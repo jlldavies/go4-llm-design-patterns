@@ -1,0 +1,19 @@
+# Internal working files — not for public repo
+LOG.md
+SECTION-REVIEW.md
+SIDEBAR-co-scientist.md
+Transcript.txt
+Transcript 2.txt
+Transcript 2
+doc-system/
+
+# Dropbox temp files
+*.tmp.*
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
