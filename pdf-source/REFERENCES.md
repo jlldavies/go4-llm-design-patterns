@@ -487,48 +487,56 @@ $\to$ Model performance degrades as context window fills with mixed-authority, m
 **Tulving, E. (1985)**
 "Memory and Consciousness"
 *Canadian Psychology*, 26(1), 1–12
+DOI: [10.1037/h0080017](https://doi.org/10.1037/h0080017)
 $\to$ Episodic vs. semantic memory distinction. Foundation for K10/K11 split.
 *Cited by: K10, K11, H1*
 
 **Berlyne, D. E. (1966)**
 "Curiosity and Exploration"
 *Science*, 153(3731), 25–33
+DOI: [10.1126/science.153.3731.25](https://doi.org/10.1126/science.153.3731.25)
 $\to$ Optimal arousal theory. Curiosity as entropy-seeking. Foundation for H3.
 *Cited by: H3*
 
 **Premack, D., Woodruff, G. (1978)**
 "Does the chimpanzee have a theory of mind?"
 *Behavioral and Brain Sciences*, 1(4), 515–526
+DOI: [10.1017/S0140525X00076512](https://doi.org/10.1017/S0140525X00076512)
 $\to$ Theory of Mind. Foundation for H7 (Adaptive Persona as user model).
 *Cited by: H7*
 
 **Clark, A., Chalmers, D. (1998)**
 "The Extended Mind"
 *Analysis*, 58(1), 7–19
+DOI: [10.1093/analys/58.1.7](https://doi.org/10.1093/analys/58.1.7)
 $\to$ External tools as cognitive extensions. Foundation for K11 (Observational Memory as extended mind).
 *Cited by: K11*
 
 **Saltzer, J. H., Schroeder, M. D. (1975)**
 "The Protection of Information in Computer Systems"
 *Proceedings of the IEEE*, 63(9)
+DOI: [10.1109/PROC.1975.9939](https://doi.org/10.1109/PROC.1975.9939)
 $\to$ Principle of least privilege. Foundation for V4 (Dual LLM), V8 (Tool Sandboxing).
 *Cited by: V4, V8*
 
 **Baars, B. J. (1988)**
 *A Cognitive Theory of Consciousness*
 Cambridge University Press
+[archive.org/details/cognitivetheoryo0000baar](https://archive.org/details/cognitivetheoryo0000baar)
 $\to$ Global Workspace Theory. Conscious processing as broadcast to global workspace. Foundation for O11 (Blackboard System).
 *Cited by: O11, H6, Theater of Mind paper*
 
 **Vygotsky, L. S. (1934/1986)**
 *Thought and Language*
 MIT Press (Kozulin translation)
+[archive.org/details/thoughtlanguage0000vygo](https://archive.org/details/thoughtlanguage0000vygo)
 $\to$ Inner speech as internalized dialogue. Foundation for R15 (Inner Monologue), H6 (Continuous Inner Monologue).
 *Cited by: R15, H6*
 
 **Skjuve, M., Følstad, A., Fostervold, K. I., Brandtzaeg, P. B. (2021)**
 "My Chatbot Companion — a Study of Human-Chatbot Relationships"
-*Computers in Human Behavior*, 122, 106842
+*International Journal of Human-Computer Studies*, 149, 102601
+DOI: [10.1016/j.ijhcs.2021.102601](https://doi.org/10.1016/j.ijhcs.2021.102601)
 $\to$ Parasocial relationship formation with AI agents. Foundation for H10 (Relational Memory) ethical constraints.
 *Cited by: H10*
 
@@ -538,16 +546,19 @@ $\to$ Parasocial relationship formation with AI agents. Foundation for H10 (Rela
 
 **Hacker News — MCP and Tool Overhead Discussion (2024-25)**
 Multiple threads including: "Show HN: Model Context Protocol" discussion; "MCP is the npm of AI tools" thread
+[Search on Hacker News](https://hn.algolia.com/?query=Model+Context+Protocol)
 $\to$ Community quantification of token overhead. Practitioner backlash on schema costs. "Supply chain risk" framing.
 *Cited by: I3*
 
 **Hacker News — LangChain Backlash (2024)**
 "Ask HN: Why are people moving away from LangChain?"
+[Search on Hacker News](https://hn.algolia.com/?query=moving+away+from+LangChain)
 $\to$ 80+ package dependencies. Death by abstraction. MCP as disruption of LangChain value proposition.
 *Cited by: I6*
 
 **Hacker News — Production Agent Failures (2024-25)**
 Various threads on agent reliability and production incidents
+[Search on Hacker News](https://hn.algolia.com/?query=AI+agent+production+reliability)
 $\to$ Context for A1-A15 anti-patterns. Empirical grounding for reliability patterns.
 *Cited by: V-category patterns*
 
