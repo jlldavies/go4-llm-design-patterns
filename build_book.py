@@ -155,6 +155,7 @@ def latex_safe(text: str) -> str:
 
 # Raw LaTeX page break using pandoc's fenced raw block — bypasses latex_safe().
 PAGE_BREAK = "\n```{=latex}\n\\clearpage\n```\n"
+TOC = "\n```{=latex}\n\\tableofcontents\n\\clearpage\n```\n"
 
 
 def assemble() -> str:
@@ -170,18 +171,14 @@ def assemble() -> str:
         "---\n"
     )
 
-    # Introduction
+    # Introduction — before the TOC
     intro = read(ROOT / "INTRO.md")
     parts.append("# Introduction\n")
     parts.append(strip_first_h1(intro))
     parts.append("\n")
 
-    # Chapter 0 — Mechanistic Foundation (must precede Pattern Catalog;
-    # patterns cite mechanisms by number, which are defined here)
-    parts.append(PAGE_BREAK)
-    chapter0 = read(ROOT / "CHAPTER-0.md")
-    parts.append(strip_first_h1(chapter0))
-    parts.append("\n")
+    # TOC placed after Introduction
+    parts.append(TOC)
 
     # The Pattern Catalog (TAXONOMY-DRAFT) — strip planning sections
     tax = read(ROOT / "TAXONOMY-DRAFT.md")
@@ -193,7 +190,6 @@ def assemble() -> str:
     for chapter_title, intro_file, standalones in CATEGORIES:
         parts.append(f"# {chapter_title}\n")
         intro_text = read(PATTERNS / intro_file)
-        # Strip H1 title, then strip stub list — include intro only.
         intro_body = strip_category_stubs(strip_first_h1(intro_text))
         parts.append(intro_body)
         parts.append("\n")
@@ -203,20 +199,26 @@ def assemble() -> str:
             body = read(path)
             first_line = body.splitlines()[0]
             title = first_line.lstrip("# ").strip()
-            # Each pattern starts on a fresh page.
             parts.append(PAGE_BREAK)
             parts.append(f"## {title}\n")
             rest = strip_first_h1(body)
-            # Shift H2→H4, H3→H5 inside the pattern body.
             parts.append(shift_headings(rest, by=2))
             parts.append("\n")
 
-    # Appendices
+    # Mechanisms — back-matter reference (formerly Chapter 0)
+    parts.append(PAGE_BREAK)
+    chapter0 = read(ROOT / "CHAPTER-0.md")
+    parts.append("# The Mechanical Foundation\n")
+    parts.append(strip_first_h1(chapter0))
+    parts.append("\n")
+
+    # Appendix A — Conflicts
     parts.append(PAGE_BREAK)
     parts.append("# Appendix A — Conflicts\n")
     parts.append(strip_first_h1(read(PATTERNS / "CONFLICTS.md")))
     parts.append("\n")
 
+    # Appendix B — References
     parts.append(PAGE_BREAK)
     parts.append("# Appendix B — References\n")
     parts.append(strip_first_h1(read(ROOT / "REFERENCES.md")))
@@ -232,7 +234,6 @@ def main():
     cmd = [
         "pandoc", str(OUT_MD), "-o", str(OUT_PDF),
         "--pdf-engine=xelatex",
-        "--toc", "--toc-depth=2",
         "--top-level-division=chapter",
         "-V", "documentclass=book",
         "-V", "classoption=oneside",
