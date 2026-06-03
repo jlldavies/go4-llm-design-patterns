@@ -204,7 +204,7 @@ $\to$ Autonomous Minecraft agent building a skill library. Foundation for H4.
 *Cited by: H4*
 
 **Salemi, A., Mysore, S., Bendersky, M., Zamani, H. (2023)**
-"LAMP: When Large Language Models Meet Personalization"
+"LaMP: When Large Language Models Meet Personalization"
 arXiv: 2304.11406
 $\to$ LLM personalisation: user-specific style adaptation. Foundation for H7.
 *Cited by: H7*
@@ -337,7 +337,7 @@ $\to$ Standardised tool discovery, authentication, and invocation. Foundation fo
 *Cited by: I3, V13, CONFLICTS*
 
 **Google Agent-to-Agent (A2A) Protocol Specification (2024)**
-google.github.io/A2A
+github.com/google-a2a/A2A
 $\to$ Structured cross-agent task delegation with streaming status. Foundation for I5, I6.
 *Cited by: I5, I6*
 
@@ -365,7 +365,7 @@ $\to$ Article 9 (Risk Management), Article 14 (Human Oversight), Article 52 (Tra
 *Cited by: V1, V7, H10*
 
 **NIST AI Risk Management Framework (AI RMF 1.0) (2023)**
-nist.gov/system/files/documents/2023/01/26/NIST-AI-600-1.pdf
+airc.nist.gov/technical-reports/ [direct PDF link stale — landing page confirmed live]
 $\to$ Govern, Map, Measure, Manage framework. Foundation for V5, V7, V18.
 *Cited by: V5, V7, V18*
 
@@ -425,7 +425,7 @@ $\to$ Persistence is externalised memory (CLAUDE.md / MEMORY.md / /memory files 
 
 **Dex Horthy / HumanLayer (2025)**
 "12-Factor Agents: Best Practices for Building AI Agents in Production"
-12factor.agency
+github.com/humanlayer/12-factor-agents [original domain 12factor.agency has expired]
 $\to$ All 12 factors: Natural Language to Structured Output; Own Your Prompts; Own Your Context Window; Own Your State, Separate from Session; Call LLM as a Pure Function; Human in the Loop; Small Focused Agents; Own Your Control Flow; Compact Errors; Trigger from Anywhere; Trust Nobody; Stateless by Default.
 *Cited by: V1, V9, V10, V11, V12, V14*
 
@@ -458,13 +458,13 @@ $\to$ Harness Architecture 2$\times$2 framework. Practical agent design patterns
 
 **Composio (2025)**
 "AI Agent Report 2025"
-composio.dev/blog/ai-agent-report
+composio.dev/blog/ai-agent-report [link unavailable as of June 2026 — report may have been removed or moved]
 $\to$ Key findings: 88% of AI agents never reach production. Tool overload quantification: 43% $\to$ 14% selection accuracy. Production failure root cause analysis. Simulation as recommended mitigation.
 *Cited by: V1, V9, V13, V16, V18*
 
 **PineCone (2025)**
 "Nexus: Agent Operating Context" and NoQL query language
-pinecone.io/blog/nexus
+pinecone.io/blog/nexus [link unavailable as of June 2026 — content may have moved within Pinecone docs]
 $\to$ Explicit repositioning from vector similarity to agent operating context bundles. NoQL carries intent, filters, access policy, provenance, response shape, and confidence — not just similarity. Rediscovery quantification: up to 85% of agent compute consumed by context re-assembly rather than task execution. Conceptual and empirical foundation for K13 Retrieval Bundle.
 *Cited by: K13*
 
