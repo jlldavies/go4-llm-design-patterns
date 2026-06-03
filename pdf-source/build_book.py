@@ -5,6 +5,8 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+sys.path.insert(0, str(Path(__file__).parent.parent / "site"))
+from linkify import linkify_mechanisms, linkify_conflicts
 
 PDF_SRC = Path(__file__).parent          # pdf-source/ — book source markdown
 ROOT = PDF_SRC.parent                    # repo root — patterns/, GO4.pdf, book.md
@@ -238,7 +240,7 @@ def assemble() -> str:
 
     # Appendix A — Conflicts
     parts.append(PAGE_BREAK)
-    parts.append("# Appendix A — Conflicts\n")
+    parts.append("# Appendix A — Conflicts {#appendix-conflicts}\n")
     parts.append(strip_first_h1(read(PATTERNS / "CONFLICTS.md")))
     parts.append("\n")
 
@@ -257,8 +259,19 @@ def assemble() -> str:
     return "\n".join(parts)
 
 
+def linkify_pdf(text: str) -> str:
+    """Inject single-document (#anchor) links for the PDF."""
+    text = linkify_mechanisms(text, lambda n: f"[{n}](#m{n})")
+    text = linkify_conflicts(
+        text,
+        lambda n: f"[Appendix A, Critical {n}](#critical-{n})",
+        lambda: "[Appendix A](#appendix-conflicts)",
+    )
+    return text
+
+
 def main():
-    OUT_MD.write_text(latex_safe(assemble()), encoding="utf-8")
+    OUT_MD.write_text(latex_safe(linkify_pdf(assemble())), encoding="utf-8")
     print(f"wrote {OUT_MD} ({OUT_MD.stat().st_size:,} bytes)")
 
     cmd = [
