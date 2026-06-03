@@ -1,0 +1,16 @@
+[book]
+title = "GO4 — AI Engineering Design Patterns"
+authors = ["James Davies"]
+language = "en"
+src = "src"
+
+[output.html]
+site-url = "/go4-llm-design-patterns/"
+git-repository-url = "https://github.com/jlldavies/go4-llm-design-patterns"
+edit-url-template = "https://github.com/jlldavies/go4-llm-design-patterns/edit/main/{path}"
+mathjax-support = true
+no-section-label = true
+
+[output.html.fold]
+enable = true
+level = 1
