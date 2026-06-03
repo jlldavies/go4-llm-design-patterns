@@ -1,6 +1,7 @@
 # Summary
 
-[Introduction](introduction.md)
+[Introduction](pdf-source/INTRO.md)
+[The Pattern Catalog](pdf-source/TAXONOMY-DRAFT.md)
 
 ---
 

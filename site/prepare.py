@@ -25,7 +25,7 @@ for f in sorted((ROOT / "patterns").glob("*.md")):
 # Selected pdf-source files
 src_pdf = SRC / "pdf-source"
 src_pdf.mkdir(exist_ok=True)
-for name in ["CHAPTER-0.md", "REFERENCES.md", "APPENDIX-C.md"]:
+for name in ["INTRO.md", "TAXONOMY-DRAFT.md", "CHAPTER-0.md", "REFERENCES.md", "APPENDIX-C.md"]:
     copy(ROOT / "pdf-source" / name, src_pdf / name)
 
 print("Done.")
