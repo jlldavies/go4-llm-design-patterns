@@ -56,7 +56,8 @@ eq(conflict_edges(cm), [("R4", "R5", "conflicts_with"),
                         ("S9", "V7", "composes_with")])
 
 eq(_edge_type("Sibling of"), "siblings")
-eq(_edge_type("Required by"), "requires")
+eq(_edge_type("Required by"), "related")   # Fix 2: demoted from "requires" to "related"
+eq(_edge_type("Requires"), "requires")      # Fix 2: "requires" stays as-is
 eq(_edge_type("Pairs with"), "composes_with")
 eq(_edge_type("Distinct from"), "related")
 eq(_edge_type("Totally novel label"), "related")
@@ -70,8 +71,21 @@ rp = (
 )
 e = related_edges(rp, "R4")
 eq(e["siblings"], ["R5"])
-eq(e["requires"], ["V9"])
+eq(e["related"], ["V9"])   # Fix 2: "Required by" now maps to "related"
 eq(e["composes_with"], ["K8"])
+
+# Fix 1 + 3: non-bold prose IDs excluded; Note bullet skipped even if it bolds an ID
+rp2 = (
+    "## Related Patterns\n"
+    "- **Sibling of** **R5 ReWOO** — mutually exclusive; unbounded use is anti-pattern A3.\n"
+    "- **Note on fundamentality** — **R13 CodeAct** is also a loop but distinct.\n"
+    "## Sources\n"
+)
+eq(related_edges(rp2, "R4"), {"siblings": ["R5"]})
+
+# Fix 2
+eq(_edge_type("Required by"), "related")
+eq(_edge_type("Requires"), "requires")
 
 R4_HEAD = "# R4 — ReAct\n"
 eq(title_of(R4_HEAD), "ReAct")
@@ -82,6 +96,10 @@ eq(intent_of("## Intent\n\nLet an agent make its next decision after seeing the 
 
 eq(emit_frontmatter({"id": "R4", "cost": "medium-high", "requires": ["V9", "V14"], "derived": True}),
    "---\nid: R4\ncost: medium-high\nrequires: [V9, V14]\nderived: true\n---")
+
+# Fix 4: quote-containing alias produces valid escaped YAML; plain alias stays unquoted
+eq(emit_frontmatter({"also_known_as": ['Human Block', 'the "npm" of AI tools']}),
+   '---\nalso_known_as: [Human Block, "the \\"npm\\" of AI tools"]\n---')
 eq(relationship_sentence({"requires": ["V9", "V14"], "siblings": ["R5"]}),
    "Requires V9, V14. Sibling of R5.")
 eq(wikilink_line({"requires": ["V9"], "siblings": ["R5"]}, {"V9": "V9-Bounded-Execution", "R5": "R5-ReWOO"}),
@@ -97,6 +115,13 @@ unit = assemble_pattern_unit(
 )
 assert "## Description" in unit and "[[V9-Bounded-Execution]]" in unit, unit
 assert "patterns/R4-ReAct.md" in unit, unit
+# Fix 6: strengthen assemble_pattern_unit test
+assert "## Key points" in unit, unit
+assert "Sibling of R5" in unit, unit
+assert "[[R5-ReWOO]]" in unit, unit
+
+# Fix 5
+eq(category_of("A3"), "Unknown")
 
 eq(strip_first_h1("# Title\n\nBody line"), "Body line")
 

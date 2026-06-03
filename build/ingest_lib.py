@@ -26,7 +26,7 @@ def unit_id(stem: str) -> str:
 
 
 def category_of(uid: str) -> str:
-    return CATEGORY[uid[0]]
+    return CATEGORY.get(uid[0], "Unknown")
 
 
 def title_of(text: str) -> str:
@@ -67,7 +67,7 @@ def mechanism_refs(text: str) -> list:
 
 EDGE_LABELS = [  # (lowercase prefix, edge type) — order matters, first match wins
     ("sibling", "siblings"),
-    ("required by", "requires"), ("requires", "requires"), ("depends on", "requires"),
+    ("required by", "related"), ("requires", "requires"), ("depends on", "requires"),
     ("pairs with", "composes_with"), ("composes with", "composes_with"),
     ("inner pattern of", "composes_with"), ("often paired with", "composes_with"),
     ("managed by", "composes_with"), ("uses", "composes_with"),
@@ -154,8 +154,17 @@ def related_edges(text: str, self_id: str) -> dict:
         lbl = re.match(r'\s*-\s*\*\*(.+?)\*\*', line)
         if not lbl:
             continue
+        # Fix 3: skip editorial "Note on…" bullets
+        if lbl.group(1).lower().startswith("note"):
+            continue
         etype = _edge_type(lbl.group(1))
-        ids = [i for i in _REL_ID.findall(line) if i != self_id]
+        # Fix 1: collect IDs only from bold spans (**...**), not from prose
+        bold_spans = re.findall(r'\*\*([^*]+)\*\*', line)
+        ids = []
+        for span in bold_spans:
+            for i in _REL_ID.findall(span):
+                if i != self_id and i not in ids:
+                    ids.append(i)
         if ids:
             edges.setdefault(etype, [])
             for i in ids:
@@ -173,7 +182,9 @@ EDGE_PHRASE = {
 
 def _yaml_scalar(v) -> str:
     s = str(v)
-    return f'"{s}"' if re.search(r'[:#\[\]{}",]', s) else s
+    if re.search(r'[:#\[\]{}",]', s):
+        return '"' + s.replace('\\', '\\\\').replace('"', '\\"') + '"'
+    return s
 
 
 def emit_frontmatter(fields: dict) -> str:
@@ -183,7 +194,7 @@ def emit_frontmatter(fields: dict) -> str:
         if v in (None, "", [], {}):
             continue
         if isinstance(v, list):
-            lines.append(f"{k}: [{', '.join(str(x) for x in v)}]")
+            lines.append(f"{k}: [{', '.join(_yaml_scalar(x) for x in v)}]")
         elif isinstance(v, bool):
             lines.append(f"{k}: {'true' if v else 'false'}")
         else:
