@@ -3,6 +3,10 @@
 \usepackage{tikz}
 \usetikzlibrary{calc}
 \usepackage{xcolor}
+% URL line-breaking: allow breaks at /, -, _, ., = and alphanumerics
+\usepackage{url}
+\renewcommand{\UrlBreaks}{\do\/\do-\do_\do.\do=\do~\do+\do:\do@}
+\setlength{\emergencystretch}{3em}
 
 % Pattern card stripe colours
 \definecolor{patternbg}{HTML}{FDFAEC}
