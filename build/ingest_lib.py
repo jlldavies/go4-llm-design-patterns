@@ -86,6 +86,22 @@ def _edge_type(label: str) -> str:
     return "related"
 
 
+_MECH_HEAD = re.compile(
+    r'^###\s+M(\d+)\s+—\s+(.+?)\s*\{#m\d+\}\s*\n+#{3,4}\s+Grade\s+([AB])', re.M)
+
+
+def parse_mechanisms(chapter0: str) -> list:
+    """Return [{'num':int,'title':str,'grade':'A'|'B','slug':str}] for M1..M12."""
+    heads = list(_MECH_HEAD.finditer(chapter0))
+    out = []
+    for h in heads:
+        num, title, grade = int(h.group(1)), h.group(2).strip(), h.group(3)
+        slug = re.sub(r'[^a-z0-9]+', "-", title.lower()).strip("-")
+        out.append({"num": num, "title": title, "grade": grade,
+                    "slug": f"M{num}-{slug}"})
+    return out
+
+
 _README_ROW = re.compile(
     r'^\|\s*\[([A-Z]+\d+)[^\]]*\]\([^)]+\)\s*\|[^|]*\|\s*([^|]+?)\s*\|', re.M)
 

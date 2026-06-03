@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from ingest_lib import unit_id, category_of, title_of, also_known_as, intent_of, mechanism_refs, related_edges, _edge_type, conflict_edges, when_to_use_map
+from ingest_lib import unit_id, category_of, title_of, also_known_as, intent_of, mechanism_refs, related_edges, _edge_type, conflict_edges, when_to_use_map, parse_mechanisms
 
 
 def eq(got, want):
@@ -21,6 +21,18 @@ eq(category_of("H10"), "Humanizers")
 eq(mechanism_refs("conditions on mechanism 4; see mechanisms 2 and 3, plus (mechanism 12)."), [2, 3, 4, 12])
 eq(mechanism_refs("no citations here"), [])
 eq(mechanism_refs("mechanism 99 is out of range"), [])
+
+c0 = (
+    "### M1 — Attention as a Learned Bilinear Form  {#m1}\n\n#### Grade A\n*text*\n"
+    "### M2 — n² Compute and KV Cache Memory Cost  {#m2}\n\n#### Grade A\n*text*\n"
+    "### M4 — Lost-in-the-Middle as Q-K Space Geometry  {#m4}\n\n#### Grade B — empirically strong\n*text*\n"
+)
+ms = parse_mechanisms(c0)
+eq(len(ms), 3)
+eq(ms[0]["num"], 1)
+eq(ms[1]["grade"], "A")
+eq(ms[2]["grade"], "B")
+eq(ms[0]["slug"], "M1-attention-as-a-learned-bilinear-form")
 
 rows = (
     "| [S1 Zero-Shot](patterns/S1-Zero-Shot.md) | Direct Instruction | Simple, well-defined tasks within model priors |\n"
