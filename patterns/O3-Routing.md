@@ -51,7 +51,7 @@ O3 is right when inputs split into distinct categories, a specialist beats a gen
 **3. Pick the classifier.** Three implementations, in increasing flexibility and cost:
 - **Rule-based** (regex, keyword, deterministic feature) — sub-millisecond, free, brittle. Good when categories carry obvious surface signals.
 - **Embedding similarity to route exemplars** (e.g. semantic-router) — single embedding call, ~10–50ms, cheap, robust to paraphrase. The production default for well-separated categories. Embedding cosine distance approximates the inner-product structure of the model's attention space — it is a cheaper proxy for the same discriminative computation the LLM would perform under its learned bilinear form, making it the right tool when the categories are linearly separable in embedding space (mechanism 1).
-- **LLM classifier call** (small fast model with a classification prompt) — 100–500ms, $-per-call, handles novel inputs and nuanced categories. Use when the categories require understanding.
+- **LLM classifier call** (small fast model with a classification prompt) — 100–500ms, cost-per-call, handles novel inputs and nuanced categories. Use when the categories require understanding.
 If the classifier itself is wrong > 5% of the time on held-out data, the routing decision becomes the system's dominant failure mode — fix the classifier before adding more routes.
 
 **4. Always define an `other` route.** A miscategorised input that falls into the wrong specialist handler is a worse failure than one that lands in a deliberate fallback. The `other` / `unknown` route should escalate to a generalist handler, a human, or a clarification prompt — never to the closest-matching specialist by default.

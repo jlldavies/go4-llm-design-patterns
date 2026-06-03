@@ -249,7 +249,7 @@ hybrid_agent(task):
 - **OpenHands** production deployments — the leading open-source coding agent at scale; CodeAct paradigm with layered planning and test-driven repair loops.
 - **Devin (Cognition AI)** — proprietary autonomous software engineer; widely described as a stacked-primitive scaffold (plan $\to$ execute with tool use $\to$ test $\to$ revise).
 - **Claude Code, Cursor agent mode, Aider** — production coding tools whose internal loops, where visible, exhibit the O16 stack: a ReAct-style outer loop, an inline planning step on harder tasks, an inner test-fix loop.
-- **Agentless** — open implementation showing that a *three-phase plan-execute stack with no ReAct* achieves SWE-bench Lite SOTA at low cost (32% with $0.70 per task as published); evidence that the right O16 stack is task-specific, not maximally layered.
+- **Agentless** — open implementation showing that a *three-phase plan-execute stack with no ReAct* achieves SWE-bench Lite SOTA at low cost (32% at about 0.70 USD per task as published); evidence that the right O16 stack is task-specific, not maximally layered.
 
 ## Related Patterns
 

@@ -8,7 +8,7 @@ src = "src"
 site-url = "/go4-llm-design-patterns/"
 git-repository-url = "https://github.com/jlldavies/go4-llm-design-patterns"
 edit-url-template = "https://github.com/jlldavies/go4-llm-design-patterns/edit/main/{path}"
-mathjax-support = true
+mathjax-support = false
 no-section-label = true
 
 [output.html.fold]
