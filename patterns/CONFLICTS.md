@@ -12,7 +12,7 @@
 Six types of conflict appear across this pattern language:
 
 | Type | Symbol | Meaning |
-|---|---|---|
+|:------------|:--:|:------------------------------|
 | **Mutually Exclusive** | $\oplus$ | Cannot apply both to the same task; using both is the anti-pattern |
 | **Direct Tension** | $\leftrightarrow$ | Both are valid but pull in opposite directions; must choose a balance point |
 | **Prerequisite Dependency** | $\to$ | A requires B; using A without B is unsafe or broken |
@@ -185,7 +185,7 @@ checkpoint_store.save(session_id, state)    # V10 save
 ### Signal vs Signal
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
-|---|---|---|---|
+|:------------|:--:|:------------|:------------------------|
 | S1 (Zero-Shot) | $\uparrow$ | S2 (Few-Shot) | S1 is the default; add S2 when output format is inconsistent. S2 costs 3-5× more tokens. |
 | S3 (Persona) | $\sim$ | S5 (Constraint Framing) | Persona may imply latitude that constraints prohibit. Add explicit "constraints override persona." |
 | S3 (Persona) | $\sim$ | S9 (Constitutional Framing) | Persona implies identity; constitution implies values. Conflict when persona's implied expertise contradicts constitutional safety constraints. Constitution wins. |
@@ -198,7 +198,7 @@ checkpoint_store.save(session_id, state)    # V10 save
 ### Signal vs Reasoning
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
-|---|---|---|---|
+|:------------|:--:|:------------|:------------------------|
 | S2 (Few-Shot) | $\sim$ | R17 (Self-Consistency) | S2 shapes what the model produces; R17 samples multiple versions and votes. They compose: S2 sets format, R17 improves reliability. Ensure S2 examples don't bias R17 toward a single answer style. |
 | S4 (Instruction Decomposition) | $\uparrow$ | R3 (Plan-and-Solve) | S4 is a prompt-level step list; R3 is an agent-level planning cycle with separate plan and execution calls. R3 is more powerful but costs more. |
 | S9 (Constitutional Framing) | $\sim$ | R7 (Reflexion) | Reflexion critiques outputs; constitution critiques against principles. If both are active, ensure they don't generate contradictory critique: R7 might say "be more detailed" while S9 says "be more concise." Make priorities explicit. |
@@ -206,7 +206,7 @@ checkpoint_store.save(session_id, state)    # V10 save
 ### Knowledge vs Knowledge
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
-|---|---|---|---|
+|:------------|:--:|:------------|:------------------------|
 | K1 (Vanilla RAG) | $\uparrow$ | K3 (GraphRAG) | K1 for simple, direct lookup; K3 for multi-hop relational queries. Upgrade when queries require understanding entity relationships. K3 has 2-5× index build cost. |
 | K1 (Vanilla RAG) | $\uparrow$ | K4 (RAPTOR) | K1 for specific queries; K4 for breadth across large heterogeneous corpora. Upgrade when query diversity is high and K1 retrieval quality is inconsistent. |
 | K1 (Vanilla RAG) | $\leftrightarrow$ | K9 (Long Context) | The primary architectural fork of Category II: retrieve a selected subset, or place the whole working set in a large window. K1 scales to any corpus size; K9 avoids retrieval infrastructure and retrieval misses when the working set fits an affordable window. |
@@ -219,14 +219,14 @@ checkpoint_store.save(session_id, state)    # V10 save
 ### Knowledge vs Reasoning
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
-|---|---|---|---|
+|:------------|:--:|:------------|:------------------------|
 | K8 (Working Memory) | $\sim$ | R9 (Tree of Thoughts) | ToT generates many branches; all branches share the same working memory. Without explicit per-branch scratchpad management, branches contaminate each other. Each ToT branch needs its own K8 instance. |
 | K11 (Observational Memory) | $\sim$ | R5 (ReWOO) | ReWOO plans all observations before executing. K11 provides what the agent has already observed. If K11 contains prior observations relevant to the current plan, inject them before planning — not mid-execution. |
 
 ### Reasoning vs Reasoning
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
-|---|---|---|---|
+|:------------|:--:|:------------|:------------------------|
 | R4 (ReAct) | $\oplus$ | R5 (ReWOO) | See CRITICAL 1. Mutually exclusive for the same task. |
 | R7 (Reflexion) | $\leftrightarrow$ | R17 (Self-Consistency) | Both improve reliability through repetition but via different mechanisms. R17: parallel sampling + voting. R7: sequential iteration with memory of failures. R17 is parallel (immediate N× cost); R7 is sequential (cost scales only on failure). For tasks with automated feedback $\to$ R7. Without feedback $\to$ R17. |
 | R9 (ToT) | $\leftrightarrow$ | R10 (LATS) | ToT uses heuristic tree search; LATS uses MCTS with full backtracking. LATS is strictly more powerful but can be 10× more expensive. Use ToT as default; upgrade to LATS only for the highest-stakes open-ended problems where LATS's backtracking provides decisive advantage. |
@@ -236,7 +236,7 @@ checkpoint_store.save(session_id, state)    # V10 save
 ### Reasoning vs Orchestration
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
-|---|---|---|---|
+|:------------|:--:|:------------|:------------------------|
 | R4 (ReAct) | $\sim$ | O6 (Orchestrator-Workers) | R4 is a reasoning loop within a single agent; O6 is delegation across agents. In O6 systems, each worker typically runs R4 internally. The conflict: if R4 loops are unbounded (A3), they prevent the orchestrator from receiving timely worker results. Always pair R4 with V9 (Bounded Execution) inside O6 workers. |
 | R7 (Reflexion) | $\sim$ | O5 (Evaluator-Optimizer) | Reflexion is self-critique within a single agent; O5 uses a separate evaluator agent. They compose: R7 for intra-agent improvement; O5 for validated cross-agent quality gates. Don't run both simultaneously on the same task — the critique loops will conflict. |
 | R12 (Skeleton-of-Thought) | $\sim$ | O4 (Parallelization) | SoT generates an outline then fills sections in parallel; O4 parallelises independent sub-tasks. They are essentially the same pattern at different levels of abstraction. If you implement SoT, you are implementing O4 at the section level. No conflict — but avoid implementing both independently for the same task. |
@@ -244,7 +244,7 @@ checkpoint_store.save(session_id, state)    # V10 save
 ### Orchestration vs Orchestration
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
-|---|---|---|---|
+|:------------|:--:|:------------|:------------------------|
 | O2 (Prompt Chaining) | $\uparrow$ | O6 (Orchestrator-Workers) | O2 uses a fixed, predetermined sequence; O6 uses dynamic task decomposition at runtime. Start with O2 — cheaper and more testable. Upgrade to O6 when the decomposition cannot be predetermined at design time. |
 | O6 (Orchestrator-Workers) | $\leftrightarrow$ | O7 (Supervisor Hierarchy) | O6 is single-level delegation; O7 is multi-level. Use O6 as long as the orchestrator can maintain oversight of all workers. Add hierarchy (O7) when the number of workers exceeds what the orchestrator can coordinate effectively (~5-10 workers). |
 | O9 (Multi-Agent Reflection) | $\leftrightarrow$ | R17 (Self-Consistency) | Both achieve reliability through multiple independent assessments. R17 samples the same model N times; O9 uses distinct agents with different personas or knowledge. O9 is more expensive but produces genuinely diverse perspectives when agents are well-differentiated. R17 if you have one model and need reliability; O9 if you have multiple specialist agents and need diverse critique. |
@@ -255,7 +255,7 @@ checkpoint_store.save(session_id, state)    # V10 save
 ### Reliability vs Signal/Reasoning
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
-|---|---|---|---|
+|:------------|:--:|:------------|:------------------------|
 | V1 (HITL) | $\leftrightarrow$ | V2 (Human-on-Loop) | See CRITICAL 2. Not a sliding scale — a design choice based on action reversibility. |
 | V5 (Guardrail Layering) | $\sim$ | S5 (Constraint Framing) | S5 is model self-restraint via prompt; V5 is external enforcement via code. They are complementary, not alternatives. S5 catches broad behavioral constraints; V5 enforces specific, enumerable violations. Use both: S5 for "spirit of the rules"; V5 for "letter of the rules." |
 | V9 (Bounded Execution) | $\sim$ | R10 (LATS) | LATS requires deep tree search; bounds truncate it. This is an unavoidable tension: set bounds too tight and LATS never reaches good solutions; too loose and cost explodes. Resolution: profile LATS on representative problems; set bounds at p95 completion cost, not p50. |
@@ -266,7 +266,7 @@ checkpoint_store.save(session_id, state)    # V10 save
 ### Reliability vs Orchestration
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
-|---|---|---|---|
+|:------------|:--:|:------------|:------------------------|
 | V3 (Lethal Trifecta) | $\to$ | V4 or V6 or V8 | V3 is detection only; it requires at least one mitigation. V4 is the strongest architectural mitigation; V6 and V8 are operational mitigations. V3 without any mitigation is incomplete. |
 | V7 (AgentSpec) | $\sim$ | O6 (Orchestrator-Workers) | Orchestrators typically have broad capability; workers are specialised. AgentSpec must be differentiated per agent role — the orchestrator's policy differs from workers'. A single AgentSpec for all agents in an O6 system is a misconfiguration. |
 | V8 (Tool Sandboxing) | $\to$ | R13 (CodeAct) | See CRITICAL 5. Dependency, not a conflict. |
@@ -274,7 +274,7 @@ checkpoint_store.save(session_id, state)    # V10 save
 ### Integration vs Integration
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
-|---|---|---|---|
+|:------------|:--:|:------------|:------------------------|
 | I1 (Direct API) | $\uparrow$ | I2 (Function Call) | I1 is the execution layer; I2 is LLM routing layer on top. When LLM routing adds no value (deterministic action), skip I2 and use I1 directly. |
 | I2 (Function Call) | $\uparrow$ | I3 (MCP Server) | I2 for small, stable, single-agent tool sets. I3 when tools must be shared across agents or tool count exceeds V13 limits. Migration from I2 to I3 is low-cost — start with I2. |
 | I3 (MCP Server) | $\leftrightarrow$ | I4 (CLI Invocation) | I3: typed schemas, structured output, high token cost. I4: zero schema overhead, unstructured text output. For any tool with an existing CLI, prefer I4. Use I3 when: credential isolation is required, or tool output must be typed and validated, or the tool has no CLI. |
@@ -284,7 +284,7 @@ checkpoint_store.save(session_id, state)    # V10 save
 ### Humanizer vs Humanizer
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
-|---|---|---|---|
+|:------------|:--:|:------------|:------------------------|
 | H1 (Identity Persistence) | $\leftrightarrow$ | H7 (Adaptive Persona) | H1 defines what is invariant; H7 adapts what is variable. The conflict: without clear boundary, H7 can erode H1 through gradual style adaptation. Resolution: explicitly partition "identity core" (H1: values, principles, commitments) from "expression surface" (H7: tone, vocabulary, detail level). H7 may never touch the identity core. |
 | H1 (Identity Persistence) | $\sim$ | H9 (Observational Identity) | H1 is the stable identity; H9 is the evolving self-knowledge. They must be kept consistent: if H9 determines the agent is incapable of a task it previously claimed confidence in, H1's self-representation must update. H9 data informs H1 updates; H1 provides the stable anchor that H9 can't erode through capability measurement alone. |
 | H2 (Episodic Self-Improvement) | $\sim$ | H4 (Procedural Skill Accumulation) | H2 accumulates failure lessons; H4 accumulates successful procedures. They are complementary but must not contaminate each other: a partially successful trajectory that also had failures should go to H4 (the successful parts) AND H2 (the failure patterns). Ensure deduplication at the boundary. |
@@ -298,7 +298,7 @@ checkpoint_store.save(session_id, state)    # V10 save
 ### Humanizer vs Other Categories
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
-|---|---|---|---|
+|:------------|:--:|:------------|:------------------------|
 | H1 (Identity Persistence) | $\leftrightarrow$ | S3 (Persona) | S3 is per-session, stateless. H1 is persistent, session-spanning. H1 is strictly more capable; S3 is the default for systems without session persistence. Do not implement both for the same agent — H1 subsumes S3. |
 | H2 (Episodic Self-Improvement) | $\sim$ | R7 (Reflexion) | R7 is within-session Reflexion; H2 persists R7's outputs across sessions. H2 requires R7 as its data source — they compose sequentially, not in conflict. The tension: H2's accumulated lessons may contradict a fresh R7 critique in a new context. Resolution: treat H2 lessons as prior evidence with confidence weighting, not as absolute rules. |
 | H6 (Inner Monologue) | $\leftrightarrow$ | V1 (Human-in-the-Loop) | A continuous inner monologue (H6) implies significant autonomous operation between user interactions. When H6 leads to autonomous actions (not just thoughts), V1 must gate those actions. H6's Thinker should be designed to produce insights, not autonomous actions, unless those actions are explicitly scoped and gated. |
