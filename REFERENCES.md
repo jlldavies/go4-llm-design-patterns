@@ -458,7 +458,7 @@ $\to$ Harness Architecture 2$\times$2 framework. Practical agent design patterns
 
 **Composio (2025)**
 "AI Agent Report 2025"
-composio.dev/blog/ai-agent-report [link unavailable as of June 2026 — report may have been removed or moved]
+composio.dev/blog/ai-agent-report [temporarily unavailable June 2026 due to security incident — report expected to return]
 $\to$ Key findings: 88% of AI agents never reach production. Tool overload quantification: 43% $\to$ 14% selection accuracy. Production failure root cause analysis. Simulation as recommended mitigation.
 *Cited by: V1, V9, V13, V16, V18*
 
