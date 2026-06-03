@@ -224,6 +224,12 @@ def assemble() -> str:
     parts.append(strip_first_h1(read(ROOT / "REFERENCES.md")))
     parts.append("\n")
 
+    # Appendix C — Anti-Patterns and Composition Examples
+    parts.append(PAGE_BREAK)
+    parts.append("# Appendix C — Anti-Patterns and Composition Examples\n")
+    parts.append(strip_first_h1(read(ROOT / "APPENDIX-C.md")))
+    parts.append("\n")
+
     return "\n".join(parts)
 
 
