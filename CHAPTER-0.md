@@ -30,7 +30,10 @@ The mechanisms in this chapter are precise. Before the formalism, here is the co
 
 ## 0.1 — The Inference Primitives (Mechanisms 1–7)
 
-### Mechanism 1 — Attention as a Learned Bilinear Form **[Grade A]**
+### M1 — Attention as a Learned Bilinear Form
+
+#### Grade A
+*The bilinear form is algebraically derived from the QK^T computation; the result follows from the matrix operations and requires no empirical inference.*
 
 At each attention head, the core computation contracts a query against a key. Writing the query as $Q_\alpha \in \mathbb{R}^{d_\text{head}}$ (naturally a covector — a linear functional acting on the key space) and the key as $K^\alpha \in \mathbb{R}^{d_\text{head}}$ (a vector), the raw attention score is:
 
@@ -54,7 +57,10 @@ Every head defines a different $g_{\mu\nu}$. Multi-head attention runs $H$ such 
 
 ---
 
-### Mechanism 2 — n² Compute and KV Cache Memory Cost **[Grade A]**
+### M2 — n² Compute and KV Cache Memory Cost
+
+#### Grade A
+*Quadratic scaling of the attention matrix is an algebraic consequence of computing pairwise token interactions; the cost bound is exact.*
 
 The attention matrix $QK^T \in \mathbb{R}^{n \times n}$ (where $n$ = sequence length) is computed at every layer for every head. The compute cost of prefill — processing all $n$ input tokens in one forward pass — is $O(n^2 d_\text{model})$ in FLOPs. Doubling the context quadruples the prefill cost.
 
@@ -66,7 +72,10 @@ Token generation (the decode phase) is structurally different. At each step, onl
 
 ---
 
-### Mechanism 3 — The KV Cache as a Growing 4D Tensor **[Grade A]**
+### M3 — The KV Cache as a Growing 4D Tensor
+
+#### Grade A
+*Cache structure and monotonic growth follow directly from causal masking applied to autoregressive decoding; the tensor shape is exact.*
 
 The key-value cache at inference time is a 4-dimensional tensor of shape:
 
@@ -84,7 +93,10 @@ At generation step $t$, the model computes a new Q for position $t$ and contrast
 
 ---
 
-### Mechanism 4 — Lost-in-the-Middle as Q-K Space Geometry **[Grade B — empirically strong, partially derived]**
+### M4 — Lost-in-the-Middle as Q-K Space Geometry
+
+#### Grade B — empirically strong, partially derived
+*The U-shaped attention weight distribution is robustly observed across models and tasks, but the geometric account is a partial derivation rather than a closed-form proof.*
 
 Liu et al. (2024) documented a U-shaped recall curve over sequence position: recall is strong at the start and end of the context window, materially weaker for content placed in the middle. This is not an arbitrary empirical finding — it has a mechanical substrate, though the substrate is not fully derivable from first principles (hence Grade B).
 
@@ -98,7 +110,10 @@ Middle K vectors are geometrically accessible — the attention computation can 
 
 ---
 
-### Mechanism 5 — Prefix Caching as Cache Engineering **[Grade A mechanism; Grade B operational specifics]**
+### M5 — Prefix Caching as Cache Engineering
+
+#### Grade A mechanism; Grade B operational specifics
+*That caching prefix KV states reduces recomputation follows directly from M2 and M3; the TTL durations and hit-rate figures cited are provider-specific and subject to change.*
 
 Provider-level prefix caching stores the KV cache state (Mechanism 3) for a stable prompt prefix. When a subsequent request sends the same prefix — identical tokens, same byte offsets — the provider injects the stored KV states directly into the generation step, bypassing prefill entirely. The savings follow from Mechanism 2: the $O(n^2)$ prefill cost for the cached prefix is not paid on cache hits.
 
@@ -119,7 +134,10 @@ For multi-agent systems (Mechanism 6), the shared context given to all workers s
 
 ---
 
-### Mechanism 6 — Subagent Decomposition as Context Bounding **[Grade A]**
+### M6 — Subagent Decomposition as Context Bounding
+
+#### Grade A
+*The cost reduction from independent context windows is a direct arithmetic consequence of n² scaling; the calculation is exact given the quadratic bound from M2.*
 
 Each spawned subagent has its own KV cache, its own sequence length $n$, and its own $O(n^2)$ attention compute budget. This is not a logical property of multi-agent architecture — it is a physical property of how the inference computation is partitioned across API calls.
 
@@ -136,7 +154,10 @@ The quality win of O6 Orchestrator-Workers over O1 Single Agent is structural, n
 
 ---
 
-### Mechanism 7 — Stochastic Generation and Autoregressive Commitment **[Grade A]**
+### M7 — Stochastic Generation and Autoregressive Commitment
+
+#### Grade A
+*Sampling from the output distribution is the defined mechanism of autoregressive generation; the irreversibility of committed tokens is a structural property, not an empirical finding.*
 
 Token generation is sampling from a learned probability distribution over the vocabulary. Given the sequence of tokens $t_1, t_2, \ldots, t_{k-1}$, the model outputs a distribution $P(t_k \mid t_1, \ldots, t_{k-1})$ and samples the next token from it. Generation is **autoregressive**: each sampled token becomes part of the conditioning sequence for the next token.
 
@@ -152,7 +173,10 @@ Two consequences are mechanically unavoidable:
 
 ## 0.2 — The Memory and Storage Hierarchy (Mechanisms 8–10)
 
-### Mechanism 8 — Model Size Matching to Task Complexity **[Grade A cost; Grade B thresholds]**
+### M8 — Model Size Matching to Task Complexity
+
+#### Grade A cost; Grade B thresholds
+*That smaller models are cheaper per token follows from parameter counts; the capability thresholds at which model tiers are interchangeable are empirical and task-dependent.*
 
 Large model capacity (parameter count) is required for complex, multi-step reasoning that integrates many latent factors. It is not required for routing, classification, format conversion, exact lookup, data loading, or other tasks that require recall and pattern-matching rather than reasoning. The generation cost for the same token count scales with model size; using a 70B-parameter model for a routing decision costs an order of magnitude more in memory bandwidth and FLOPs than a 7B model for the same decision.
 
@@ -167,7 +191,10 @@ This is not a preference — it is a cost-structure fact. The practical threshol
 
 ---
 
-### Mechanism 9 — Storage Tier Hierarchy **[Grade A cost structure; Grade B use patterns]**
+### M9 — Storage Tier Hierarchy
+
+#### Grade A cost structure; Grade B use patterns
+*The cost and latency ordering of in-context, retrieval, and fine-tuning tiers follows from their computational structure; which tier is optimal for a given access pattern is empirically determined.*
 
 The KV cache does not persist across API calls (Mechanism 3). All information that must survive a session boundary must be written to external storage and retrieved into context. This creates a hierarchy of storage tiers with distinct cost and access properties:
 
@@ -187,7 +214,10 @@ The critical design axis is **write cost vs. read cost**. In-context storage pay
 
 ---
 
-### Mechanism 10 — No Cross-Session Persistence: All Memory Is Retrieval **[Grade A]**
+### M10 — No Cross-Session Persistence: All Memory Is Retrieval
+
+#### Grade A
+*LLM weights are fixed at inference time; the absence of cross-session state change is a definitional property of the inference API contract, not an empirical observation.*
 
 The model's weights do not change between API calls. There is no mechanism by which a conversation causes the model to "learn" or "remember" anything in its parameters. The KV cache is session-scoped (Mechanism 3) and does not persist across calls.
 
@@ -201,7 +231,10 @@ All apparent inter-session memory is a file-retrieval operation: a document (CLA
 
 ## 0.3 — The Positional Architecture (Mechanisms 11–12)
 
-### Mechanism 11 — Context Compaction for Long-Running Systems **[Grade A mechanism; Grade B trigger thresholds]**
+### M11 — Context Compaction for Long-Running Systems
+
+#### Grade A mechanism; Grade B trigger thresholds
+*That accumulated context must eventually be managed follows from finite window size and quadratic cost; the optimal compaction trigger depends on workload characteristics that are not derivable from first principles.*
 
 In a long-running agent session (an O8 Loop Agent, or any agentic workflow with many turns), the KV cache grows monotonically (Mechanism 3). Without intervention, $n$ eventually approaches the context window limit. The practical cost grows with $n$ even before the limit is hit: attention quality degrades as the middle of the context fills with superseded reasoning (Mechanism 4), and per-turn cost rises as the $O(n^2)$ factor grows.
 
@@ -219,7 +252,10 @@ The **"early decision" problem** in automated systems is a specialised case. Whe
 
 ---
 
-### Mechanism 12 — RoPE as an SO(d_head) Lie Group Action **[Grade A]**
+### M12 — RoPE as an SO(d_head) Lie Group Action
+
+#### Grade A
+*The rotary embedding is derived exactly from the requirement that relative position encode as a rotation; the Lie group structure follows from the composition law for rotation matrices.*
 
 Rotary positional encoding applies a rotation matrix $R(i\theta) \in \text{SO}(d_\text{head})$ to each query and key before the attention contraction, where $\theta \in \mathbb{R}^{d_\text{head}/2}$ is a fixed frequency vector and $i$ is the token's absolute position in the sequence. The attention score between positions $i$ and $j$ becomes:
 
