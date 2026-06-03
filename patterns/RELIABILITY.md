@@ -77,6 +77,45 @@ Patterns differ in *which envelope they tighten* — the human gate around an ir
 
 ---
 
+## Quick Reference
+
+### V-A — Safety and Security
+
+| # | Pattern | Also Known As | Intent |
+|---|---|---|---|
+| V1 | **Human-in-the-Loop** | Approval Gate | Block on irreversible, novel, or high-blast-radius actions |
+| V2 | **Human-on-the-Loop** | Monitoring Mode | Agent acts autonomously; human monitors and can interrupt |
+| V3 | **Rule of Two** | Lethal Trifecta Guard | Flag agents with private data + untrusted content + external comms |
+| V4 | **Dual LLM** | Privilege Separation | Quarantined LLM for untrusted data; privileged LLM for actions |
+| V5 | **Guardrail Layering** | Defense in Depth | Safety checks at input, pre-call, post-call, and output |
+| V6 | **Prompt Injection Shield** | Input Sanitisation | Structural and positional defences against injection |
+| V7 | **AgentSpec** | Policy as Code | Declarative, out-of-prompt, deterministic policy enforcement |
+| V8 | **Tool Sandboxing** | Isolated Execution | Confine LLM-generated code to restricted environment |
+
+### V-B — Operational Reliability
+
+| # | Pattern | Also Known As | Intent |
+|---|---|---|---|
+| V9 | **Bounded Execution** | Circuit Breaker | Hard caps on steps, cost, wall-time — required for every loop |
+| V10 | **Checkpointing** | State Snapshot | Replayable agent state; recovery without restart |
+| V11 | **Error Compaction** | Error Summarisation | Compress errors into compact structured signals |
+| V12 | **Stateless Reducer** | Pure Agent | Deterministic, replayable summary of accumulated state |
+| V13 | **Tool Budget** | Schema Budget | Limit active schema tokens — every schema token costs n² attention |
+| V19 | **Fallback** | Graceful Degradation | Cheaper degraded path for every primary-path failure mode |
+| V20 | **Schema Validation** | Structured Output | Validate output against schema; re-prompt on failure |
+
+### V-C — Observability and Evaluation
+
+| # | Pattern | Also Known As | Intent |
+|---|---|---|---|
+| V14 | **Trajectory Logging** | Agent Tracing | OTel-compatible trace of every call, action, observation |
+| V15 | **LLM-as-Judge** | AI Evaluator | Second model evaluates quality against defined rubrics |
+| V16 | **Offline Eval** | Regression Testing | Batch evaluation against held-out cases before deployment |
+| V17 | **Online Eval** | Production Monitoring | Real-time quality metrics in production |
+| V18 | **Agent Simulation** | Sandbox Testing | Simulated environment for pre-deployment stress testing |
+
+---
+
 ## V1 — Human-in-the-Loop
 
 Insert mandatory human review and approval at defined decision boundaries before the agent proceeds — the agent *blocks* until a human approves, rejects, or modifies the plan.

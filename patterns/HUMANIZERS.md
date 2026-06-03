@@ -81,6 +81,44 @@ Patterns differ in *what they extract* — identity, principles, lessons, skills
 
 ---
 
+## Quick Reference
+
+| # | Pattern | Also Known As | Intent | When to Use |
+|---|---|---|---|---|
+| H1 | **Identity Persistence** | Genesis State | Stable invariant self at position 0 every session | Any multi-session agent |
+| H2 | **Episodic Self-Improvement** | Cross-Session Reflexion | Persist verbal self-critiques; improve without weight updates | Recurring task types |
+| H3 | **Entropy-Driven Curiosity** | Deadlock Break | Increase temperature or inject stimuli on stagnation | Creative agents; stuck reasoning loops |
+| H4 | **Procedural Skill Accumulation** | Skill Library | Distil successful trajectories into reusable skills | Agents with recurring task types |
+| H5 | **Constitutional Self-Alignment** | Principle Evolution | Operating principles evolve through experience with human checkpoints | Long-running agents; governed alignment |
+| H6 | **Continuous Inner Monologue** | MIRROR | Background reasoning separate from user-facing responses | Persistent assistants; monitoring agents |
+| H7 | **Adaptive Persona** | User-Calibrated Style | Communication adapts to observed user preferences | Personal assistants; multi-user systems |
+| H8 | **Meta-Agent Self-Modification** | Self-Improving Agent | Agent modifies own operational parameters within governed allowlist | Large-scale production; abundant eval data |
+| H9 | **Observational Identity** | Self-Knowledge Model | Explicit model of own capabilities and knowledge state | Multi-session; capability routing |
+| H10 | **Relational Memory** | User Model Persistence | Persistent user relationship record with GDPR erasure | Personal assistants; coaching |
+
+---
+
+## Cognitive Science Grounding
+
+Humanizer patterns map to classical cognitive science theories — the convergence suggests the patterns capture something real about how intelligence works over time.
+
+| Pattern | Cognitive Theory | Source |
+|---|---|---|
+| O11 Blackboard | Global Workspace Theory (Baars) | Explicit in Theater of Mind paper |
+| O10 Swarm | Society of Mind (Minsky) | Multi-specialised agents |
+| R16 Talker-Reasoner | Dual-Process Theory (Kahneman) | Direct mapping: System 1/2 |
+| K10 Long-Term Memory | Tulving / Baddeley memory taxonomy | Episodic, semantic, procedural variants |
+| K11 Observational Memory | Extended Mind Thesis (Clark) | External tool as cognitive extension |
+| H1 Identity Persistence | Autobiographical memory (Tulving 1985) | Genesis State in Theater of Mind |
+| H2 Episodic Self-Improvement | Episodic memory consolidation | Reflexion extended cross-session |
+| H3 Entropy-Driven Curiosity | Optimal Arousal / Noradrenergic system | Theater of Mind — entropy monitoring |
+| H5 Constitutional Self-Alignment | Moral development (Kohlberg) | Constitutional AI extended to inference |
+| H6 Inner Monologue | Vygotskian inner speech | MIRROR / Thinker architecture |
+| H7 Adaptive Persona | Theory of Mind (Premack & Woodruff) | User model as cognitive representation |
+| H10 Relational Memory | Parasocial relationship theory | HCI research; Skjuve et al. 2021 |
+
+---
+
 ## H1 — Identity Persistence
 
 Inject a stable, invariant self-representation — values, style, capabilities, outstanding commitments — at the head of every context window, so the agent is recognisably the same agent across sessions, instances, and resets. The foundational Humanizer pattern; subsumes S3 Persona for any system with cross-session continuity, and is a prerequisite for every other H-pattern.

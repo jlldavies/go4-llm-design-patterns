@@ -88,6 +88,19 @@ The headline cost number: GitHub MCP occupies ~40,000–55,000 tokens of schema 
 
 ---
 
+## Quick Reference
+
+| # | Pattern | Also Known As | Intent | When to Use |
+|---|---|---|---|---|
+| I1 | **Direct API** | Deterministic Call | Synchronous HTTP; no LLM reasoning | Sub-10ms ops; consistency-critical |
+| I2 | **Function/Tool Call** | Schema-Wrapped API | LLM selects and invokes typed function | 1–5 tools; app-specific routing |
+| I3 | **MCP Server** | Model Context Protocol | Standardised tool discovery; credential isolation | 5+ tools shared across agents |
+| I4 | **CLI Invocation** | Shell Tool | Agent uses existing CLI directly | Tools with existing CLIs (git, docker, gh) |
+| I5 | **Agent Card** | Agent Manifest | Self-describing JSON for agent discovery | Multi-agent; A2A interoperability |
+| I6 | **A2A Delegation** | Agent-to-Agent | Structured cross-agent task delegation | Multi-vendor agent collaboration |
+
+---
+
 ## I1 — Direct API Call
 
 Call an external service directly from code without LLM routing — deterministically, synchronously, with full programmatic control over parameters, retries, and error handling. The LLM, if present, sits upstream of the call (deciding *what* to do) rather than inside it. The right pattern when the action is fully determined by code logic and the latency, cost, or determinism of an LLM in the call path is unjustified — financial transactions, structured database writes, sub-10ms operations, anything with audit and compliance requirements.

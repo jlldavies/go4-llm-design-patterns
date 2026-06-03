@@ -75,6 +75,23 @@ The loaded-once vs. per-call distinction is also a caching boundary (mechanism 5
 
 ---
 
+## Quick Reference
+
+| # | Pattern | Also Known As | Intent | When to Use |
+|---|---|---|---|---|
+| S1 | **Zero-Shot** | Direct Instruction | Task with no examples; rely on model priors | Simple, well-defined tasks where model knowledge is sufficient |
+| S2 | **Few-Shot** | In-Context Learning | Provide examples to demonstrate desired format or behaviour | Format control, style matching, novel task types |
+| S3 | **Persona** | Role Prompting | Assign the model an identity to frame knowledge and tone | Expert framing, domain-specific tasks, tone alignment |
+| S4 | **Instruction Decomposition** | Step Prompting | Break complex instruction into numbered sequential steps | Multi-step tasks with clear ordering |
+| S5 | **Constraint Framing** | Negative Prompting | Define what model must NOT do as prominently as what it should | Safety-sensitive, compliance, avoiding known failure modes |
+| S6 | **Output Template** | Template Filling | Provide skeleton of expected output for model to complete | Structured data extraction, consistent formatting |
+| S8 | **Meta-Prompt** | Auto-Prompting | Model generates or refines its own prompt | Self-optimising workflows; experimental; cost intensive |
+| S9 | **Constitutional Framing** | Constitutional AI | Embed principles the model applies to self-critique | Alignment enforcement, safety-critical contexts |
+
+*S7 (Self-Consistency Voting) relocated to R17 (Reasoning). S10 (Chain of Density) folded into K6 (Context Compression). Both are intentional gaps.*
+
+---
+
 ## S1 — Zero-Shot
 
 Ask the model to do the task with nothing but the instruction itself — no examples, no decomposition, no template, no role, no constitution — and rely entirely on its pre-trained instruction-following. The baseline against which every other Signal pattern is defined as an upgrade.

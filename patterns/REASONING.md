@@ -85,6 +85,32 @@ Patterns differ in *what the deliberation does* — write a linear chain, branch
 
 ---
 
+## Quick Reference
+
+| # | Pattern | Also Known As | LLM Calls | Best For |
+|---|---|---|---|---|
+| R1 | **Zero-Shot CoT** | "Think step by step" | 1 | Quick reasoning improvement; no examples |
+| R2 | **Few-Shot CoT** | Exemplar CoT | 1 | Consistent reasoning format with examples |
+| R3 | **Plan-and-Solve** | Explicit Planning | 2 | Well-defined multi-step workflows |
+| R4 | **ReAct** | Reason+Act Loop | N per step | Exploratory; adaptive; unpredictable paths |
+| R5 | **ReWOO** | Reasoning Without Observation | 2 total | Independent tool calls; 5× cheaper than R4 |
+| R6 | **Self-Ask** | Decomposition | 1 + N follow-ups | Multi-hop factual questions |
+| R7 | **Reflexion** | Verbal Reinforcement | N × retries | Clear pass/fail criteria; retries acceptable |
+| R8 | **Self-Refine** | Generate-Critique-Refine | N iterations | General quality improvement; no separate judge |
+| R9 | **Tree of Thoughts** | ToT | N (branching) | Hard open-ended; path unknown |
+| R10 | **LATS** | Language Agent Tree Search | N (tree search) | Highest quality; highest cost |
+| R11 | **Buffer of Thoughts** | BoT | 1 + template | 12% cost of ToT; reusable templates |
+| R12 | **Skeleton-of-Thought** | SoT | 1 + N parallel | Parallel generation; latency reduction |
+| R13 | **CodeAct** | Executable Code Actions | N (with execution) | Multi-tool; ~20pp accuracy gain over JSON |
+| R14 | **Program of Thoughts** | PoT | 1 + execution | Numerical/mathematical tasks |
+| R16 | **Talker-Reasoner** | System 1/System 2 | Dual async | Real-time + deliberative combined |
+| R17 | **Self-Consistency** | Majority Voting | N samples | Factual tasks; sample and vote |
+| R18 | **Graph of Thoughts** | GoT | N (DAG) | Non-linear reasoning; merging thought branches |
+| R19 | **Step-Back Prompting** | Abstraction Prompting | 2 | Abstract to principle before answering |
+| R20 | **Chain of Verification** | CoVe | 1 + N verifications | Reduce hallucination; verify each claim |
+
+---
+
 ## R1 — Zero-Shot CoT
 
 Append a short reasoning-elicitation trigger (canonically *"Let's think step by step"*) to a zero-shot prompt and let the model write its reasoning out before the final answer — no examples, no decomposition, no scaffold.

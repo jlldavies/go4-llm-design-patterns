@@ -86,6 +86,38 @@ Most production agent workflows need more than one shape. This is the correct di
 
 ---
 
+## Quick Reference
+
+### II-A — Retrieval
+
+| # | Pattern | Also Known As | Intent | When to Use |
+|---|---|---|---|---|
+| K1 | **Vanilla RAG** | Naive RAG | Retrieve relevant chunks at query time | Simple Q&A, static corpora, citations required |
+| K2 | **Query Transformation** | HyDE, multi-query | Transform the raw query to retrieve better | Query/document mismatch; ambiguous queries |
+| K3 | **GraphRAG** | Graph Retrieval | Index corpus as entity-relationship graph | Multi-hop relational queries; global synthesis |
+| K4 | **RAPTOR** | Hierarchical RAG | Index corpus as recursive summary tree | Variable abstraction; hierarchical documents |
+| K5 | **Adaptive RAG** | Self-RAG, Corrective RAG | Wrap retrieval in evaluate-and-control loop | Mixed query streams; factuality-critical |
+| K13 | **Retrieval Bundle** | Agent Operating Context | Specify exact context bundle before writing retrieval code | Recurring workflows; rediscovery cost measurable |
+
+### II-B — Context-Window Management
+
+| # | Pattern | Also Known As | Intent | When to Use |
+|---|---|---|---|---|
+| K6 | **Context Compression** | Summarisation | Summarise context that no longer fits (lossy) | Long-running agents; context overflow |
+| K7 | **Context Pruning** | Selective Recall | Remove spent spans without summarising (lossless) | Spent tool outputs; finished sub-task context |
+| K8 | **Working Memory** | Scratchpad | Explicit in-context space model writes to itself | Multi-step reasoning; intermediate state |
+| K9 | **Long Context** | Context Stuffing | Hold whole working set in a large window | Working set fits; retrieval not justified |
+
+### II-C — Memory
+
+| # | Pattern | Also Known As | Intent | When to Use |
+|---|---|---|---|---|
+| K10 | **Long-Term Memory** | Persistent Memory | External store of facts, retrieved by similarity | Cross-session fact storage; preferences |
+| K11 | **Observational Memory** | Agent-Centric Memory | Append-only activity log; prefix-cache-friendly | Long-running agents with prefix caching |
+| K12 | **Karpathy Memory** | Curated Memory | LLM curates dense structured notes | Read-frequency dominates; structure matters |
+
+---
+
 ## K1 — Vanilla RAG
 
 Retrieve the documents most relevant to a query from an external corpus and inject them into the context window, so the model answers from supplied evidence rather than from its trained weights alone.

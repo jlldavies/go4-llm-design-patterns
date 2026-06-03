@@ -80,6 +80,65 @@ Patterns differ in *how the coordination layer is shaped* — fixed pipeline, cl
 
 ---
 
+## Quick Reference
+
+### IV-A — Workflow Patterns
+
+| # | Pattern | Also Known As | Intent | Complexity |
+|---|---|---|---|---|
+| O1 | **Single Agent** | Autonomous Agent | One LLM + tools + system prompt | Low |
+| O2 | **Prompt Chaining** | Pipeline | Output of one call feeds the next in fixed order | Low |
+| O3 | **Routing** | Classifier-Dispatcher | Classify input → specialist handler | Medium |
+| O4 | **Parallelization** | Fan-out Fan-in | Simultaneous independent LLM calls | Medium |
+
+### IV-B — Agentic Patterns
+
+| # | Pattern | Also Known As | Intent | Complexity |
+|---|---|---|---|---|
+| O5 | **Evaluator-Optimizer** | Generator-Critic | Separate generator and judge; iterative improvement | Medium |
+| O6 | **Orchestrator-Workers** | Hub-and-Spoke | Central LLM dynamically delegates to workers | High |
+| O7 | **Supervisor Hierarchy** | Hierarchical Agents | Multi-level tree of orchestrators | High |
+| O8 | **Loop Agent** | Agentic Loop | Sequence repeats until termination condition | Medium |
+| O9 | **Multi-Agent Reflection** | Ensemble Critique | Multiple agents independently critique one output | High |
+| O10 | **Swarm** | Peer-to-Peer Agents | No central coordinator; emergent coordination | Very High |
+
+### IV-C — Specialised Coordination
+
+| # | Pattern | Also Known As | Intent | Complexity |
+|---|---|---|---|---|
+| O11 | **Blackboard** | Shared Workspace | Central shared memory; agents post and consume | High |
+| O12 | **Debate and Deliberation** | Devil's Advocate | Agents argue opposing positions before synthesis | High |
+| O13 | **Negotiation** | Multi-Party Consensus | Agents with conflicting objectives negotiate | Very High |
+| O14 | **SIE** | Single Information Environment | Agents own specific datasets; coordinator routes | Medium |
+| O15 | **Agent Handoff** | Context Transfer | Structured state transfer mid-task | Medium |
+| O16 | **Hybrid Control Flow** | Primitive Stack | Stacked loop primitives; most real agents | Varies |
+| O17 | **Agent Isolation** | Clean Context | Fresh context per sub-task — required companion to O6 | Low overhead |
+| O18 | **Cache-Warmed Worker Pool** | Primed Agent Pool | Shared prefix cached before worker fan-out | Low overhead |
+
+---
+
+## Scaffold Architecture Dimensions
+
+*From empirical study of 13 coding agents (arXiv 2604.03515).*
+
+**Five stackable loop primitives:**
+1. ReAct loop
+2. Generate-test-repair
+3. Plan-execute
+4. Multi-attempt retry
+5. Tree search (MCTS)
+
+Most production agents (11/13 studied) use O16 — multiple primitives stacked, not a single pattern.
+
+**The major architectural fault line:**
+
+- **LLM-as-navigator** (8/13 agents): general tools; LLM decides navigation; simpler but less precise
+- **Scaffold-understands-code** (5/13 agents): repository maps, AST indexing, knowledge graphs; more powerful but complex
+
+**Active research frontier (no consensus):** context compaction strategy, state representation format, safety mechanisms for interactive agents.
+
+---
+
 ## O1 — Single Agent
 
 One LLM with a defined tool set and system prompt autonomously handles the complete request, using its own reasoning loop to plan, act, and respond. The baseline that any multi-agent move must out-perform.
