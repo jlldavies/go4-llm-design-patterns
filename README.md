@@ -306,27 +306,15 @@ Full bibliography: [`REFERENCES.md`](REFERENCES.md)
 
 ---
 
-## Building the PDF Yourself
-
-Requires [pandoc](https://pandoc.org/) and XeLaTeX (Charter and Avenir Next fonts):
-
-```bash
-git clone https://github.com/jlldavies/go4-llm-design-patterns
-cd go4-llm-design-patterns
-python3 build_book.py
-# → book.md and GO4.pdf
-```
-
----
-
 ## Citation
 
 ```bibtex
 @misc{davies2026go4,
-  title  = {GO4: A Gang of Four for AI Engineering},
-  author = {Davies, James},
-  year   = {2026},
-  url    = {https://github.com/jlldavies/go4-llm-design-patterns}
+  title        = {{GO4}: A Pattern Language for {LLM} Engineering},
+  author       = {Davies, James},
+  year         = {2026},
+  howpublished = {\url{https://github.com/jlldavies/go4-llm-design-patterns}},
+  note         = {94 design patterns for building LLM systems in production}
 }
 ```
 
