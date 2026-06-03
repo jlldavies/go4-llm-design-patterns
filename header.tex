@@ -1,4 +1,38 @@
 \usepackage{fancyhdr}
+\usepackage{eso-pic}
+\usepackage{tikz}
+\usepackage{xcolor}
+
+% Pattern card stripe colours
+\definecolor{patternbg}{HTML}{FDFAEC}
+\definecolor{patternsep}{HTML}{333333}
+
+% Stripe state — set per pattern, cleared at section end
+\newcommand{\currentpatternname}{}
+\newcommand{\setpatternname}[1]{\renewcommand{\currentpatternname}{#1}}
+\newcommand{\clearpatternname}{\renewcommand{\currentpatternname}{}}
+
+% Draw pale yellow left stripe + dark hairline + rotated pattern name on every page
+\AddToShipoutPictureBG{%
+  \ifx\currentpatternname\empty\else
+    \begin{tikzpicture}[remember picture, overlay]
+      \fill[patternbg]
+        ([xshift=-1.8cm]current page text area.north west)
+        rectangle
+        ([xshift=-0.3cm]current page text area.south west);
+      \draw[patternsep, line width=0.4pt]
+        ([xshift=-0.3cm]current page text area.north west)
+        --
+        ([xshift=-0.3cm]current page text area.south west);
+      \node[rotate=90, anchor=center, text=patternsep,
+            font=\small\sffamily]
+        at ([xshift=-1.05cm]current page.center)
+        {\currentpatternname};
+    \end{tikzpicture}
+  \fi
+}
+
+% Running headers
 \pagestyle{fancy}
 \fancyhf{}
 \renewcommand{\chaptermark}[1]{\markboth{#1}{}}
