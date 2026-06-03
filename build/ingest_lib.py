@@ -86,6 +86,32 @@ def _edge_type(label: str) -> str:
     return "related"
 
 
+CONFLICT_SYMBOLS = [
+    (r'\\oplus', "conflicts_with"), (r'\\leftrightarrow', "conflicts_with"),
+    (r'\\to\b', "requires"), (r'\\sim', "composes_with"),
+    (r'\\uparrow', "composes_with"), (r'\bH/S\b', "composes_with"),
+]
+_CONF_HEAD = re.compile(r'^###\s+Critical\s+\d+\s+—\s+(.+?)\s*\{#', re.M)
+
+
+def conflict_edges(conflicts_md: str) -> list:
+    """Parse CONFLICTS.md headings into [(a, b, edge_type), ...] (a,b are ids)."""
+    out = []
+    for head in _CONF_HEAD.finditer(conflicts_md):
+        title = head.group(1)
+        ids = re.findall(r'\b([A-Z]+\d+)\b', title)
+        if len(ids) < 2:
+            continue
+        etype = "conflicts_with"
+        for pat, t in CONFLICT_SYMBOLS:
+            if re.search(pat, title):
+                etype = t
+                break
+        a, b = ids[0], ids[1]
+        out.append((a, b, etype))
+    return out
+
+
 def related_edges(text: str, self_id: str) -> dict:
     """Parse '## Related Patterns' bullets into {edge_type: [ids]} (deduped, no self)."""
     sec = re.search(r'^## Related Patterns\s*\n(.*?)(?:\n## |\Z)', text, re.S | re.M)

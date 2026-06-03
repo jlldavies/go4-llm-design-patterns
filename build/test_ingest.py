@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from ingest_lib import unit_id, category_of, title_of, also_known_as, intent_of, mechanism_refs, related_edges, _edge_type
+from ingest_lib import unit_id, category_of, title_of, also_known_as, intent_of, mechanism_refs, related_edges, _edge_type, conflict_edges
 
 
 def eq(got, want):
@@ -21,6 +21,15 @@ eq(category_of("H10"), "Humanizers")
 eq(mechanism_refs("conditions on mechanism 4; see mechanisms 2 and 3, plus (mechanism 12)."), [2, 3, 4, 12])
 eq(mechanism_refs("no citations here"), [])
 eq(mechanism_refs("mechanism 99 is out of range"), [])
+
+cm = (
+    "### Critical 1 — R4 $\\oplus$ R5  {#critical-1}\n"
+    "### Critical 2 — V1 $\\leftrightarrow$ V2  {#critical-2}\n"
+    "### Critical 3 — S9 H/S V7  {#critical-3}\n"
+)
+eq(conflict_edges(cm), [("R4", "R5", "conflicts_with"),
+                        ("V1", "V2", "conflicts_with"),
+                        ("S9", "V7", "composes_with")])
 
 eq(_edge_type("Sibling of"), "siblings")
 eq(_edge_type("Required by"), "requires")
