@@ -3,7 +3,7 @@ id: O18
 title: Cache-Warmed Worker Pool
 type: pattern
 category: Orchestration
-summary: "Design the shared context given to all parallel workers as a single stable, cacheable prefix; fire a warm-up call (or time the first worker call) to establish that prefix in the provider KV cache; then dispatch all remaining workers within the cache TTL — so the shared portion of each worker's prompt is served from cache at ~10% of the normal prefill cost rather than re-computed independently for each worker.."
+summary: "Design the shared context given to all parallel workers as a single stable, cacheable prefix; fire a warm-up call (or time the first worker call) to establish that prefix in the provider KV cache; then dispatch all remaining workers within the cache TTL — so the shared portion of each worker's prompt is served from cache at ~10% of the normal prefill cost rather than re-computed independently for each worker."
 when_to_use: Establish cacheable shared prefix before fan-out — ~85% cost reduction on shared context
 also_known_as: [Primed Agent Pool, Prefix-Warm Fan-Out, Shared Context Warming]
 composes_with: [O4]

@@ -6,15 +6,15 @@ category: Reliability
 summary: "Place the safety perimeter in code, not in the model."
 when_to_use: Input / pre-call / post-call / output guards at all four boundaries
 also_known_as: [Multi-Point Safety, Defense in Depth for LLMs, Input-Output Filtering, Four-Point Guardrails, I/O Guards]
-composes_with: [S5, V6, V7, V1, V4, V3, V15, V8]
-related: [V6]
+composes_with: [S5, V6, V7, V14, V1, V4, V15, V8, V9]
+related: [S5, V6]
 mechanism_refs: [1, 2, 7]
 canonical: patterns/V5-Guardrail-Layering.md
 derived: true
 ---
 
 ## Description
-Place the safety perimeter in code, not in the model. Intercept and validate at every boundary the agent crosses — input from the user, the parameters of each tool call, the response of each tool, and the final output to the user — so the system tolerates the model failing any single check. Composes with S5, V6, V7, V1, V4, V3, V15, V8. This is a condensed digest; the canonical file (`patterns/V5-Guardrail-Layering.md`) carries the full decision criteria, failure modes, and implementation.
+Place the safety perimeter in code, not in the model. Intercept and validate at every boundary the agent crosses — input from the user, the parameters of each tool call, the response of each tool, and the final output to the user — so the system tolerates the model failing any single check. Composes with S5, V6, V7, V14, V1, V4, V15, V8, V9. This is a condensed digest; the canonical file (`patterns/V5-Guardrail-Layering.md`) carries the full decision criteria, failure modes, and implementation.
 
 ## Key points
 - the agent invokes external tools (nearly all production agents qualify);
@@ -22,4 +22,4 @@ Place the safety perimeter in code, not in the model. Intercept and validate at 
 - the domain is safety-critical, regulated, or carries reputational tail risk (healthcare, finance, legal, public-facing brand);
 - the agent crosses the V3 Lethal Trifecta surfaces — private data, untrusted content, external communication — in any combination;
 
-Related: [[S5-Constraint-Framing]] · [[V6-Prompt-Injection-Shield]] · [[V7-AgentSpec]] · [[V1-Human-in-the-Loop]] · [[V4-Dual-LLM]] · [[V3-Rule-of-Two]] · [[V15-LLM-as-Judge]] · [[V8-Tool-Sandboxing]]
+Related: [[S5-Constraint-Framing]] · [[V6-Prompt-Injection-Shield]] · [[V7-AgentSpec]] · [[V14-Trajectory-Logging]] · [[V1-Human-in-the-Loop]] · [[V4-Dual-LLM]] · [[V15-LLM-as-Judge]] · [[V8-Tool-Sandboxing]] · [[V9-Bounded-Execution]]

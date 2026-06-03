@@ -41,7 +41,7 @@ def bootstrap():
         edges = L.related_edges(text, uid)
         intent = L.intent_of(text)
         meta[uid] = {
-            "summary": (intent.split(". ")[0] + ".") if intent else L.title_of(text),
+            "summary": (intent.split(". ")[0].rstrip(".") + ".") if intent else L.title_of(text),
             "when_to_use": wmap.get(uid, ""),
             "cost": "",  # fill during review (decision-guide tables are the source)
             "edges": edges,

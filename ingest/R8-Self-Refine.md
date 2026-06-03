@@ -3,7 +3,7 @@ id: R8
 title: Self-Refine
 type: pattern
 category: Reasoning
-summary: "Improve the quality of an output by having the same model that produced it write a critique of it and revise from that critique, iterating until a stopping condition — without any external evaluator, ground-truth signal, or second model.."
+summary: "Improve the quality of an output by having the same model that produced it write a critique of it and revise from that critique, iterating until a stopping condition — without any external evaluator, ground-truth signal, or second model."
 when_to_use: Iterative in-session quality improvement
 also_known_as: [Generate-Critique-Refine, Iterative Self-Improvement, Self-Feedback Refinement, Self-Editing Loop]
 siblings: [R7, R17]

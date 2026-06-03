@@ -3,7 +3,7 @@ id: H4
 title: Procedural Skill Accumulation
 type: pattern
 category: Humanizers
-summary: "Convert the agent's successful problem-solving work into reusable, parameterised procedures, so the next time a similar task arrives the agent retrieves and adapts a proven skill rather than re-deriving it from scratch — turning one solved task into a permanent capability.."
+summary: "Convert the agent's successful problem-solving work into reusable, parameterised procedures, so the next time a similar task arrives the agent retrieves and adapts a proven skill rather than re-deriving it from scratch — turning one solved task into a permanent capability."
 when_to_use: Generalise successful trajectories into reusable callable skills
 also_known_as: [Skill Library, LEGO Memory, Memp, Trajectory Distillation, Workflow Memory, Voyager-Style Skill Acquisition]
 related: [K10, H1, R11, S8]

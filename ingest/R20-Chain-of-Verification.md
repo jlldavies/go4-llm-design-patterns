@@ -3,7 +3,7 @@ id: R20
 title: Chain-of-Verification
 type: pattern
 category: Reasoning
-summary: "Reduce hallucination in a single-shot answer by interrogating it: surface the factual claims the answer rests on as explicit verification questions, answer each one independently of the draft, and rewrite the draft from those answers.."
+summary: "Reduce hallucination in a single-shot answer by interrogating it: surface the factual claims the answer rests on as explicit verification questions, answer each one independently of the draft, and rewrite the draft from those answers."
 when_to_use: Generate answer; verify each claim independently
 also_known_as: [CoVe, Verify-Then-Revise, Question-Driven Self-Verification]
 siblings: [R8, R7, R17]

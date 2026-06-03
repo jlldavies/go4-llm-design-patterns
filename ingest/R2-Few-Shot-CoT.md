@@ -3,7 +3,7 @@ id: R2
 title: Few-Shot CoT
 type: pattern
 category: Reasoning
-summary: "Elicit step-by-step intermediate reasoning by *demonstrating* it in a small set of in-prompt examples — `(question, reasoning trace, answer)` triples — so the model both adopts the reasoning style and produces the answer in the demonstrated form.."
+summary: "Elicit step-by-step intermediate reasoning by *demonstrating* it in a small set of in-prompt examples — `(question, reasoning trace, answer)` triples — so the model both adopts the reasoning style and produces the answer in the demonstrated form."
 when_to_use: Show worked reasoning before the target question
 also_known_as: [Exemplar Chain-of-Thought, Manual CoT, Demonstration-Based CoT, k-Shot CoT]
 related: [R1, S2, R3, R4, R14]

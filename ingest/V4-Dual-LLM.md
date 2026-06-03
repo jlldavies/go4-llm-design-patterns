@@ -3,18 +3,18 @@ id: V4
 title: Dual LLM
 type: pattern
 category: Reliability
-summary: "Make prompt-injection-driven exfiltration architecturally impossible by ensuring no single LLM session simultaneously possesses private data access, tool access, and exposure to untrusted content.."
+summary: "Make prompt-injection-driven exfiltration architecturally impossible by ensuring no single LLM session simultaneously possesses private data access, tool access, and exposure to untrusted content."
 when_to_use: Quarantine Q-LLM handles untrusted content; privileged P-LLM acts
 also_known_as: [Privilege Separation, Privileged + Quarantined Split, P-LLM / Q-LLM, Two-Brain Pattern]
 related: [V3, V6, O17]
-composes_with: [V6, V7, V8]
+composes_with: [V6, V7, V8, V14]
 mechanism_refs: [1, 3, 8]
 canonical: patterns/V4-Dual-LLM.md
 derived: true
 ---
 
 ## Description
-Make prompt-injection-driven exfiltration architecturally impossible by ensuring no single LLM session simultaneously possesses private data access, tool access, and exposure to untrusted content. Composes with V6, V7, V8. This is a condensed digest; the canonical file (`patterns/V4-Dual-LLM.md`) carries the full decision criteria, failure modes, and implementation.
+Make prompt-injection-driven exfiltration architecturally impossible by ensuring no single LLM session simultaneously possesses private data access, tool access, and exposure to untrusted content. Composes with V6, V7, V8, V14. This is a condensed digest; the canonical file (`patterns/V4-Dual-LLM.md`) carries the full decision criteria, failure modes, and implementation.
 
 ## Key points
 - a V3 audit confirms the Lethal Trifecta (private data + untrusted content + external comms) in a single agent;
@@ -22,4 +22,4 @@ Make prompt-injection-driven exfiltration architecturally impossible by ensuring
 - the cost of a successful exfiltration attack is catastrophic (PII leakage, financial transactions, irreversible communications);
 - the agent has tool access that could be weaponised — outbound email, web requests, data export, code execution.
 
-Related: [[V6-Prompt-Injection-Shield]] · [[V7-AgentSpec]] · [[V8-Tool-Sandboxing]] · [[V3-Rule-of-Two]] · [[O17-Agent-Isolation]]
+Related: [[V6-Prompt-Injection-Shield]] · [[V7-AgentSpec]] · [[V8-Tool-Sandboxing]] · [[V14-Trajectory-Logging]] · [[V3-Rule-of-Two]] · [[O17-Agent-Isolation]]

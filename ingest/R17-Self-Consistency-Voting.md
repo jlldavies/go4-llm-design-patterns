@@ -3,7 +3,7 @@ id: R17
 title: Self-Consistency Voting
 type: pattern
 category: Reasoning
-summary: "Improve the reliability of a reasoning step by sampling N independent attempts at the *same* prompt and selecting the answer they most agree on, instead of trusting a single greedy decode.."
+summary: "Improve the reliability of a reasoning step by sampling N independent attempts at the *same* prompt and selecting the answer they most agree on, instead of trusting a single greedy decode."
 when_to_use: Sample N reasoning paths; majority vote
 also_known_as: [Self-Consistency, Self-Consistency Decoding, Ensemble Sampling, Majority Vote, SC Prompting]
 siblings: [R7, R8]

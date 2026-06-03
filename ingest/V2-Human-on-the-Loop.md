@@ -3,7 +3,7 @@ id: V2
 title: Human-on-the-Loop
 type: pattern
 category: Reliability
-summary: "Preserve meaningful human oversight over an autonomous agent without paying V1's per-action latency: the agent proceeds; the human watches a live trace and can pull the brake.."
+summary: "Preserve meaningful human oversight over an autonomous agent without paying V1's per-action latency: the agent proceeds; the human watches a live trace and can pull the brake."
 when_to_use: Monitor and interrupt; agent proceeds by default
 also_known_as: [Monitoring Mode, Supervisory Control, HOTL, Brake-Pedal Oversight]
 siblings: [V1]

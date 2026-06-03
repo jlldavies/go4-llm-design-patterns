@@ -3,7 +3,7 @@ id: V17
 title: Online Eval
 type: pattern
 category: Reliability
-summary: "Make the deployed system answer the question *\"is it still working?\"* on its own, continuously, by sampling its live traces, judging them against rubrics that need no ground truth, and surfacing drift as an alert — so quality and safety regressions that only appear in production are detected from the run itself, not from a customer complaint.."
+summary: "Make the deployed system answer the question *\"is it still working?\"* on its own, continuously, by sampling its live traces, judging them against rubrics that need no ground truth, and surfacing drift as an alert — so quality and safety regressions that only appear in production are detected from the run itself, not from a customer complaint."
 when_to_use: Real-time quality metrics in production
 also_known_as: [Production Monitoring, Live Quality Tracking, Continuous Eval, Reference-Free Eval, Drift Monitoring, Real-Time LLM Observability]
 related: [V14, V18, V16]

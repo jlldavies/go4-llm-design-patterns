@@ -15,11 +15,12 @@
       "type": "pattern",
       "category": "Humanizers",
       "title": "Identity Persistence",
-      "summary": "Give the agent a single, durable identity that survives context resets — a self-representation loaded first, every time, that defines who the agent is, what it values, how it speaks, and what it has promised — so users encounter the same agent each session rather than a fresh stranger wearing the same name..",
+      "summary": "Give the agent a single, durable identity that survives context resets — a self-representation loaded first, every time, that defines who the agent is, what it values, how it speaks, and what it has promised — so users encounter the same agent each session rather than a fresh stranger wearing the same name.",
       "file": "ingest/H1-Identity-Persistence.md",
       "canonical": "patterns/H1-Identity-Persistence.md",
       "edges": {
         "composes_with": [
+          "K6",
           "K10",
           "K12",
           "V6",
@@ -29,8 +30,12 @@
         ],
         "related": [
           "S3",
+          "H2",
+          "H4",
+          "H5",
           "H7",
-          "H9"
+          "H9",
+          "H10"
         ],
         "mechanism_refs": [
           2,
@@ -45,30 +50,31 @@
       "type": "pattern",
       "category": "Humanizers",
       "title": "Relational Memory",
-      "summary": "Give each user a persistent, structured model of the working relationship — goals, history, preferences, ethical constraints — that the agent reads at every session so it can show up as a continuous collaborator, while guardrails and a hard right-to-deletion keep that continuity from drifting into simulated intimacy..",
+      "summary": "Give each user a persistent, structured model of the working relationship — goals, history, preferences, ethical constraints — that the agent reads at every session so it can show up as a continuous collaborator, while guardrails and a hard right-to-deletion keep that continuity from drifting into simulated intimacy.",
       "file": "ingest/H10-Relational-Memory.md",
       "canonical": "patterns/H10-Relational-Memory.md",
       "edges": {
         "requires": [
           "H1",
           "K10",
-          "K12"
+          "K12",
+          "V5"
         ],
         "composes_with": [
           "H7",
           "K11",
+          "K6",
           "V1",
-          "H1",
-          "H5"
+          "V14"
         ],
         "related": [
+          "H1",
+          "H2",
+          "H4",
+          "H7",
           "H9",
           "S3",
-          "H1",
-          "K10",
-          "K12",
-          "V5",
-          "H7"
+          "V5"
         ],
         "mechanism_refs": [
           2,
@@ -82,14 +88,18 @@
       "type": "pattern",
       "category": "Humanizers",
       "title": "Episodic Self-Improvement",
-      "summary": "Promote R7 Reflexion's ephemeral, within-task verbal critiques into a durable lesson library that survives session resets, is injected into future contexts as light-weight guidance, and accumulates compounding improvement over time — giving the agent the closest thing to *learning* available without fine-tuning..",
+      "summary": "Promote R7 Reflexion's ephemeral, within-task verbal critiques into a durable lesson library that survives session resets, is injected into future contexts as light-weight guidance, and accumulates compounding improvement over time — giving the agent the closest thing to *learning* available without fine-tuning.",
       "file": "ingest/H2-Episodic-Self-Improvement.md",
       "canonical": "patterns/H2-Episodic-Self-Improvement.md",
       "edges": {
         "composes_with": [
           "R7",
-          "K12",
+          "H1",
+          "K10",
+          "K6",
+          "V6",
           "V1",
+          "V14",
           "H4",
           "H9"
         ],
@@ -113,7 +123,7 @@
       "type": "pattern",
       "category": "Humanizers",
       "title": "Entropy-Driven Curiosity",
-      "summary": "Detect when an agent's own output distribution has collapsed — the agent is \"thinking the same thoughts in a loop\" — and act on the detection by raising sampling temperature or injecting a contrarian cue, so the loop escapes its local optimum and resumes productive search..",
+      "summary": "Detect when an agent's own output distribution has collapsed — the agent is \"thinking the same thoughts in a loop\" — and act on the detection by raising sampling temperature or injecting a contrarian cue, so the loop escapes its local optimum and resumes productive search.",
       "file": "ingest/H3-Entropy-Driven-Curiosity.md",
       "canonical": "patterns/H3-Entropy-Driven-Curiosity.md",
       "edges": {
@@ -122,10 +132,19 @@
         ],
         "composes_with": [
           "V9",
+          "V15",
+          "R20",
+          "K11",
+          "H2",
           "V20"
         ],
         "related": [
           "H1",
+          "R4",
+          "R3",
+          "R7",
+          "R9",
+          "R10",
           "R17",
           "H7"
         ],
@@ -141,7 +160,7 @@
       "type": "pattern",
       "category": "Humanizers",
       "title": "Procedural Skill Accumulation",
-      "summary": "Convert the agent's successful problem-solving work into reusable, parameterised procedures, so the next time a similar task arrives the agent retrieves and adapts a proven skill rather than re-deriving it from scratch — turning one solved task into a permanent capability..",
+      "summary": "Convert the agent's successful problem-solving work into reusable, parameterised procedures, so the next time a similar task arrives the agent retrieves and adapts a proven skill rather than re-deriving it from scratch — turning one solved task into a permanent capability.",
       "file": "ingest/H4-Procedural-Skill-Accumulation.md",
       "canonical": "patterns/H4-Procedural-Skill-Accumulation.md",
       "edges": {
@@ -176,7 +195,7 @@
       "type": "pattern",
       "category": "Humanizers",
       "title": "Constitutional Self-Alignment",
-      "summary": "Close the loop on the constitution: detect gaps and degradations during operation, propose principle additions or revisions with reasoning and evidence, and route every proposal through a mandatory human reviewer before the active constitution changes..",
+      "summary": "Close the loop on the constitution: detect gaps and degradations during operation, propose principle additions or revisions with reasoning and evidence, and route every proposal through a mandatory human reviewer before the active constitution changes.",
       "file": "ingest/H5-Constitutional-Self-Alignment.md",
       "canonical": "patterns/H5-Constitutional-Self-Alignment.md",
       "edges": {
@@ -184,6 +203,8 @@
           "V1"
         ],
         "composes_with": [
+          "V14",
+          "V10",
           "V15",
           "H2"
         ],
@@ -205,18 +226,23 @@
       "type": "pattern",
       "category": "Humanizers",
       "title": "Continuous Inner Monologue",
-      "summary": "Maintain a continuous, autonomous inner monologue — a Thinker process separate from the user-facing Responder — that reflects between turns, consolidates across sessions, and writes its conclusions to a shared memory the Responder reads on the next interaction..",
+      "summary": "Maintain a continuous, autonomous inner monologue — a Thinker process separate from the user-facing Responder — that reflects between turns, consolidates across sessions, and writes its conclusions to a shared memory the Responder reads on the next interaction.",
       "file": "ingest/H6-Continuous-Inner-Monologue.md",
       "canonical": "patterns/H6-Continuous-Inner-Monologue.md",
       "edges": {
         "composes_with": [
-          "H1"
+          "H1",
+          "R7"
         ],
         "siblings": [
           "H3"
         ],
         "related": [
-          "R16"
+          "R16",
+          "H2",
+          "H4",
+          "H9",
+          "H5"
         ],
         "mechanism_refs": [
           2,
@@ -232,7 +258,7 @@
       "type": "pattern",
       "category": "Humanizers",
       "title": "Adaptive Persona",
-      "summary": "Close the style gap between agent and user: infer how this user prefers to be communicated with — from explicit corrections, implicit engagement signals, and their own register — and apply those parameters at generation time, while explicitly preserving the identity invariants H1 holds constant..",
+      "summary": "Close the style gap between agent and user: infer how this user prefers to be communicated with — from explicit corrections, implicit engagement signals, and their own register — and apply those parameters at generation time, while explicitly preserving the identity invariants H1 holds constant.",
       "file": "ingest/H7-Adaptive-Persona.md",
       "canonical": "patterns/H7-Adaptive-Persona.md",
       "edges": {
@@ -244,13 +270,12 @@
           "K12",
           "H10",
           "H2",
-          "V5",
-          "H1"
+          "V5"
         ],
         "related": [
           "S3",
-          "H1",
-          "H9"
+          "H9",
+          "H1"
         ],
         "mechanism_refs": [
           2,
@@ -263,12 +288,14 @@
       "type": "pattern",
       "category": "Humanizers",
       "title": "Meta-Agent Self-Modification",
-      "summary": "Make the operational configuration of a production agent a continuously-improving artefact — tuned online against measured performance — while preventing the runaway, the reward-hack, and the unreviewed value-edit that unconstrained self-modification produces..",
+      "summary": "Make the operational configuration of a production agent a continuously-improving artefact — tuned online against measured performance — while preventing the runaway, the reward-hack, and the unreviewed value-edit that unconstrained self-modification produces.",
       "file": "ingest/H8-Meta-Agent-Self-Modification.md",
       "canonical": "patterns/H8-Meta-Agent-Self-Modification.md",
       "edges": {
         "composes_with": [
-          "V16",
+          "V9",
+          "V10",
+          "V14",
           "V15",
           "H2",
           "H4"
@@ -294,18 +321,23 @@
       "type": "pattern",
       "category": "Humanizers",
       "title": "Observational Identity",
-      "summary": "Give an agent a persistent, queryable model of its own demonstrated capabilities, attempted tasks, outstanding commitments, and known limitations — each entry timestamped and confidence-scored, each subject to decay — so the agent can route on, communicate about, and reason from its own track record rather than guessing..",
+      "summary": "Give an agent a persistent, queryable model of its own demonstrated capabilities, attempted tasks, outstanding commitments, and known limitations — each entry timestamped and confidence-scored, each subject to decay — so the agent can route on, communicate about, and reason from its own track record rather than guessing.",
       "file": "ingest/H9-Observational-Identity.md",
       "canonical": "patterns/H9-Observational-Identity.md",
       "edges": {
         "composes_with": [
           "H1",
           "K11",
-          "K12"
+          "K12",
+          "K6",
+          "V9",
+          "V14"
         ],
         "related": [
           "H2",
           "H4",
+          "O3",
+          "O6",
           "H1",
           "K10",
           "K11"
@@ -323,13 +355,16 @@
       "type": "pattern",
       "category": "Integration",
       "title": "Direct API Call",
-      "summary": "Execute an external action from ordinary code, with parameters fixed by program logic rather than chosen by a language model, so the integration is deterministic, sub-10ms-latency-achievable, and auditable line-for-line..",
+      "summary": "Execute an external action from ordinary code, with parameters fixed by program logic rather than chosen by a language model, so the integration is deterministic, sub-10ms-latency-achievable, and auditable line-for-line.",
       "file": "ingest/I1-Direct-API.md",
       "canonical": "patterns/I1-Direct-API.md",
       "edges": {
         "composes_with": [
           "V5",
-          "V1"
+          "V9",
+          "V14",
+          "V1",
+          "R4"
         ],
         "related": [
           "I2",
@@ -348,13 +383,17 @@
       "type": "pattern",
       "category": "Integration",
       "title": "Function / Tool Call",
-      "summary": "Make external actions LLM-routable without giving up typed execution: the LLM reads tool descriptions and picks one with structured arguments; code validates and executes it; the result flows back into the model's context so reasoning continues..",
+      "summary": "Make external actions LLM-routable without giving up typed execution: the LLM reads tool descriptions and picks one with structured arguments; code validates and executes it; the result flows back into the model's context so reasoning continues.",
       "file": "ingest/I2-Function-Call.md",
       "canonical": "patterns/I2-Function-Call.md",
       "edges": {
         "composes_with": [
           "V13",
-          "V1"
+          "V20",
+          "V9",
+          "V1",
+          "V14",
+          "V6"
         ],
         "siblings": [
           "I3",
@@ -362,7 +401,9 @@
         ],
         "related": [
           "I1",
-          "R4"
+          "R4",
+          "R13",
+          "V3"
         ],
         "mechanism_refs": [
           2,
@@ -375,7 +416,7 @@
       "type": "pattern",
       "category": "Integration",
       "title": "MCP Server",
-      "summary": "Expose a set of tools through a separate protocol-conformant server so multiple agents and clients can discover, authenticate, and invoke those tools without per-agent integration code — accepting the resulting schema-token cost as a first-class budget item..",
+      "summary": "Expose a set of tools through a separate protocol-conformant server so multiple agents and clients can discover, authenticate, and invoke those tools without per-agent integration code — accepting the resulting schema-token cost as a first-class budget item.",
       "file": "ingest/I3-MCP-Server.md",
       "canonical": "patterns/I3-MCP-Server.md",
       "edges": {
@@ -383,8 +424,11 @@
           "V13"
         ],
         "composes_with": [
+          "I5",
           "V6",
           "V8",
+          "V3",
+          "V14",
           "R4",
           "R13"
         ],
@@ -409,14 +453,18 @@
       "type": "pattern",
       "category": "Integration",
       "title": "CLI Invocation",
-      "summary": "Let the agent use the existing CLI ecosystem as its tool surface — invoking `git`, `docker`, `gh`, `kubectl`, cloud CLIs, and Unix utilities directly — so the integration carries zero schema-token overhead and inherits decades of battle-tested behaviour..",
+      "summary": "Let the agent use the existing CLI ecosystem as its tool surface — invoking `git`, `docker`, `gh`, `kubectl`, cloud CLIs, and Unix utilities directly — so the integration carries zero schema-token overhead and inherits decades of battle-tested behaviour.",
       "file": "ingest/I4-CLI-Invocation.md",
       "canonical": "patterns/I4-CLI-Invocation.md",
       "edges": {
         "composes_with": [
           "V6",
+          "V9",
           "V11",
-          "V1"
+          "V14",
+          "V1",
+          "R4",
+          "R13"
         ],
         "siblings": [
           "I2",
@@ -438,12 +486,16 @@
       "type": "pattern",
       "category": "Integration",
       "title": "Agent Card",
-      "summary": "Make an agent self-describing on the open web: serve a stable JSON document at a well-known path that names its identity, skills, endpoint, authentication, and protocol version, so other agents can locate it, verify compatibility, and call it without hard-coded configuration..",
+      "summary": "Make an agent self-describing on the open web: serve a stable JSON document at a well-known path that names its identity, skills, endpoint, authentication, and protocol version, so other agents can locate it, verify compatibility, and call it without hard-coded configuration.",
       "file": "ingest/I5-Agent-Card.md",
       "canonical": "patterns/I5-Agent-Card.md",
       "edges": {
         "composes_with": [
-          "V7"
+          "O6",
+          "O7",
+          "V7",
+          "V14",
+          "V6"
         ],
         "related": [
           "I6",
@@ -463,7 +515,7 @@
       "type": "pattern",
       "category": "Integration",
       "title": "A2A Delegation",
-      "summary": "Make a cross-boundary agent call interoperable by default — discover the executor via its Agent Card, submit a typed task, stream status, receive a structured result, and handle failure as a defined protocol event rather than a bespoke integration..",
+      "summary": "Make a cross-boundary agent call interoperable by default — discover the executor via its Agent Card, submit a typed task, stream status, receive a structured result, and handle failure as a defined protocol event rather than a bespoke integration.",
       "file": "ingest/I6-A2A-Delegation.md",
       "canonical": "patterns/I6-A2A-Delegation.md",
       "edges": {
@@ -493,7 +545,7 @@
       "type": "pattern",
       "category": "Knowledge",
       "title": "Vanilla RAG",
-      "summary": "Ground a model's response in a specific, external, updatable corpus by retrieving the passages relevant to each query at query time and injecting them into the prompt — without retraining the model..",
+      "summary": "Ground a model's response in a specific, external, updatable corpus by retrieving the passages relevant to each query at query time and injecting them into the prompt — without retraining the model.",
       "file": "ingest/K1-Vanilla-RAG.md",
       "canonical": "patterns/K1-Vanilla-RAG.md",
       "edges": {
@@ -524,7 +576,7 @@
       "type": "pattern",
       "category": "Knowledge",
       "title": "Long-Term Memory",
-      "summary": "Give an agent continuity beyond a single context by writing knowledge to an external store and retrieving it when relevant — so the agent improves over time without retraining..",
+      "summary": "Give an agent continuity beyond a single context by writing knowledge to an external store and retrieving it when relevant — so the agent improves over time without retraining.",
       "file": "ingest/K10-Long-Term-Memory.md",
       "canonical": "patterns/K10-Long-Term-Memory.md",
       "edges": {
@@ -533,6 +585,9 @@
         ],
         "related": [
           "K1",
+          "K8",
+          "K11",
+          "K12",
           "H2",
           "H4",
           "H10"
@@ -551,15 +606,20 @@
       "type": "pattern",
       "category": "Knowledge",
       "title": "Observational Memory",
-      "summary": "Maintain coherence across a long agentic session by keeping a running, compact record of the agent's own observations and actions, and prioritising that record over external retrieval..",
+      "summary": "Maintain coherence across a long agentic session by keeping a running, compact record of the agent's own observations and actions, and prioritising that record over external retrieval.",
       "file": "ingest/K11-Observational-Memory.md",
       "canonical": "patterns/K11-Observational-Memory.md",
       "edges": {
         "composes_with": [
-          "K12"
+          "K12",
+          "K6",
+          "K7",
+          "K1"
         ],
         "related": [
-          "K10"
+          "K10",
+          "K8",
+          "K9"
         ],
         "mechanism_refs": [
           2,
@@ -573,10 +633,14 @@
       "type": "pattern",
       "category": "Knowledge",
       "title": "Karpathy Memory",
-      "summary": "Give an agent a memory the LLM itself maintains as structured, dense, token-efficient notes — paying more at *write* time so every *read* is cheap, navigable, and useful..",
+      "summary": "Give an agent a memory the LLM itself maintains as structured, dense, token-efficient notes — paying more at *write* time so every *read* is cheap, navigable, and useful.",
       "file": "ingest/K12-Karpathy-Memory.md",
       "canonical": "patterns/K12-Karpathy-Memory.md",
       "edges": {
+        "composes_with": [
+          "S6",
+          "V14"
+        ],
         "related": [
           "K10",
           "K11",
@@ -596,7 +660,7 @@
       "type": "pattern",
       "category": "Knowledge",
       "title": "Retrieval Bundle",
-      "summary": "Define the exact bundle of operational context a specific agent workflow always needs — not \"relevant documents\" but precisely *these fields from these sources in these shapes* — and then build assembly to deliver that bundle reliably, rather than letting the agent reconstruct it dynamically from raw search results on every run..",
+      "summary": "Define the exact bundle of operational context a specific agent workflow always needs — not \"relevant documents\" but precisely *these fields from these sources in these shapes* — and then build assembly to deliver that bundle reliably, rather than letting the agent reconstruct it dynamically from raw search results on every run.",
       "file": "ingest/K13-Retrieval-Bundle.md",
       "canonical": "patterns/K13-Retrieval-Bundle.md",
       "edges": {
@@ -605,6 +669,11 @@
           "K9"
         ],
         "related": [
+          "K1",
+          "K3",
+          "K4",
+          "K10",
+          "K11",
           "K12",
           "K5"
         ],
@@ -624,16 +693,19 @@
       "type": "pattern",
       "category": "Knowledge",
       "title": "Query Transformation",
-      "summary": "Improve retrieval quality by transforming the user's raw query into a form better matched to the corpus, in the moment between the user submitting the query and the retriever running..",
+      "summary": "Improve retrieval quality by transforming the user's raw query into a form better matched to the corpus, in the moment between the user submitting the query and the retriever running.",
       "file": "ingest/K2-Query-Transformation.md",
       "canonical": "patterns/K2-Query-Transformation.md",
       "edges": {
         "composes_with": [
+          "K3",
+          "K4",
           "K5"
         ],
         "related": [
           "K1",
-          "K5"
+          "K5",
+          "R19"
         ],
         "mechanism_refs": [
           1,
@@ -646,15 +718,20 @@
       "type": "pattern",
       "category": "Knowledge",
       "title": "GraphRAG",
-      "summary": "Answer queries that require connecting information across many documents — multi-hop relationship questions and whole-corpus synthesis — by indexing the corpus as a graph of entities and relationships instead of a flat set of chunks..",
+      "summary": "Answer queries that require connecting information across many documents — multi-hop relationship questions and whole-corpus synthesis — by indexing the corpus as a graph of entities and relationships instead of a flat set of chunks.",
       "file": "ingest/K3-GraphRAG.md",
       "canonical": "patterns/K3-GraphRAG.md",
       "edges": {
+        "composes_with": [
+          "K2",
+          "K5"
+        ],
         "siblings": [
           "K4"
         ],
         "related": [
-          "K1"
+          "K1",
+          "K9"
         ],
         "mechanism_refs": [
           1,
@@ -669,15 +746,20 @@
       "type": "pattern",
       "category": "Knowledge",
       "title": "RAPTOR",
-      "summary": "Answer queries that vary in scope — from a precise fact to a broad theme — by indexing the corpus as a multi-level summary tree and retrieving from the level of abstraction the query requires..",
+      "summary": "Answer queries that vary in scope — from a precise fact to a broad theme — by indexing the corpus as a multi-level summary tree and retrieving from the level of abstraction the query requires.",
       "file": "ingest/K4-RAPTOR.md",
       "canonical": "patterns/K4-RAPTOR.md",
       "edges": {
+        "composes_with": [
+          "K2",
+          "K5"
+        ],
         "siblings": [
           "K3"
         ],
         "related": [
           "K1",
+          "K9",
           "K6"
         ],
         "mechanism_refs": [
@@ -692,12 +774,19 @@
       "type": "pattern",
       "category": "Knowledge",
       "title": "Adaptive RAG",
-      "summary": "Make retrieval conditional and self-correcting, so the system retrieves only when retrieval helps and recovers when retrieval fails, instead of retrieving blindly on every query and trusting whatever returns..",
+      "summary": "Make retrieval conditional and self-correcting, so the system retrieves only when retrieval helps and recovers when retrieval fails, instead of retrieving blindly on every query and trusting whatever returns.",
       "file": "ingest/K5-Adaptive-RAG.md",
       "canonical": "patterns/K5-Adaptive-RAG.md",
       "edges": {
+        "composes_with": [
+          "K2",
+          "V9"
+        ],
         "related": [
-          "K2"
+          "K1",
+          "K4",
+          "K2",
+          "V15"
         ],
         "mechanism_refs": [
           2,
@@ -711,12 +800,16 @@
       "type": "pattern",
       "category": "Knowledge",
       "title": "Context Compression",
-      "summary": "Keep a long-running task within the context window by summarising older or bulky content into a denser form, preserving as much of its information as the reclaimed space allows..",
+      "summary": "Keep a long-running task within the context window by summarising older or bulky content into a denser form, preserving as much of its information as the reclaimed space allows.",
       "file": "ingest/K6-Context-Compression.md",
       "canonical": "patterns/K6-Context-Compression.md",
       "edges": {
+        "composes_with": [
+          "K8"
+        ],
         "related": [
           "K7",
+          "K9",
           "K4",
           "K10",
           "K11",
@@ -735,10 +828,17 @@
       "type": "pattern",
       "category": "Knowledge",
       "title": "Context Pruning",
-      "summary": "Reclaim context-window space by deleting content that has served its purpose, without summarising or altering what remains..",
+      "summary": "Reclaim context-window space by deleting content that has served its purpose, without summarising or altering what remains.",
       "file": "ingest/K7-Context-Pruning.md",
       "canonical": "patterns/K7-Context-Pruning.md",
       "edges": {
+        "composes_with": [
+          "K8"
+        ],
+        "related": [
+          "K6",
+          "K11"
+        ],
         "mechanism_refs": [
           2,
           3,
@@ -752,7 +852,7 @@
       "type": "pattern",
       "category": "Knowledge",
       "title": "Working Memory / Scratchpad",
-      "summary": "Externalise the model's working state into a persistent, inspectable region of the context, so intermediate results survive from one step to the next within a task..",
+      "summary": "Externalise the model's working state into a persistent, inspectable region of the context, so intermediate results survive from one step to the next within a task.",
       "file": "ingest/K8-Working-Memory.md",
       "canonical": "patterns/K8-Working-Memory.md",
       "edges": {
@@ -761,7 +861,10 @@
           "K7",
           "K10",
           "K11",
-          "K12"
+          "K12",
+          "R4",
+          "R3",
+          "V10"
         ],
         "mechanism_refs": [
           1,
@@ -777,12 +880,18 @@
       "type": "pattern",
       "category": "Knowledge",
       "title": "Long Context",
-      "summary": "Make the model's full working knowledge available by loading it all into the context window, trading per-call token cost for the elimination of a retrieval system..",
+      "summary": "Make the model's full working knowledge available by loading it all into the context window, trading per-call token cost for the elimination of a retrieval system.",
       "file": "ingest/K9-Long-Context.md",
       "canonical": "patterns/K9-Long-Context.md",
       "edges": {
+        "composes_with": [
+          "K6"
+        ],
         "related": [
-          "K1"
+          "K1",
+          "K3",
+          "K4",
+          "K11"
         ],
         "mechanism_refs": [
           2,
@@ -834,18 +943,23 @@
       "type": "pattern",
       "category": "Orchestration",
       "title": "Swarm / Mesh",
-      "summary": "Coordinate a fleet of specialised agents without a central orchestrator, by giving each agent the authority to hand control to any peer it deems better suited to the current step..",
+      "summary": "Coordinate a fleet of specialised agents without a central orchestrator, by giving each agent the authority to hand control to any peer it deems better suited to the current step.",
       "file": "ingest/O10-Swarm.md",
       "canonical": "patterns/O10-Swarm.md",
       "edges": {
         "composes_with": [
-          "O15"
+          "O15",
+          "O17",
+          "S6",
+          "R4"
         ],
         "related": [
           "O7",
           "O6",
           "O11",
-          "O3"
+          "O3",
+          "V9",
+          "V14"
         ],
         "mechanism_refs": [
           1,
@@ -859,17 +973,21 @@
       "type": "pattern",
       "category": "Orchestration",
       "title": "Blackboard System",
-      "summary": "Replace a fixed plan or a central orchestrator's task assignments with a shared memory whose evolving state, read by a thin control unit, decides which specialist runs next — so the set and order of contributors adapts to what has accumulated, not to what was decreed up front..",
+      "summary": "Replace a fixed plan or a central orchestrator's task assignments with a shared memory whose evolving state, read by a thin control unit, decides which specialist runs next — so the set and order of contributors adapts to what has accumulated, not to what was decreed up front.",
       "file": "ingest/O11-Blackboard.md",
       "canonical": "patterns/O11-Blackboard.md",
       "edges": {
         "composes_with": [
-          "K10"
+          "K10",
+          "V14",
+          "O17",
+          "O4"
         ],
         "related": [
           "O6",
           "K10",
-          "O2"
+          "O2",
+          "V9"
         ],
         "mechanism_refs": [
           2,
@@ -883,7 +1001,7 @@
       "type": "pattern",
       "category": "Orchestration",
       "title": "Debate / Deliberation",
-      "summary": "Use *adversarial argument between agents holding opposing positions* — not independent critique, not iterative self-refinement — to surface the assumptions, counter-evidence, and failure modes a single agent's reasoning would not see, then synthesise the exchange into a more accurate or better-considered final answer..",
+      "summary": "Use *adversarial argument between agents holding opposing positions* — not independent critique, not iterative self-refinement — to surface the assumptions, counter-evidence, and failure modes a single agent's reasoning would not see, then synthesise the exchange into a more accurate or better-considered final answer.",
       "file": "ingest/O12-Debate-Deliberation.md",
       "canonical": "patterns/O12-Debate-Deliberation.md",
       "edges": {
@@ -908,19 +1026,24 @@
       "type": "pattern",
       "category": "Orchestration",
       "title": "Negotiation",
-      "summary": "Coordinate agents whose objectives diverge by *structure*, not just *opinion* — give each agent a private utility function and a walk-away threshold, run them through a bargaining protocol that produces offers, counter-offers, and concessions, and terminate on a deal that all parties accept or a formally-declared no-deal..",
+      "summary": "Coordinate agents whose objectives diverge by *structure*, not just *opinion* — give each agent a private utility function and a walk-away threshold, run them through a bargaining protocol that produces offers, counter-offers, and concessions, and terminate on a deal that all parties accept or a formally-declared no-deal.",
       "file": "ingest/O13-Negotiation.md",
       "canonical": "patterns/O13-Negotiation.md",
       "edges": {
         "composes_with": [
+          "O4",
+          "O15",
+          "V14",
           "V15",
+          "V1",
           "S6"
         ],
         "related": [
           "O12",
           "O5",
           "O9",
-          "O11"
+          "O11",
+          "V9"
         ],
         "mechanism_refs": [
           1,
@@ -937,16 +1060,23 @@
       "type": "pattern",
       "category": "Orchestration",
       "title": "Single Information Environment",
-      "summary": "Make data ownership the primary unit of agent specialisation, so the routing question becomes \"*which dataset holds the answer?*\" rather than \"*which capability is needed?*\", and each owner agent is tuned to one bounded corpus instead of one shared one..",
+      "summary": "Make data ownership the primary unit of agent specialisation, so the routing question becomes \"*which dataset holds the answer?*\" rather than \"*which capability is needed?*\", and each owner agent is tuned to one bounded corpus instead of one shared one.",
       "file": "ingest/O14-SIE.md",
       "canonical": "patterns/O14-SIE.md",
       "edges": {
         "composes_with": [
-          "K1"
+          "K1",
+          "K2",
+          "K5",
+          "O4",
+          "V9",
+          "V14"
         ],
         "related": [
           "O3",
           "O6",
+          "O11",
+          "K10",
           "O7"
         ],
         "mechanism_refs": [
@@ -960,7 +1090,7 @@
       "type": "pattern",
       "category": "Orchestration",
       "title": "Agent Handoff",
-      "summary": "Move a live interaction from one agent to another inside the same system without losing context, so the user does not repeat themselves and the receiving agent starts from the conversation's true state — not from zero, and not from a noisy transcript..",
+      "summary": "Move a live interaction from one agent to another inside the same system without losing context, so the user does not repeat themselves and the receiving agent starts from the conversation's true state — not from zero, and not from a noisy transcript.",
       "file": "ingest/O15-Agent-Handoff.md",
       "canonical": "patterns/O15-Agent-Handoff.md",
       "edges": {
@@ -989,19 +1119,24 @@
       "type": "pattern",
       "category": "Orchestration",
       "title": "Hybrid Control Flow",
-      "summary": "Build a single agent that is competent across all phases of a complex task by stacking the loop primitives each phase needs — exploration on a ReAct loop, planning on plan-execute, repair on generate-test-repair, recovery on bounded retry — rather than trying to force every phase through one primitive..",
+      "summary": "Build a single agent that is competent across all phases of a complex task by stacking the loop primitives each phase needs — exploration on a ReAct loop, planning on plan-execute, repair on generate-test-repair, recovery on bounded retry — rather than trying to force every phase through one primitive.",
       "file": "ingest/O16-Hybrid-Control-Flow.md",
       "canonical": "patterns/O16-Hybrid-Control-Flow.md",
       "edges": {
         "composes_with": [
+          "R4",
+          "R3",
+          "R10",
           "O17",
           "O4",
+          "V14",
           "V15"
         ],
         "related": [
           "O8",
           "O6",
-          "O2"
+          "O2",
+          "V9"
         ],
         "mechanism_refs": [
           2,
@@ -1015,7 +1150,7 @@
       "type": "pattern",
       "category": "Orchestration",
       "title": "Agent Isolation",
-      "summary": "When a sub-task does not need the parent's accumulated context, spawn the sub-agent with a fresh window holding only that sub-task's brief and inputs — so the sub-agent reasons over a tight, on-topic context instead of inheriting whatever the parent happens to be carrying..",
+      "summary": "When a sub-task does not need the parent's accumulated context, spawn the sub-agent with a fresh window holding only that sub-task's brief and inputs — so the sub-agent reasons over a tight, on-topic context instead of inheriting whatever the parent happens to be carrying.",
       "file": "ingest/O17-Agent-Isolation.md",
       "canonical": "patterns/O17-Agent-Isolation.md",
       "edges": {
@@ -1046,7 +1181,7 @@
       "type": "pattern",
       "category": "Orchestration",
       "title": "Cache-Warmed Worker Pool",
-      "summary": "Design the shared context given to all parallel workers as a single stable, cacheable prefix; fire a warm-up call (or time the first worker call) to establish that prefix in the provider KV cache; then dispatch all remaining workers within the cache TTL — so the shared portion of each worker's prompt is served from cache at ~10% of the normal prefill cost rather than re-computed independently for each worker..",
+      "summary": "Design the shared context given to all parallel workers as a single stable, cacheable prefix; fire a warm-up call (or time the first worker call) to establish that prefix in the provider KV cache; then dispatch all remaining workers within the cache TTL — so the shared portion of each worker's prompt is served from cache at ~10% of the normal prefill cost rather than re-computed independently for each worker.",
       "file": "ingest/O18-Cache-Warmed-Worker-Pool.md",
       "canonical": "patterns/O18-Cache-Warmed-Worker-Pool.md",
       "edges": {
@@ -1073,7 +1208,7 @@
       "type": "pattern",
       "category": "Orchestration",
       "title": "Prompt Chaining",
-      "summary": "Decompose a task into a known, ordered sequence of LLM calls with deterministic transitions between them, so each step has its own focused setup and can be independently tested, logged, and gated — and so the whole pipeline is predictable in cost and behaviour..",
+      "summary": "Decompose a task into a known, ordered sequence of LLM calls with deterministic transitions between them, so each step has its own focused setup and can be independently tested, logged, and gated — and so the whole pipeline is predictable in cost and behaviour.",
       "file": "ingest/O2-Prompt-Chaining.md",
       "canonical": "patterns/O2-Prompt-Chaining.md",
       "edges": {
@@ -1105,15 +1240,15 @@
       "type": "pattern",
       "category": "Orchestration",
       "title": "Routing",
-      "summary": "Make the choice of handler an explicit, inspectable, swappable step, so each input type meets a handler tuned for it and the routing decision itself becomes a first-class object the system can log, test, and improve..",
+      "summary": "Make the choice of handler an explicit, inspectable, swappable step, so each input type meets a handler tuned for it and the routing decision itself becomes a first-class object the system can log, test, and improve.",
       "file": "ingest/O3-Routing.md",
       "canonical": "patterns/O3-Routing.md",
       "edges": {
         "composes_with": [
           "O1",
           "O2",
-          "R4",
-          "R7",
+          "V14",
+          "V9",
           "V15"
         ],
         "related": [
@@ -1133,14 +1268,15 @@
       "type": "pattern",
       "category": "Orchestration",
       "title": "Parallelization",
-      "summary": "When sub-tasks of a request are genuinely independent of each other, run them simultaneously across distinct LLM calls and aggregate the results programmatically, so wall-clock latency collapses from the sum of the calls to the maximum..",
+      "summary": "When sub-tasks of a request are genuinely independent of each other, run them simultaneously across distinct LLM calls and aggregate the results programmatically, so wall-clock latency collapses from the sum of the calls to the maximum.",
       "file": "ingest/O4-Parallelization.md",
       "canonical": "patterns/O4-Parallelization.md",
       "edges": {
         "composes_with": [
-          "O6",
           "O17",
           "O2",
+          "V9",
+          "V14",
           "V15"
         ],
         "siblings": [
@@ -1165,7 +1301,7 @@
       "type": "pattern",
       "category": "Orchestration",
       "title": "Evaluator-Optimizer",
-      "summary": "Improve output quality by separating the generator and the judge into two distinct agents — different sessions, typically different setups, potentially different models — so the evaluation is genuinely independent of the work it scores, and the generator iterates on a feedback signal it cannot foresee or sandbag..",
+      "summary": "Improve output quality by separating the generator and the judge into two distinct agents — different sessions, typically different setups, potentially different models — so the evaluation is genuinely independent of the work it scores, and the generator iterates on a feedback signal it cannot foresee or sandbag.",
       "file": "ingest/O5-Evaluator-Optimizer.md",
       "canonical": "patterns/O5-Evaluator-Optimizer.md",
       "edges": {
@@ -1191,7 +1327,7 @@
       "type": "pattern",
       "category": "Orchestration",
       "title": "Orchestrator-Workers",
-      "summary": "Have a central LLM decide *at runtime* how to break a goal into sub-tasks and which worker each sub-task goes to, then collect and synthesise the workers' returns — so the decomposition adapts to the specific input instead of being baked into a pipeline..",
+      "summary": "Have a central LLM decide *at runtime* how to break a goal into sub-tasks and which worker each sub-task goes to, then collect and synthesise the workers' returns — so the decomposition adapts to the specific input instead of being baked into a pipeline.",
       "file": "ingest/O6-Orchestrator-Workers.md",
       "canonical": "patterns/O6-Orchestrator-Workers.md",
       "edges": {
@@ -1223,12 +1359,20 @@
       "type": "pattern",
       "category": "Orchestration",
       "title": "Supervisor Hierarchy",
-      "summary": "Scale orchestration past the point where a single coordinator can hold all worker context, by stacking O6 Orchestrator-Workers nodes into a tree where every supervisor manages only its direct children..",
+      "summary": "Scale orchestration past the point where a single coordinator can hold all worker context, by stacking O6 Orchestrator-Workers nodes into a tree where every supervisor manages only its direct children.",
       "file": "ingest/O7-Supervisor-Hierarchy.md",
       "canonical": "patterns/O7-Supervisor-Hierarchy.md",
       "edges": {
+        "composes_with": [
+          "O4",
+          "O17",
+          "S6",
+          "R4"
+        ],
         "related": [
           "O6",
+          "V9",
+          "V14",
           "O10",
           "O11",
           "O16"
@@ -1245,20 +1389,25 @@
       "type": "pattern",
       "category": "Orchestration",
       "title": "Loop Agent",
-      "summary": "Improve a single carried state across rounds by running the same sequence of distinct agents — each with its own role, prompt, and output contract — on the state, until a termination judge says the state is good enough or a hard bound trips..",
+      "summary": "Improve a single carried state across rounds by running the same sequence of distinct agents — each with its own role, prompt, and output contract — on the state, until a termination judge says the state is good enough or a hard bound trips.",
       "file": "ingest/O8-Loop-Agent.md",
       "canonical": "patterns/O8-Loop-Agent.md",
       "edges": {
         "composes_with": [
+          "O4",
           "O9",
-          "V15"
+          "V14",
+          "V15",
+          "K6",
+          "K7"
         ],
         "related": [
           "O2",
           "R4",
           "R7",
           "O5",
-          "O6"
+          "O6",
+          "V9"
         ],
         "mechanism_refs": [
           1,
@@ -1272,13 +1421,18 @@
       "type": "pattern",
       "category": "Orchestration",
       "title": "Multi-Agent Reflection",
-      "summary": "Get genuinely independent evaluation of an output by running several differently-configured critic agents in parallel against it, then synthesising their critiques — so the verdict reflects multiple lenses no single critic (or self-critique) would produce..",
+      "summary": "Get genuinely independent evaluation of an output by running several differently-configured critic agents in parallel against it, then synthesising their critiques — so the verdict reflects multiple lenses no single critic (or self-critique) would produce.",
       "file": "ingest/O9-Multi-Agent-Reflection.md",
       "canonical": "patterns/O9-Multi-Agent-Reflection.md",
       "edges": {
         "composes_with": [
           "O4",
+          "V9",
+          "V14",
+          "V1",
           "V15",
+          "S3",
+          "S5",
           "S6"
         ],
         "siblings": [
@@ -1300,7 +1454,7 @@
       "type": "pattern",
       "category": "Reasoning",
       "title": "Zero-Shot CoT",
-      "summary": "Elicit explicit intermediate reasoning from a capable instruction-tuned model by adding a single short trigger phrase to an otherwise zero-shot prompt, so the model writes its working out before committing to an answer instead of jumping straight to a guess..",
+      "summary": "Elicit explicit intermediate reasoning from a capable instruction-tuned model by adding a single short trigger phrase to an otherwise zero-shot prompt, so the model writes its working out before committing to an answer instead of jumping straight to a guess.",
       "file": "ingest/R1-Zero-Shot-CoT.md",
       "canonical": "patterns/R1-Zero-Shot-CoT.md",
       "edges": {
@@ -1331,12 +1485,15 @@
       "type": "pattern",
       "category": "Reasoning",
       "title": "Language Agent Tree Search (LATS)",
-      "summary": "Search the solution space of an agentic task with full Monte Carlo Tree Search — selection by UCB, expansion, simulation, and value backpropagation — using the LLM as action generator, value estimator, and verbal critic, so the agent can revisit any node, redirect from any dead end, and converge on high-quality trajectories on problems that defeat single-path patterns..",
+      "summary": "Search the solution space of an agentic task with full Monte Carlo Tree Search — selection by UCB, expansion, simulation, and value backpropagation — using the LLM as action generator, value estimator, and verbal critic, so the agent can revisit any node, redirect from any dead end, and converge on high-quality trajectories on problems that defeat single-path patterns.",
       "file": "ingest/R10-LATS.md",
       "canonical": "patterns/R10-LATS.md",
       "edges": {
         "composes_with": [
-          "V15"
+          "V14",
+          "V15",
+          "R11",
+          "O17"
         ],
         "siblings": [
           "R9"
@@ -1345,6 +1502,7 @@
           "R4",
           "R7",
           "R9",
+          "V9",
           "R3"
         ],
         "mechanism_refs": [
@@ -1359,13 +1517,16 @@
       "type": "pattern",
       "category": "Reasoning",
       "title": "Buffer of Thoughts",
-      "summary": "Replace re-deriving a reasoning structure on every hard problem with retrieving and instantiating a previously distilled *thought-template*, so the cost of search is paid once across a problem family rather than every problem in it..",
+      "summary": "Replace re-deriving a reasoning structure on every hard problem with retrieving and instantiating a previously distilled *thought-template*, so the cost of search is paid once across a problem family rather than every problem in it.",
       "file": "ingest/R11-Buffer-of-Thoughts.md",
       "canonical": "patterns/R11-Buffer-of-Thoughts.md",
       "edges": {
         "composes_with": [
           "K1",
-          "K10"
+          "K10",
+          "R7",
+          "V9",
+          "V14"
         ],
         "siblings": [
           "R9",
@@ -1391,15 +1552,21 @@
       "type": "pattern",
       "category": "Reasoning",
       "title": "Skeleton-of-Thought",
-      "summary": "Cut end-to-end latency on long-form, structurally separable answers by writing the outline once and expanding every point in parallel, instead of decoding the whole answer token-by-token in a single sequential stream..",
+      "summary": "Cut end-to-end latency on long-form, structurally separable answers by writing the outline once and expanding every point in parallel, instead of decoding the whole answer token-by-token in a single sequential stream.",
       "file": "ingest/R12-Skeleton-of-Thought.md",
       "canonical": "patterns/R12-Skeleton-of-Thought.md",
       "edges": {
+        "composes_with": [
+          "V9",
+          "S6",
+          "V15"
+        ],
         "siblings": [
           "O4"
         ],
         "related": [
           "R3",
+          "R9",
           "S4"
         ],
         "mechanism_refs": [
@@ -1413,7 +1580,7 @@
       "type": "pattern",
       "category": "Reasoning",
       "title": "CodeAct",
-      "summary": "Make the agent's Action a *program*, not a tool call — so one step can call several tools, branch on what they return, loop, and keep intermediate results in variables — and execute that program in a sandbox whose stdout, return value, and stack traces become the next Observation..",
+      "summary": "Make the agent's Action a *program*, not a tool call — so one step can call several tools, branch on what they return, loop, and keep intermediate results in variables — and execute that program in a sandbox whose stdout, return value, and stack traces become the next Observation.",
       "file": "ingest/R13-CodeAct.md",
       "canonical": "patterns/R13-CodeAct.md",
       "edges": {
@@ -1450,18 +1617,25 @@
       "type": "pattern",
       "category": "Reasoning",
       "title": "Program of Thoughts",
-      "summary": "For tasks whose hard part is computation — arithmetic, algebra, financial sums, statistical operations, symbolic manipulation — let the model write a short program and let a Python (or equivalent) interpreter compute the answer, instead of asking the model to compute in natural-language tokens..",
+      "summary": "For tasks whose hard part is computation — arithmetic, algebra, financial sums, statistical operations, symbolic manipulation — let the model write a short program and let a Python (or equivalent) interpreter compute the answer, instead of asking the model to compute in natural-language tokens.",
       "file": "ingest/R14-Program-of-Thoughts.md",
       "canonical": "patterns/R14-Program-of-Thoughts.md",
       "edges": {
         "composes_with": [
-          "R17"
+          "R17",
+          "V9",
+          "V14",
+          "O4"
         ],
         "siblings": [
           "R13"
         ],
         "related": [
-          "V8"
+          "R1",
+          "R2",
+          "V8",
+          "R7",
+          "R5"
         ],
         "mechanism_refs": [
           2,
@@ -1474,12 +1648,27 @@
       "type": "pattern",
       "category": "Reasoning",
       "title": "Talker-Reasoner",
-      "summary": "Decouple the latency budget of *responding* from the latency budget of *thinking*, so the agent can answer every turn within a hard real-time bound while still performing arbitrarily deep reasoning whose results land when they are ready..",
+      "summary": "Decouple the latency budget of *responding* from the latency budget of *thinking*, so the agent can answer every turn within a hard real-time bound while still performing arbitrarily deep reasoning whose results land when they are ready.",
       "file": "ingest/R16-Talker-Reasoner.md",
       "canonical": "patterns/R16-Talker-Reasoner.md",
       "edges": {
+        "composes_with": [
+          "K8",
+          "K12",
+          "O3",
+          "V9",
+          "V14",
+          "R3",
+          "R4",
+          "R7"
+        ],
         "siblings": [
           "H6"
+        ],
+        "related": [
+          "R3",
+          "R4",
+          "R1"
         ],
         "mechanism_refs": [
           2,
@@ -1494,7 +1683,7 @@
       "type": "pattern",
       "category": "Reasoning",
       "title": "Self-Consistency Voting",
-      "summary": "Improve the reliability of a reasoning step by sampling N independent attempts at the *same* prompt and selecting the answer they most agree on, instead of trusting a single greedy decode..",
+      "summary": "Improve the reliability of a reasoning step by sampling N independent attempts at the *same* prompt and selecting the answer they most agree on, instead of trusting a single greedy decode.",
       "file": "ingest/R17-Self-Consistency-Voting.md",
       "canonical": "patterns/R17-Self-Consistency-Voting.md",
       "edges": {
@@ -1527,13 +1716,22 @@
       "type": "pattern",
       "category": "Reasoning",
       "title": "Graph of Thoughts",
-      "summary": "Solve problems whose natural decomposition is not a tree by reasoning over a directed acyclic graph of thoughts in which sub-results can be *aggregated* — merged, sorted, deduplicated, combined — and not only expanded and pruned..",
+      "summary": "Solve problems whose natural decomposition is not a tree by reasoning over a directed acyclic graph of thoughts in which sub-results can be *aggregated* — merged, sorted, deduplicated, combined — and not only expanded and pruned.",
       "file": "ingest/R18-Graph-of-Thoughts.md",
       "canonical": "patterns/R18-Graph-of-Thoughts.md",
       "edges": {
+        "composes_with": [
+          "V9",
+          "V15",
+          "V14",
+          "R1",
+          "R2"
+        ],
         "siblings": [
           "R9",
-          "R10"
+          "R10",
+          "R11",
+          "R12"
         ],
         "related": [
           "R17"
@@ -1551,12 +1749,16 @@
       "type": "pattern",
       "category": "Reasoning",
       "title": "Step-Back Prompting",
-      "summary": "Improve reasoning on specific, detail-heavy questions by first answering a strictly more abstract version of them — extracting the underlying principle, concept, or class of fact — and then applying that principle back to the specific case..",
+      "summary": "Improve reasoning on specific, detail-heavy questions by first answering a strictly more abstract version of them — extracting the underlying principle, concept, or class of fact — and then applying that principle back to the specific case.",
       "file": "ingest/R19-Step-Back-Prompting.md",
       "canonical": "patterns/R19-Step-Back-Prompting.md",
       "edges": {
         "composes_with": [
-          "K5"
+          "K1",
+          "K5",
+          "S2",
+          "S6",
+          "V15"
         ],
         "related": [
           "K2",
@@ -1575,7 +1777,7 @@
       "type": "pattern",
       "category": "Reasoning",
       "title": "Few-Shot CoT",
-      "summary": "Elicit step-by-step intermediate reasoning by *demonstrating* it in a small set of in-prompt examples — `(question, reasoning trace, answer)` triples — so the model both adopts the reasoning style and produces the answer in the demonstrated form..",
+      "summary": "Elicit step-by-step intermediate reasoning by *demonstrating* it in a small set of in-prompt examples — `(question, reasoning trace, answer)` triples — so the model both adopts the reasoning style and produces the answer in the demonstrated form.",
       "file": "ingest/R2-Few-Shot-CoT.md",
       "canonical": "patterns/R2-Few-Shot-CoT.md",
       "edges": {
@@ -1604,7 +1806,7 @@
       "type": "pattern",
       "category": "Reasoning",
       "title": "Chain-of-Verification",
-      "summary": "Reduce hallucination in a single-shot answer by interrogating it: surface the factual claims the answer rests on as explicit verification questions, answer each one independently of the draft, and rewrite the draft from those answers..",
+      "summary": "Reduce hallucination in a single-shot answer by interrogating it: surface the factual claims the answer rests on as explicit verification questions, answer each one independently of the draft, and rewrite the draft from those answers.",
       "file": "ingest/R20-Chain-of-Verification.md",
       "canonical": "patterns/R20-Chain-of-Verification.md",
       "edges": {
@@ -1629,7 +1831,7 @@
       "type": "pattern",
       "category": "Reasoning",
       "title": "Plan-and-Solve",
-      "summary": "Separate the act of *deciding what to do* from the act of *doing it* by putting them in different LLM calls, so the Planner sees the whole task before committing to an order, the Executor runs efficiently against a stable plan, and the plan itself is an inspectable artifact a human or a downstream component can read, edit, or gate on before any step runs..",
+      "summary": "Separate the act of *deciding what to do* from the act of *doing it* by putting them in different LLM calls, so the Planner sees the whole task before committing to an order, the Executor runs efficiently against a stable plan, and the plan itself is an inspectable artifact a human or a downstream component can read, edit, or gate on before any step runs.",
       "file": "ingest/R3-Plan-and-Solve.md",
       "canonical": "patterns/R3-Plan-and-Solve.md",
       "edges": {
@@ -1665,7 +1867,7 @@
       "type": "pattern",
       "category": "Reasoning",
       "title": "ReAct",
-      "summary": "Let an agent make its next decision *after* seeing the result of its last action, by interleaving short reasoning traces with tool calls and feeding each tool's return back into the model — so the trajectory adapts to what the environment actually says, instead of executing a plan written before any of it was known..",
+      "summary": "Let an agent make its next decision *after* seeing the result of its last action, by interleaving short reasoning traces with tool calls and feeding each tool's return back into the model — so the trajectory adapts to what the environment actually says, instead of executing a plan written before any of it was known.",
       "file": "ingest/R4-ReAct.md",
       "canonical": "patterns/R4-ReAct.md",
       "edges": {
@@ -1707,7 +1909,7 @@
       "type": "pattern",
       "category": "Reasoning",
       "title": "ReWOO",
-      "summary": "Separate reasoning from observation so the model plans all tool invocations once, with placeholders for the results, and never re-enters the loop until every external call has completed and the evidence is ready to synthesise..",
+      "summary": "Separate reasoning from observation so the model plans all tool invocations once, with placeholders for the results, and never re-enters the loop until every external call has completed and the evidence is ready to synthesise.",
       "file": "ingest/R5-ReWOO.md",
       "canonical": "patterns/R5-ReWOO.md",
       "edges": {
@@ -1716,11 +1918,17 @@
         ],
         "composes_with": [
           "O4",
-          "R4"
+          "V9",
+          "V14",
+          "K7",
+          "O3"
         ],
         "related": [
           "R4",
           "R3",
+          "R7",
+          "R9",
+          "R10",
           "S6",
           "S2"
         ],
@@ -1737,7 +1945,7 @@
       "type": "pattern",
       "category": "Reasoning",
       "title": "Self-Ask",
-      "summary": "Close the *compositionality gap* — the failure mode in which a model can answer each sub-fact of a multi-hop question individually but cannot combine them — by forcing the model to ask and answer its own follow-up questions before composing the final answer..",
+      "summary": "Close the *compositionality gap* — the failure mode in which a model can answer each sub-fact of a multi-hop question individually but cannot combine them — by forcing the model to ask and answer its own follow-up questions before composing the final answer.",
       "file": "ingest/R6-Self-Ask.md",
       "canonical": "patterns/R6-Self-Ask.md",
       "edges": {
@@ -1763,7 +1971,7 @@
       "type": "pattern",
       "category": "Reasoning",
       "title": "Reflexion",
-      "summary": "Improve the reliability of an agent on a task with an automated pass/fail signal by having it retry, with a verbal critique of why the last attempt failed appended to its context — so each retry learns from a linguistic gradient instead of from weights..",
+      "summary": "Improve the reliability of an agent on a task with an automated pass/fail signal by having it retry, with a verbal critique of why the last attempt failed appended to its context — so each retry learns from a linguistic gradient instead of from weights.",
       "file": "ingest/R7-Reflexion.md",
       "canonical": "patterns/R7-Reflexion.md",
       "edges": {
@@ -1792,7 +2000,7 @@
       "type": "pattern",
       "category": "Reasoning",
       "title": "Self-Refine",
-      "summary": "Improve the quality of an output by having the same model that produced it write a critique of it and revise from that critique, iterating until a stopping condition — without any external evaluator, ground-truth signal, or second model..",
+      "summary": "Improve the quality of an output by having the same model that produced it write a critique of it and revise from that critique, iterating until a stopping condition — without any external evaluator, ground-truth signal, or second model.",
       "file": "ingest/R8-Self-Refine.md",
       "canonical": "patterns/R8-Self-Refine.md",
       "edges": {
@@ -1819,7 +2027,7 @@
       "type": "pattern",
       "category": "Reasoning",
       "title": "Tree of Thoughts",
-      "summary": "Solve problems where the right reasoning path is not obvious upfront by having the LLM expand a tree of candidate partial solutions, score the promise of each, expand the best, and backtrack from dead ends — substituting *search over a structured space* for a single linear chain of thought..",
+      "summary": "Solve problems where the right reasoning path is not obvious upfront by having the LLM expand a tree of candidate partial solutions, score the promise of each, expand the best, and backtrack from dead ends — substituting *search over a structured space* for a single linear chain of thought.",
       "file": "ingest/R9-Tree-of-Thoughts.md",
       "canonical": "patterns/R9-Tree-of-Thoughts.md",
       "edges": {
@@ -1884,15 +2092,19 @@
       "type": "pattern",
       "category": "Signal",
       "title": "Few-Shot",
-      "summary": "Demonstrate the task with examples in the prompt, so the model learns the desired format and behaviour from the demonstrations themselves rather than from a description of them..",
+      "summary": "Demonstrate the task with examples in the prompt, so the model learns the desired format and behaviour from the demonstrations themselves rather than from a description of them.",
       "file": "ingest/S2-Few-Shot.md",
       "canonical": "patterns/S2-Few-Shot.md",
       "edges": {
         "composes_with": [
-          "R17"
+          "S3",
+          "S6",
+          "R17",
+          "K1"
         ],
         "related": [
-          "S1"
+          "S1",
+          "S6"
         ],
         "mechanism_refs": [
           2,
@@ -1906,7 +2118,7 @@
       "type": "pattern",
       "category": "Signal",
       "title": "Persona",
-      "summary": "Frame the model's response distribution at the identity level — selecting a domain, a register, and a decision style in one move — so every subsequent turn inherits that framing without restating it..",
+      "summary": "Frame the model's response distribution at the identity level — selecting a domain, a register, and a decision style in one move — so every subsequent turn inherits that framing without restating it.",
       "file": "ingest/S3-Persona.md",
       "canonical": "patterns/S3-Persona.md",
       "edges": {
@@ -1918,7 +2130,11 @@
         ],
         "related": [
           "H1",
-          "S9"
+          "S9",
+          "K5",
+          "K12",
+          "R4",
+          "V15"
         ],
         "mechanism_refs": [
           1,
@@ -1933,7 +2149,7 @@
       "type": "pattern",
       "category": "Signal",
       "title": "Instruction Decomposition",
-      "summary": "Replace a dense, unstructured instruction with an explicit numbered procedure inside a single prompt, so the model performs each step in order, no step is silently skipped, and the failure mode of any miss is localisable to a specific step..",
+      "summary": "Replace a dense, unstructured instruction with an explicit numbered procedure inside a single prompt, so the model performs each step in order, no step is silently skipped, and the failure mode of any miss is localisable to a specific step.",
       "file": "ingest/S4-Instruction-Decomposition.md",
       "canonical": "patterns/S4-Instruction-Decomposition.md",
       "edges": {
@@ -1962,7 +2178,7 @@
       "type": "pattern",
       "category": "Signal",
       "title": "Constraint Framing",
-      "summary": "Give the model an explicit, enumerable list of forbidden behaviours at session setup, so prohibitions are addressed as a first-class concern rather than left implicit in the positive instructions or scattered across the task description..",
+      "summary": "Give the model an explicit, enumerable list of forbidden behaviours at session setup, so prohibitions are addressed as a first-class concern rather than left implicit in the positive instructions or scattered across the task description.",
       "file": "ingest/S5-Constraint-Framing.md",
       "canonical": "patterns/S5-Constraint-Framing.md",
       "edges": {
@@ -1992,12 +2208,21 @@
       "type": "pattern",
       "category": "Signal",
       "title": "Output Template",
-      "summary": "Replace open-ended generation of \"content plus format\" with the simpler task of filling content into a predefined skeleton, so downstream parsers, chained LLM calls, and human reviewers see a consistent shape every run..",
+      "summary": "Replace open-ended generation of \"content plus format\" with the simpler task of filling content into a predefined skeleton, so downstream parsers, chained LLM calls, and human reviewers see a consistent shape every run.",
       "file": "ingest/S6-Output-Template.md",
       "canonical": "patterns/S6-Output-Template.md",
       "edges": {
         "composes_with": [
-          "S4"
+          "S2",
+          "S4",
+          "S5",
+          "V15"
+        ],
+        "related": [
+          "O2",
+          "I2",
+          "S1",
+          "S3"
         ],
         "mechanism_refs": [
           2,
@@ -2012,16 +2237,26 @@
       "type": "pattern",
       "category": "Signal",
       "title": "Meta-Prompt",
-      "summary": "Replace hand-crafted prompt engineering with a measured generate-evaluate-select loop, in which an LLM proposes candidate prompts, an evaluator scores them against a task signal, and the best candidate is kept and iterated on..",
+      "summary": "Replace hand-crafted prompt engineering with a measured generate-evaluate-select loop, in which an LLM proposes candidate prompts, an evaluator scores them against a task signal, and the best candidate is kept and iterated on.",
       "file": "ingest/S8-Meta-Prompt.md",
       "canonical": "patterns/S8-Meta-Prompt.md",
       "edges": {
+        "composes_with": [
+          "V9",
+          "V14",
+          "S3",
+          "S5",
+          "S6"
+        ],
         "siblings": [
           "R7"
         ],
         "related": [
           "R17",
           "V15",
+          "S1",
+          "S6",
+          "S9",
           "K12",
           "O5"
         ],
@@ -2036,7 +2271,7 @@
       "type": "pattern",
       "category": "Signal",
       "title": "Constitutional Framing",
-      "summary": "Make the model's value judgement legible, auditable, and updatable — by stating the principles explicitly in the prompt and inserting a self-critique-and-revise step that checks the draft against them before it is returned..",
+      "summary": "Make the model's value judgement legible, auditable, and updatable — by stating the principles explicitly in the prompt and inserting a self-critique-and-revise step that checks the draft against them before it is returned.",
       "file": "ingest/S9-Constitutional-Framing.md",
       "canonical": "patterns/S9-Constitutional-Framing.md",
       "edges": {
@@ -2069,7 +2304,7 @@
       "type": "pattern",
       "category": "Reliability",
       "title": "Human-in-the-Loop",
-      "summary": "Make the agent halt at the boundary of any action whose cost-of-error exceeds the cost-of-delay, surface the planned action to a human in interpretable form, and resume only on an explicit verdict — so that irreversible, novel, or high-blast-radius actions never execute autonomously..",
+      "summary": "Make the agent halt at the boundary of any action whose cost-of-error exceeds the cost-of-delay, surface the planned action to a human in interpretable form, and resume only on an explicit verdict — so that irreversible, novel, or high-blast-radius actions never execute autonomously.",
       "file": "ingest/V1-Human-in-the-Loop.md",
       "canonical": "patterns/V1-Human-in-the-Loop.md",
       "edges": {
@@ -2081,11 +2316,17 @@
         ],
         "composes_with": [
           "V14",
-          "V7"
+          "V9",
+          "V7",
+          "S6",
+          "S5"
         ],
         "related": [
           "V2",
-          "H6"
+          "H5",
+          "H8",
+          "H6",
+          "V17"
         ],
         "mechanism_refs": [
           7
@@ -2097,7 +2338,7 @@
       "type": "pattern",
       "category": "Reliability",
       "title": "Checkpointing",
-      "summary": "Externalise the agent's working state to a durable store at each step boundary, so failures, terminations, and human pauses become resumable events instead of restart-from-zero events..",
+      "summary": "Externalise the agent's working state to a durable store at each step boundary, so failures, terminations, and human pauses become resumable events instead of restart-from-zero events.",
       "file": "ingest/V10-Checkpointing.md",
       "canonical": "patterns/V10-Checkpointing.md",
       "edges": {
@@ -2106,10 +2347,14 @@
           "V14"
         ],
         "related": [
+          "V1",
           "V9",
+          "O15",
           "K8",
           "V14",
-          "K11"
+          "K10",
+          "K11",
+          "K12"
         ],
         "mechanism_refs": [
           3,
@@ -2122,17 +2367,23 @@
       "type": "pattern",
       "category": "Reliability",
       "title": "Error Compaction",
-      "summary": "Keep the cumulative weight of errors, exceptions, and tool failures inside the agent's context window small enough that the agent retains the diagnostic signal but does not lose attention or budget to repeated raw tracebacks..",
+      "summary": "Keep the cumulative weight of errors, exceptions, and tool failures inside the agent's context window small enough that the agent retains the diagnostic signal but does not lose attention or budget to repeated raw tracebacks.",
       "file": "ingest/V11-Error-Compaction.md",
       "canonical": "patterns/V11-Error-Compaction.md",
       "edges": {
         "composes_with": [
           "V14",
-          "V9"
+          "V9",
+          "V1",
+          "O8",
+          "R4",
+          "R7"
         ],
         "related": [
           "K6",
-          "K7"
+          "K7",
+          "R13",
+          "R14"
         ],
         "mechanism_refs": [
           2,
@@ -2146,7 +2397,7 @@
       "type": "pattern",
       "category": "Reliability",
       "title": "Stateless Reducer",
-      "summary": "Force all agent state to be explicit, external, and passed in — so the agent function itself holds no hidden state between invocations and is, in the functional sense, a pure reducer over its inputs..",
+      "summary": "Force all agent state to be explicit, external, and passed in — so the agent function itself holds no hidden state between invocations and is, in the functional sense, a pure reducer over its inputs.",
       "file": "ingest/V12-Stateless-Reducer.md",
       "canonical": "patterns/V12-Stateless-Reducer.md",
       "edges": {
@@ -2155,7 +2406,14 @@
           "V14"
         ],
         "related": [
-          "V10"
+          "O4",
+          "O6",
+          "O15",
+          "I6",
+          "V16",
+          "V10",
+          "K11",
+          "K12"
         ],
         "mechanism_refs": [
           3,
@@ -2168,7 +2426,7 @@
       "type": "pattern",
       "category": "Reliability",
       "title": "Tool Budget",
-      "summary": "Keep the per-agent tool catalogue small enough that the model's tool-selection accuracy stays in the usable range and the tool schemas do not consume the context budget the actual task needs — by enforcing a hard cap on tool count, a measured cap on schema-token cost, and a discipline of dynamic-load-only-what-the-task-requires..",
+      "summary": "Keep the per-agent tool catalogue small enough that the model's tool-selection accuracy stays in the usable range and the tool schemas do not consume the context budget the actual task needs — by enforcing a hard cap on tool count, a measured cap on schema-token cost, and a discipline of dynamic-load-only-what-the-task-requires.",
       "file": "ingest/V13-Tool-Budget.md",
       "canonical": "patterns/V13-Tool-Budget.md",
       "edges": {
@@ -2177,8 +2435,10 @@
         ],
         "composes_with": [
           "I2",
+          "I4",
           "O17",
           "V14",
+          "V7",
           "K6",
           "V11"
         ],
@@ -2199,15 +2459,20 @@
       "type": "pattern",
       "category": "Reliability",
       "title": "Trajectory Logging",
-      "summary": "Make every step the agent takes visible as a structured event, in a vendor-neutral format, so that debugging, auditing, evaluation, and monitoring can all read from the same record — instead of each rebuilding the run from fragmentary logs..",
+      "summary": "Make every step the agent takes visible as a structured event, in a vendor-neutral format, so that debugging, auditing, evaluation, and monitoring can all read from the same record — instead of each rebuilding the run from fragmentary logs.",
       "file": "ingest/V14-Trajectory-Logging.md",
       "canonical": "patterns/V14-Trajectory-Logging.md",
       "edges": {
         "composes_with": [
-          "K11"
+          "K11",
+          "K12",
+          "O6",
+          "O7",
+          "O17"
         ],
         "related": [
           "V1",
+          "V2",
           "V5",
           "V7",
           "V9",
@@ -2229,7 +2494,7 @@
       "type": "pattern",
       "category": "Reliability",
       "title": "LLM-as-Judge",
-      "summary": "Turn \"is this output any good?\" into a deterministic, schema-checkable call against a written rubric, so generative quality can be measured automatically — at scale, without human labels, and on dimensions traditional metrics cannot reach..",
+      "summary": "Turn \"is this output any good?\" into a deterministic, schema-checkable call against a written rubric, so generative quality can be measured automatically — at scale, without human labels, and on dimensions traditional metrics cannot reach.",
       "file": "ingest/V15-LLM-as-Judge.md",
       "canonical": "patterns/V15-LLM-as-Judge.md",
       "edges": {
@@ -2240,7 +2505,12 @@
         "related": [
           "O5",
           "V16",
-          "R17"
+          "V17",
+          "S8",
+          "R17",
+          "R7",
+          "R8",
+          "K5"
         ],
         "mechanism_refs": [
           1,
@@ -2253,7 +2523,7 @@
       "type": "pattern",
       "category": "Reliability",
       "title": "Offline Eval",
-      "summary": "Establish a held-out, versioned suite of inputs and expected outputs (or pass criteria), run it against the agent on every change, and gate deployment on the result — so quality, safety, and cost have a numeric baseline that any change must clear before it reaches users..",
+      "summary": "Establish a held-out, versioned suite of inputs and expected outputs (or pass criteria), run it against the agent on every change, and gate deployment on the result — so quality, safety, and cost have a numeric baseline that any change must clear before it reaches users.",
       "file": "ingest/V16-Offline-Eval.md",
       "canonical": "patterns/V16-Offline-Eval.md",
       "edges": {
@@ -2281,7 +2551,7 @@
       "type": "pattern",
       "category": "Reliability",
       "title": "Online Eval",
-      "summary": "Make the deployed system answer the question *\"is it still working?\"* on its own, continuously, by sampling its live traces, judging them against rubrics that need no ground truth, and surfacing drift as an alert — so quality and safety regressions that only appear in production are detected from the run itself, not from a customer complaint..",
+      "summary": "Make the deployed system answer the question *\"is it still working?\"* on its own, continuously, by sampling its live traces, judging them against rubrics that need no ground truth, and surfacing drift as an alert — so quality and safety regressions that only appear in production are detected from the run itself, not from a customer complaint.",
       "file": "ingest/V17-Online-Eval.md",
       "canonical": "patterns/V17-Online-Eval.md",
       "edges": {
@@ -2313,7 +2583,7 @@
       "type": "pattern",
       "category": "Reliability",
       "title": "Agent Simulation",
-      "summary": "Drive the agent through a complete task — with a simulated user, simulated tools, and a simulated environment — under happy-path, edge, adversarial, and load conditions, and score the full trajectory, not just the final answer, against safety and quality criteria — so trajectory-shaped failures invisible to flat eval surface before users see them..",
+      "summary": "Drive the agent through a complete task — with a simulated user, simulated tools, and a simulated environment — under happy-path, edge, adversarial, and load conditions, and score the full trajectory, not just the final answer, against safety and quality criteria — so trajectory-shaped failures invisible to flat eval surface before users see them.",
       "file": "ingest/V18-Agent-Simulation.md",
       "canonical": "patterns/V18-Agent-Simulation.md",
       "edges": {
@@ -2324,7 +2594,10 @@
           "V15",
           "V9",
           "V6",
-          "V8"
+          "V8",
+          "O6",
+          "O7",
+          "O11"
         ],
         "related": [
           "V16",
@@ -2341,7 +2614,7 @@
       "type": "pattern",
       "category": "Reliability",
       "title": "Fallback / Graceful Degradation",
-      "summary": "Make every failure mode of the primary path land on a *named, pre-declared, cheaper* execution path so the system answers something useful instead of an error, while loudly signalling that it has degraded..",
+      "summary": "Make every failure mode of the primary path land on a *named, pre-declared, cheaper* execution path so the system answers something useful instead of an error, while loudly signalling that it has degraded.",
       "file": "ingest/V19-Fallback.md",
       "canonical": "patterns/V19-Fallback.md",
       "edges": {
@@ -2365,7 +2638,7 @@
       "type": "pattern",
       "category": "Reliability",
       "title": "Human-on-the-Loop",
-      "summary": "Preserve meaningful human oversight over an autonomous agent without paying V1's per-action latency: the agent proceeds; the human watches a live trace and can pull the brake..",
+      "summary": "Preserve meaningful human oversight over an autonomous agent without paying V1's per-action latency: the agent proceeds; the human watches a live trace and can pull the brake.",
       "file": "ingest/V2-Human-on-the-Loop.md",
       "canonical": "patterns/V2-Human-on-the-Loop.md",
       "edges": {
@@ -2402,17 +2675,23 @@
       "type": "pattern",
       "category": "Reliability",
       "title": "Output / Schema Validation",
-      "summary": "Treat every generated output as untrusted with respect to its declared shape, validate it against that shape, and recover from non-conformance with a bounded retry loop that carries the validation error back to the model — so downstream code never sees a malformed payload..",
+      "summary": "Treat every generated output as untrusted with respect to its declared shape, validate it against that shape, and recover from non-conformance with a bounded retry loop that carries the validation error back to the model — so downstream code never sees a malformed payload.",
       "file": "ingest/V20-Schema-Validation.md",
       "canonical": "patterns/V20-Schema-Validation.md",
       "edges": {
         "composes_with": [
-          "S6"
+          "S6",
+          "V9",
+          "V14",
+          "V1",
+          "V11"
         ],
         "related": [
           "V5",
           "V15",
-          "S6"
+          "S6",
+          "O2",
+          "I2"
         ],
         "mechanism_refs": [
           4,
@@ -2426,20 +2705,24 @@
       "type": "pattern",
       "category": "Reliability",
       "title": "Rule of Two / Lethal Trifecta",
-      "summary": "Make the Lethal Trifecta — the unique combination of capabilities that turns ordinary prompt injection into uncontrollable data exfiltration — visible at design time and continuously thereafter, so an agent that holds all three is *never* shipped without a named mitigation in place..",
+      "summary": "Make the Lethal Trifecta — the unique combination of capabilities that turns ordinary prompt injection into uncontrollable data exfiltration — visible at design time and continuously thereafter, so an agent that holds all three is *never* shipped without a named mitigation in place.",
       "file": "ingest/V3-Rule-of-Two.md",
       "canonical": "patterns/V3-Rule-of-Two.md",
       "edges": {
         "composes_with": [
-          "V4",
+          "V7",
           "V14",
-          "V17"
+          "V17",
+          "V13",
+          "V1"
         ],
         "related": [
           "V4",
           "V6",
           "V8",
-          "V5"
+          "V5",
+          "O15",
+          "I3"
         ],
         "mechanism_refs": [
           2,
@@ -2452,14 +2735,15 @@
       "type": "pattern",
       "category": "Reliability",
       "title": "Dual LLM",
-      "summary": "Make prompt-injection-driven exfiltration architecturally impossible by ensuring no single LLM session simultaneously possesses private data access, tool access, and exposure to untrusted content..",
+      "summary": "Make prompt-injection-driven exfiltration architecturally impossible by ensuring no single LLM session simultaneously possesses private data access, tool access, and exposure to untrusted content.",
       "file": "ingest/V4-Dual-LLM.md",
       "canonical": "patterns/V4-Dual-LLM.md",
       "edges": {
         "composes_with": [
           "V6",
           "V7",
-          "V8"
+          "V8",
+          "V14"
         ],
         "related": [
           "V3",
@@ -2486,13 +2770,15 @@
           "S5",
           "V6",
           "V7",
+          "V14",
           "V1",
           "V4",
-          "V3",
           "V15",
-          "V8"
+          "V8",
+          "V9"
         ],
         "related": [
+          "S5",
           "V6"
         ],
         "mechanism_refs": [
@@ -2507,14 +2793,14 @@
       "type": "pattern",
       "category": "Reliability",
       "title": "Prompt Injection Shield",
-      "summary": "Treat every byte of externally-sourced text as adversarial; sanitise it on entry, mark it as data not instruction, and bound what the agent can do with it — so that a prompt smuggled inside untrusted content cannot redirect the agent's behaviour..",
+      "summary": "Treat every byte of externally-sourced text as adversarial; sanitise it on entry, mark it as data not instruction, and bound what the agent can do with it — so that a prompt smuggled inside untrusted content cannot redirect the agent's behaviour.",
       "file": "ingest/V6-Prompt-Injection-Shield.md",
       "canonical": "patterns/V6-Prompt-Injection-Shield.md",
       "edges": {
         "composes_with": [
           "V3",
-          "V4",
           "V8",
+          "V14",
           "V17",
           "V13",
           "S5",
@@ -2536,26 +2822,24 @@
       "type": "pattern",
       "category": "Reliability",
       "title": "AgentSpec / Declarative Governance",
-      "summary": "Place the agent's hard rules in code outside the model, expressed in a declarative policy artefact, and have an independent runtime engine check every proposed action against that policy — so the rules survive prompt manipulation, produce an audit record, and can be changed without redeploying the model..",
+      "summary": "Place the agent's hard rules in code outside the model, expressed in a declarative policy artefact, and have an independent runtime engine check every proposed action against that policy — so the rules survive prompt manipulation, produce an audit record, and can be changed without redeploying the model.",
       "file": "ingest/V7-AgentSpec.md",
       "canonical": "patterns/V7-AgentSpec.md",
       "edges": {
         "composes_with": [
           "V5",
           "V14",
+          "V1",
           "V4",
           "V6",
           "V8",
-          "V3",
           "V16",
           "V17"
         ],
         "related": [
           "S9",
           "H5",
-          "V4",
-          "V6",
-          "V8",
+          "V3",
           "V5",
           "V15"
         ],
@@ -2570,7 +2854,7 @@
       "type": "pattern",
       "category": "Reliability",
       "title": "Tool Sandboxing",
-      "summary": "Execute every tool call — particularly any LLM-generated code — in a constrained, ephemeral environment whose access to filesystem, network, processes, time, memory, and cost is enumerated and enforced from outside the agent, so that no reasoning error, hallucinated command, or successful prompt injection can damage the host, exfiltrate data, or run unbounded..",
+      "summary": "Execute every tool call — particularly any LLM-generated code — in a constrained, ephemeral environment whose access to filesystem, network, processes, time, memory, and cost is enumerated and enforced from outside the agent, so that no reasoning error, hallucinated command, or successful prompt injection can damage the host, exfiltrate data, or run unbounded.",
       "file": "ingest/V8-Tool-Sandboxing.md",
       "canonical": "patterns/V8-Tool-Sandboxing.md",
       "edges": {
@@ -2598,7 +2882,7 @@
       "type": "pattern",
       "category": "Reliability",
       "title": "Bounded Execution",
-      "summary": "Apply hard, externally-enforced limits on every dimension along which an agent loop can run away — iterations, tool calls, tokens, wall-clock, and dollars — so that a miscalibrated agent fails fast at a known bound instead of consuming unbounded resources before someone notices..",
+      "summary": "Apply hard, externally-enforced limits on every dimension along which an agent loop can run away — iterations, tool calls, tokens, wall-clock, and dollars — so that a miscalibrated agent fails fast at a known bound instead of consuming unbounded resources before someone notices.",
       "file": "ingest/V9-Bounded-Execution.md",
       "canonical": "patterns/V9-Bounded-Execution.md",
       "edges": {
@@ -2606,6 +2890,21 @@
           "V10",
           "V14",
           "V1"
+        ],
+        "related": [
+          "R4",
+          "R7",
+          "R8",
+          "R9",
+          "R10",
+          "R13",
+          "R17",
+          "R20",
+          "K5",
+          "O5",
+          "O8",
+          "O16",
+          "H5"
         ],
         "mechanism_refs": [
           2,
@@ -2616,6 +2915,11 @@
     }
   ],
   "edges": [
+    {
+      "from": "H1",
+      "to": "K6",
+      "type": "composes_with"
+    },
     {
       "from": "H1",
       "to": "K10",
@@ -2653,12 +2957,32 @@
     },
     {
       "from": "H1",
+      "to": "H2",
+      "type": "related"
+    },
+    {
+      "from": "H1",
+      "to": "H4",
+      "type": "related"
+    },
+    {
+      "from": "H1",
+      "to": "H5",
+      "type": "related"
+    },
+    {
+      "from": "H1",
       "to": "H7",
       "type": "related"
     },
     {
       "from": "H1",
       "to": "H9",
+      "type": "related"
+    },
+    {
+      "from": "H1",
+      "to": "H10",
       "type": "related"
     },
     {
@@ -2674,6 +2998,11 @@
     {
       "from": "H10",
       "to": "K12",
+      "type": "requires"
+    },
+    {
+      "from": "H10",
+      "to": "V5",
       "type": "requires"
     },
     {
@@ -2688,18 +3017,38 @@
     },
     {
       "from": "H10",
+      "to": "K6",
+      "type": "composes_with"
+    },
+    {
+      "from": "H10",
       "to": "V1",
       "type": "composes_with"
     },
     {
       "from": "H10",
-      "to": "H1",
+      "to": "V14",
       "type": "composes_with"
     },
     {
       "from": "H10",
-      "to": "H5",
-      "type": "composes_with"
+      "to": "H1",
+      "type": "related"
+    },
+    {
+      "from": "H10",
+      "to": "H2",
+      "type": "related"
+    },
+    {
+      "from": "H10",
+      "to": "H4",
+      "type": "related"
+    },
+    {
+      "from": "H10",
+      "to": "H7",
+      "type": "related"
     },
     {
       "from": "H10",
@@ -2713,27 +3062,7 @@
     },
     {
       "from": "H10",
-      "to": "H1",
-      "type": "related"
-    },
-    {
-      "from": "H10",
-      "to": "K10",
-      "type": "related"
-    },
-    {
-      "from": "H10",
-      "to": "K12",
-      "type": "related"
-    },
-    {
-      "from": "H10",
       "to": "V5",
-      "type": "related"
-    },
-    {
-      "from": "H10",
-      "to": "H7",
       "type": "related"
     },
     {
@@ -2743,12 +3072,32 @@
     },
     {
       "from": "H2",
-      "to": "K12",
+      "to": "H1",
+      "type": "composes_with"
+    },
+    {
+      "from": "H2",
+      "to": "K10",
+      "type": "composes_with"
+    },
+    {
+      "from": "H2",
+      "to": "K6",
+      "type": "composes_with"
+    },
+    {
+      "from": "H2",
+      "to": "V6",
       "type": "composes_with"
     },
     {
       "from": "H2",
       "to": "V1",
+      "type": "composes_with"
+    },
+    {
+      "from": "H2",
+      "to": "V14",
       "type": "composes_with"
     },
     {
@@ -2798,12 +3147,57 @@
     },
     {
       "from": "H3",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "H3",
+      "to": "R20",
+      "type": "composes_with"
+    },
+    {
+      "from": "H3",
+      "to": "K11",
+      "type": "composes_with"
+    },
+    {
+      "from": "H3",
+      "to": "H2",
+      "type": "composes_with"
+    },
+    {
+      "from": "H3",
       "to": "V20",
       "type": "composes_with"
     },
     {
       "from": "H3",
       "to": "H1",
+      "type": "related"
+    },
+    {
+      "from": "H3",
+      "to": "R4",
+      "type": "related"
+    },
+    {
+      "from": "H3",
+      "to": "R3",
+      "type": "related"
+    },
+    {
+      "from": "H3",
+      "to": "R7",
+      "type": "related"
+    },
+    {
+      "from": "H3",
+      "to": "R9",
+      "type": "related"
+    },
+    {
+      "from": "H3",
+      "to": "R10",
       "type": "related"
     },
     {
@@ -2883,6 +3277,16 @@
     },
     {
       "from": "H5",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "H5",
+      "to": "V10",
+      "type": "composes_with"
+    },
+    {
+      "from": "H5",
       "to": "V15",
       "type": "composes_with"
     },
@@ -2918,12 +3322,37 @@
     },
     {
       "from": "H6",
+      "to": "R7",
+      "type": "composes_with"
+    },
+    {
+      "from": "H6",
       "to": "H3",
       "type": "siblings"
     },
     {
       "from": "H6",
       "to": "R16",
+      "type": "related"
+    },
+    {
+      "from": "H6",
+      "to": "H2",
+      "type": "related"
+    },
+    {
+      "from": "H6",
+      "to": "H4",
+      "type": "related"
+    },
+    {
+      "from": "H6",
+      "to": "H9",
+      "type": "related"
+    },
+    {
+      "from": "H6",
+      "to": "H5",
       "type": "related"
     },
     {
@@ -2958,17 +3387,7 @@
     },
     {
       "from": "H7",
-      "to": "H1",
-      "type": "composes_with"
-    },
-    {
-      "from": "H7",
       "to": "S3",
-      "type": "related"
-    },
-    {
-      "from": "H7",
-      "to": "H1",
       "type": "related"
     },
     {
@@ -2977,8 +3396,23 @@
       "type": "related"
     },
     {
+      "from": "H7",
+      "to": "H1",
+      "type": "related"
+    },
+    {
       "from": "H8",
-      "to": "V16",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "H8",
+      "to": "V10",
+      "type": "composes_with"
+    },
+    {
+      "from": "H8",
+      "to": "V14",
       "type": "composes_with"
     },
     {
@@ -3048,12 +3482,37 @@
     },
     {
       "from": "H9",
+      "to": "K6",
+      "type": "composes_with"
+    },
+    {
+      "from": "H9",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "H9",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "H9",
       "to": "H2",
       "type": "related"
     },
     {
       "from": "H9",
       "to": "H4",
+      "type": "related"
+    },
+    {
+      "from": "H9",
+      "to": "O3",
+      "type": "related"
+    },
+    {
+      "from": "H9",
+      "to": "O6",
       "type": "related"
     },
     {
@@ -3078,7 +3537,22 @@
     },
     {
       "from": "I1",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "I1",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "I1",
       "to": "V1",
+      "type": "composes_with"
+    },
+    {
+      "from": "I1",
+      "to": "R4",
       "type": "composes_with"
     },
     {
@@ -3103,7 +3577,27 @@
     },
     {
       "from": "I2",
+      "to": "V20",
+      "type": "composes_with"
+    },
+    {
+      "from": "I2",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "I2",
       "to": "V1",
+      "type": "composes_with"
+    },
+    {
+      "from": "I2",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "I2",
+      "to": "V6",
       "type": "composes_with"
     },
     {
@@ -3127,9 +3621,24 @@
       "type": "related"
     },
     {
+      "from": "I2",
+      "to": "R13",
+      "type": "related"
+    },
+    {
+      "from": "I2",
+      "to": "V3",
+      "type": "related"
+    },
+    {
       "from": "I3",
       "to": "V13",
       "type": "conflicts_with"
+    },
+    {
+      "from": "I3",
+      "to": "I5",
+      "type": "composes_with"
     },
     {
       "from": "I3",
@@ -3139,6 +3648,16 @@
     {
       "from": "I3",
       "to": "V8",
+      "type": "composes_with"
+    },
+    {
+      "from": "I3",
+      "to": "V3",
+      "type": "composes_with"
+    },
+    {
+      "from": "I3",
+      "to": "V14",
       "type": "composes_with"
     },
     {
@@ -3178,12 +3697,32 @@
     },
     {
       "from": "I4",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "I4",
       "to": "V11",
       "type": "composes_with"
     },
     {
       "from": "I4",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "I4",
       "to": "V1",
+      "type": "composes_with"
+    },
+    {
+      "from": "I4",
+      "to": "R4",
+      "type": "composes_with"
+    },
+    {
+      "from": "I4",
+      "to": "R13",
       "type": "composes_with"
     },
     {
@@ -3208,7 +3747,27 @@
     },
     {
       "from": "I5",
+      "to": "O6",
+      "type": "composes_with"
+    },
+    {
+      "from": "I5",
+      "to": "O7",
+      "type": "composes_with"
+    },
+    {
+      "from": "I5",
       "to": "V7",
+      "type": "composes_with"
+    },
+    {
+      "from": "I5",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "I5",
+      "to": "V6",
       "type": "composes_with"
     },
     {
@@ -3348,6 +3907,21 @@
     },
     {
       "from": "K10",
+      "to": "K8",
+      "type": "related"
+    },
+    {
+      "from": "K10",
+      "to": "K11",
+      "type": "related"
+    },
+    {
+      "from": "K10",
+      "to": "K12",
+      "type": "related"
+    },
+    {
+      "from": "K10",
       "to": "H2",
       "type": "related"
     },
@@ -3368,8 +3942,43 @@
     },
     {
       "from": "K11",
+      "to": "K6",
+      "type": "composes_with"
+    },
+    {
+      "from": "K11",
+      "to": "K7",
+      "type": "composes_with"
+    },
+    {
+      "from": "K11",
+      "to": "K1",
+      "type": "composes_with"
+    },
+    {
+      "from": "K11",
       "to": "K10",
       "type": "related"
+    },
+    {
+      "from": "K11",
+      "to": "K8",
+      "type": "related"
+    },
+    {
+      "from": "K11",
+      "to": "K9",
+      "type": "related"
+    },
+    {
+      "from": "K12",
+      "to": "S6",
+      "type": "composes_with"
+    },
+    {
+      "from": "K12",
+      "to": "V14",
+      "type": "composes_with"
     },
     {
       "from": "K12",
@@ -3398,6 +4007,31 @@
     },
     {
       "from": "K13",
+      "to": "K1",
+      "type": "related"
+    },
+    {
+      "from": "K13",
+      "to": "K3",
+      "type": "related"
+    },
+    {
+      "from": "K13",
+      "to": "K4",
+      "type": "related"
+    },
+    {
+      "from": "K13",
+      "to": "K10",
+      "type": "related"
+    },
+    {
+      "from": "K13",
+      "to": "K11",
+      "type": "related"
+    },
+    {
+      "from": "K13",
       "to": "K12",
       "type": "related"
     },
@@ -3405,6 +4039,16 @@
       "from": "K13",
       "to": "K5",
       "type": "related"
+    },
+    {
+      "from": "K2",
+      "to": "K3",
+      "type": "composes_with"
+    },
+    {
+      "from": "K2",
+      "to": "K4",
+      "type": "composes_with"
     },
     {
       "from": "K2",
@@ -3422,6 +4066,21 @@
       "type": "related"
     },
     {
+      "from": "K2",
+      "to": "R19",
+      "type": "related"
+    },
+    {
+      "from": "K3",
+      "to": "K2",
+      "type": "composes_with"
+    },
+    {
+      "from": "K3",
+      "to": "K5",
+      "type": "composes_with"
+    },
+    {
       "from": "K3",
       "to": "K4",
       "type": "siblings"
@@ -3430,6 +4089,21 @@
       "from": "K3",
       "to": "K1",
       "type": "related"
+    },
+    {
+      "from": "K3",
+      "to": "K9",
+      "type": "related"
+    },
+    {
+      "from": "K4",
+      "to": "K2",
+      "type": "composes_with"
+    },
+    {
+      "from": "K4",
+      "to": "K5",
+      "type": "composes_with"
     },
     {
       "from": "K4",
@@ -3443,7 +4117,32 @@
     },
     {
       "from": "K4",
+      "to": "K9",
+      "type": "related"
+    },
+    {
+      "from": "K4",
       "to": "K6",
+      "type": "related"
+    },
+    {
+      "from": "K5",
+      "to": "K2",
+      "type": "composes_with"
+    },
+    {
+      "from": "K5",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "K5",
+      "to": "K1",
+      "type": "related"
+    },
+    {
+      "from": "K5",
+      "to": "K4",
       "type": "related"
     },
     {
@@ -3452,8 +4151,23 @@
       "type": "related"
     },
     {
+      "from": "K5",
+      "to": "V15",
+      "type": "related"
+    },
+    {
+      "from": "K6",
+      "to": "K8",
+      "type": "composes_with"
+    },
+    {
       "from": "K6",
       "to": "K7",
+      "type": "related"
+    },
+    {
+      "from": "K6",
+      "to": "K9",
       "type": "related"
     },
     {
@@ -3477,6 +4191,21 @@
       "type": "related"
     },
     {
+      "from": "K7",
+      "to": "K8",
+      "type": "composes_with"
+    },
+    {
+      "from": "K7",
+      "to": "K6",
+      "type": "related"
+    },
+    {
+      "from": "K7",
+      "to": "K11",
+      "type": "related"
+    },
+    {
       "from": "K8",
       "to": "K6",
       "type": "related"
@@ -3502,8 +4231,43 @@
       "type": "related"
     },
     {
+      "from": "K8",
+      "to": "R4",
+      "type": "related"
+    },
+    {
+      "from": "K8",
+      "to": "R3",
+      "type": "related"
+    },
+    {
+      "from": "K8",
+      "to": "V10",
+      "type": "related"
+    },
+    {
+      "from": "K9",
+      "to": "K6",
+      "type": "composes_with"
+    },
+    {
       "from": "K9",
       "to": "K1",
+      "type": "related"
+    },
+    {
+      "from": "K9",
+      "to": "K3",
+      "type": "related"
+    },
+    {
+      "from": "K9",
+      "to": "K4",
+      "type": "related"
+    },
+    {
+      "from": "K9",
+      "to": "K11",
       "type": "related"
     },
     {
@@ -3598,6 +4362,21 @@
     },
     {
       "from": "O10",
+      "to": "O17",
+      "type": "composes_with"
+    },
+    {
+      "from": "O10",
+      "to": "S6",
+      "type": "composes_with"
+    },
+    {
+      "from": "O10",
+      "to": "R4",
+      "type": "composes_with"
+    },
+    {
+      "from": "O10",
       "to": "O7",
       "type": "related"
     },
@@ -3617,8 +4396,33 @@
       "type": "related"
     },
     {
+      "from": "O10",
+      "to": "V9",
+      "type": "related"
+    },
+    {
+      "from": "O10",
+      "to": "V14",
+      "type": "related"
+    },
+    {
       "from": "O11",
       "to": "K10",
+      "type": "composes_with"
+    },
+    {
+      "from": "O11",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "O11",
+      "to": "O17",
+      "type": "composes_with"
+    },
+    {
+      "from": "O11",
+      "to": "O4",
       "type": "composes_with"
     },
     {
@@ -3634,6 +4438,11 @@
     {
       "from": "O11",
       "to": "O2",
+      "type": "related"
+    },
+    {
+      "from": "O11",
+      "to": "V9",
       "type": "related"
     },
     {
@@ -3663,7 +4472,27 @@
     },
     {
       "from": "O13",
+      "to": "O4",
+      "type": "composes_with"
+    },
+    {
+      "from": "O13",
+      "to": "O15",
+      "type": "composes_with"
+    },
+    {
+      "from": "O13",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "O13",
       "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "O13",
+      "to": "V1",
       "type": "composes_with"
     },
     {
@@ -3692,8 +4521,38 @@
       "type": "related"
     },
     {
+      "from": "O13",
+      "to": "V9",
+      "type": "related"
+    },
+    {
       "from": "O14",
       "to": "K1",
+      "type": "composes_with"
+    },
+    {
+      "from": "O14",
+      "to": "K2",
+      "type": "composes_with"
+    },
+    {
+      "from": "O14",
+      "to": "K5",
+      "type": "composes_with"
+    },
+    {
+      "from": "O14",
+      "to": "O4",
+      "type": "composes_with"
+    },
+    {
+      "from": "O14",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "O14",
+      "to": "V14",
       "type": "composes_with"
     },
     {
@@ -3704,6 +4563,16 @@
     {
       "from": "O14",
       "to": "O6",
+      "type": "related"
+    },
+    {
+      "from": "O14",
+      "to": "O11",
+      "type": "related"
+    },
+    {
+      "from": "O14",
+      "to": "K10",
       "type": "related"
     },
     {
@@ -3758,12 +4627,32 @@
     },
     {
       "from": "O16",
+      "to": "R4",
+      "type": "composes_with"
+    },
+    {
+      "from": "O16",
+      "to": "R3",
+      "type": "composes_with"
+    },
+    {
+      "from": "O16",
+      "to": "R10",
+      "type": "composes_with"
+    },
+    {
+      "from": "O16",
       "to": "O17",
       "type": "composes_with"
     },
     {
       "from": "O16",
       "to": "O4",
+      "type": "composes_with"
+    },
+    {
+      "from": "O16",
+      "to": "V14",
       "type": "composes_with"
     },
     {
@@ -3784,6 +4673,11 @@
     {
       "from": "O16",
       "to": "O2",
+      "type": "related"
+    },
+    {
+      "from": "O16",
+      "to": "V9",
       "type": "related"
     },
     {
@@ -3923,12 +4817,12 @@
     },
     {
       "from": "O3",
-      "to": "R4",
+      "to": "V14",
       "type": "composes_with"
     },
     {
       "from": "O3",
-      "to": "R7",
+      "to": "V9",
       "type": "composes_with"
     },
     {
@@ -3958,17 +4852,22 @@
     },
     {
       "from": "O4",
-      "to": "O6",
-      "type": "composes_with"
-    },
-    {
-      "from": "O4",
       "to": "O17",
       "type": "composes_with"
     },
     {
       "from": "O4",
       "to": "O2",
+      "type": "composes_with"
+    },
+    {
+      "from": "O4",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "O4",
+      "to": "V14",
       "type": "composes_with"
     },
     {
@@ -4098,7 +4997,37 @@
     },
     {
       "from": "O7",
+      "to": "O4",
+      "type": "composes_with"
+    },
+    {
+      "from": "O7",
+      "to": "O17",
+      "type": "composes_with"
+    },
+    {
+      "from": "O7",
+      "to": "S6",
+      "type": "composes_with"
+    },
+    {
+      "from": "O7",
+      "to": "R4",
+      "type": "composes_with"
+    },
+    {
+      "from": "O7",
       "to": "O6",
+      "type": "related"
+    },
+    {
+      "from": "O7",
+      "to": "V9",
+      "type": "related"
+    },
+    {
+      "from": "O7",
+      "to": "V14",
       "type": "related"
     },
     {
@@ -4118,12 +5047,32 @@
     },
     {
       "from": "O8",
+      "to": "O4",
+      "type": "composes_with"
+    },
+    {
+      "from": "O8",
       "to": "O9",
       "type": "composes_with"
     },
     {
       "from": "O8",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "O8",
       "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "O8",
+      "to": "K6",
+      "type": "composes_with"
+    },
+    {
+      "from": "O8",
+      "to": "K7",
       "type": "composes_with"
     },
     {
@@ -4152,13 +5101,43 @@
       "type": "related"
     },
     {
+      "from": "O8",
+      "to": "V9",
+      "type": "related"
+    },
+    {
       "from": "O9",
       "to": "O4",
       "type": "composes_with"
     },
     {
       "from": "O9",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "O9",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "O9",
+      "to": "V1",
+      "type": "composes_with"
+    },
+    {
+      "from": "O9",
       "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "O9",
+      "to": "S3",
+      "type": "composes_with"
+    },
+    {
+      "from": "O9",
+      "to": "S5",
       "type": "composes_with"
     },
     {
@@ -4238,7 +5217,22 @@
     },
     {
       "from": "R10",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "R10",
       "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "R10",
+      "to": "R11",
+      "type": "composes_with"
+    },
+    {
+      "from": "R10",
+      "to": "O17",
       "type": "composes_with"
     },
     {
@@ -4263,6 +5257,11 @@
     },
     {
       "from": "R10",
+      "to": "V9",
+      "type": "related"
+    },
+    {
+      "from": "R10",
       "to": "R3",
       "type": "related"
     },
@@ -4274,6 +5273,21 @@
     {
       "from": "R11",
       "to": "K10",
+      "type": "composes_with"
+    },
+    {
+      "from": "R11",
+      "to": "R7",
+      "type": "composes_with"
+    },
+    {
+      "from": "R11",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "R11",
+      "to": "V14",
       "type": "composes_with"
     },
     {
@@ -4313,12 +5327,32 @@
     },
     {
       "from": "R12",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "R12",
+      "to": "S6",
+      "type": "composes_with"
+    },
+    {
+      "from": "R12",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "R12",
       "to": "O4",
       "type": "siblings"
     },
     {
       "from": "R12",
       "to": "R3",
+      "type": "related"
+    },
+    {
+      "from": "R12",
+      "to": "R9",
       "type": "related"
     },
     {
@@ -4398,8 +5432,33 @@
     },
     {
       "from": "R14",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "R14",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "R14",
+      "to": "O4",
+      "type": "composes_with"
+    },
+    {
+      "from": "R14",
       "to": "R13",
       "type": "siblings"
+    },
+    {
+      "from": "R14",
+      "to": "R1",
+      "type": "related"
+    },
+    {
+      "from": "R14",
+      "to": "R2",
+      "type": "related"
     },
     {
       "from": "R14",
@@ -4407,9 +5466,74 @@
       "type": "related"
     },
     {
+      "from": "R14",
+      "to": "R7",
+      "type": "related"
+    },
+    {
+      "from": "R14",
+      "to": "R5",
+      "type": "related"
+    },
+    {
+      "from": "R16",
+      "to": "K8",
+      "type": "composes_with"
+    },
+    {
+      "from": "R16",
+      "to": "K12",
+      "type": "composes_with"
+    },
+    {
+      "from": "R16",
+      "to": "O3",
+      "type": "composes_with"
+    },
+    {
+      "from": "R16",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "R16",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "R16",
+      "to": "R3",
+      "type": "composes_with"
+    },
+    {
+      "from": "R16",
+      "to": "R4",
+      "type": "composes_with"
+    },
+    {
+      "from": "R16",
+      "to": "R7",
+      "type": "composes_with"
+    },
+    {
       "from": "R16",
       "to": "H6",
       "type": "siblings"
+    },
+    {
+      "from": "R16",
+      "to": "R3",
+      "type": "related"
+    },
+    {
+      "from": "R16",
+      "to": "R4",
+      "type": "related"
+    },
+    {
+      "from": "R16",
+      "to": "R1",
+      "type": "related"
     },
     {
       "from": "R17",
@@ -4458,6 +5582,31 @@
     },
     {
       "from": "R18",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "R18",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "R18",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "R18",
+      "to": "R1",
+      "type": "composes_with"
+    },
+    {
+      "from": "R18",
+      "to": "R2",
+      "type": "composes_with"
+    },
+    {
+      "from": "R18",
       "to": "R9",
       "type": "siblings"
     },
@@ -4468,12 +5617,42 @@
     },
     {
       "from": "R18",
+      "to": "R11",
+      "type": "siblings"
+    },
+    {
+      "from": "R18",
+      "to": "R12",
+      "type": "siblings"
+    },
+    {
+      "from": "R18",
       "to": "R17",
       "type": "related"
     },
     {
       "from": "R19",
+      "to": "K1",
+      "type": "composes_with"
+    },
+    {
+      "from": "R19",
       "to": "K5",
+      "type": "composes_with"
+    },
+    {
+      "from": "R19",
+      "to": "S2",
+      "type": "composes_with"
+    },
+    {
+      "from": "R19",
+      "to": "S6",
+      "type": "composes_with"
+    },
+    {
+      "from": "R19",
+      "to": "V15",
       "type": "composes_with"
     },
     {
@@ -4718,7 +5897,22 @@
     },
     {
       "from": "R5",
-      "to": "R4",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "R5",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "R5",
+      "to": "K7",
+      "type": "composes_with"
+    },
+    {
+      "from": "R5",
+      "to": "O3",
       "type": "composes_with"
     },
     {
@@ -4729,6 +5923,21 @@
     {
       "from": "R5",
       "to": "R3",
+      "type": "related"
+    },
+    {
+      "from": "R5",
+      "to": "R7",
+      "type": "related"
+    },
+    {
+      "from": "R5",
+      "to": "R9",
+      "type": "related"
+    },
+    {
+      "from": "R5",
+      "to": "R10",
       "type": "related"
     },
     {
@@ -4948,12 +6157,32 @@
     },
     {
       "from": "S2",
+      "to": "S3",
+      "type": "composes_with"
+    },
+    {
+      "from": "S2",
+      "to": "S6",
+      "type": "composes_with"
+    },
+    {
+      "from": "S2",
       "to": "R17",
       "type": "composes_with"
     },
     {
       "from": "S2",
+      "to": "K1",
+      "type": "composes_with"
+    },
+    {
+      "from": "S2",
       "to": "S1",
+      "type": "related"
+    },
+    {
+      "from": "S2",
+      "to": "S6",
       "type": "related"
     },
     {
@@ -4984,6 +6213,26 @@
     {
       "from": "S3",
       "to": "S9",
+      "type": "related"
+    },
+    {
+      "from": "S3",
+      "to": "K5",
+      "type": "related"
+    },
+    {
+      "from": "S3",
+      "to": "K12",
+      "type": "related"
+    },
+    {
+      "from": "S3",
+      "to": "R4",
+      "type": "related"
+    },
+    {
+      "from": "S3",
+      "to": "V15",
       "type": "related"
     },
     {
@@ -5083,7 +6332,67 @@
     },
     {
       "from": "S6",
+      "to": "S2",
+      "type": "composes_with"
+    },
+    {
+      "from": "S6",
       "to": "S4",
+      "type": "composes_with"
+    },
+    {
+      "from": "S6",
+      "to": "S5",
+      "type": "composes_with"
+    },
+    {
+      "from": "S6",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "S6",
+      "to": "O2",
+      "type": "related"
+    },
+    {
+      "from": "S6",
+      "to": "I2",
+      "type": "related"
+    },
+    {
+      "from": "S6",
+      "to": "S1",
+      "type": "related"
+    },
+    {
+      "from": "S6",
+      "to": "S3",
+      "type": "related"
+    },
+    {
+      "from": "S8",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "S8",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "S8",
+      "to": "S3",
+      "type": "composes_with"
+    },
+    {
+      "from": "S8",
+      "to": "S5",
+      "type": "composes_with"
+    },
+    {
+      "from": "S8",
+      "to": "S6",
       "type": "composes_with"
     },
     {
@@ -5099,6 +6408,21 @@
     {
       "from": "S8",
       "to": "V15",
+      "type": "related"
+    },
+    {
+      "from": "S8",
+      "to": "S1",
+      "type": "related"
+    },
+    {
+      "from": "S8",
+      "to": "S6",
+      "type": "related"
+    },
+    {
+      "from": "S8",
+      "to": "S9",
       "type": "related"
     },
     {
@@ -5183,7 +6507,22 @@
     },
     {
       "from": "V1",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "V1",
       "to": "V7",
+      "type": "composes_with"
+    },
+    {
+      "from": "V1",
+      "to": "S6",
+      "type": "composes_with"
+    },
+    {
+      "from": "V1",
+      "to": "S5",
       "type": "composes_with"
     },
     {
@@ -5193,7 +6532,22 @@
     },
     {
       "from": "V1",
+      "to": "H5",
+      "type": "related"
+    },
+    {
+      "from": "V1",
+      "to": "H8",
+      "type": "related"
+    },
+    {
+      "from": "V1",
       "to": "H6",
+      "type": "related"
+    },
+    {
+      "from": "V1",
+      "to": "V17",
       "type": "related"
     },
     {
@@ -5208,7 +6562,17 @@
     },
     {
       "from": "V10",
+      "to": "V1",
+      "type": "related"
+    },
+    {
+      "from": "V10",
       "to": "V9",
+      "type": "related"
+    },
+    {
+      "from": "V10",
+      "to": "O15",
       "type": "related"
     },
     {
@@ -5223,7 +6587,17 @@
     },
     {
       "from": "V10",
+      "to": "K10",
+      "type": "related"
+    },
+    {
+      "from": "V10",
       "to": "K11",
+      "type": "related"
+    },
+    {
+      "from": "V10",
+      "to": "K12",
       "type": "related"
     },
     {
@@ -5238,12 +6612,42 @@
     },
     {
       "from": "V11",
+      "to": "V1",
+      "type": "composes_with"
+    },
+    {
+      "from": "V11",
+      "to": "O8",
+      "type": "composes_with"
+    },
+    {
+      "from": "V11",
+      "to": "R4",
+      "type": "composes_with"
+    },
+    {
+      "from": "V11",
+      "to": "R7",
+      "type": "composes_with"
+    },
+    {
+      "from": "V11",
       "to": "K6",
       "type": "related"
     },
     {
       "from": "V11",
       "to": "K7",
+      "type": "related"
+    },
+    {
+      "from": "V11",
+      "to": "R13",
+      "type": "related"
+    },
+    {
+      "from": "V11",
+      "to": "R14",
       "type": "related"
     },
     {
@@ -5258,7 +6662,42 @@
     },
     {
       "from": "V12",
+      "to": "O4",
+      "type": "related"
+    },
+    {
+      "from": "V12",
+      "to": "O6",
+      "type": "related"
+    },
+    {
+      "from": "V12",
+      "to": "O15",
+      "type": "related"
+    },
+    {
+      "from": "V12",
+      "to": "I6",
+      "type": "related"
+    },
+    {
+      "from": "V12",
+      "to": "V16",
+      "type": "related"
+    },
+    {
+      "from": "V12",
       "to": "V10",
+      "type": "related"
+    },
+    {
+      "from": "V12",
+      "to": "K11",
+      "type": "related"
+    },
+    {
+      "from": "V12",
+      "to": "K12",
       "type": "related"
     },
     {
@@ -5273,12 +6712,22 @@
     },
     {
       "from": "V13",
+      "to": "I4",
+      "type": "composes_with"
+    },
+    {
+      "from": "V13",
       "to": "O17",
       "type": "composes_with"
     },
     {
       "from": "V13",
       "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "V13",
+      "to": "V7",
       "type": "composes_with"
     },
     {
@@ -5313,7 +6762,32 @@
     },
     {
       "from": "V14",
+      "to": "K12",
+      "type": "composes_with"
+    },
+    {
+      "from": "V14",
+      "to": "O6",
+      "type": "composes_with"
+    },
+    {
+      "from": "V14",
+      "to": "O7",
+      "type": "composes_with"
+    },
+    {
+      "from": "V14",
+      "to": "O17",
+      "type": "composes_with"
+    },
+    {
+      "from": "V14",
       "to": "V1",
+      "type": "related"
+    },
+    {
+      "from": "V14",
+      "to": "V2",
       "type": "related"
     },
     {
@@ -5383,7 +6857,32 @@
     },
     {
       "from": "V15",
+      "to": "V17",
+      "type": "related"
+    },
+    {
+      "from": "V15",
+      "to": "S8",
+      "type": "related"
+    },
+    {
+      "from": "V15",
       "to": "R17",
+      "type": "related"
+    },
+    {
+      "from": "V15",
+      "to": "R7",
+      "type": "related"
+    },
+    {
+      "from": "V15",
+      "to": "R8",
+      "type": "related"
+    },
+    {
+      "from": "V15",
+      "to": "K5",
       "type": "related"
     },
     {
@@ -5528,6 +7027,21 @@
     },
     {
       "from": "V18",
+      "to": "O6",
+      "type": "composes_with"
+    },
+    {
+      "from": "V18",
+      "to": "O7",
+      "type": "composes_with"
+    },
+    {
+      "from": "V18",
+      "to": "O11",
+      "type": "composes_with"
+    },
+    {
+      "from": "V18",
       "to": "V16",
       "type": "related"
     },
@@ -5633,6 +7147,26 @@
     },
     {
       "from": "V20",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "V20",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "V20",
+      "to": "V1",
+      "type": "composes_with"
+    },
+    {
+      "from": "V20",
+      "to": "V11",
+      "type": "composes_with"
+    },
+    {
+      "from": "V20",
       "to": "V5",
       "type": "related"
     },
@@ -5647,8 +7181,18 @@
       "type": "related"
     },
     {
+      "from": "V20",
+      "to": "O2",
+      "type": "related"
+    },
+    {
+      "from": "V20",
+      "to": "I2",
+      "type": "related"
+    },
+    {
       "from": "V3",
-      "to": "V4",
+      "to": "V7",
       "type": "composes_with"
     },
     {
@@ -5659,6 +7203,16 @@
     {
       "from": "V3",
       "to": "V17",
+      "type": "composes_with"
+    },
+    {
+      "from": "V3",
+      "to": "V13",
+      "type": "composes_with"
+    },
+    {
+      "from": "V3",
+      "to": "V1",
       "type": "composes_with"
     },
     {
@@ -5679,6 +7233,16 @@
     {
       "from": "V3",
       "to": "V5",
+      "type": "related"
+    },
+    {
+      "from": "V3",
+      "to": "O15",
+      "type": "related"
+    },
+    {
+      "from": "V3",
+      "to": "I3",
       "type": "related"
     },
     {
@@ -5694,6 +7258,11 @@
     {
       "from": "V4",
       "to": "V8",
+      "type": "composes_with"
+    },
+    {
+      "from": "V4",
+      "to": "V14",
       "type": "composes_with"
     },
     {
@@ -5728,17 +7297,17 @@
     },
     {
       "from": "V5",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "V5",
       "to": "V1",
       "type": "composes_with"
     },
     {
       "from": "V5",
       "to": "V4",
-      "type": "composes_with"
-    },
-    {
-      "from": "V5",
-      "to": "V3",
       "type": "composes_with"
     },
     {
@@ -5753,6 +7322,16 @@
     },
     {
       "from": "V5",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "V5",
+      "to": "S5",
+      "type": "related"
+    },
+    {
+      "from": "V5",
       "to": "V6",
       "type": "related"
     },
@@ -5763,12 +7342,12 @@
     },
     {
       "from": "V6",
-      "to": "V4",
+      "to": "V8",
       "type": "composes_with"
     },
     {
       "from": "V6",
-      "to": "V8",
+      "to": "V14",
       "type": "composes_with"
     },
     {
@@ -5818,6 +7397,11 @@
     },
     {
       "from": "V7",
+      "to": "V1",
+      "type": "composes_with"
+    },
+    {
+      "from": "V7",
       "to": "V4",
       "type": "composes_with"
     },
@@ -5829,11 +7413,6 @@
     {
       "from": "V7",
       "to": "V8",
-      "type": "composes_with"
-    },
-    {
-      "from": "V7",
-      "to": "V3",
       "type": "composes_with"
     },
     {
@@ -5858,17 +7437,7 @@
     },
     {
       "from": "V7",
-      "to": "V4",
-      "type": "related"
-    },
-    {
-      "from": "V7",
-      "to": "V6",
-      "type": "related"
-    },
-    {
-      "from": "V7",
-      "to": "V8",
+      "to": "V3",
       "type": "related"
     },
     {
@@ -5945,6 +7514,71 @@
       "from": "V9",
       "to": "V1",
       "type": "composes_with"
+    },
+    {
+      "from": "V9",
+      "to": "R4",
+      "type": "related"
+    },
+    {
+      "from": "V9",
+      "to": "R7",
+      "type": "related"
+    },
+    {
+      "from": "V9",
+      "to": "R8",
+      "type": "related"
+    },
+    {
+      "from": "V9",
+      "to": "R9",
+      "type": "related"
+    },
+    {
+      "from": "V9",
+      "to": "R10",
+      "type": "related"
+    },
+    {
+      "from": "V9",
+      "to": "R13",
+      "type": "related"
+    },
+    {
+      "from": "V9",
+      "to": "R17",
+      "type": "related"
+    },
+    {
+      "from": "V9",
+      "to": "R20",
+      "type": "related"
+    },
+    {
+      "from": "V9",
+      "to": "K5",
+      "type": "related"
+    },
+    {
+      "from": "V9",
+      "to": "O5",
+      "type": "related"
+    },
+    {
+      "from": "V9",
+      "to": "O8",
+      "type": "related"
+    },
+    {
+      "from": "V9",
+      "to": "O16",
+      "type": "related"
+    },
+    {
+      "from": "V9",
+      "to": "H5",
+      "type": "related"
     }
   ],
   "stats": {

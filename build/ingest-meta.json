@@ -1,15 +1,20 @@
 {
   "H1": {
-    "summary": "Give the agent a single, durable identity that survives context resets — a self-representation loaded first, every time, that defines who the agent is, what it values, how it speaks, and what it has promised — so users encounter the same agent each session rather than a fresh stranger wearing the same name..",
+    "summary": "Give the agent a single, durable identity that survives context resets — a self-representation loaded first, every time, that defines who the agent is, what it values, how it speaks, and what it has promised — so users encounter the same agent each session rather than a fresh stranger wearing the same name.",
     "when_to_use": "Stable persona loaded at position 0 every session",
     "cost": "",
     "edges": {
       "related": [
         "S3",
+        "H2",
+        "H4",
+        "H5",
         "H7",
-        "H9"
+        "H9",
+        "H10"
       ],
       "composes_with": [
+        "K6",
         "K10",
         "K12",
         "V6",
@@ -20,35 +25,36 @@
     }
   },
   "H10": {
-    "summary": "Give each user a persistent, structured model of the working relationship — goals, history, preferences, ethical constraints — that the agent reads at every session so it can show up as a continuous collaborator, while guardrails and a hard right-to-deletion keep that continuity from drifting into simulated intimacy..",
+    "summary": "Give each user a persistent, structured model of the working relationship — goals, history, preferences, ethical constraints — that the agent reads at every session so it can show up as a continuous collaborator, while guardrails and a hard right-to-deletion keep that continuity from drifting into simulated intimacy.",
     "when_to_use": "Per-user relationship record with GDPR erasure support",
     "cost": "",
     "edges": {
+      "related": [
+        "H1",
+        "H2",
+        "H4",
+        "H7",
+        "H9",
+        "S3",
+        "V5"
+      ],
       "requires": [
         "H1",
         "K10",
-        "K12"
+        "K12",
+        "V5"
       ],
       "composes_with": [
         "H7",
         "K11",
+        "K6",
         "V1",
-        "H1",
-        "H5"
-      ],
-      "related": [
-        "H9",
-        "S3",
-        "H1",
-        "K10",
-        "K12",
-        "V5",
-        "H7"
+        "V14"
       ]
     }
   },
   "H2": {
-    "summary": "Promote R7 Reflexion's ephemeral, within-task verbal critiques into a durable lesson library that survives session resets, is injected into future contexts as light-weight guidance, and accumulates compounding improvement over time — giving the agent the closest thing to *learning* available without fine-tuning..",
+    "summary": "Promote R7 Reflexion's ephemeral, within-task verbal critiques into a durable lesson library that survives session resets, is injected into future contexts as light-weight guidance, and accumulates compounding improvement over time — giving the agent the closest thing to *learning* available without fine-tuning.",
     "when_to_use": "Distil session lessons into persistent improvement artefacts",
     "cost": "",
     "edges": {
@@ -61,25 +67,38 @@
       ],
       "composes_with": [
         "R7",
-        "K12",
+        "H1",
+        "K10",
+        "K6",
+        "V6",
         "V1",
+        "V14",
         "H4",
         "H9"
       ]
     }
   },
   "H3": {
-    "summary": "Detect when an agent's own output distribution has collapsed — the agent is \"thinking the same thoughts in a loop\" — and act on the detection by raising sampling temperature or injecting a contrarian cue, so the loop escapes its local optimum and resumes productive search..",
+    "summary": "Detect when an agent's own output distribution has collapsed — the agent is \"thinking the same thoughts in a loop\" — and act on the detection by raising sampling temperature or injecting a contrarian cue, so the loop escapes its local optimum and resumes productive search.",
     "when_to_use": "Drive exploration by seeking to reduce uncertainty",
     "cost": "",
     "edges": {
       "related": [
         "H1",
+        "R4",
+        "R3",
+        "R7",
+        "R9",
+        "R10",
         "R17",
         "H7"
       ],
       "composes_with": [
         "V9",
+        "V15",
+        "R20",
+        "K11",
+        "H2",
         "V20"
       ],
       "conflicts_with": [
@@ -88,7 +107,7 @@
     }
   },
   "H4": {
-    "summary": "Convert the agent's successful problem-solving work into reusable, parameterised procedures, so the next time a similar task arrives the agent retrieves and adapts a proven skill rather than re-deriving it from scratch — turning one solved task into a permanent capability..",
+    "summary": "Convert the agent's successful problem-solving work into reusable, parameterised procedures, so the next time a similar task arrives the agent retrieves and adapts a proven skill rather than re-deriving it from scratch — turning one solved task into a permanent capability.",
     "when_to_use": "Generalise successful trajectories into reusable callable skills",
     "cost": "",
     "edges": {
@@ -113,7 +132,7 @@
     }
   },
   "H5": {
-    "summary": "Close the loop on the constitution: detect gaps and degradations during operation, propose principle additions or revisions with reasoning and evidence, and route every proposal through a mandatory human reviewer before the active constitution changes..",
+    "summary": "Close the loop on the constitution: detect gaps and degradations during operation, propose principle additions or revisions with reasoning and evidence, and route every proposal through a mandatory human reviewer before the active constitution changes.",
     "when_to_use": "Agent proposes constitution updates; humans approve",
     "cost": "",
     "edges": {
@@ -124,6 +143,8 @@
         "V1"
       ],
       "composes_with": [
+        "V14",
+        "V10",
         "V15",
         "H2"
       ],
@@ -133,15 +154,20 @@
     }
   },
   "H6": {
-    "summary": "Maintain a continuous, autonomous inner monologue — a Thinker process separate from the user-facing Responder — that reflects between turns, consolidates across sessions, and writes its conclusions to a shared memory the Responder reads on the next interaction..",
+    "summary": "Maintain a continuous, autonomous inner monologue — a Thinker process separate from the user-facing Responder — that reflects between turns, consolidates across sessions, and writes its conclusions to a shared memory the Responder reads on the next interaction.",
     "when_to_use": "Background reasoning between turns; fast responder reads it",
     "cost": "",
     "edges": {
       "related": [
-        "R16"
+        "R16",
+        "H2",
+        "H4",
+        "H9",
+        "H5"
       ],
       "composes_with": [
-        "H1"
+        "H1",
+        "R7"
       ],
       "siblings": [
         "H3"
@@ -149,7 +175,7 @@
     }
   },
   "H7": {
-    "summary": "Close the style gap between agent and user: infer how this user prefers to be communicated with — from explicit corrections, implicit engagement signals, and their own register — and apply those parameters at generation time, while explicitly preserving the identity invariants H1 holds constant..",
+    "summary": "Close the style gap between agent and user: infer how this user prefers to be communicated with — from explicit corrections, implicit engagement signals, and their own register — and apply those parameters at generation time, while explicitly preserving the identity invariants H1 holds constant.",
     "when_to_use": "Per-user style model; adapts communication to each person",
     "cost": "",
     "edges": {
@@ -161,18 +187,17 @@
         "K12",
         "H10",
         "H2",
-        "V5",
-        "H1"
+        "V5"
       ],
       "related": [
         "S3",
-        "H1",
-        "H9"
+        "H9",
+        "H1"
       ]
     }
   },
   "H8": {
-    "summary": "Make the operational configuration of a production agent a continuously-improving artefact — tuned online against measured performance — while preventing the runaway, the reward-hack, and the unreviewed value-edit that unconstrained self-modification produces..",
+    "summary": "Make the operational configuration of a production agent a continuously-improving artefact — tuned online against measured performance — while preventing the runaway, the reward-hack, and the unreviewed value-edit that unconstrained self-modification produces.",
     "when_to_use": "Agent edits own system prompt within a governed allowlist",
     "cost": "",
     "edges": {
@@ -184,7 +209,9 @@
         "H5"
       ],
       "composes_with": [
-        "V16",
+        "V9",
+        "V10",
+        "V14",
         "V15",
         "H2",
         "H4"
@@ -196,18 +223,23 @@
     }
   },
   "H9": {
-    "summary": "Give an agent a persistent, queryable model of its own demonstrated capabilities, attempted tasks, outstanding commitments, and known limitations — each entry timestamped and confidence-scored, each subject to decay — so the agent can route on, communicate about, and reason from its own track record rather than guessing..",
+    "summary": "Give an agent a persistent, queryable model of its own demonstrated capabilities, attempted tasks, outstanding commitments, and known limitations — each entry timestamped and confidence-scored, each subject to decay — so the agent can route on, communicate about, and reason from its own track record rather than guessing.",
     "when_to_use": "Explicit model of own capabilities and knowledge state",
     "cost": "",
     "edges": {
       "composes_with": [
         "H1",
         "K11",
-        "K12"
+        "K12",
+        "K6",
+        "V9",
+        "V14"
       ],
       "related": [
         "H2",
         "H4",
+        "O3",
+        "O6",
         "H1",
         "K10",
         "K11"
@@ -215,7 +247,7 @@
     }
   },
   "I1": {
-    "summary": "Execute an external action from ordinary code, with parameters fixed by program logic rather than chosen by a language model, so the integration is deterministic, sub-10ms-latency-achievable, and auditable line-for-line..",
+    "summary": "Execute an external action from ordinary code, with parameters fixed by program logic rather than chosen by a language model, so the integration is deterministic, sub-10ms-latency-achievable, and auditable line-for-line.",
     "when_to_use": "Call a deterministic service; no model decision needed",
     "cost": "",
     "edges": {
@@ -226,18 +258,23 @@
       ],
       "composes_with": [
         "V5",
-        "V1"
+        "V9",
+        "V14",
+        "V1",
+        "R4"
       ]
     }
   },
   "I2": {
-    "summary": "Make external actions LLM-routable without giving up typed execution: the LLM reads tool descriptions and picks one with structured arguments; code validates and executes it; the result flows back into the model's context so reasoning continues..",
+    "summary": "Make external actions LLM-routable without giving up typed execution: the LLM reads tool descriptions and picks one with structured arguments; code validates and executes it; the result flows back into the model's context so reasoning continues.",
     "when_to_use": "Model selects and invokes a typed function",
     "cost": "",
     "edges": {
       "related": [
         "I1",
-        "R4"
+        "R4",
+        "R13",
+        "V3"
       ],
       "siblings": [
         "I3",
@@ -245,12 +282,16 @@
       ],
       "composes_with": [
         "V13",
-        "V1"
+        "V20",
+        "V9",
+        "V1",
+        "V14",
+        "V6"
       ]
     }
   },
   "I3": {
-    "summary": "Expose a set of tools through a separate protocol-conformant server so multiple agents and clients can discover, authenticate, and invoke those tools without per-agent integration code — accepting the resulting schema-token cost as a first-class budget item..",
+    "summary": "Expose a set of tools through a separate protocol-conformant server so multiple agents and clients can discover, authenticate, and invoke those tools without per-agent integration code — accepting the resulting schema-token cost as a first-class budget item.",
     "when_to_use": "Standardised tool discovery; 5+ tools shared across agents",
     "cost": "",
     "edges": {
@@ -263,8 +304,11 @@
         "I4"
       ],
       "composes_with": [
+        "I5",
         "V6",
         "V8",
+        "V3",
+        "V14",
         "R4",
         "R13"
       ],
@@ -274,7 +318,7 @@
     }
   },
   "I4": {
-    "summary": "Let the agent use the existing CLI ecosystem as its tool surface — invoking `git`, `docker`, `gh`, `kubectl`, cloud CLIs, and Unix utilities directly — so the integration carries zero schema-token overhead and inherits decades of battle-tested behaviour..",
+    "summary": "Let the agent use the existing CLI ecosystem as its tool surface — invoking `git`, `docker`, `gh`, `kubectl`, cloud CLIs, and Unix utilities directly — so the integration carries zero schema-token overhead and inherits decades of battle-tested behaviour.",
     "when_to_use": "Wrap an existing CLI as an agent action",
     "cost": "",
     "edges": {
@@ -288,13 +332,17 @@
       ],
       "composes_with": [
         "V6",
+        "V9",
         "V11",
-        "V1"
+        "V14",
+        "V1",
+        "R4",
+        "R13"
       ]
     }
   },
   "I5": {
-    "summary": "Make an agent self-describing on the open web: serve a stable JSON document at a well-known path that names its identity, skills, endpoint, authentication, and protocol version, so other agents can locate it, verify compatibility, and call it without hard-coded configuration..",
+    "summary": "Make an agent self-describing on the open web: serve a stable JSON document at a well-known path that names its identity, skills, endpoint, authentication, and protocol version, so other agents can locate it, verify compatibility, and call it without hard-coded configuration.",
     "when_to_use": "Publish self-describing JSON for agent discovery",
     "cost": "",
     "edges": {
@@ -305,12 +353,16 @@
         "I1"
       ],
       "composes_with": [
-        "V7"
+        "O6",
+        "O7",
+        "V7",
+        "V14",
+        "V6"
       ]
     }
   },
   "I6": {
-    "summary": "Make a cross-boundary agent call interoperable by default — discover the executor via its Agent Card, submit a typed task, stream status, receive a structured result, and handle failure as a defined protocol event rather than a bespoke integration..",
+    "summary": "Make a cross-boundary agent call interoperable by default — discover the executor via its Agent Card, submit a typed task, stream status, receive a structured result, and handle failure as a defined protocol event rather than a bespoke integration.",
     "when_to_use": "Structured task delegation to another agent via A2A protocol",
     "cost": "",
     "edges": {
@@ -330,7 +382,7 @@
     }
   },
   "K1": {
-    "summary": "Ground a model's response in a specific, external, updatable corpus by retrieving the passages relevant to each query at query time and injecting them into the prompt — without retraining the model..",
+    "summary": "Ground a model's response in a specific, external, updatable corpus by retrieving the passages relevant to each query at query time and injecting them into the prompt — without retraining the model.",
     "when_to_use": "Q&A over external corpus; citations required",
     "cost": "",
     "edges": {
@@ -353,12 +405,15 @@
     }
   },
   "K10": {
-    "summary": "Give an agent continuity beyond a single context by writing knowledge to an external store and retrieving it when relevant — so the agent improves over time without retraining..",
+    "summary": "Give an agent continuity beyond a single context by writing knowledge to an external store and retrieving it when relevant — so the agent improves over time without retraining.",
     "when_to_use": "Cross-session fact storage; retrieved by similarity",
     "cost": "",
     "edges": {
       "related": [
         "K1",
+        "K8",
+        "K11",
+        "K12",
         "H2",
         "H4",
         "H10"
@@ -369,20 +424,25 @@
     }
   },
   "K11": {
-    "summary": "Maintain coherence across a long agentic session by keeping a running, compact record of the agent's own observations and actions, and prioritising that record over external retrieval..",
+    "summary": "Maintain coherence across a long agentic session by keeping a running, compact record of the agent's own observations and actions, and prioritising that record over external retrieval.",
     "when_to_use": "Append-only activity log; exploits prefix caching",
     "cost": "",
     "edges": {
       "composes_with": [
-        "K12"
+        "K12",
+        "K6",
+        "K7",
+        "K1"
       ],
       "related": [
-        "K10"
+        "K10",
+        "K8",
+        "K9"
       ]
     }
   },
   "K12": {
-    "summary": "Give an agent a memory the LLM itself maintains as structured, dense, token-efficient notes — paying more at *write* time so every *read* is cheap, navigable, and useful..",
+    "summary": "Give an agent a memory the LLM itself maintains as structured, dense, token-efficient notes — paying more at *write* time so every *read* is cheap, navigable, and useful.",
     "when_to_use": "LLM curates dense structured notes; cheap reads",
     "cost": "",
     "edges": {
@@ -390,15 +450,24 @@
         "K10",
         "K11",
         "K6"
+      ],
+      "composes_with": [
+        "S6",
+        "V14"
       ]
     }
   },
   "K13": {
-    "summary": "Define the exact bundle of operational context a specific agent workflow always needs — not \"relevant documents\" but precisely *these fields from these sources in these shapes* — and then build assembly to deliver that bundle reliably, rather than letting the agent reconstruct it dynamically from raw search results on every run..",
+    "summary": "Define the exact bundle of operational context a specific agent workflow always needs — not \"relevant documents\" but precisely *these fields from these sources in these shapes* — and then build assembly to deliver that bundle reliably, rather than letting the agent reconstruct it dynamically from raw search results on every run.",
     "when_to_use": "Specify the exact context bundle a workflow always needs — solves the rediscovery problem",
     "cost": "",
     "edges": {
       "related": [
+        "K1",
+        "K3",
+        "K4",
+        "K10",
+        "K11",
         "K12",
         "K5"
       ],
@@ -409,78 +478,110 @@
     }
   },
   "K2": {
-    "summary": "Improve retrieval quality by transforming the user's raw query into a form better matched to the corpus, in the moment between the user submitting the query and the retriever running..",
+    "summary": "Improve retrieval quality by transforming the user's raw query into a form better matched to the corpus, in the moment between the user submitting the query and the retriever running.",
     "when_to_use": "Improve retrieval by rewriting the query first",
     "cost": "",
     "edges": {
       "related": [
         "K1",
-        "K5"
+        "K5",
+        "R19"
       ],
       "composes_with": [
+        "K3",
+        "K4",
         "K5"
       ]
     }
   },
   "K3": {
-    "summary": "Answer queries that require connecting information across many documents — multi-hop relationship questions and whole-corpus synthesis — by indexing the corpus as a graph of entities and relationships instead of a flat set of chunks..",
+    "summary": "Answer queries that require connecting information across many documents — multi-hop relationship questions and whole-corpus synthesis — by indexing the corpus as a graph of entities and relationships instead of a flat set of chunks.",
     "when_to_use": "Multi-hop reasoning; entity relationships; global synthesis",
     "cost": "",
     "edges": {
       "related": [
-        "K1"
+        "K1",
+        "K9"
       ],
       "siblings": [
         "K4"
+      ],
+      "composes_with": [
+        "K2",
+        "K5"
       ]
     }
   },
   "K4": {
-    "summary": "Answer queries that vary in scope — from a precise fact to a broad theme — by indexing the corpus as a multi-level summary tree and retrieving from the level of abstraction the query requires..",
+    "summary": "Answer queries that vary in scope — from a precise fact to a broad theme — by indexing the corpus as a multi-level summary tree and retrieving from the level of abstraction the query requires.",
     "when_to_use": "Variable abstraction levels; document trees",
     "cost": "",
     "edges": {
       "related": [
         "K1",
+        "K9",
         "K6"
       ],
       "siblings": [
         "K3"
+      ],
+      "composes_with": [
+        "K2",
+        "K5"
       ]
     }
   },
   "K5": {
-    "summary": "Make retrieval conditional and self-correcting, so the system retrieves only when retrieval helps and recovers when retrieval fails, instead of retrieving blindly on every query and trusting whatever returns..",
+    "summary": "Make retrieval conditional and self-correcting, so the system retrieves only when retrieval helps and recovers when retrieval fails, instead of retrieving blindly on every query and trusting whatever returns.",
     "when_to_use": "Gate retrieval; self-critique retrieved results",
     "cost": "",
     "edges": {
       "related": [
-        "K2"
+        "K1",
+        "K4",
+        "K2",
+        "V15"
+      ],
+      "composes_with": [
+        "K2",
+        "V9"
       ]
     }
   },
   "K6": {
-    "summary": "Keep a long-running task within the context window by summarising older or bulky content into a denser form, preserving as much of its information as the reclaimed space allows..",
+    "summary": "Keep a long-running task within the context window by summarising older or bulky content into a denser form, preserving as much of its information as the reclaimed space allows.",
     "when_to_use": "Reduce context size; session history management",
     "cost": "",
     "edges": {
       "related": [
         "K7",
+        "K9",
         "K4",
         "K10",
         "K11",
         "K12"
+      ],
+      "composes_with": [
+        "K8"
       ]
     }
   },
   "K7": {
-    "summary": "Reclaim context-window space by deleting content that has served its purpose, without summarising or altering what remains..",
+    "summary": "Reclaim context-window space by deleting content that has served its purpose, without summarising or altering what remains.",
     "when_to_use": "Remove spent spans without lossy summarisation",
     "cost": "",
-    "edges": {}
+    "edges": {
+      "related": [
+        "K6",
+        "K11"
+      ],
+      "composes_with": [
+        "K8"
+      ]
+    }
   },
   "K8": {
-    "summary": "Externalise the model's working state into a persistent, inspectable region of the context, so intermediate results survive from one step to the next within a task..",
+    "summary": "Externalise the model's working state into a persistent, inspectable region of the context, so intermediate results survive from one step to the next within a task.",
     "when_to_use": "Explicit in-context state the model writes to itself",
     "cost": "",
     "edges": {
@@ -489,17 +590,26 @@
         "K7",
         "K10",
         "K11",
-        "K12"
+        "K12",
+        "R4",
+        "R3",
+        "V10"
       ]
     }
   },
   "K9": {
-    "summary": "Make the model's full working knowledge available by loading it all into the context window, trading per-call token cost for the elimination of a retrieval system..",
+    "summary": "Make the model's full working knowledge available by loading it all into the context window, trading per-call token cost for the elimination of a retrieval system.",
     "when_to_use": "Whole corpus fits in window; repeated queries",
     "cost": "",
     "edges": {
       "related": [
-        "K1"
+        "K1",
+        "K3",
+        "K4",
+        "K11"
+      ],
+      "composes_with": [
+        "K6"
       ]
     }
   },
@@ -532,7 +642,7 @@
     }
   },
   "O10": {
-    "summary": "Coordinate a fleet of specialised agents without a central orchestrator, by giving each agent the authority to hand control to any peer it deems better suited to the current step..",
+    "summary": "Coordinate a fleet of specialised agents without a central orchestrator, by giving each agent the authority to hand control to any peer it deems better suited to the current step.",
     "when_to_use": "No central controller; shared environment coordination",
     "cost": "",
     "edges": {
@@ -540,30 +650,39 @@
         "O7",
         "O6",
         "O11",
-        "O3"
+        "O3",
+        "V9",
+        "V14"
       ],
       "composes_with": [
-        "O15"
+        "O15",
+        "O17",
+        "S6",
+        "R4"
       ]
     }
   },
   "O11": {
-    "summary": "Replace a fixed plan or a central orchestrator's task assignments with a shared memory whose evolving state, read by a thin control unit, decides which specialist runs next — so the set and order of contributors adapts to what has accumulated, not to what was decreed up front..",
+    "summary": "Replace a fixed plan or a central orchestrator's task assignments with a shared memory whose evolving state, read by a thin control unit, decides which specialist runs next — so the set and order of contributors adapts to what has accumulated, not to what was decreed up front.",
     "when_to_use": "Asynchronous shared state; agents post and consume",
     "cost": "",
     "edges": {
       "related": [
         "O6",
         "K10",
-        "O2"
+        "O2",
+        "V9"
       ],
       "composes_with": [
-        "K10"
+        "K10",
+        "V14",
+        "O17",
+        "O4"
       ]
     }
   },
   "O12": {
-    "summary": "Use *adversarial argument between agents holding opposing positions* — not independent critique, not iterative self-refinement — to surface the assumptions, counter-evidence, and failure modes a single agent's reasoning would not see, then synthesise the exchange into a more accurate or better-considered final answer..",
+    "summary": "Use *adversarial argument between agents holding opposing positions* — not independent critique, not iterative self-refinement — to surface the assumptions, counter-evidence, and failure modes a single agent's reasoning would not see, then synthesise the exchange into a more accurate or better-considered final answer.",
     "when_to_use": "Two agents argue opposing positions; synthesiser integrates",
     "cost": "",
     "edges": {
@@ -579,7 +698,7 @@
     }
   },
   "O13": {
-    "summary": "Coordinate agents whose objectives diverge by *structure*, not just *opinion* — give each agent a private utility function and a walk-away threshold, run them through a bargaining protocol that produces offers, counter-offers, and concessions, and terminate on a deal that all parties accept or a formally-declared no-deal..",
+    "summary": "Coordinate agents whose objectives diverge by *structure*, not just *opinion* — give each agent a private utility function and a walk-away threshold, run them through a bargaining protocol that produces offers, counter-offers, and concessions, and terminate on a deal that all parties accept or a formally-declared no-deal.",
     "when_to_use": "Structured protocol for conflicting objectives",
     "cost": "",
     "edges": {
@@ -587,31 +706,43 @@
         "O12",
         "O5",
         "O9",
-        "O11"
+        "O11",
+        "V9"
       ],
       "composes_with": [
+        "O4",
+        "O15",
+        "V14",
         "V15",
+        "V1",
         "S6"
       ]
     }
   },
   "O14": {
-    "summary": "Make data ownership the primary unit of agent specialisation, so the routing question becomes \"*which dataset holds the answer?*\" rather than \"*which capability is needed?*\", and each owner agent is tuned to one bounded corpus instead of one shared one..",
+    "summary": "Make data ownership the primary unit of agent specialisation, so the routing question becomes \"*which dataset holds the answer?*\" rather than \"*which capability is needed?*\", and each owner agent is tuned to one bounded corpus instead of one shared one.",
     "when_to_use": "Agent edits its own tools",
     "cost": "",
     "edges": {
       "related": [
         "O3",
         "O6",
+        "O11",
+        "K10",
         "O7"
       ],
       "composes_with": [
-        "K1"
+        "K1",
+        "K2",
+        "K5",
+        "O4",
+        "V9",
+        "V14"
       ]
     }
   },
   "O15": {
-    "summary": "Move a live interaction from one agent to another inside the same system without losing context, so the user does not repeat themselves and the receiving agent starts from the conversation's true state — not from zero, and not from a noisy transcript..",
+    "summary": "Move a live interaction from one agent to another inside the same system without losing context, so the user does not repeat themselves and the receiving agent starts from the conversation's true state — not from zero, and not from a noisy transcript.",
     "when_to_use": "Structured state transfer between agents mid-task",
     "cost": "",
     "edges": {
@@ -631,24 +762,29 @@
     }
   },
   "O16": {
-    "summary": "Build a single agent that is competent across all phases of a complex task by stacking the loop primitives each phase needs — exploration on a ReAct loop, planning on plan-execute, repair on generate-test-repair, recovery on bounded retry — rather than trying to force every phase through one primitive..",
+    "summary": "Build a single agent that is competent across all phases of a complex task by stacking the loop primitives each phase needs — exploration on a ReAct loop, planning on plan-execute, repair on generate-test-repair, recovery on bounded retry — rather than trying to force every phase through one primitive.",
     "when_to_use": "Stack multiple loop primitives; most production agents are this",
     "cost": "",
     "edges": {
+      "composes_with": [
+        "R4",
+        "R3",
+        "R10",
+        "O17",
+        "O4",
+        "V14",
+        "V15"
+      ],
       "related": [
         "O8",
         "O6",
-        "O2"
-      ],
-      "composes_with": [
-        "O17",
-        "O4",
-        "V15"
+        "O2",
+        "V9"
       ]
     }
   },
   "O17": {
-    "summary": "When a sub-task does not need the parent's accumulated context, spawn the sub-agent with a fresh window holding only that sub-task's brief and inputs — so the sub-agent reasons over a tight, on-topic context instead of inheriting whatever the parent happens to be carrying..",
+    "summary": "When a sub-task does not need the parent's accumulated context, spawn the sub-agent with a fresh window holding only that sub-task's brief and inputs — so the sub-agent reasons over a tight, on-topic context instead of inheriting whatever the parent happens to be carrying.",
     "when_to_use": "Fresh isolated context per sub-task — mandatory companion to O6",
     "cost": "",
     "edges": {
@@ -670,7 +806,7 @@
     }
   },
   "O18": {
-    "summary": "Design the shared context given to all parallel workers as a single stable, cacheable prefix; fire a warm-up call (or time the first worker call) to establish that prefix in the provider KV cache; then dispatch all remaining workers within the cache TTL — so the shared portion of each worker's prompt is served from cache at ~10% of the normal prefill cost rather than re-computed independently for each worker..",
+    "summary": "Design the shared context given to all parallel workers as a single stable, cacheable prefix; fire a warm-up call (or time the first worker call) to establish that prefix in the provider KV cache; then dispatch all remaining workers within the cache TTL — so the shared portion of each worker's prompt is served from cache at ~10% of the normal prefill cost rather than re-computed independently for each worker.",
     "when_to_use": "Establish cacheable shared prefix before fan-out — ~85% cost reduction on shared context",
     "cost": "",
     "edges": {
@@ -687,7 +823,7 @@
     }
   },
   "O2": {
-    "summary": "Decompose a task into a known, ordered sequence of LLM calls with deterministic transitions between them, so each step has its own focused setup and can be independently tested, logged, and gated — and so the whole pipeline is predictable in cost and behaviour..",
+    "summary": "Decompose a task into a known, ordered sequence of LLM calls with deterministic transitions between them, so each step has its own focused setup and can be independently tested, logged, and gated — and so the whole pipeline is predictable in cost and behaviour.",
     "when_to_use": "Fixed-sequence pipeline; output of step N feeds step N+1",
     "cost": "",
     "edges": {
@@ -710,15 +846,15 @@
     }
   },
   "O3": {
-    "summary": "Make the choice of handler an explicit, inspectable, swappable step, so each input type meets a handler tuned for it and the routing decision itself becomes a first-class object the system can log, test, and improve..",
+    "summary": "Make the choice of handler an explicit, inspectable, swappable step, so each input type meets a handler tuned for it and the routing decision itself becomes a first-class object the system can log, test, and improve.",
     "when_to_use": "Classify input; dispatch to specialist prompt or agent",
     "cost": "",
     "edges": {
       "composes_with": [
         "O1",
         "O2",
-        "R4",
-        "R7",
+        "V14",
+        "V9",
         "V15"
       ],
       "related": [
@@ -730,7 +866,7 @@
     }
   },
   "O4": {
-    "summary": "When sub-tasks of a request are genuinely independent of each other, run them simultaneously across distinct LLM calls and aggregate the results programmatically, so wall-clock latency collapses from the sum of the calls to the maximum..",
+    "summary": "When sub-tasks of a request are genuinely independent of each other, run them simultaneously across distinct LLM calls and aggregate the results programmatically, so wall-clock latency collapses from the sum of the calls to the maximum.",
     "when_to_use": "Independent sub-tasks run concurrently",
     "cost": "",
     "edges": {
@@ -745,15 +881,16 @@
         "R17"
       ],
       "composes_with": [
-        "O6",
         "O17",
         "O2",
+        "V9",
+        "V14",
         "V15"
       ]
     }
   },
   "O5": {
-    "summary": "Improve output quality by separating the generator and the judge into two distinct agents — different sessions, typically different setups, potentially different models — so the evaluation is genuinely independent of the work it scores, and the generator iterates on a feedback signal it cannot foresee or sandbag..",
+    "summary": "Improve output quality by separating the generator and the judge into two distinct agents — different sessions, typically different setups, potentially different models — so the evaluation is genuinely independent of the work it scores, and the generator iterates on a feedback signal it cannot foresee or sandbag.",
     "when_to_use": "Generator + judge in a quality improvement loop",
     "cost": "",
     "edges": {
@@ -769,7 +906,7 @@
     }
   },
   "O6": {
-    "summary": "Have a central LLM decide *at runtime* how to break a goal into sub-tasks and which worker each sub-task goes to, then collect and synthesise the workers' returns — so the decomposition adapts to the specific input instead of being baked into a pipeline..",
+    "summary": "Have a central LLM decide *at runtime* how to break a goal into sub-tasks and which worker each sub-task goes to, then collect and synthesise the workers' returns — so the decomposition adapts to the specific input instead of being baked into a pipeline.",
     "when_to_use": "Dynamic task decomposition; workers run in isolation",
     "cost": "",
     "edges": {
@@ -793,20 +930,28 @@
     }
   },
   "O7": {
-    "summary": "Scale orchestration past the point where a single coordinator can hold all worker context, by stacking O6 Orchestrator-Workers nodes into a tree where every supervisor manages only its direct children..",
+    "summary": "Scale orchestration past the point where a single coordinator can hold all worker context, by stacking O6 Orchestrator-Workers nodes into a tree where every supervisor manages only its direct children.",
     "when_to_use": "O6 applied recursively; supervisor of supervisors",
     "cost": "",
     "edges": {
       "related": [
         "O6",
+        "V9",
+        "V14",
         "O10",
         "O11",
         "O16"
+      ],
+      "composes_with": [
+        "O4",
+        "O17",
+        "S6",
+        "R4"
       ]
     }
   },
   "O8": {
-    "summary": "Improve a single carried state across rounds by running the same sequence of distinct agents — each with its own role, prompt, and output contract — on the state, until a termination judge says the state is good enough or a hard bound trips..",
+    "summary": "Improve a single carried state across rounds by running the same sequence of distinct agents — each with its own role, prompt, and output contract — on the state, until a termination judge says the state is good enough or a hard bound trips.",
     "when_to_use": "Long-running workflows; periodic trigger",
     "cost": "",
     "edges": {
@@ -815,16 +960,21 @@
         "R4",
         "R7",
         "O5",
-        "O6"
+        "O6",
+        "V9"
       ],
       "composes_with": [
+        "O4",
         "O9",
-        "V15"
+        "V14",
+        "V15",
+        "K6",
+        "K7"
       ]
     }
   },
   "O9": {
-    "summary": "Get genuinely independent evaluation of an output by running several differently-configured critic agents in parallel against it, then synthesising their critiques — so the verdict reflects multiple lenses no single critic (or self-critique) would produce..",
+    "summary": "Get genuinely independent evaluation of an output by running several differently-configured critic agents in parallel against it, then synthesising their critiques — so the verdict reflects multiple lenses no single critic (or self-critique) would produce.",
     "when_to_use": "Multiple independent reviewers on a single output",
     "cost": "",
     "edges": {
@@ -838,13 +988,18 @@
       ],
       "composes_with": [
         "O4",
+        "V9",
+        "V14",
+        "V1",
         "V15",
+        "S3",
+        "S5",
         "S6"
       ]
     }
   },
   "R1": {
-    "summary": "Elicit explicit intermediate reasoning from a capable instruction-tuned model by adding a single short trigger phrase to an otherwise zero-shot prompt, so the model writes its working out before committing to an answer instead of jumping straight to a guess..",
+    "summary": "Elicit explicit intermediate reasoning from a capable instruction-tuned model by adding a single short trigger phrase to an otherwise zero-shot prompt, so the model writes its working out before committing to an answer instead of jumping straight to a guess.",
     "when_to_use": "Elicit reasoning without examples",
     "cost": "",
     "edges": {
@@ -865,7 +1020,7 @@
     }
   },
   "R10": {
-    "summary": "Search the solution space of an agentic task with full Monte Carlo Tree Search — selection by UCB, expansion, simulation, and value backpropagation — using the LLM as action generator, value estimator, and verbal critic, so the agent can revisit any node, redirect from any dead end, and converge on high-quality trajectories on problems that defeat single-path patterns..",
+    "summary": "Search the solution space of an agentic task with full Monte Carlo Tree Search — selection by UCB, expansion, simulation, and value backpropagation — using the LLM as action generator, value estimator, and verbal critic, so the agent can revisit any node, redirect from any dead end, and converge on high-quality trajectories on problems that defeat single-path patterns.",
     "when_to_use": "MCTS + ReAct + Reflexion unified",
     "cost": "",
     "edges": {
@@ -876,15 +1031,19 @@
         "R4",
         "R7",
         "R9",
+        "V9",
         "R3"
       ],
       "composes_with": [
-        "V15"
+        "V14",
+        "V15",
+        "R11",
+        "O17"
       ]
     }
   },
   "R11": {
-    "summary": "Replace re-deriving a reasoning structure on every hard problem with retrieving and instantiating a previously distilled *thought-template*, so the cost of search is paid once across a problem family rather than every problem in it..",
+    "summary": "Replace re-deriving a reasoning structure on every hard problem with retrieving and instantiating a previously distilled *thought-template*, so the cost of search is paid once across a problem family rather than every problem in it.",
     "when_to_use": "Reusable reasoning patterns distilled from prior runs",
     "cost": "",
     "edges": {
@@ -901,12 +1060,15 @@
       ],
       "composes_with": [
         "K1",
-        "K10"
+        "K10",
+        "R7",
+        "V9",
+        "V14"
       ]
     }
   },
   "R12": {
-    "summary": "Cut end-to-end latency on long-form, structurally separable answers by writing the outline once and expanding every point in parallel, instead of decoding the whole answer token-by-token in a single sequential stream..",
+    "summary": "Cut end-to-end latency on long-form, structurally separable answers by writing the outline once and expanding every point in parallel, instead of decoding the whole answer token-by-token in a single sequential stream.",
     "when_to_use": "Outline first; generate sections in parallel",
     "cost": "",
     "edges": {
@@ -915,12 +1077,18 @@
       ],
       "related": [
         "R3",
+        "R9",
         "S4"
+      ],
+      "composes_with": [
+        "V9",
+        "S6",
+        "V15"
       ]
     }
   },
   "R13": {
-    "summary": "Make the agent's Action a *program*, not a tool call — so one step can call several tools, branch on what they return, loop, and keep intermediate results in variables — and execute that program in a sandbox whose stdout, return value, and stack traces become the next Observation..",
+    "summary": "Make the agent's Action a *program*, not a tool call — so one step can call several tools, branch on what they return, loop, and keep intermediate results in variables — and execute that program in a sandbox whose stdout, return value, and stack traces become the next Observation.",
     "when_to_use": "Python as action language; ~20pp accuracy gain over JSON tool calls",
     "cost": "",
     "edges": {
@@ -948,7 +1116,7 @@
     }
   },
   "R14": {
-    "summary": "For tasks whose hard part is computation — arithmetic, algebra, financial sums, statistical operations, symbolic manipulation — let the model write a short program and let a Python (or equivalent) interpreter compute the answer, instead of asking the model to compute in natural-language tokens..",
+    "summary": "For tasks whose hard part is computation — arithmetic, algebra, financial sums, statistical operations, symbolic manipulation — let the model write a short program and let a Python (or equivalent) interpreter compute the answer, instead of asking the model to compute in natural-language tokens.",
     "when_to_use": "Delegate computation to a deterministic interpreter",
     "cost": "",
     "edges": {
@@ -956,25 +1124,47 @@
         "R13"
       ],
       "related": [
-        "V8"
+        "R1",
+        "R2",
+        "V8",
+        "R7",
+        "R5"
       ],
       "composes_with": [
-        "R17"
+        "R17",
+        "V9",
+        "V14",
+        "O4"
       ]
     }
   },
   "R16": {
-    "summary": "Decouple the latency budget of *responding* from the latency budget of *thinking*, so the agent can answer every turn within a hard real-time bound while still performing arbitrarily deep reasoning whose results land when they are ready..",
+    "summary": "Decouple the latency budget of *responding* from the latency budget of *thinking*, so the agent can answer every turn within a hard real-time bound while still performing arbitrarily deep reasoning whose results land when they are ready.",
     "when_to_use": "Fast responder + slow deliberative reasoner in parallel",
     "cost": "",
     "edges": {
       "siblings": [
         "H6"
+      ],
+      "related": [
+        "R3",
+        "R4",
+        "R1"
+      ],
+      "composes_with": [
+        "K8",
+        "K12",
+        "O3",
+        "V9",
+        "V14",
+        "R3",
+        "R4",
+        "R7"
       ]
     }
   },
   "R17": {
-    "summary": "Improve the reliability of a reasoning step by sampling N independent attempts at the *same* prompt and selecting the answer they most agree on, instead of trusting a single greedy decode..",
+    "summary": "Improve the reliability of a reasoning step by sampling N independent attempts at the *same* prompt and selecting the answer they most agree on, instead of trusting a single greedy decode.",
     "when_to_use": "Sample N reasoning paths; majority vote",
     "cost": "",
     "edges": {
@@ -998,21 +1188,30 @@
     }
   },
   "R18": {
-    "summary": "Solve problems whose natural decomposition is not a tree by reasoning over a directed acyclic graph of thoughts in which sub-results can be *aggregated* — merged, sorted, deduplicated, combined — and not only expanded and pruned..",
+    "summary": "Solve problems whose natural decomposition is not a tree by reasoning over a directed acyclic graph of thoughts in which sub-results can be *aggregated* — merged, sorted, deduplicated, combined — and not only expanded and pruned.",
     "when_to_use": "DAG of reasoning operations; non-linear thought",
     "cost": "",
     "edges": {
       "siblings": [
         "R9",
-        "R10"
+        "R10",
+        "R11",
+        "R12"
       ],
       "related": [
         "R17"
+      ],
+      "composes_with": [
+        "V9",
+        "V15",
+        "V14",
+        "R1",
+        "R2"
       ]
     }
   },
   "R19": {
-    "summary": "Improve reasoning on specific, detail-heavy questions by first answering a strictly more abstract version of them — extracting the underlying principle, concept, or class of fact — and then applying that principle back to the specific case..",
+    "summary": "Improve reasoning on specific, detail-heavy questions by first answering a strictly more abstract version of them — extracting the underlying principle, concept, or class of fact — and then applying that principle back to the specific case.",
     "when_to_use": "Abstract to principle before answering",
     "cost": "",
     "edges": {
@@ -1022,12 +1221,16 @@
         "R3"
       ],
       "composes_with": [
-        "K5"
+        "K1",
+        "K5",
+        "S2",
+        "S6",
+        "V15"
       ]
     }
   },
   "R2": {
-    "summary": "Elicit step-by-step intermediate reasoning by *demonstrating* it in a small set of in-prompt examples — `(question, reasoning trace, answer)` triples — so the model both adopts the reasoning style and produces the answer in the demonstrated form..",
+    "summary": "Elicit step-by-step intermediate reasoning by *demonstrating* it in a small set of in-prompt examples — `(question, reasoning trace, answer)` triples — so the model both adopts the reasoning style and produces the answer in the demonstrated form.",
     "when_to_use": "Show worked reasoning before the target question",
     "cost": "",
     "edges": {
@@ -1047,7 +1250,7 @@
     }
   },
   "R20": {
-    "summary": "Reduce hallucination in a single-shot answer by interrogating it: surface the factual claims the answer rests on as explicit verification questions, answer each one independently of the draft, and rewrite the draft from those answers..",
+    "summary": "Reduce hallucination in a single-shot answer by interrogating it: surface the factual claims the answer rests on as explicit verification questions, answer each one independently of the draft, and rewrite the draft from those answers.",
     "when_to_use": "Generate answer; verify each claim independently",
     "cost": "",
     "edges": {
@@ -1062,7 +1265,7 @@
     }
   },
   "R3": {
-    "summary": "Separate the act of *deciding what to do* from the act of *doing it* by putting them in different LLM calls, so the Planner sees the whole task before committing to an order, the Executor runs efficiently against a stable plan, and the plan itself is an inspectable artifact a human or a downstream component can read, edit, or gate on before any step runs..",
+    "summary": "Separate the act of *deciding what to do* from the act of *doing it* by putting them in different LLM calls, so the Planner sees the whole task before committing to an order, the Executor runs efficiently against a stable plan, and the plan itself is an inspectable artifact a human or a downstream component can read, edit, or gate on before any step runs.",
     "when_to_use": "Two-phase: explicit plan, then execute",
     "cost": "",
     "edges": {
@@ -1089,7 +1292,7 @@
     }
   },
   "R4": {
-    "summary": "Let an agent make its next decision *after* seeing the result of its last action, by interleaving short reasoning traces with tool calls and feeding each tool's return back into the model — so the trajectory adapts to what the environment actually says, instead of executing a plan written before any of it was known..",
+    "summary": "Let an agent make its next decision *after* seeing the result of its last action, by interleaving short reasoning traces with tool calls and feeding each tool's return back into the model — so the trajectory adapts to what the environment actually says, instead of executing a plan written before any of it was known.",
     "when_to_use": "Adaptive tool use; each action informs the next",
     "cost": "",
     "edges": {
@@ -1120,19 +1323,25 @@
     }
   },
   "R5": {
-    "summary": "Separate reasoning from observation so the model plans all tool invocations once, with placeholders for the results, and never re-enters the loop until every external call has completed and the evidence is ready to synthesise..",
+    "summary": "Separate reasoning from observation so the model plans all tool invocations once, with placeholders for the results, and never re-enters the loop until every external call has completed and the evidence is ready to synthesise.",
     "when_to_use": "Independent tool calls; 5$\\times$ token efficiency vs ReAct",
     "cost": "",
     "edges": {
       "related": [
         "R4",
         "R3",
+        "R7",
+        "R9",
+        "R10",
         "S6",
         "S2"
       ],
       "composes_with": [
         "O4",
-        "R4"
+        "V9",
+        "V14",
+        "K7",
+        "O3"
       ],
       "conflicts_with": [
         "R4"
@@ -1140,7 +1349,7 @@
     }
   },
   "R6": {
-    "summary": "Close the *compositionality gap* — the failure mode in which a model can answer each sub-fact of a multi-hop question individually but cannot combine them — by forcing the model to ask and answer its own follow-up questions before composing the final answer..",
+    "summary": "Close the *compositionality gap* — the failure mode in which a model can answer each sub-fact of a multi-hop question individually but cannot combine them — by forcing the model to ask and answer its own follow-up questions before composing the final answer.",
     "when_to_use": "Multi-hop factual questions; sub-question chains",
     "cost": "",
     "edges": {
@@ -1156,7 +1365,7 @@
     }
   },
   "R7": {
-    "summary": "Improve the reliability of an agent on a task with an automated pass/fail signal by having it retry, with a verbal critique of why the last attempt failed appended to its context — so each retry learns from a linguistic gradient instead of from weights..",
+    "summary": "Improve the reliability of an agent on a task with an automated pass/fail signal by having it retry, with a verbal critique of why the last attempt failed appended to its context — so each retry learns from a linguistic gradient instead of from weights.",
     "when_to_use": "Verbal self-critique across retries",
     "cost": "",
     "edges": {
@@ -1176,7 +1385,7 @@
     }
   },
   "R8": {
-    "summary": "Improve the quality of an output by having the same model that produced it write a critique of it and revise from that critique, iterating until a stopping condition — without any external evaluator, ground-truth signal, or second model..",
+    "summary": "Improve the quality of an output by having the same model that produced it write a critique of it and revise from that critique, iterating until a stopping condition — without any external evaluator, ground-truth signal, or second model.",
     "when_to_use": "Iterative in-session quality improvement",
     "cost": "",
     "edges": {
@@ -1194,7 +1403,7 @@
     }
   },
   "R9": {
-    "summary": "Solve problems where the right reasoning path is not obvious upfront by having the LLM expand a tree of candidate partial solutions, score the promise of each, expand the best, and backtrack from dead ends — substituting *search over a structured space* for a single linear chain of thought..",
+    "summary": "Solve problems where the right reasoning path is not obvious upfront by having the LLM expand a tree of candidate partial solutions, score the promise of each, expand the best, and backtrack from dead ends — substituting *search over a structured space* for a single linear chain of thought.",
     "when_to_use": "BFS/DFS over reasoning states; complex planning",
     "cost": "",
     "edges": {
@@ -1240,26 +1449,34 @@
     }
   },
   "S2": {
-    "summary": "Demonstrate the task with examples in the prompt, so the model learns the desired format and behaviour from the demonstrations themselves rather than from a description of them..",
+    "summary": "Demonstrate the task with examples in the prompt, so the model learns the desired format and behaviour from the demonstrations themselves rather than from a description of them.",
     "when_to_use": "Format control, novel task types, style matching",
     "cost": "",
     "edges": {
       "related": [
-        "S1"
+        "S1",
+        "S6"
       ],
       "composes_with": [
-        "R17"
+        "S3",
+        "S6",
+        "R17",
+        "K1"
       ]
     }
   },
   "S3": {
-    "summary": "Frame the model's response distribution at the identity level — selecting a domain, a register, and a decision style in one move — so every subsequent turn inherits that framing without restating it..",
+    "summary": "Frame the model's response distribution at the identity level — selecting a domain, a register, and a decision style in one move — so every subsequent turn inherits that framing without restating it.",
     "when_to_use": "Domain expertise framing, tone alignment",
     "cost": "",
     "edges": {
       "related": [
         "H1",
-        "S9"
+        "S9",
+        "K5",
+        "K12",
+        "R4",
+        "V15"
       ],
       "composes_with": [
         "S5",
@@ -1270,7 +1487,7 @@
     }
   },
   "S4": {
-    "summary": "Replace a dense, unstructured instruction with an explicit numbered procedure inside a single prompt, so the model performs each step in order, no step is silently skipped, and the failure mode of any miss is localisable to a specific step..",
+    "summary": "Replace a dense, unstructured instruction with an explicit numbered procedure inside a single prompt, so the model performs each step in order, no step is silently skipped, and the failure mode of any miss is localisable to a specific step.",
     "when_to_use": "Multi-step tasks where order matters",
     "cost": "",
     "edges": {
@@ -1292,7 +1509,7 @@
     }
   },
   "S5": {
-    "summary": "Give the model an explicit, enumerable list of forbidden behaviours at session setup, so prohibitions are addressed as a first-class concern rather than left implicit in the positive instructions or scattered across the task description..",
+    "summary": "Give the model an explicit, enumerable list of forbidden behaviours at session setup, so prohibitions are addressed as a first-class concern rather than left implicit in the positive instructions or scattered across the task description.",
     "when_to_use": "Safety-sensitive tasks, known failure modes",
     "cost": "",
     "edges": {
@@ -1313,25 +1530,44 @@
     }
   },
   "S6": {
-    "summary": "Replace open-ended generation of \"content plus format\" with the simpler task of filling content into a predefined skeleton, so downstream parsers, chained LLM calls, and human reviewers see a consistent shape every run..",
+    "summary": "Replace open-ended generation of \"content plus format\" with the simpler task of filling content into a predefined skeleton, so downstream parsers, chained LLM calls, and human reviewers see a consistent shape every run.",
     "when_to_use": "Structured data extraction, consistent formatting",
     "cost": "",
     "edges": {
       "composes_with": [
-        "S4"
+        "S2",
+        "S4",
+        "S5",
+        "V15"
+      ],
+      "related": [
+        "O2",
+        "I2",
+        "S1",
+        "S3"
       ]
     }
   },
   "S8": {
-    "summary": "Replace hand-crafted prompt engineering with a measured generate-evaluate-select loop, in which an LLM proposes candidate prompts, an evaluator scores them against a task signal, and the best candidate is kept and iterated on..",
+    "summary": "Replace hand-crafted prompt engineering with a measured generate-evaluate-select loop, in which an LLM proposes candidate prompts, an evaluator scores them against a task signal, and the best candidate is kept and iterated on.",
     "when_to_use": "Self-optimising workflows, automated prompt tuning",
     "cost": "",
     "edges": {
       "related": [
         "R17",
         "V15",
+        "S1",
+        "S6",
+        "S9",
         "K12",
         "O5"
+      ],
+      "composes_with": [
+        "V9",
+        "V14",
+        "S3",
+        "S5",
+        "S6"
       ],
       "siblings": [
         "R7"
@@ -1339,7 +1575,7 @@
     }
   },
   "S9": {
-    "summary": "Make the model's value judgement legible, auditable, and updatable — by stating the principles explicitly in the prompt and inserting a self-critique-and-revise step that checks the draft against them before it is returned..",
+    "summary": "Make the model's value judgement legible, auditable, and updatable — by stating the principles explicitly in the prompt and inserting a self-critique-and-revise step that checks the draft against them before it is returned.",
     "when_to_use": "Alignment enforcement, principle-based self-critique",
     "cost": "",
     "edges": {
@@ -1361,20 +1597,26 @@
     }
   },
   "V1": {
-    "summary": "Make the agent halt at the boundary of any action whose cost-of-error exceeds the cost-of-delay, surface the planned action to a human in interpretable form, and resume only on an explicit verdict — so that irreversible, novel, or high-blast-radius actions never execute autonomously..",
+    "summary": "Make the agent halt at the boundary of any action whose cost-of-error exceeds the cost-of-delay, surface the planned action to a human in interpretable form, and resume only on an explicit verdict — so that irreversible, novel, or high-blast-radius actions never execute autonomously.",
     "when_to_use": "Block on irreversible, novel, or high-blast-radius actions",
     "cost": "",
     "edges": {
       "related": [
         "V2",
-        "H6"
+        "H5",
+        "H8",
+        "H6",
+        "V17"
       ],
       "requires": [
         "V10"
       ],
       "composes_with": [
         "V14",
-        "V7"
+        "V9",
+        "V7",
+        "S6",
+        "S5"
       ],
       "conflicts_with": [
         "V2"
@@ -1382,7 +1624,7 @@
     }
   },
   "V10": {
-    "summary": "Externalise the agent's working state to a durable store at each step boundary, so failures, terminations, and human pauses become resumable events instead of restart-from-zero events..",
+    "summary": "Externalise the agent's working state to a durable store at each step boundary, so failures, terminations, and human pauses become resumable events instead of restart-from-zero events.",
     "when_to_use": "Replayable agent state; recovery without restart",
     "cost": "",
     "edges": {
@@ -1391,30 +1633,40 @@
         "V14"
       ],
       "related": [
+        "V1",
         "V9",
+        "O15",
         "K8",
         "V14",
-        "K11"
+        "K10",
+        "K11",
+        "K12"
       ]
     }
   },
   "V11": {
-    "summary": "Keep the cumulative weight of errors, exceptions, and tool failures inside the agent's context window small enough that the agent retains the diagnostic signal but does not lose attention or budget to repeated raw tracebacks..",
+    "summary": "Keep the cumulative weight of errors, exceptions, and tool failures inside the agent's context window small enough that the agent retains the diagnostic signal but does not lose attention or budget to repeated raw tracebacks.",
     "when_to_use": "Compress errors into compact structured signals",
     "cost": "",
     "edges": {
       "related": [
         "K6",
-        "K7"
+        "K7",
+        "R13",
+        "R14"
       ],
       "composes_with": [
         "V14",
-        "V9"
+        "V9",
+        "V1",
+        "O8",
+        "R4",
+        "R7"
       ]
     }
   },
   "V12": {
-    "summary": "Force all agent state to be explicit, external, and passed in — so the agent function itself holds no hidden state between invocations and is, in the functional sense, a pure reducer over its inputs..",
+    "summary": "Force all agent state to be explicit, external, and passed in — so the agent function itself holds no hidden state between invocations and is, in the functional sense, a pure reducer over its inputs.",
     "when_to_use": "Reduce accumulated state to a deterministic, replayable summary",
     "cost": "",
     "edges": {
@@ -1423,12 +1675,19 @@
         "V14"
       ],
       "related": [
-        "V10"
+        "O4",
+        "O6",
+        "O15",
+        "I6",
+        "V16",
+        "V10",
+        "K11",
+        "K12"
       ]
     }
   },
   "V13": {
-    "summary": "Keep the per-agent tool catalogue small enough that the model's tool-selection accuracy stays in the usable range and the tool schemas do not consume the context budget the actual task needs — by enforcing a hard cap on tool count, a measured cap on schema-token cost, and a discipline of dynamic-load-only-what-the-task-requires..",
+    "summary": "Keep the per-agent tool catalogue small enough that the model's tool-selection accuracy stays in the usable range and the tool schemas do not consume the context budget the actual task needs — by enforcing a hard cap on tool count, a measured cap on schema-token cost, and a discipline of dynamic-load-only-what-the-task-requires.",
     "when_to_use": "Limit active schema tokens — every schema token costs n² attention",
     "cost": "",
     "edges": {
@@ -1439,8 +1698,10 @@
       ],
       "composes_with": [
         "I2",
+        "I4",
         "O17",
         "V14",
+        "V7",
         "K6",
         "V11"
       ],
@@ -1450,12 +1711,13 @@
     }
   },
   "V14": {
-    "summary": "Make every step the agent takes visible as a structured event, in a vendor-neutral format, so that debugging, auditing, evaluation, and monitoring can all read from the same record — instead of each rebuilding the run from fragmentary logs..",
+    "summary": "Make every step the agent takes visible as a structured event, in a vendor-neutral format, so that debugging, auditing, evaluation, and monitoring can all read from the same record — instead of each rebuilding the run from fragmentary logs.",
     "when_to_use": "OTel-compatible trace of every call, action, and observation",
     "cost": "",
     "edges": {
       "related": [
         "V1",
+        "V2",
         "V5",
         "V7",
         "V9",
@@ -1467,19 +1729,28 @@
         "V11"
       ],
       "composes_with": [
-        "K11"
+        "K11",
+        "K12",
+        "O6",
+        "O7",
+        "O17"
       ]
     }
   },
   "V15": {
-    "summary": "Turn \"is this output any good?\" into a deterministic, schema-checkable call against a written rubric, so generative quality can be measured automatically — at scale, without human labels, and on dimensions traditional metrics cannot reach..",
+    "summary": "Turn \"is this output any good?\" into a deterministic, schema-checkable call against a written rubric, so generative quality can be measured automatically — at scale, without human labels, and on dimensions traditional metrics cannot reach.",
     "when_to_use": "Second model evaluates quality; catches errors the first cannot see",
     "cost": "",
     "edges": {
       "related": [
         "O5",
         "V16",
-        "R17"
+        "V17",
+        "S8",
+        "R17",
+        "R7",
+        "R8",
+        "K5"
       ],
       "composes_with": [
         "V14",
@@ -1488,7 +1759,7 @@
     }
   },
   "V16": {
-    "summary": "Establish a held-out, versioned suite of inputs and expected outputs (or pass criteria), run it against the agent on every change, and gate deployment on the result — so quality, safety, and cost have a numeric baseline that any change must clear before it reaches users..",
+    "summary": "Establish a held-out, versioned suite of inputs and expected outputs (or pass criteria), run it against the agent on every change, and gate deployment on the result — so quality, safety, and cost have a numeric baseline that any change must clear before it reaches users.",
     "when_to_use": "Batch evaluation against held-out test cases before deployment",
     "cost": "",
     "edges": {
@@ -1509,7 +1780,7 @@
     }
   },
   "V17": {
-    "summary": "Make the deployed system answer the question *\"is it still working?\"* on its own, continuously, by sampling its live traces, judging them against rubrics that need no ground truth, and surfacing drift as an alert — so quality and safety regressions that only appear in production are detected from the run itself, not from a customer complaint..",
+    "summary": "Make the deployed system answer the question *\"is it still working?\"* on its own, continuously, by sampling its live traces, judging them against rubrics that need no ground truth, and surfacing drift as an alert — so quality and safety regressions that only appear in production are detected from the run itself, not from a customer complaint.",
     "when_to_use": "Real-time quality metrics in production",
     "cost": "",
     "edges": {
@@ -1533,7 +1804,7 @@
     }
   },
   "V18": {
-    "summary": "Drive the agent through a complete task — with a simulated user, simulated tools, and a simulated environment — under happy-path, edge, adversarial, and load conditions, and score the full trajectory, not just the final answer, against safety and quality criteria — so trajectory-shaped failures invisible to flat eval surface before users see them..",
+    "summary": "Drive the agent through a complete task — with a simulated user, simulated tools, and a simulated environment — under happy-path, edge, adversarial, and load conditions, and score the full trajectory, not just the final answer, against safety and quality criteria — so trajectory-shaped failures invisible to flat eval surface before users see them.",
     "when_to_use": "Simulated environment for pre-deployment stress testing",
     "cost": "",
     "edges": {
@@ -1544,7 +1815,10 @@
         "V15",
         "V9",
         "V6",
-        "V8"
+        "V8",
+        "O6",
+        "O7",
+        "O11"
       ],
       "related": [
         "V16",
@@ -1553,7 +1827,7 @@
     }
   },
   "V19": {
-    "summary": "Make every failure mode of the primary path land on a *named, pre-declared, cheaper* execution path so the system answers something useful instead of an error, while loudly signalling that it has degraded..",
+    "summary": "Make every failure mode of the primary path land on a *named, pre-declared, cheaper* execution path so the system answers something useful instead of an error, while loudly signalling that it has degraded.",
     "when_to_use": "Defined behaviour when primary path fails",
     "cost": "",
     "edges": {
@@ -1570,7 +1844,7 @@
     }
   },
   "V2": {
-    "summary": "Preserve meaningful human oversight over an autonomous agent without paying V1's per-action latency: the agent proceeds; the human watches a live trace and can pull the brake..",
+    "summary": "Preserve meaningful human oversight over an autonomous agent without paying V1's per-action latency: the agent proceeds; the human watches a live trace and can pull the brake.",
     "when_to_use": "Monitor and interrupt; agent proceeds by default",
     "cost": "",
     "edges": {
@@ -1597,22 +1871,28 @@
     }
   },
   "V20": {
-    "summary": "Treat every generated output as untrusted with respect to its declared shape, validate it against that shape, and recover from non-conformance with a bounded retry loop that carries the validation error back to the model — so downstream code never sees a malformed payload..",
+    "summary": "Treat every generated output as untrusted with respect to its declared shape, validate it against that shape, and recover from non-conformance with a bounded retry loop that carries the validation error back to the model — so downstream code never sees a malformed payload.",
     "when_to_use": "Enforce output contracts; re-ask on validation failure",
     "cost": "",
     "edges": {
       "composes_with": [
-        "S6"
+        "S6",
+        "V9",
+        "V14",
+        "V1",
+        "V11"
       ],
       "related": [
         "V5",
         "V15",
-        "S6"
+        "S6",
+        "O2",
+        "I2"
       ]
     }
   },
   "V3": {
-    "summary": "Make the Lethal Trifecta — the unique combination of capabilities that turns ordinary prompt injection into uncontrollable data exfiltration — visible at design time and continuously thereafter, so an agent that holds all three is *never* shipped without a named mitigation in place..",
+    "summary": "Make the Lethal Trifecta — the unique combination of capabilities that turns ordinary prompt injection into uncontrollable data exfiltration — visible at design time and continuously thereafter, so an agent that holds all three is *never* shipped without a named mitigation in place.",
     "when_to_use": "Two independent confirmations for high-stakes actions",
     "cost": "",
     "edges": {
@@ -1620,17 +1900,21 @@
         "V4",
         "V6",
         "V8",
-        "V5"
+        "V5",
+        "O15",
+        "I3"
       ],
       "composes_with": [
-        "V4",
+        "V7",
         "V14",
-        "V17"
+        "V17",
+        "V13",
+        "V1"
       ]
     }
   },
   "V4": {
-    "summary": "Make prompt-injection-driven exfiltration architecturally impossible by ensuring no single LLM session simultaneously possesses private data access, tool access, and exposure to untrusted content..",
+    "summary": "Make prompt-injection-driven exfiltration architecturally impossible by ensuring no single LLM session simultaneously possesses private data access, tool access, and exposure to untrusted content.",
     "when_to_use": "Quarantine Q-LLM handles untrusted content; privileged P-LLM acts",
     "cost": "",
     "edges": {
@@ -1642,7 +1926,8 @@
       "composes_with": [
         "V6",
         "V7",
-        "V8"
+        "V8",
+        "V14"
       ]
     }
   },
@@ -1655,19 +1940,21 @@
         "S5",
         "V6",
         "V7",
+        "V14",
         "V1",
         "V4",
-        "V3",
         "V15",
-        "V8"
+        "V8",
+        "V9"
       ],
       "related": [
+        "S5",
         "V6"
       ]
     }
   },
   "V6": {
-    "summary": "Treat every byte of externally-sourced text as adversarial; sanitise it on entry, mark it as data not instruction, and bound what the agent can do with it — so that a prompt smuggled inside untrusted content cannot redirect the agent's behaviour..",
+    "summary": "Treat every byte of externally-sourced text as adversarial; sanitise it on entry, mark it as data not instruction, and bound what the agent can do with it — so that a prompt smuggled inside untrusted content cannot redirect the agent's behaviour.",
     "when_to_use": "Structural and positional defences against prompt injection",
     "cost": "",
     "edges": {
@@ -1678,8 +1965,8 @@
       ],
       "composes_with": [
         "V3",
-        "V4",
         "V8",
+        "V14",
         "V17",
         "V13",
         "S5",
@@ -1688,33 +1975,31 @@
     }
   },
   "V7": {
-    "summary": "Place the agent's hard rules in code outside the model, expressed in a declarative policy artefact, and have an independent runtime engine check every proposed action against that policy — so the rules survive prompt manipulation, produce an audit record, and can be changed without redeploying the model..",
+    "summary": "Place the agent's hard rules in code outside the model, expressed in a declarative policy artefact, and have an independent runtime engine check every proposed action against that policy — so the rules survive prompt manipulation, produce an audit record, and can be changed without redeploying the model.",
     "when_to_use": "Declarative, out-of-prompt, deterministic policy enforcement",
     "cost": "",
     "edges": {
       "related": [
         "S9",
         "H5",
-        "V4",
-        "V6",
-        "V8",
+        "V3",
         "V5",
         "V15"
       ],
       "composes_with": [
         "V5",
         "V14",
+        "V1",
         "V4",
         "V6",
         "V8",
-        "V3",
         "V16",
         "V17"
       ]
     }
   },
   "V8": {
-    "summary": "Execute every tool call — particularly any LLM-generated code — in a constrained, ephemeral environment whose access to filesystem, network, processes, time, memory, and cost is enumerated and enforced from outside the agent, so that no reasoning error, hallucinated command, or successful prompt injection can damage the host, exfiltrate data, or run unbounded..",
+    "summary": "Execute every tool call — particularly any LLM-generated code — in a constrained, ephemeral environment whose access to filesystem, network, processes, time, memory, and cost is enumerated and enforced from outside the agent, so that no reasoning error, hallucinated command, or successful prompt injection can damage the host, exfiltrate data, or run unbounded.",
     "when_to_use": "Confine LLM-generated code to a restricted execution environment",
     "cost": "",
     "edges": {
@@ -1735,7 +2020,7 @@
     }
   },
   "V9": {
-    "summary": "Apply hard, externally-enforced limits on every dimension along which an agent loop can run away — iterations, tool calls, tokens, wall-clock, and dollars — so that a miscalibrated agent fails fast at a known bound instead of consuming unbounded resources before someone notices..",
+    "summary": "Apply hard, externally-enforced limits on every dimension along which an agent loop can run away — iterations, tool calls, tokens, wall-clock, and dollars — so that a miscalibrated agent fails fast at a known bound instead of consuming unbounded resources before someone notices.",
     "when_to_use": "Hard caps on steps, cost, wall-time, depth — required for every loop",
     "cost": "",
     "edges": {
@@ -1743,6 +2028,21 @@
         "V10",
         "V14",
         "V1"
+      ],
+      "related": [
+        "R4",
+        "R7",
+        "R8",
+        "R9",
+        "R10",
+        "R13",
+        "R17",
+        "R20",
+        "K5",
+        "O5",
+        "O8",
+        "O16",
+        "H5"
       ]
     }
   }

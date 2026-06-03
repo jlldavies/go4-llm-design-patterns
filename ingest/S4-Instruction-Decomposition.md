@@ -3,7 +3,7 @@ id: S4
 title: Instruction Decomposition
 type: pattern
 category: Signal
-summary: "Replace a dense, unstructured instruction with an explicit numbered procedure inside a single prompt, so the model performs each step in order, no step is silently skipped, and the failure mode of any miss is localisable to a specific step.."
+summary: "Replace a dense, unstructured instruction with an explicit numbered procedure inside a single prompt, so the model performs each step in order, no step is silently skipped, and the failure mode of any miss is localisable to a specific step."
 when_to_use: Multi-step tasks where order matters
 also_known_as: [Step Prompting, Numbered Steps, Chain Instructions, Recipe Prompting]
 related: [O2, R4, O4]

@@ -156,9 +156,10 @@ def conflict_edges(conflicts_md: str) -> list:
 def related_edges(text: str, self_id: str) -> dict:
     """Parse '## Related Patterns' bullets into {edge_type: [ids]} (deduped, no self).
 
-    Handles two bullet formats:
+    Handles three bullet formats:
       Format A: - **Label** **TargetID Title** — prose…   (targets bold before em-dash)
       Format B: - **Label** — T1, T2 targets…            (targets plain text after em-dash)
+      Format C: - **Label** T1 Title — prose…             (plain-text target before em-dash)
     Anti-patterns (A\\d+) and any non-pattern token are excluded via _VALID_ID whitelist.
     """
     sec = re.search(r'^## Related Patterns\s*\n(.*?)(?:\n## |\Z)', text, re.S | re.M)
@@ -176,10 +177,12 @@ def related_edges(text: str, self_id: str) -> dict:
             continue
         etype = _edge_type(lbl.group(1))
         pre, _, post = line.partition("—")
-        # Format A: bold spans in pre after the first (the first bold span is the label)
-        format_a_spans = re.findall(r'\*\*([^*]+)\*\*', pre)[1:]
-        raw_a = [i for span in format_a_spans for i in _REL_ID.findall(span)]
-        ids = _valid_ids(raw_a, self_id)
+        # Strip the leading bold label span from pre, then collect IDs from the remainder.
+        # This captures both Format A (bold targets) and Format C (plain-text targets)
+        # that appear before the em-dash.
+        pre_body = re.sub(r'^\s*-\s*\*\*[^*]+\*\*', '', pre, count=1)
+        raw_pre = re.findall(r'[A-Z]+\d+', pre_body)
+        ids = _valid_ids(raw_pre, self_id)
         if not ids and post:
             # Format B fallback: plain-text IDs from the post-em-dash prose
             raw_b = _REL_ID.findall(post)

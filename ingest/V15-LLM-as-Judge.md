@@ -3,10 +3,10 @@ id: V15
 title: LLM-as-Judge
 type: pattern
 category: Reliability
-summary: "Turn \"is this output any good?\" into a deterministic, schema-checkable call against a written rubric, so generative quality can be measured automatically — at scale, without human labels, and on dimensions traditional metrics cannot reach.."
+summary: "Turn \"is this output any good?\" into a deterministic, schema-checkable call against a written rubric, so generative quality can be measured automatically — at scale, without human labels, and on dimensions traditional metrics cannot reach."
 when_to_use: Second model evaluates quality; catches errors the first cannot see
 also_known_as: [Model-Based Evaluation, AI Evaluation, Inferential Evaluation, LLM-as-a-Judge]
-related: [O5, V16, R17]
+related: [O5, V16, V17, S8, R17, R7, R8, K5]
 composes_with: [V14, S6]
 mechanism_refs: [1, 4]
 canonical: patterns/V15-LLM-as-Judge.md
@@ -22,4 +22,4 @@ Turn "is this output any good?" into a deterministic, schema-checkable call agai
 - the quality dimensions can be written down as a rubric a stranger could apply consistently;
 - another pattern that needs an automated scorer is in play — V16, V17, O5, S8.
 
-Related: [[V14-Trajectory-Logging]] · [[S6-Output-Template]] · [[O5-Evaluator-Optimizer]] · [[V16-Offline-Eval]] · [[R17-Self-Consistency-Voting]]
+Related: [[V14-Trajectory-Logging]] · [[S6-Output-Template]] · [[O5-Evaluator-Optimizer]] · [[V16-Offline-Eval]] · [[V17-Online-Eval]] · [[S8-Meta-Prompt]] · [[R17-Self-Consistency-Voting]] · [[R7-Reflexion]] · [[R8-Self-Refine]] · [[K5-Adaptive-RAG]]

@@ -3,7 +3,7 @@ id: O5
 title: Evaluator-Optimizer
 type: pattern
 category: Orchestration
-summary: "Improve output quality by separating the generator and the judge into two distinct agents — different sessions, typically different setups, potentially different models — so the evaluation is genuinely independent of the work it scores, and the generator iterates on a feedback signal it cannot foresee or sandbag.."
+summary: "Improve output quality by separating the generator and the judge into two distinct agents — different sessions, typically different setups, potentially different models — so the evaluation is genuinely independent of the work it scores, and the generator iterates on a feedback signal it cannot foresee or sandbag."
 when_to_use: Generator + judge in a quality improvement loop
 also_known_as: [Generator-Critic, Judge-Optimizer, Separate Evaluator, Two-Agent Refinement]
 related: [R8, R7, O9]

@@ -3,7 +3,7 @@ id: R4
 title: ReAct
 type: pattern
 category: Reasoning
-summary: "Let an agent make its next decision *after* seeing the result of its last action, by interleaving short reasoning traces with tool calls and feeding each tool's return back into the model — so the trajectory adapts to what the environment actually says, instead of executing a plan written before any of it was known.."
+summary: "Let an agent make its next decision *after* seeing the result of its last action, by interleaving short reasoning traces with tool calls and feeding each tool's return back into the model — so the trajectory adapts to what the environment actually says, instead of executing a plan written before any of it was known."
 when_to_use: Adaptive tool use; each action informs the next
 also_known_as: [Reason+Act, Reason-and-Act Loop, Think-Act-Observe, Standard Agent Loop, the Agent Loop]
 siblings: [R5, R13]

@@ -3,7 +3,7 @@ id: O6
 title: Orchestrator-Workers
 type: pattern
 category: Orchestration
-summary: "Have a central LLM decide *at runtime* how to break a goal into sub-tasks and which worker each sub-task goes to, then collect and synthesise the workers' returns — so the decomposition adapts to the specific input instead of being baked into a pipeline.."
+summary: "Have a central LLM decide *at runtime* how to break a goal into sub-tasks and which worker each sub-task goes to, then collect and synthesise the workers' returns — so the decomposition adapts to the specific input instead of being baked into a pipeline."
 when_to_use: Dynamic task decomposition; workers run in isolation
 also_known_as: [Hub-and-Spoke, Lead Agent + Subagents, Orchestrator-Subagent, Lead-Researcher Pattern, Manager-Workers, Dispatcher-Workers]
 related: [O2, O7, O4, O5, V9, O17, V14]

@@ -3,18 +3,18 @@ id: H9
 title: Observational Identity
 type: pattern
 category: Humanizers
-summary: "Give an agent a persistent, queryable model of its own demonstrated capabilities, attempted tasks, outstanding commitments, and known limitations — each entry timestamped and confidence-scored, each subject to decay — so the agent can route on, communicate about, and reason from its own track record rather than guessing.."
+summary: "Give an agent a persistent, queryable model of its own demonstrated capabilities, attempted tasks, outstanding commitments, and known limitations — each entry timestamped and confidence-scored, each subject to decay — so the agent can route on, communicate about, and reason from its own track record rather than guessing."
 when_to_use: Explicit model of own capabilities and knowledge state
 also_known_as: [Self-Knowledge Model, Capability Self-Awareness, Epistemic Self-Model, Metacognitive State, Self-Model]
-composes_with: [H1, K11, K12]
-related: [H2, H4, H1, K10, K11]
+composes_with: [H1, K11, K12, K6, V9, V14]
+related: [H2, H4, O3, O6, H1, K10, K11]
 mechanism_refs: [2, 5, 9, 10]
 canonical: patterns/H9-Observational-Identity.md
 derived: true
 ---
 
 ## Description
-Give an agent a persistent, queryable model of its own demonstrated capabilities, attempted tasks, outstanding commitments, and known limitations — each entry timestamped and confidence-scored, each subject to decay — so the agent can route on, communicate about, and reason from its own track record rather than guessing. Composes with H1, K11, K12. This is a condensed digest; the canonical file (`patterns/H9-Observational-Identity.md`) carries the full decision criteria, failure modes, and implementation.
+Give an agent a persistent, queryable model of its own demonstrated capabilities, attempted tasks, outstanding commitments, and known limitations — each entry timestamped and confidence-scored, each subject to decay — so the agent can route on, communicate about, and reason from its own track record rather than guessing. Composes with H1, K11, K12, K6, V9, V14. This is a condensed digest; the canonical file (`patterns/H9-Observational-Identity.md`) carries the full decision criteria, failure modes, and implementation.
 
 ## Key points
 - the agent runs across multiple sessions and tasks recur, so a track record is genuinely informative;
@@ -22,4 +22,4 @@ Give an agent a persistent, queryable model of its own demonstrated capabilities
 - a multi-agent system needs capability-based routing — **O3 Routing** or **O6 Orchestrator-Workers** with worker selection by demonstrated competence;
 - users ask "what do you remember about X?" or "have we tried this before?" as a normal part of the interaction;
 
-Related: [[H1-Identity-Persistence]] · [[K11-Observational-Memory]] · [[K12-Karpathy-Memory]] · [[H2-Episodic-Self-Improvement]] · [[H4-Procedural-Skill-Accumulation]] · [[K10-Long-Term-Memory]]
+Related: [[H1-Identity-Persistence]] · [[K11-Observational-Memory]] · [[K12-Karpathy-Memory]] · [[K6-Context-Compression]] · [[V9-Bounded-Execution]] · [[V14-Trajectory-Logging]] · [[H2-Episodic-Self-Improvement]] · [[H4-Procedural-Skill-Accumulation]] · [[O3-Routing]] · [[O6-Orchestrator-Workers]] · [[K10-Long-Term-Memory]]

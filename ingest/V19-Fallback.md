@@ -3,7 +3,7 @@ id: V19
 title: Fallback / Graceful Degradation
 type: pattern
 category: Reliability
-summary: "Make every failure mode of the primary path land on a *named, pre-declared, cheaper* execution path so the system answers something useful instead of an error, while loudly signalling that it has degraded.."
+summary: "Make every failure mode of the primary path land on a *named, pre-declared, cheaper* execution path so the system answers something useful instead of an error, while loudly signalling that it has degraded."
 when_to_use: Defined behaviour when primary path fails
 also_known_as: [Graceful Degradation, Circuit-Breaker Fallback, Failover, Degraded-Mode Path, Recovery Lane]
 composes_with: [V9, V11, V14, V17]

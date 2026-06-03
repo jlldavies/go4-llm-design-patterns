@@ -3,7 +3,7 @@ id: V16
 title: Offline Eval
 type: pattern
 category: Reliability
-summary: "Establish a held-out, versioned suite of inputs and expected outputs (or pass criteria), run it against the agent on every change, and gate deployment on the result — so quality, safety, and cost have a numeric baseline that any change must clear before it reaches users.."
+summary: "Establish a held-out, versioned suite of inputs and expected outputs (or pass criteria), run it against the agent on every change, and gate deployment on the result — so quality, safety, and cost have a numeric baseline that any change must clear before it reaches users."
 when_to_use: Batch evaluation against held-out test cases before deployment
 also_known_as: [Regression Testing, Pre-Production Eval, Validation Suite, Eval Harness, Eval-Driven Development]
 composes_with: [V15, V17, V14, V18, V6]

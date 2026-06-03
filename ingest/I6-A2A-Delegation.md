@@ -3,7 +3,7 @@ id: I6
 title: A2A Delegation
 type: pattern
 category: Integration
-summary: "Make a cross-boundary agent call interoperable by default — discover the executor via its Agent Card, submit a typed task, stream status, receive a structured result, and handle failure as a defined protocol event rather than a bespoke integration.."
+summary: "Make a cross-boundary agent call interoperable by default — discover the executor via its Agent Card, submit a typed task, stream status, receive a structured result, and handle failure as a defined protocol event rather than a bespoke integration."
 when_to_use: Structured task delegation to another agent via A2A protocol
 also_known_as: [Agent-to-Agent Protocol, Agent2Agent, A2A, Cross-Vendor Task Delegation, Inter-System Agent RPC]
 related: [I5, O15, I3, V12]

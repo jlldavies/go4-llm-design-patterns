@@ -3,7 +3,7 @@ id: R9
 title: Tree of Thoughts
 type: pattern
 category: Reasoning
-summary: "Solve problems where the right reasoning path is not obvious upfront by having the LLM expand a tree of candidate partial solutions, score the promise of each, expand the best, and backtrack from dead ends — substituting *search over a structured space* for a single linear chain of thought.."
+summary: "Solve problems where the right reasoning path is not obvious upfront by having the LLM expand a tree of candidate partial solutions, score the promise of each, expand the best, and backtrack from dead ends — substituting *search over a structured space* for a single linear chain of thought."
 when_to_use: BFS/DFS over reasoning states; complex planning
 also_known_as: [ToT, Deliberate Problem Solving, Branching Reasoning]
 siblings: [R10]

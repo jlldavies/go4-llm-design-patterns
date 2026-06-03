@@ -3,7 +3,7 @@ id: O2
 title: Prompt Chaining
 type: pattern
 category: Orchestration
-summary: "Decompose a task into a known, ordered sequence of LLM calls with deterministic transitions between them, so each step has its own focused setup and can be independently tested, logged, and gated — and so the whole pipeline is predictable in cost and behaviour.."
+summary: "Decompose a task into a known, ordered sequence of LLM calls with deterministic transitions between them, so each step has its own focused setup and can be independently tested, logged, and gated — and so the whole pipeline is predictable in cost and behaviour."
 when_to_use: Fixed-sequence pipeline; output of step N feeds step N+1
 also_known_as: [Sequential Pipeline, LLM Pipeline, Fixed Workflow, Chain Workflow]
 related: [S4, O6, R3, V9, R4, O5]

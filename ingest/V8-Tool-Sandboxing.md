@@ -3,7 +3,7 @@ id: V8
 title: Tool Sandboxing
 type: pattern
 category: Reliability
-summary: "Execute every tool call — particularly any LLM-generated code — in a constrained, ephemeral environment whose access to filesystem, network, processes, time, memory, and cost is enumerated and enforced from outside the agent, so that no reasoning error, hallucinated command, or successful prompt injection can damage the host, exfiltrate data, or run unbounded.."
+summary: "Execute every tool call — particularly any LLM-generated code — in a constrained, ephemeral environment whose access to filesystem, network, processes, time, memory, and cost is enumerated and enforced from outside the agent, so that no reasoning error, hallucinated command, or successful prompt injection can damage the host, exfiltrate data, or run unbounded."
 when_to_use: Confine LLM-generated code to a restricted execution environment
 also_known_as: [Isolated Execution, Code Execution Isolation, Capability Restriction, Sandboxed Runtime]
 related: [R13, R14, V3, V9, I2]

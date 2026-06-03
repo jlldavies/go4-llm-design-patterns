@@ -3,7 +3,7 @@ id: R6
 title: Self-Ask
 type: pattern
 category: Reasoning
-summary: Close the *compositionality gap* — the failure mode in which a model can answer each sub-fact of a multi-hop question individually but cannot combine them — by forcing the model to ask and answer its own follow-up questions before composing the final answer..
+summary: Close the *compositionality gap* — the failure mode in which a model can answer each sub-fact of a multi-hop question individually but cannot combine them — by forcing the model to ask and answer its own follow-up questions before composing the final answer.
 when_to_use: Multi-hop factual questions; sub-question chains
 also_known_as: [Follow-Up Question Decomposition, Compositional Decomposition, Self-Ask Prompting]
 related: [R3, R4, R5]

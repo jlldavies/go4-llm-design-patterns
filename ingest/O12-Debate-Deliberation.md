@@ -3,7 +3,7 @@ id: O12
 title: Debate / Deliberation
 type: pattern
 category: Orchestration
-summary: "Use *adversarial argument between agents holding opposing positions* — not independent critique, not iterative self-refinement — to surface the assumptions, counter-evidence, and failure modes a single agent's reasoning would not see, then synthesise the exchange into a more accurate or better-considered final answer.."
+summary: "Use *adversarial argument between agents holding opposing positions* — not independent critique, not iterative self-refinement — to surface the assumptions, counter-evidence, and failure modes a single agent's reasoning would not see, then synthesise the exchange into a more accurate or better-considered final answer."
 when_to_use: Two agents argue opposing positions; synthesiser integrates
 also_known_as: [Multi-Agent Debate]
 related: [O9, O5, R17, O11]

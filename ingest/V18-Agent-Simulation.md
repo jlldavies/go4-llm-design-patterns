@@ -3,10 +3,10 @@ id: V18
 title: Agent Simulation
 type: pattern
 category: Reliability
-summary: "Drive the agent through a complete task — with a simulated user, simulated tools, and a simulated environment — under happy-path, edge, adversarial, and load conditions, and score the full trajectory, not just the final answer, against safety and quality criteria — so trajectory-shaped failures invisible to flat eval surface before users see them.."
+summary: "Drive the agent through a complete task — with a simulated user, simulated tools, and a simulated environment — under happy-path, edge, adversarial, and load conditions, and score the full trajectory, not just the final answer, against safety and quality criteria — so trajectory-shaped failures invisible to flat eval surface before users see them."
 when_to_use: Simulated environment for pre-deployment stress testing
 also_known_as: [Sandbox Testing, Agent Red-Teaming, End-to-End Simulation, Simulated-User Eval, Behavioural Audit]
-composes_with: [V16, V17, V14, V15, V9, V6, V8]
+composes_with: [V16, V17, V14, V15, V9, V6, V8, O6, O7, O11]
 related: [V16, V17]
 mechanism_refs: [4, 10]
 canonical: patterns/V18-Agent-Simulation.md
@@ -14,7 +14,7 @@ derived: true
 ---
 
 ## Description
-Drive the agent through a complete task — with a simulated user, simulated tools, and a simulated environment — under happy-path, edge, adversarial, and load conditions, and score the full trajectory, not just the final answer, against safety and quality criteria — so trajectory-shaped failures invisible to flat eval surface before users see them. Composes with V16, V17, V14, V15, V9, V6, V8. This is a condensed digest; the canonical file (`patterns/V18-Agent-Simulation.md`) carries the full decision criteria, failure modes, and implementation.
+Drive the agent through a complete task — with a simulated user, simulated tools, and a simulated environment — under happy-path, edge, adversarial, and load conditions, and score the full trajectory, not just the final answer, against safety and quality criteria — so trajectory-shaped failures invisible to flat eval surface before users see them. Composes with V16, V17, V14, V15, V9, V6, V8, O6, O7, O11. This is a condensed digest; the canonical file (`patterns/V18-Agent-Simulation.md`) carries the full decision criteria, failure modes, and implementation.
 
 ## Key points
 - the agent's value is multi-turn — task completion across a dialogue, not a one-shot answer;
@@ -22,4 +22,4 @@ Drive the agent through a complete task — with a simulated user, simulated too
 - the deployment is high-stakes — customer service, financial assistance, security-sensitive domains — where adversarial users are realistic;
 - the system is multi-agent (O6 Orchestrator-Workers, O7 Supervisor Hierarchy, O11 Blackboard) and emergent inter-agent dynamics cannot be captured case-by-case;
 
-Related: [[V16-Offline-Eval]] · [[V17-Online-Eval]] · [[V14-Trajectory-Logging]] · [[V15-LLM-as-Judge]] · [[V9-Bounded-Execution]] · [[V6-Prompt-Injection-Shield]] · [[V8-Tool-Sandboxing]]
+Related: [[V16-Offline-Eval]] · [[V17-Online-Eval]] · [[V14-Trajectory-Logging]] · [[V15-LLM-as-Judge]] · [[V9-Bounded-Execution]] · [[V6-Prompt-Injection-Shield]] · [[V8-Tool-Sandboxing]] · [[O6-Orchestrator-Workers]] · [[O7-Supervisor-Hierarchy]] · [[O11-Blackboard]]

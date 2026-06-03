@@ -151,4 +151,17 @@ eb = related_edges(rp_b, "K1")
 eq(eb.get("composes_with"), ["K2", "K3"])
 eq(eb.get("related"), ["K9"])                    # A1 (anti-pattern) excluded
 
+# Format C test: plain-text target before em-dash (K7 real-world format)
+rp_c = (
+    "## Related Patterns\n"
+    "- **Lossless counterpart of** K6 Context Compression — prune first, compress the rest.\n"
+    "- **Composes with** K8 Working Memory — scratchpad pruning.\n"
+    "- Implements Anthropic's Select strategy.\n"
+    "## Sources\n"
+)
+ec = related_edges(rp_c, "K7")
+eq(ec.get("related"), ["K6"])           # 'Lossless counterpart of' -> default 'related'; plain-text target captured
+eq(ec.get("composes_with"), ["K8"])
+# third bullet has no bold label -> skipped entirely
+
 print("ALL INGEST TESTS PASSED")

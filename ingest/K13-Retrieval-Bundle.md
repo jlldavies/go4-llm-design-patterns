@@ -3,10 +3,10 @@ id: K13
 title: Retrieval Bundle
 type: pattern
 category: Knowledge
-summary: "Define the exact bundle of operational context a specific agent workflow always needs — not \"relevant documents\" but precisely *these fields from these sources in these shapes* — and then build assembly to deliver that bundle reliably, rather than letting the agent reconstruct it dynamically from raw search results on every run.."
+summary: "Define the exact bundle of operational context a specific agent workflow always needs — not \"relevant documents\" but precisely *these fields from these sources in these shapes* — and then build assembly to deliver that bundle reliably, rather than letting the agent reconstruct it dynamically from raw search results on every run."
 when_to_use: Specify the exact context bundle a workflow always needs — solves the rediscovery problem
 also_known_as: [Agent Operating Context, Workflow Context Specification, Typed Memory Contract, Pre-Compiled Context Bundle]
-related: [K12, K5]
+related: [K1, K3, K4, K10, K11, K12, K5]
 composes_with: [O18, K9]
 mechanism_refs: [1, 2, 4, 5, 6, 9, 10]
 canonical: patterns/K13-Retrieval-Bundle.md
@@ -22,4 +22,4 @@ Define the exact bundle of operational context a specific agent workflow always 
 - the agent's context window is filling with mixed-authority or mixed-freshness content that degrades output reliability;
 - you are choosing between retrieval primitives and are not sure which to use — K13 is the prerequisite that answers that question.
 
-Related: [[O18-Cache-Warmed-Worker-Pool]] · [[K9-Long-Context]] · [[K12-Karpathy-Memory]] · [[K5-Adaptive-RAG]]
+Related: [[O18-Cache-Warmed-Worker-Pool]] · [[K9-Long-Context]] · [[K1-Vanilla-RAG]] · [[K3-GraphRAG]] · [[K4-RAPTOR]] · [[K10-Long-Term-Memory]] · [[K11-Observational-Memory]] · [[K12-Karpathy-Memory]] · [[K5-Adaptive-RAG]]

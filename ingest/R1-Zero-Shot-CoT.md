@@ -3,7 +3,7 @@ id: R1
 title: Zero-Shot CoT
 type: pattern
 category: Reasoning
-summary: "Elicit explicit intermediate reasoning from a capable instruction-tuned model by adding a single short trigger phrase to an otherwise zero-shot prompt, so the model writes its working out before committing to an answer instead of jumping straight to a guess.."
+summary: "Elicit explicit intermediate reasoning from a capable instruction-tuned model by adding a single short trigger phrase to an otherwise zero-shot prompt, so the model writes its working out before committing to an answer instead of jumping straight to a guess."
 when_to_use: Elicit reasoning without examples
 also_known_as: ["\"Let's think step by step\"", Zero-Shot Chain-of-Thought, Zero-Shot-CoT, Trigger-Phrase CoT]
 related: [S1, R3, R4, R14, R17, R7, R8, O6, O4]
