@@ -233,6 +233,7 @@ if __name__ == "__main__":
     else:
         meta = json.loads(META.read_text(encoding="utf-8"))
         id_to_stem = id_to_stem_map()
+        OUT.mkdir(exist_ok=True)
         chapter0 = (CONTENT / "CHAPTER-0.md").read_text(encoding="utf-8")
         mechs = build_mechanisms(chapter0, id_to_stem)
         units = build_patterns(meta, id_to_stem)

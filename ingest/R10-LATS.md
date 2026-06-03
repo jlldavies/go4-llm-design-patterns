@@ -1,0 +1,21 @@
+---
+id: R10
+title: Language Agent Tree Search (LATS)
+type: pattern
+category: Reasoning
+summary: "Search the solution space of an agentic task with full Monte Carlo Tree Search — selection by UCB, expansion, simulation, and value backpropagation — using the LLM as action generator, value estimator, and verbal critic, so the agent can revisit any node, redirect from any dead end, and converge on high-quality trajectories on problems that defeat single-path patterns.."
+when_to_use: MCTS + ReAct + Reflexion unified
+also_known_as: [LATS, MCTS for LLM Agents, Monte Carlo Agent Search]
+mechanism_refs: [5, 7, 8]
+canonical: patterns/R10-LATS.md
+derived: true
+---
+
+## Description
+Search the solution space of an agentic task with full Monte Carlo Tree Search — selection by UCB, expansion, simulation, and value backpropagation — using the LLM as action generator, value estimator, and verbal critic, so the agent can revisit any node, redirect from any dead end, and converge on high-quality trajectories on problems that defeat single-path patterns. This is a condensed digest; the canonical file (`patterns/R10-LATS.md`) carries the full decision criteria, failure modes, and implementation.
+
+## Key points
+- the task is hard enough that ReAct (R4), Reflexion (R7), and Tree of Thoughts (R9) have all been tried and demonstrably fail;
+- the task admits a useful value signal — a verifier, a test suite, a programmatic correctness check, or at minimum a reliable LLM critic — that can score partial trajectories;
+- correctness or quality is worth roughly 10$\times$ ToT's cost (10–100$\times$ ReAct's);
+- the task is bounded enough that a tree with depth in the tens and branching factor of 3–5 can plausibly contain a solution.
