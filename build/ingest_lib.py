@@ -86,6 +86,20 @@ def _edge_type(label: str) -> str:
     return "related"
 
 
+_README_ROW = re.compile(
+    r'^\|\s*\[([A-Z]+\d+)[^\]]*\]\([^)]+\)\s*\|[^|]*\|\s*([^|]+?)\s*\|', re.M)
+
+
+def when_to_use_map(readme: str) -> dict:
+    """{id: when_to_use} from README pattern-index tables. Strips bold/markdown emphasis."""
+    out = {}
+    for m in _README_ROW.finditer(readme):
+        uid, when = m.group(1), m.group(2).strip()
+        when = re.sub(r'\*\*([^*]+)\*\*', r'\1', when)  # drop **bold**
+        out[uid] = when
+    return out
+
+
 CONFLICT_SYMBOLS = [
     (r'\\oplus', "conflicts_with"), (r'\\leftrightarrow', "conflicts_with"),
     (r'\\to\b', "requires"), (r'\\sim', "composes_with"),

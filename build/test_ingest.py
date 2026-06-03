@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from ingest_lib import unit_id, category_of, title_of, also_known_as, intent_of, mechanism_refs, related_edges, _edge_type, conflict_edges
+from ingest_lib import unit_id, category_of, title_of, also_known_as, intent_of, mechanism_refs, related_edges, _edge_type, conflict_edges, when_to_use_map
 
 
 def eq(got, want):
@@ -21,6 +21,14 @@ eq(category_of("H10"), "Humanizers")
 eq(mechanism_refs("conditions on mechanism 4; see mechanisms 2 and 3, plus (mechanism 12)."), [2, 3, 4, 12])
 eq(mechanism_refs("no citations here"), [])
 eq(mechanism_refs("mechanism 99 is out of range"), [])
+
+rows = (
+    "| [S1 Zero-Shot](patterns/S1-Zero-Shot.md) | Direct Instruction | Simple, well-defined tasks within model priors |\n"
+    "| [R4 ReAct](patterns/R4-ReAct.md) | Reason+Act, Agent Loop | Adaptive tool use; each action informs the next |\n"
+)
+w = when_to_use_map(rows)
+eq(w["S1"], "Simple, well-defined tasks within model priors")
+eq(w["R4"], "Adaptive tool use; each action informs the next")
 
 cm = (
     "### Critical 1 — R4 $\\oplus$ R5  {#critical-1}\n"
