@@ -8,7 +8,9 @@
 
 **[⬇ Download GO4.pdf — 1,163 pages, free](https://github.com/jlldavies/go4-llm-design-patterns/raw/main/GO4.pdf)**
 
-Or read online: [`book.md`](book.md) — the full text as a single searchable Markdown file.
+**[📖 Browse online](https://jlldavies.github.io/go4-llm-design-patterns)** — the full catalog, searchable, no download needed.
+
+[![Deploy mdBook](https://github.com/jlldavies/go4-llm-design-patterns/actions/workflows/deploy-pages.yml/badge.svg)](https://jlldavies.github.io/go4-llm-design-patterns)
 
 ---
 
