@@ -46,13 +46,13 @@ V2 is right when the actions are reversible, the agent is calibrated, and V1's b
 
 **1. Reversibility test.** Classify every action type the agent can take by reversibility: undo-able in seconds, undo-able with effort, or irreversible. If **any action** in the autonomous scope is irreversible, route it through **V1 Human-in-the-Loop**; V2 covers the rest. A V2 agent with one buried irreversible action is a V1-appropriate agent in disguise.
 
-**2. Blast-radius test.** For each action class, estimate the worst-case impact of an unmonitored error: data corruption, external comms sent, money moved, systems modified. V2 is appropriate only at **low blast radius** — where a bad action can be reversed before serious harm. High blast radius → V1.
+**2. Blast-radius test.** For each action class, estimate the worst-case impact of an unmonitored error: data corruption, external comms sent, money moved, systems modified. V2 is appropriate only at **low blast radius** — where a bad action can be reversed before serious harm. High blast radius $\to$ V1.
 
 **3. Calibration evidence.** Does the agent have a measured error rate on this action class, from **V16 Offline Eval** and ideally **V17 Online Eval**? Threshold: an action class with no eval baseline does not yet qualify for V2 — the supervisor has no priors to monitor against. If error rate or drift is unknown, use V1 until it is known.
 
 **4. Latency-vs-value test.** What is the *workflow value* of allowing the agent to continue without blocking? If V1 latency is acceptable for the user and workload, V1 wins — it is the safer default. V2 earns its place only when V1 latency demonstrably destroys the workflow (long-running pipelines, high-frequency processing, time-sensitive monitoring loops). "V1 feels slow" is not the test; "V1 makes this workflow impossible" is.
 
-**5. Monitor-and-interrupt readiness.** Three pieces must be in place before V2 ships: (a) a **trace** instrumented per **V14 Trajectory Logging** that a human can actually follow in real time; (b) a **monitor** — human, automated thresholds, or both — with named trigger conditions; (c) an **interrupt mechanism** that pauses cleanly and hands state to the supervisor (pairs with **V10 Checkpointing**). Missing any of the three → not yet ready for V2.
+**5. Monitor-and-interrupt readiness.** Three pieces must be in place before V2 ships: (a) a **trace** instrumented per **V14 Trajectory Logging** that a human can actually follow in real time; (b) a **monitor** — human, automated thresholds, or both — with named trigger conditions; (c) an **interrupt mechanism** that pauses cleanly and hands state to the supervisor (pairs with **V10 Checkpointing**). Missing any of the three $\to$ not yet ready for V2.
 
 **Quick test — V2 is the right pattern when:**
 
@@ -98,14 +98,14 @@ The trace is continuous; the monitor is asynchronous; the agent does not block o
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Agent** | autonomous execution within scope | task + state → actions | hold any action class that has not been explicitly admitted to its autonomous scope; expanding scope at runtime breaks the calibration that V2 rests on. |
-| **Trace Emitter** *(V14)* | a continuous, structured, human-readable trace of every step | step events → trace stream | be silent on anomalies; a sparse or summarised trace defeats real-time supervision. The trace V2 needs is denser than the audit trace V14 produces by default. |
-| **Monitor** | watching the trace for triggers | trace stream + thresholds → trigger events | absorb everything quietly; a monitor that never fires is indistinguishable from no monitor. Calibration against V17 signals is mandatory, not optional. |
-| **Interrupt Handler** | cleanly pausing the agent on trigger | trigger event → paused state at next safe point | abort mid-action — pause at the next checkpoint (V10) so resume is possible; hard kills lose state. |
-| **Human Supervisor** | reviewing paused state and directing continuation | paused state → resume / redirect / abort | be the monitor *and* the supervisor on a long shift — alert fatigue is the dominant failure mode; rotate or alarm-tier. |
-| **State Store** *(V10)* | durable checkpoints the supervisor can edit before resume | agent state → resumable snapshot | be in-memory only; without external persistence, an interrupt loses the work it was trying to save. |
+| **Agent** | autonomous execution within scope | task + state $\to$ actions | hold any action class that has not been explicitly admitted to its autonomous scope; expanding scope at runtime breaks the calibration that V2 rests on. |
+| **Trace Emitter** *(V14)* | a continuous, structured, human-readable trace of every step | step events $\to$ trace stream | be silent on anomalies; a sparse or summarised trace defeats real-time supervision. The trace V2 needs is denser than the audit trace V14 produces by default. |
+| **Monitor** | watching the trace for triggers | trace stream + thresholds $\to$ trigger events | absorb everything quietly; a monitor that never fires is indistinguishable from no monitor. Calibration against V17 signals is mandatory, not optional. |
+| **Interrupt Handler** | cleanly pausing the agent on trigger | trigger event $\to$ paused state at next safe point | abort mid-action — pause at the next checkpoint (V10) so resume is possible; hard kills lose state. |
+| **Human Supervisor** | reviewing paused state and directing continuation | paused state $\to$ resume / redirect / abort | be the monitor *and* the supervisor on a long shift — alert fatigue is the dominant failure mode; rotate or alarm-tier. |
+| **State Store** *(V10)* | durable checkpoints the supervisor can edit before resume | agent state $\to$ resumable snapshot | be in-memory only; without external persistence, an interrupt loses the work it was trying to save. |
 
 Six responsibilities; the **Trace Emitter**, **Monitor**, and **Interrupt Handler** are what distinguish V2 from V1 — V1 has none of these because it blocks on the human directly. The **State Store** is shared with V10 and V1; the **Agent** and **Human Supervisor** are shared with V1 but play different roles.
 

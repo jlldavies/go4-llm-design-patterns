@@ -58,14 +58,14 @@ I3 is right when standardisation, sharing, or credential isolation justify the s
 - > 55,000 tokens for one server, or > 60,000 across all loaded servers — over budget; trim by toolset, split into focused servers, or fall back to **I4** for the high-frequency subset.
 
 **3. Hard tool-count ceiling.** Total tools surfaced to the client (across *all* servers).
-- ≤ 15 — safe selection accuracy.
+- $\leq$ 15 — safe selection accuracy.
 - 16–40 — degrading; Cursor's empirical limit is ~40; pair with dynamic injection.
-- > 40 — selection accuracy collapses (~43% → ~14% at high counts); **V13 Tool Budget** is now mandatory, not optional.
+- > 40 — selection accuracy collapses (~43% $\to$ ~14% at high counts); **V13 Tool Budget** is now mandatory, not optional.
 
 **4. Credential / trust posture.** Where do the API keys live?
-- Acceptable in the agent process → **I2** is fine.
-- Must not be reachable by the LLM context or agent code (separation of duties, third-party tool, customer credentials) → **I3** earns its keep; the server holds the secret, the agent only sees the tool name.
-- Tool is reachable by adversarial input (untrusted document content, user-pasted prompts) → V3 Lethal Trifecta applies; **I3** must be paired with **V6 Prompt Injection Shield** and **V8 Tool Sandboxing** regardless.
+- Acceptable in the agent process $\to$ **I2** is fine.
+- Must not be reachable by the LLM context or agent code (separation of duties, third-party tool, customer credentials) $\to$ **I3** earns its keep; the server holds the secret, the agent only sees the tool name.
+- Tool is reachable by adversarial input (untrusted document content, user-pasted prompts) $\to$ V3 Lethal Trifecta applies; **I3** must be paired with **V6 Prompt Injection Shield** and **V8 Tool Sandboxing** regardless.
 
 **5. Ecosystem fit.** Does a maintained server already exist (registry.modelcontextprotocol.io, modelcontextprotocol/servers, github/github-mcp-server, vendor-maintained)?
 - Yes — large pay-off; you inherit a tested integration, updates, and community fixes.
@@ -78,7 +78,7 @@ I3 is right when standardisation, sharing, or credential isolation justify the s
 - measured `tools/list` token cost fits within the V13 Tool Budget for the target agent, *and*
 - total tool count across all loaded servers stays at or below the selection-accuracy ceiling (~40 tools).
 
-If any condition fails, drop to a smaller sibling. Single client → **I2 Function Call**. CLI exists for the hot tool → **I4 CLI Invocation**. Deterministic action with no routing needed → **I1 Direct API Call**. Over schema budget but truly need MCP → adopt a tool-search subagent / gateway (Claude Code's tools-via-search mode is the canonical implementation, ~47% reported reduction), split into focused servers, or allow-list a subset of toolsets.
+If any condition fails, drop to a smaller sibling. Single client $\to$ **I2 Function Call**. CLI exists for the hot tool $\to$ **I4 CLI Invocation**. Deterministic action with no routing needed $\to$ **I1 Direct API Call**. Over schema budget but truly need MCP $\to$ adopt a tool-search subagent / gateway (Claude Code's tools-via-search mode is the canonical implementation, ~47% reported reduction), split into focused servers, or allow-list a subset of toolsets.
 
 ## Structure
 
@@ -116,15 +116,15 @@ The credential boundary is the dashed line: secrets live inside the server, neve
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **MCP Server** | implementing the protocol endpoints (`tools/list`, `tools/call`, optional `resources/*`, `prompts/*`) for one logical tool group | JSON-RPC request → JSON-RPC response | leak credentials into responses, return raw transport noise to the agent, or stuff dozens of unrelated tools into one server. One server, one bounded surface area. |
-| **MCP Client** | protocol implementation inside the agent framework — connecting to configured servers, merging discovered tools, routing `tools/call` | server URL/command + LLM-chosen tool call → executed result | silently load every tool from every server; this is where **V13 Tool Budget** is enforced before the schemas hit the model context. |
-| **Tool Registry / Discovery** | the `tools/list` endpoint — the catalogue the client reads at startup (and re-reads on dynamic refresh) | client request → list of schemas | grow without an owner. Each schema is paid for in tokens on every session; an un-pruned registry is the schema-bloat failure mode in person. |
-| **Auth Manager** | credential storage and per-call authentication inside the server | tool invocation → authenticated outbound call | expose credentials in error messages, in `tools/list` descriptions, or anywhere reachable by the agent's context. The agent must never see a secret. |
-| **Tool Executor** | the actual outbound work — HTTP, SDK, filesystem, database call | validated parameters → raw external result | embed routing logic ("if user said X then ..."); routing happens in the LLM upstream, not in the executor. The executor is I1 internally. |
-| **Result Shaper** | turning raw external results into the structured response the protocol defines | raw result → typed protocol response | leak transport envelopes, debug fields, or unbounded payloads back into the agent's context; the result will be read by the model and counts against its budget. |
-| **Tool Budget Policy** *(at client)* | per-agent cap on schema tokens and tool count; selects toolsets, enables dynamic loading, gates over-budget servers | available servers + agent role → loaded subset | be set by gut feel. Thresholds come from **V13 Tool Budget** measurements, not optimism. |
+| **MCP Server** | implementing the protocol endpoints (`tools/list`, `tools/call`, optional `resources/*`, `prompts/*`) for one logical tool group | JSON-RPC request $\to$ JSON-RPC response | leak credentials into responses, return raw transport noise to the agent, or stuff dozens of unrelated tools into one server. One server, one bounded surface area. |
+| **MCP Client** | protocol implementation inside the agent framework — connecting to configured servers, merging discovered tools, routing `tools/call` | server URL/command + LLM-chosen tool call $\to$ executed result | silently load every tool from every server; this is where **V13 Tool Budget** is enforced before the schemas hit the model context. |
+| **Tool Registry / Discovery** | the `tools/list` endpoint — the catalogue the client reads at startup (and re-reads on dynamic refresh) | client request $\to$ list of schemas | grow without an owner. Each schema is paid for in tokens on every session; an un-pruned registry is the schema-bloat failure mode in person. |
+| **Auth Manager** | credential storage and per-call authentication inside the server | tool invocation $\to$ authenticated outbound call | expose credentials in error messages, in `tools/list` descriptions, or anywhere reachable by the agent's context. The agent must never see a secret. |
+| **Tool Executor** | the actual outbound work — HTTP, SDK, filesystem, database call | validated parameters $\to$ raw external result | embed routing logic ("if user said X then ..."); routing happens in the LLM upstream, not in the executor. The executor is I1 internally. |
+| **Result Shaper** | turning raw external results into the structured response the protocol defines | raw result $\to$ typed protocol response | leak transport envelopes, debug fields, or unbounded payloads back into the agent's context; the result will be read by the model and counts against its budget. |
+| **Tool Budget Policy** *(at client)* | per-agent cap on schema tokens and tool count; selects toolsets, enables dynamic loading, gates over-budget servers | available servers + agent role $\to$ loaded subset | be set by gut feel. Thresholds come from **V13 Tool Budget** measurements, not optimism. |
 
 Seven narrow responsibilities split across two processes. The split is the point: the *server* owns credentials, execution, and the external surface; the *client* owns budget enforcement and routing. Confusing the two — e.g. an agent that holds the credential because "it's easier" — collapses the credential-isolation benefit that justifies the pattern.
 
@@ -148,7 +148,7 @@ I3 typically composes with **V13 Tool Budget** as a hard prerequisite, **V6 Prom
 
 **Costs**
 - Schema-token tax — every connected server contributes its full `tools/list` to context; GitHub MCP alone is ~55,000 tokens by 2026.
-- Selection accuracy degradation — tool counts above ~15 erode the LLM's tool-selection precision; above ~40 it collapses (~43% → ~14% measured).
+- Selection accuracy degradation — tool counts above ~15 erode the LLM's tool-selection precision; above ~40 it collapses (~43% $\to$ ~14% measured).
 - Operational surface — server process management, transport choice (stdio vs SSE vs streamable HTTP), health, restarts.
 - Latency floor — a stdio or HTTP round-trip per call; not appropriate for sub-10ms hot paths (use **I1**).
 - Supply-chain exposure — every added server is code in the trust boundary; a malicious or compromised server with full credential access is the supply-chain failure mode.
@@ -159,7 +159,7 @@ I3 typically composes with **V13 Tool Budget** as a hard prerequisite, **V6 Prom
 - *Credential leak via descriptions / errors* — a server includes secret material in tool descriptions, error messages, or example values; the agent's context now contains the secret.
 - *Lethal Trifecta via composition* — Server A reads private data; Server B writes outbound; Server C ingests untrusted input. Each is fine alone; together they are an exfiltration pipeline. **V3** must be applied across the *combined* server set, not per-server.
 - *Stale or vendored schemas* — the server changed but cached schemas in the client did not; calls fail with mysterious type errors. Re-run `tools/list` on connection; surface schema versions.
-- *Reflexive use over I4* — high-frequency operation on a tool that has a CLI is wrapped in MCP for "consistency"; the agent burns 35× more tokens per call than the CLI equivalent.
+- *Reflexive use over I4* — high-frequency operation on a tool that has a CLI is wrapped in MCP for "consistency"; the agent burns 35$\times$ more tokens per call than the CLI equivalent.
 
 ## Implementation Notes
 
@@ -259,7 +259,7 @@ The optional second session — a tool-search subagent — is the canonical miti
 - **Wraps** I1 Direct API Call — every `tools/call` ultimately executes as an I1 inside the server.
 - **Sibling of** I4 CLI Invocation — same goal (give the LLM an external action), opposite trade-off on schema overhead. Production agents commonly run both: I3 for shared credentialed tools, I4 for the hot path.
 - **Composes with** I5 Agent Card — Agent Cards are agent-level discovery; MCP is tool-level discovery; an agent may serve both, at different granularities.
-- **Required by** V13 Tool Budget — I3 without V13 enforcement is the documented failure mode (schema bloat → tool-selection collapse). See **CRITICAL 6**.
+- **Required by** V13 Tool Budget — I3 without V13 enforcement is the documented failure mode (schema bloat $\to$ tool-selection collapse). See **CRITICAL 6**.
 - **Pairs with** V6 Prompt Injection Shield — any MCP tool that reads adversarial content (third-party documents, web pages, issues, emails) widens the attack surface; V6 is the mitigation.
 - **Pairs with** V8 Tool Sandboxing — for any MCP server whose tools execute code or touch a privileged surface, V8 is the runtime control.
 - **Pairs with** V3 Lethal Trifecta — the audit lens applied *across the combined set of loaded servers*, not per-server.
@@ -274,8 +274,8 @@ The optional second session — a tool-search subagent — is the canonical miti
 - *The 2026 MCP Roadmap* — official blog post on the MCP blog ([`blog.modelcontextprotocol.io`](https://blog.modelcontextprotocol.io/)).
 - SEP-1576 — *Mitigating Token Bloat in MCP: Reducing Schema Redundancy and Optimizing Tool Selection* — modelcontextprotocol/modelcontextprotocol issue #1576 (September 2025); the canonical articulation of the schema-cost problem from inside the project.
 - GitHub Blog (2025) — *Improving token efficiency in GitHub Agentic Workflows* — the official GitHub take on schema cost in their own server.
-- *GitHub MCP Token Cost: A 2026 Autopsy and 4 Fixes* — practitioner analysis tracking the 42K → 55K growth and the mitigation ladder (tool-search subagent, allow-listing, CLI fallback, retrieval-out-of-loop).
-- *MCP Token Trap: Why Your AI Agent Burns 35× More Tokens Than a CLI* — OnlyCLI benchmark comparing MCP vs CLI per-operation cost.
+- *GitHub MCP Token Cost: A 2026 Autopsy and 4 Fixes* — practitioner analysis tracking the 42K $\to$ 55K growth and the mitigation ladder (tool-search subagent, allow-listing, CLI fallback, retrieval-out-of-loop).
+- *MCP Token Trap: Why Your AI Agent Burns 35$\times$ More Tokens Than a CLI* — OnlyCLI benchmark comparing MCP vs CLI per-operation cost.
 - HN community discussions on MCP vs API and MCP vs LangChain (2024–25 threads) — the practitioner backlash and consensus.
 - Composio *AI Agent Report 2025* — MCP adoption data.
 - Wikipedia — *Model Context Protocol* — for adoption timeline (OpenAI March 2025, Linux Foundation December 2025) cross-reference.

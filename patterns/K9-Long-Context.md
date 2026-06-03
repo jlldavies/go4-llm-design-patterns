@@ -51,7 +51,7 @@ K9 is mostly a sizing exercise — measure, threshold, decide.
 | T > ~50% of nominal | quality degradation likely; benchmark before committing |
 | T < ~25% of nominal | K9 comfortable |
 
-**3. Cost the calls.** Per uncached call: `T × input-token-price`. With prompt caching, repeat calls over the same set typically cost 10–25% of the uncached price after the first (provider-specific). For N queries per session over a stable set, total cost ≈ `uncached × 1 + cached × (N − 1)`. If N is small the long prefix is paid in full almost every call — that usually breaks the economics.
+**3. Cost the calls.** Per uncached call: `T × input-token-price`. With prompt caching, repeat calls over the same set typically cost 10–25% of the uncached price after the first (provider-specific). For N queries per session over a stable set, total cost $\approx$ `uncached × 1 + cached × (N − 1)`. If N is small the long prefix is paid in full almost every call — that usually breaks the economics.
 
 **Prefix cache mechanics (mechanism 5).** The provider stores the KV state tensor $[L \times n \times n_{\text{kv}} \times d_{\text{head}}]$ of the stable prefix — the portion of the prompt that does not change across requests. Re-submission within the provider TTL (~5 minutes for Anthropic, minimum 1,024 tokens) injects the cached states directly, skipping prefill entirely and reducing cost to ~10% of the normal input token price for the cached portion. Sessions that pause longer than the TTL re-prefill at full cost. Design implication: Long Context is most economical when queries over the same stable document corpus are batched within the TTL window. A stable corpus that is loaded once and queried many times within 5 minutes pays the prefill cost once; the same corpus queried once per hour pays it every time.
 
@@ -61,8 +61,8 @@ K9 is mostly a sizing exercise — measure, threshold, decide.
 
 **Quick test — K9 is the right pattern when:**
 
-- T ≤ ~50% of the nominal window, *and*
-- queries per session N ≥ 5 (so caching amortises the prefix), *and*
+- T $\leq$ ~50% of the nominal window, *and*
+- queries per session N $\geq$ 5 (so caching amortises the prefix), *and*
 - the latency budget tolerates a long prefill, *and*
 - T does not grow unboundedly during the session.
 
@@ -81,11 +81,11 @@ If any condition fails, choose K1 or one of its refinements. If T is large *and*
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Working set** | every document the task may need, in full | — → working set | exceed the window — silent overflow drops content with no warning. |
-| **Context window** | holding the working set and the exchange | working set + query → prompt | be assumed free — every uncached token is paid on every call. |
-| **Generator (LLM)** | attending over the whole set to answer | prompt → answer | be trusted equally at all positions — mid-context material is used worse (lost-in-the-middle). |
+| **Working set** | every document the task may need, in full | — $\to$ working set | exceed the window — silent overflow drops content with no warning. |
+| **Context window** | holding the working set and the exchange | working set + query $\to$ prompt | be assumed free — every uncached token is paid on every call. |
+| **Generator (LLM)** | attending over the whole set to answer | prompt $\to$ answer | be trusted equally at all positions — mid-context material is used worse (lost-in-the-middle). |
 
 The pattern's signature is the participants it *removes*: no chunker, no embedding model, no vector store, no retriever.
 

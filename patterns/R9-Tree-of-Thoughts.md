@@ -16,7 +16,7 @@ Solve problems where the right reasoning path is not obvious upfront by having t
 
 Chain-of-thought (R1, R2) commits to one line of reasoning at the first step and rides it to the end. For easy problems with a single obvious approach, this is fine — the chain is the answer. For *hard* problems with a large solution space — Game of 24, crosswords, creative writing under constraints, planning under uncertainty — the first plausible thought is often wrong, and CoT has no machinery to recover. The model produces a confident, well-structured trajectory that ends at the wrong place, with no signal it should have tried something else (mechanism 7 — token generation is forward-only stochastic sampling; once an intermediate thought is committed, subsequent tokens condition on it and cannot revise it). Add Self-Consistency (R17) on top and you draw N parallel chains; if the model has the same bias on all N, you vote a wrong answer with high confidence.
 
-The deficit is *deliberation*. Humans solving a hard puzzle do not generate a single chain; they generate candidates, look at each, judge which are promising, expand the promising ones, abandon the dead ends, and sometimes come back to a discarded branch. Yao et al. (2023) made this operational: at each reasoning step, ask the LLM for **k candidate next thoughts**, then ask it (or a separate evaluator) to **score** each candidate, then **search** — BFS keeps the top-b thoughts at each level, DFS expands the most promising depth-first with backtracking on failure. The headline result in the paper is striking on tasks where CoT fails by construction: Game of 24 success rate **4% → 74%** for GPT-4, with comparable gains on Creative Writing and Mini Crosswords. The lift is not a percentage point or two — it is a phase change in what the model can do.
+The deficit is *deliberation*. Humans solving a hard puzzle do not generate a single chain; they generate candidates, look at each, judge which are promising, expand the promising ones, abandon the dead ends, and sometimes come back to a discarded branch. Yao et al. (2023) made this operational: at each reasoning step, ask the LLM for **k candidate next thoughts**, then ask it (or a separate evaluator) to **score** each candidate, then **search** — BFS keeps the top-b thoughts at each level, DFS expands the most promising depth-first with backtracking on failure. The headline result in the paper is striking on tasks where CoT fails by construction: Game of 24 success rate **4% $\to$ 74%** for GPT-4, with comparable gains on Creative Writing and Mini Crosswords. The lift is not a percentage point or two — it is a phase change in what the model can do.
 
 The unique contribution is to give the LLM the *deliberate-thinking machinery* that pure forward generation lacks: branching, evaluation, pruning, backtracking. ToT is structurally distinct from its band-mates. **R10 LATS** subsumes ToT conceptually — it is the same idea executed with Monte Carlo Tree Search, a formal value function, and a reflection step — but it is much more expensive and requires more engineering; ToT is the *lightweight, prompt-only* member of the family. **R11 Buffer of Thoughts** moves the same kind of structure *out of inference time* by retrieving pre-distilled thought-templates from a library; it pays at write-time so reads are cheap, where ToT pays at every read. **R17 Self-Consistency** draws independent samples and votes — no evaluation, no branching, no backtracking — it works without structure but cannot recover from a shared bias across samples. ToT sits at a specific point on the cost-quality curve: more expensive than CoT or Self-Consistency, more capable on search-structured problems; cheaper than LATS, less capable when the search demands a formal value function.
 
@@ -29,7 +29,7 @@ Use Tree of Thoughts when:
 - the problem has a **large search space** where the first plausible reasoning path is often wrong — Game of 24, mathematical puzzles, mini-crosswords, planning under constraints, creative writing with hard constraints;
 - you can write a **reasonable evaluator** for *partial* solutions — "this state can plausibly reach a valid solution" or "this state cannot";
 - one-shot CoT (R1/R2) demonstrably fails or saturates well below the model's ceiling;
-- you can afford **5–50× the LLM calls of CoT** for the lift in quality;
+- you can afford **5–50$\times$ the LLM calls of CoT** for the lift in quality;
 - the problem decomposes naturally into *thought steps* of comparable granularity (so branching has somewhere to land).
 
 Do not use it when:
@@ -44,9 +44,9 @@ Do not use it when:
 
 ## Decision Criteria
 
-R9 is right when one-shot CoT fails on a search-structured problem, you can score partial states usefully, and you can afford 5–50× CoT's compute for a phase-change in quality.
+R9 is right when one-shot CoT fails on a search-structured problem, you can score partial states usefully, and you can afford 5–50$\times$ CoT's compute for a phase-change in quality.
 
-**1. Confirm CoT actually fails.** Measure single-chain CoT success rate on a labelled set. If R1/R2 already clears your bar, do not pay for ToT. The ToT lift is *huge* on problems where CoT is near zero (Game of 24: 4% → 74%) and *small* on problems where CoT already works. If CoT scores > 60%, the gain may not justify the cost — try **R17 Self-Consistency** first; it is 1/k the price.
+**1. Confirm CoT actually fails.** Measure single-chain CoT success rate on a labelled set. If R1/R2 already clears your bar, do not pay for ToT. The ToT lift is *huge* on problems where CoT is near zero (Game of 24: 4% $\to$ 74%) and *small* on problems where CoT already works. If CoT scores > 60%, the gain may not justify the cost — try **R17 Self-Consistency** first; it is 1/k the price.
 
 **2. Test the evaluator independently.** Before building the loop, write the value/vote prompt and score it on a labelled set of *partial* states ("can this state still reach a valid solution?"). If the evaluator's accuracy is below ~70%, the search will wander and cost will run without quality return — fix the evaluator first, or fall back to **R17**. The evaluator is the pattern's bottleneck.
 
@@ -60,7 +60,7 @@ R9 is right when one-shot CoT fails on a search-structured problem, you can scor
 
 - one-shot CoT (R1/R2) demonstrably fails or saturates well below the model's ceiling on the task, *and*
 - the LLM can score partial states with > ~70% accuracy on a labelled probe set, *and*
-- the budget tolerates 5–50× CoT cost per problem for the quality lift, *and*
+- the budget tolerates 5–50$\times$ CoT cost per problem for the quality lift, *and*
 - the problem decomposes into thought-steps of comparable granularity (so branching has somewhere to land).
 
 If CoT already works, choose **R1/R2**. If failures look like sample noise rather than systematic commitments, choose **R17 Self-Consistency Voting**. If you need the strongest possible search and can pay for it, escalate to **R10 LATS**. If the reasoning structures recur across many problems, **R11 Buffer of Thoughts** delivers comparable quality at a fraction of the cost. If the task needs interactive tool use rather than reasoning-path search, the pattern you want is **R4 ReAct**, not R9.
@@ -98,14 +98,14 @@ If CoT already works, choose **R1/R2**. If failures look like sample noise rathe
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **State** | the representation of a partial solution at a given tree node | parent state + applied thought → child state | be opaque — the evaluator and the generator both read it, so it must be a textual / structured form the LLM can reason about. A state the LLM cannot inspect breaks the loop. |
-| **Thought Generator (LLM)** | producing k candidate next thoughts from a given state | state → k candidate thoughts | judge its own candidates — that is the Evaluator's job. A generator that pre-prunes loses the search's diversity and collapses into a CoT chain. |
-| **State Evaluator (LLM)** | scoring the promise of each candidate state — value-style ("can this still win?") or vote-style ("which of these k is best?") | candidate state(s) + problem → score / ranking | generate new thoughts or commit to a final answer; it only judges. The Evaluator is the pattern's bottleneck — its accuracy bounds the search's quality. |
-| **Search controller** | the search policy: BFS keep top-b, or DFS expand-best with backtracking | scored frontier + visited set → next state to expand | run unbounded — `V9` budget on nodes / calls / depth / wall-clock is mandatory. A controller without a cap is a runaway tree. |
+| **State** | the representation of a partial solution at a given tree node | parent state + applied thought $\to$ child state | be opaque — the evaluator and the generator both read it, so it must be a textual / structured form the LLM can reason about. A state the LLM cannot inspect breaks the loop. |
+| **Thought Generator (LLM)** | producing k candidate next thoughts from a given state | state $\to$ k candidate thoughts | judge its own candidates — that is the Evaluator's job. A generator that pre-prunes loses the search's diversity and collapses into a CoT chain. |
+| **State Evaluator (LLM)** | scoring the promise of each candidate state — value-style ("can this still win?") or vote-style ("which of these k is best?") | candidate state(s) + problem $\to$ score / ranking | generate new thoughts or commit to a final answer; it only judges. The Evaluator is the pattern's bottleneck — its accuracy bounds the search's quality. |
+| **Search controller** | the search policy: BFS keep top-b, or DFS expand-best with backtracking | scored frontier + visited set $\to$ next state to expand | run unbounded — `V9` budget on nodes / calls / depth / wall-clock is mandatory. A controller without a cap is a runaway tree. |
 | **Frontier / visited store** | the search state: open states to expand, closed states already evaluated | reads/writes from controller | drop visited states without recording them — repeated re-evaluation of the same state is the most common silent cost leak. |
-| **Solution extractor** | picking the best leaf (or path) when the search terminates | terminal states + scores → final answer + path | rescore states; it returns the best-already-found, not a new judgment. The path back to root is the inspectable trace. |
+| **Solution extractor** | picking the best leaf (or path) when the search terminates | terminal states + scores $\to$ final answer + path | rescore states; it returns the best-already-found, not a new judgment. The path back to root is the inspectable trace. |
 
 Six narrow responsibilities. The Generator and the Evaluator are *the same model* in most ToT deployments — the pattern's value comes from using the LLM in *two distinct modes* (proposing vs judging) on the *same problem*, not from having two different models. Keep them as separate sessions even when the model is shared: the proposer prompt asks for diversity, the evaluator prompt asks for discrimination, and mixing them creates the "generator that pre-prunes" failure.
 
@@ -116,14 +116,14 @@ A problem arrives and becomes the root state. The Search controller takes the ro
 ## Consequences
 
 **Benefits**
-- Phase-change quality lifts on search-structured problems where CoT is near zero — Yao et al. report Game of 24 GPT-4 success **4% → 74%**, with comparable gains on Creative Writing (coherence by judge) and Mini Crosswords (letter/word success).
+- Phase-change quality lifts on search-structured problems where CoT is near zero — Yao et al. report Game of 24 GPT-4 success **4% $\to$ 74%**, with comparable gains on Creative Writing (coherence by judge) and Mini Crosswords (letter/word success).
 - Backtracking *recovers from wrong first steps*, which CoT and Self-Consistency cannot. A pattern that *can* abandon a branch is qualitatively different from one that *commits*.
 - The whole tree is *inspectable* — every node has a state, a score, an expansion history. For debugging, evaluation, and trust calibration this is a much richer artefact than a single chain.
 - Prompt-only and model-agnostic — no fine-tune required, works with any capable model. The official paper uses GPT-4 stock.
 - Tunable on a clear cost axis (k, b, d) — operators can dial cost against quality without changing the pattern.
 
 **Costs**
-- **5–50× CoT cost per problem** as a working envelope. At k=5, b=5, d=4 the call count is ~200 per problem (generation + evaluation). The cost is the most-cited reason ToT does not appear in production despite the headline numbers. The cost per call grows with depth, not just call count (mechanism 2 / 3): a node at depth d carries a root-to-node path of d steps as context; the LLM call at depth d pays O(d²) attention cost over that prefix. Total cost scales as k × b × Σᵢ O(i²) over depth, making deep trees disproportionately expensive relative to shallow ones. Budget depth (d) more conservatively than breadth (k) and width (b).
+- **5–50$\times$ CoT cost per problem** as a working envelope. At k=5, b=5, d=4 the call count is ~200 per problem (generation + evaluation). The cost is the most-cited reason ToT does not appear in production despite the headline numbers. The cost per call grows with depth, not just call count (mechanism 2 / 3): a node at depth d carries a root-to-node path of d steps as context; the LLM call at depth d pays O(d²) attention cost over that prefix. Total cost scales as k $\times$ b $\times$ Σᵢ O(i²) over depth, making deep trees disproportionately expensive relative to shallow ones. Budget depth (d) more conservatively than breadth (k) and width (b).
 - Latency scales with depth — each level is a sequential step (the next level's candidates depend on the previous level's selected states). Within a level, generation and evaluation across siblings can be parallelised, but depth is on the critical path.
 - Engineering surface: the search controller, the frontier/visited store, the budget enforcement, and the evaluator prompt are all real engineering — the pattern is not a one-prompt drop-in.
 - Evaluator-bound — if the LLM cannot score partial states reliably, the whole pattern wanders. Many tasks fail this prerequisite quietly.
@@ -162,13 +162,13 @@ A problem arrives and becomes the root state. The Search controller takes the ro
 |---|---|---|---|
 | 1 | Pop next state from frontier (BFS level / DFS top-of-stack) | `code` | |
 | 2 | Generator proposes k candidate thoughts from this state | `LLM` | Generator session |
-| 3 | Apply each thought to the state → k child states | `code` | |
+| 3 | Apply each thought to the state $\to$ k child states | `code` | |
 | 4 | Evaluator scores each child (value-style or vote-style) | `LLM` | Evaluator session |
 | 5 | Search controller picks which to keep (BFS top-b / DFS push-best) | `code` | |
 | 6 | Record expansions in frontier / visited store | `code` | V14 |
 | 7 | Check budget (V9: max nodes / calls / depth / wall-clock) | `code` | V9 |
-| 8 | If terminal state passes evaluator threshold → extract solution | `code` | |
-| 9 | Else if budget exhausted → return best-effort leaf | `code` | V9 |
+| 8 | If terminal state passes evaluator threshold $\to$ extract solution | `code` | |
+| 9 | Else if budget exhausted $\to$ return best-effort leaf | `code` | V9 |
 | 10 | Else loop to 1 | `code` | |
 
 **Skeleton** — the wiring only; each `# LLM` line is a configured session (specified below):
@@ -237,11 +237,11 @@ tree_of_thoughts(problem, k=5, b=5, d=4, max_nodes=200):
 - **Pairs with V14 Trajectory Logging** — the tree *is* the inspectable artefact; every node, score, and pruning decision should be logged. This is also how you diagnose evaluator noise after the fact.
 - **Pairs with V10 Checkpointing** — for long searches a half-built tree is expensive to lose to a transient error.
 - **Composes with V15 LLM-as-Judge** — the State Evaluator is a V15 judge specialised to partial states. The judge's quality bounds the search.
-- **Lineage** — the "Something-of-Thought" family runs CoT (R1/R2) → ToT (R9) → GoT (R18 Graph of Thoughts) → BoT (R11) → SoT (R12). Each adds either structure or efficiency to the reasoning chain; ToT is the first that introduces *search and backtracking*.
+- **Lineage** — the "Something-of-Thought" family runs CoT (R1/R2) $\to$ ToT (R9) $\to$ GoT (R18 Graph of Thoughts) $\to$ BoT (R11) $\to$ SoT (R12). Each adds either structure or efficiency to the reasoning chain; ToT is the first that introduces *search and backtracking*.
 
 ## Sources
 
-- Yao et al. (2023) — "Tree of Thoughts: Deliberate Problem Solving with Large Language Models" (arXiv [2305.10601](https://arxiv.org/abs/2305.10601); NeurIPS 2023). The canonical reference. Key results: Game of 24 GPT-4 4% → 74%; comparable lifts on Creative Writing and Mini Crosswords.
+- Yao et al. (2023) — "Tree of Thoughts: Deliberate Problem Solving with Large Language Models" (arXiv [2305.10601](https://arxiv.org/abs/2305.10601); NeurIPS 2023). The canonical reference. Key results: Game of 24 GPT-4 4% $\to$ 74%; comparable lifts on Creative Writing and Mini Crosswords.
 - Long (2023) — "Large Language Model Guided Tree-of-Thought" (arXiv [2305.08291](https://arxiv.org/abs/2305.08291)). A near-contemporaneous, independent formulation; useful as a cross-check on the core idea.
 - Besta et al. (2024) — "Demystifying Chains, Trees, and Graphs of Thoughts" (arXiv [2401.14295](https://arxiv.org/abs/2401.14295)). The survey that situates ToT in the wider Something-of-Thought family; the source for the BoT/GoT/SoT cost comparisons.
 - Zhou et al. (2023) — "Language Agent Tree Search Unifies Reasoning, Acting, and Planning in Language Models" (arXiv [2310.04406](https://arxiv.org/abs/2310.04406); ICML 2024). The R10 LATS paper; the formal MCTS-plus-reflection extension of ToT.

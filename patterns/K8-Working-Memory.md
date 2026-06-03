@@ -77,11 +77,11 @@ If steps are independent, K8 is overhead. If the task is multi-agent or cross-se
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
 | **Scratchpad** | the delimited region holding working state | — | be undelimited — if it blends into prose the model treats it as text, not state. |
-| **Model** | reading the pad, reasoning, writing it back | pad + step → pad + output | recompute a result the pad already holds, or skip writing its conclusions back. |
-| **Scratchpad Manager** *(optional)* | formatting, bounding, persisting the pad | pad → bounded pad | let the pad grow unbounded — apply K6/K7 to it. |
+| **Model** | reading the pad, reasoning, writing it back | pad + step $\to$ pad + output | recompute a result the pad already holds, or skip writing its conclusions back. |
+| **Scratchpad Manager** *(optional)* | formatting, bounding, persisting the pad | pad $\to$ bounded pad | let the pad grow unbounded — apply K6/K7 to it. |
 
 ## Collaborations
 

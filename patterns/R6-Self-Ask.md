@@ -56,9 +56,9 @@ R6 is right when the question is compositional, the sub-facts are individually r
 
 **2. Count the hops.** Self-Ask shines at **2–4 hops**. At 1 hop, the scaffold is overhead. Above ~5 hops the Q/A chain bloats and intermediate-answer errors compound; switch to **R4 ReAct** with explicit state, or **R9 Tree of Thoughts** if the path branches.
 
-**3. Pick a variant by where the sub-facts live.** Sub-facts inside the model's training data → **Vanilla Self-Ask** (no tool). Sub-facts are time-sensitive, long-tail, or proprietary → **Self-Ask with Search** (or compose with **K1 Vanilla RAG** against your corpus). The tool choice is the main lever; the scaffold itself is the same.
+**3. Pick a variant by where the sub-facts live.** Sub-facts inside the model's training data $\to$ **Vanilla Self-Ask** (no tool). Sub-facts are time-sensitive, long-tail, or proprietary $\to$ **Self-Ask with Search** (or compose with **K1 Vanilla RAG** against your corpus). The tool choice is the main lever; the scaffold itself is the same.
 
-**4. Cost the chain.** Each hop adds one round-trip — a follow-up + an intermediate answer + (optional) a tool call. Plan-and-Solve and ReWOO can be cheaper when the sub-questions are independent and parallelisable; Self-Ask is inherently *sequential* because hop N+1 depends on hop N's answer. If the hops are genuinely independent, prefer **R5 ReWOO** for the 5× token efficiency.
+**4. Cost the chain.** Each hop adds one round-trip — a follow-up + an intermediate answer + (optional) a tool call. Plan-and-Solve and ReWOO can be cheaper when the sub-questions are independent and parallelisable; Self-Ask is inherently *sequential* because hop N+1 depends on hop N's answer. If the hops are genuinely independent, prefer **R5 ReWOO** for the 5$\times$ token efficiency.
 
 **5. Bound the recursion.** Self-Ask is a loop disguised as a Q/A scaffold — `Are there follow-up questions? Yes / No.` A miscalibrated model can say *Yes* indefinitely. Cap the number of follow-ups (typical: **4–6**) via **V9 Bounded Execution**; force a final answer when the cap is hit.
 
@@ -104,13 +104,13 @@ If the hops are independent and parallelisable, choose **R5 ReWOO**. If the task
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Decomposer (LLM)** | producing the next follow-up question given the original question and the intermediate answers so far | Q + (Q₁, a₁) … (Qₖ, aₖ) → next sub-question Qₖ₊₁ *or* terminate signal | answer its own follow-up in the same step; the structural value is *naming* the sub-question before answering it. Conflating the two collapses Self-Ask back into CoT. |
-| **Sub-question answerer** | producing the intermediate answer to one sub-question | Qₖ → aₖ | be the same call as the Decomposer; even when the same model serves both roles, the prompt must shift so the model is *only* answering Qₖ, not extending the chain. |
-| **Tool (search / retriever / calculator)** *(optional)* | sourcing the sub-fact from outside the model | Qₖ → factual span | be invoked when the answer is already in the model's parametric knowledge with high confidence; calling out for every hop on a single-hop-knowable question wastes budget. |
-| **Termination check** | deciding when no more follow-ups are needed | full Q/A history → continue / stop | hand control back to the Decomposer indefinitely; this is where **V9 Bounded Execution** caps the loop. |
-| **Composer (LLM)** | producing the final answer from the intermediate answers | Q + all (Qᵢ, aᵢ) → A | reopen sub-questions or add unsupported claims; its job is composition, not re-decomposition. |
+| **Decomposer (LLM)** | producing the next follow-up question given the original question and the intermediate answers so far | Q + (Q₁, a₁) … (Qₖ, aₖ) $\to$ next sub-question Qₖ₊₁ *or* terminate signal | answer its own follow-up in the same step; the structural value is *naming* the sub-question before answering it. Conflating the two collapses Self-Ask back into CoT. |
+| **Sub-question answerer** | producing the intermediate answer to one sub-question | Qₖ $\to$ aₖ | be the same call as the Decomposer; even when the same model serves both roles, the prompt must shift so the model is *only* answering Qₖ, not extending the chain. |
+| **Tool (search / retriever / calculator)** *(optional)* | sourcing the sub-fact from outside the model | Qₖ $\to$ factual span | be invoked when the answer is already in the model's parametric knowledge with high confidence; calling out for every hop on a single-hop-knowable question wastes budget. |
+| **Termination check** | deciding when no more follow-ups are needed | full Q/A history $\to$ continue / stop | hand control back to the Decomposer indefinitely; this is where **V9 Bounded Execution** caps the loop. |
+| **Composer (LLM)** | producing the final answer from the intermediate answers | Q + all (Qᵢ, aᵢ) $\to$ A | reopen sub-questions or add unsupported claims; its job is composition, not re-decomposition. |
 
 Five narrow responsibilities. The pattern's reliability comes from the **Decomposer / answerer separation**: when the same call both grows the chain *and* fills it in, the model takes shortcuts — guessing the composed answer before all sub-facts are surfaced. Self-Ask's scaffold (`Follow up:` / `Intermediate answer:`) is the mechanism that enforces the separation even when one model plays both roles.
 
@@ -212,7 +212,7 @@ Concretely, for the **Self-Ask** session the setup loaded once is: the four Pres
 - **Distinct from R1 Zero-Shot CoT and R2 Few-Shot CoT** — CoT emits free-form reasoning prose; Self-Ask emits a structured Q/A scaffold (`Follow up:` / `Intermediate answer:`) that names each sub-question explicitly. Self-Ask narrows the *compositionality gap* CoT alone leaves open.
 - **Distinct from R3 Plan-and-Solve** — R3 plans a sequence of *actions* upfront before executing any of them; R6 grows a tree of *questions* incrementally, where each next sub-question depends on the answer to the previous one. R3 is action-shaped; R6 is question-shaped.
 - **Distinct from R4 ReAct** — R4's loop is `Thought / Action / Observation` around a tool, with the loop structure built for exploratory action; R6's loop is `Follow up / Intermediate answer` around a sub-question, with tools optional. Many Self-Ask runs are pure recall with no tool at all; ReAct without tools is not ReAct.
-- **Distinct from R5 ReWOO** — R5 plans *all* sub-tool-calls upfront with placeholder variables and executes them in parallel; R6 is inherently sequential because hop N+1 depends on hop N's answer. If the sub-questions are independent, R5 wins on token efficiency (5×) and latency.
+- **Distinct from R5 ReWOO** — R5 plans *all* sub-tool-calls upfront with placeholder variables and executes them in parallel; R6 is inherently sequential because hop N+1 depends on hop N's answer. If the sub-questions are independent, R5 wins on token efficiency (5$\times$) and latency.
 - **Composes with K1 Vanilla RAG** — each `Intermediate answer:` slot is a clean injection point for a retrieval call against the operator's corpus. Self-Ask + K1 is the canonical pattern for compositional questions over a private knowledge base.
 - **Composes with R2 Few-Shot CoT** — the Self-Ask exemplars *are* a Few-Shot CoT prompt with a stricter output contract. Zero-Shot Self-Ask exists but is noticeably less reliable than the few-shot version.
 - **Pairs with R4 ReAct at scale** — when each sub-question itself requires multi-step tool use rather than a single lookup, the sub-question slot becomes a small ReAct sub-loop. The outer pattern is still R6 (question decomposition); the inner pattern is R4 (action loop).

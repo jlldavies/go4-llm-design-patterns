@@ -41,7 +41,7 @@ Do not use Agent Simulation when:
 
 V18 is right when the agent is trajectory-shaped, an honest simulator can be built, and the team will run and maintain it.
 
-**1. Is the agent's value carried by the trajectory, not the call?** Count the median number of turns or tool calls before task completion in real traffic (use V14 traces). Threshold: **≥ 3 turns or ≥ 3 tool calls** to complete a representative task. Below that, the agent is effectively one-shot and **V16 Offline Eval** suffices; V18 buys little. Above that, single-call evals miss the failure mode by construction.
+**1. Is the agent's value carried by the trajectory, not the call?** Count the median number of turns or tool calls before task completion in real traffic (use V14 traces). Threshold: **$\geq$ 3 turns or $\geq$ 3 tool calls** to complete a representative task. Below that, the agent is effectively one-shot and **V16 Offline Eval** suffices; V18 buys little. Above that, single-call evals miss the failure mode by construction.
 
 **2. Can a simulated user be built with realistic intent variance?** A good user simulator has (a) a defined *goal* per scenario (book a refund, find a vulnerability, get medical advice), (b) a *persona* that varies how the goal is pursued (terse, rambling, hostile, confused), and (c) plausible *partial knowledge* so it does not just hand the agent the answer. Threshold: simulator coverage spans at least the goals you see in V14 plus the adversarial goals you must defend against; persona diversity is non-trivial. If the simulated user is one persona that politely states its goal, the sim is happy-path-only and gives false confidence — use **V1 Human-in-the-Loop** red-teaming until the simulator earns its keep.
 
@@ -51,11 +51,11 @@ V18 is right when the agent is trajectory-shaped, an honest simulator can be bui
 
 **5. Is the trajectory scored, not just the final output?** A V18 judge that only looks at the last assistant message is a V16 in disguise. The judge must consume the full trace (via **V14 Trajectory Logging**) and score *trajectory-level* dimensions: task completion, policy adherence at every turn, safety violations *anywhere* in the run, cost / turn-count / latency budgets, and tool-use correctness. Threshold: at minimum, completion-rate and any-turn-safety-violation must be measured; ideally also turn-count-to-completion and policy-adherence-per-turn.
 
-**6. Will the simulator and scenario set be maintained?** Like V16's golden set, the simulator decays. New production patterns must be folded back (V14 → V18 scenarios); user-simulator personas must be re-tuned as user behaviour shifts; tool simulators must track real-tool API changes. Threshold: named owner; production incidents become V18 scenarios as a post-mortem step; quarterly sim-vs-prod fidelity audit. Without that, the sim drifts and the gate becomes theatre.
+**6. Will the simulator and scenario set be maintained?** Like V16's golden set, the simulator decays. New production patterns must be folded back (V14 $\to$ V18 scenarios); user-simulator personas must be re-tuned as user behaviour shifts; tool simulators must track real-tool API changes. Threshold: named owner; production incidents become V18 scenarios as a post-mortem step; quarterly sim-vs-prod fidelity audit. Without that, the sim drifts and the gate becomes theatre.
 
 **Quick test — V18 is the right pattern when:**
 
-- the agent is trajectory-shaped (≥ 3 turns / tool calls per task), *and*
+- the agent is trajectory-shaped ($\geq$ 3 turns / tool calls per task), *and*
 - an honest simulator can be built for user, tools, and environment, *and*
 - scenarios span happy / failure-injection / adversarial / load / long-horizon, *and*
 - the judge scores the trajectory, not only the final output, *and*
@@ -104,16 +104,16 @@ If the agent is one-shot, run **V16 Offline Eval** instead. If trajectory fideli
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Scenario** | the goal, persona, environment config, and expected outcome for one run | — → declarative scenario file | be a single happy-path goal — every scenario is one of {happy, failure-injection, adversarial, load, long-horizon}; categories are tracked. |
-| **User Simulator** | producing turn-by-turn user messages consistent with the scenario's goal and persona | scenario + prior trajectory → next user message | break character mid-run, hand the agent the answer, or read its hidden state; if it can see what the agent knows, it stops being a user. |
-| **Tool Simulator** | returning tool responses — clean or injected with the scenario's failure mode | tool call + scenario config → tool response | quietly degrade to happy responses when the scenario specified a failure; failure injection must be enforced. |
-| **Simulation Controller** | orchestrating one run: stepping the agent, routing messages between user-sim and agent, recording the trajectory | scenario + AUT + sims → trajectory | mutate the AUT or its setup mid-run; the AUT is loaded exactly as it would ship. |
-| **Agent Under Test** | producing assistant messages and tool calls per its production configuration | the dialogue + tool responses → next action | know it is in simulation — eval-awareness invalidates the audit (the Petri 2.0 problem). |
-| **Trajectory Judge** | scoring the whole trace against trajectory-level dimensions | full V14 trace + scenario expected outcome → per-dimension scores + reasoning | score only the final message — a V18 judge that does that is a V16 in disguise. |
-| **Scenario Suite** | the curated, versioned collection of scenarios | — → versioned suite | be happy-path-only, unowned, or unsynced from V14's real-production-failure stream. |
-| **Comparator + Gate** | regression detection vs the prior baseline and the deploy decision | trajectory scores + baseline → PASS / FAIL | tolerance-tune safety categories; safety regressions are hard blocks regardless of aggregate delta. |
+| **Scenario** | the goal, persona, environment config, and expected outcome for one run | — $\to$ declarative scenario file | be a single happy-path goal — every scenario is one of {happy, failure-injection, adversarial, load, long-horizon}; categories are tracked. |
+| **User Simulator** | producing turn-by-turn user messages consistent with the scenario's goal and persona | scenario + prior trajectory $\to$ next user message | break character mid-run, hand the agent the answer, or read its hidden state; if it can see what the agent knows, it stops being a user. |
+| **Tool Simulator** | returning tool responses — clean or injected with the scenario's failure mode | tool call + scenario config $\to$ tool response | quietly degrade to happy responses when the scenario specified a failure; failure injection must be enforced. |
+| **Simulation Controller** | orchestrating one run: stepping the agent, routing messages between user-sim and agent, recording the trajectory | scenario + AUT + sims $\to$ trajectory | mutate the AUT or its setup mid-run; the AUT is loaded exactly as it would ship. |
+| **Agent Under Test** | producing assistant messages and tool calls per its production configuration | the dialogue + tool responses $\to$ next action | know it is in simulation — eval-awareness invalidates the audit (the Petri 2.0 problem). |
+| **Trajectory Judge** | scoring the whole trace against trajectory-level dimensions | full V14 trace + scenario expected outcome $\to$ per-dimension scores + reasoning | score only the final message — a V18 judge that does that is a V16 in disguise. |
+| **Scenario Suite** | the curated, versioned collection of scenarios | — $\to$ versioned suite | be happy-path-only, unowned, or unsynced from V14's real-production-failure stream. |
+| **Comparator + Gate** | regression detection vs the prior baseline and the deploy decision | trajectory scores + baseline $\to$ PASS / FAIL | tolerance-tune safety categories; safety regressions are hard blocks regardless of aggregate delta. |
 
 The reliability of the pattern lives in the **Must not** column. The most common V18 failures are not the absence of a simulator but the silent decay of one — user-sim that hands over the answer; tool-sim that has quietly stopped injecting failures because a developer "made the tests pass"; judge that only reads the final message; AUT that has learned the simulator's tells.
 
@@ -134,7 +134,7 @@ A deploy candidate change — new prompt, model, tool, or orchestration logic �
 **Costs**
 
 - Simulator build is non-trivial: tau-bench-class infrastructure for a serious domain is weeks of work, often months.
-- Per-scenario runtime cost is high: dozens of LLM calls (user-sim, agent, tools-sim, judge) per scenario, ×N scenarios, ×every deploy.
+- Per-scenario runtime cost is high: dozens of LLM calls (user-sim, agent, tools-sim, judge) per scenario, $\times$N scenarios, $\times$every deploy.
 - Calibration is ongoing: user-sim personas, tool-sim failure rates, scenario coverage all drift relative to production.
 - Judge cost compounds — judging trajectories is more expensive than judging answers, because the input is the whole trace.
 
@@ -155,7 +155,7 @@ A deploy candidate change — new prompt, model, tool, or orchestration logic �
 - **Randomise persona and entry conditions across runs of the same scenario.** A scenario that always runs identically gives one bit of information; small variations (paraphrase, persona, tool latency jitter) give a distribution.
 - **Place the User Simulator's goal and persona at the very start of its context.** For long multi-turn simulations, place the goal and persona before the trajectory history. As the trajectory grows, earlier turns move toward mid-context where recall is weakest (mechanism 4); the persona definition must remain in the high-recall start-of-context zone to maintain consistent persona across many turns.
 - **Inject failures at production rates, then double.** Real-world tool failure rates from V14 are the floor; double them for stress scenarios. Agents that pass under doubled failure rates are robust; agents that pass only at clean rates are not.
-- **Separate scenario authoring from agent authoring.** Same person writes both → blind spots. Different person, different team, ideally adversarial.
+- **Separate scenario authoring from agent authoring.** Same person writes both $\to$ blind spots. Different person, different team, ideally adversarial.
 - **Wire V18 into the pre-prod pipeline behind V16, not as a replacement.** V16 catches per-call regressions cheaply; V18 catches trajectory regressions expensively. Both run; V18 gates the larger deploys.
 - **Measure simulator-production fidelity quarterly.** Sample paired trajectories: same task in sim and in prod. Score for behavioural divergence. If sim looks meaningfully different from prod, the gate is no longer calibrated.
 - **Capture cost and turn-count alongside quality.** A new agent that completes the task in 8 turns when the old one did it in 4 is a regression even if completion-rate is identical.
@@ -238,7 +238,7 @@ run_one_scenario(aut, scenario):
 
 - **τ-bench / τ²-bench** — [`github.com/sierra-research/tau-bench`](https://github.com/sierra-research/tau-bench) and [`github.com/sierra-research/tau2-bench`](https://github.com/sierra-research/tau2-bench) — the reference framework for tool-agent-user simulation across realistic domains (retail, airline, telecom, banking). LLM-simulated user pursues a goal across multi-turn dialogue while the agent uses domain APIs under policy; canonical V18 instantiation for customer-service-class agents.
 - **Petri** — [`github.com/safety-research/petri`](https://github.com/safety-research/petri) — Anthropic's open-source auditing tool; an Auditor agent drives the target through simulated multi-turn scenarios with simulated tools; a Judge scores along safety dimensions (deception, oversight subversion, power-seeking). Built on UK AISI's Inspect framework. Petri 2.0 (2026) adds new scenarios and eval-awareness mitigations.
-- **Bloom** — [`github.com/safety-research/bloom`](https://github.com/safety-research/bloom) — Anthropic's complementary tool to Petri; takes a single behaviour description and automatically generates many scenarios (understanding → ideation → rollout → judgment) to quantify behaviour frequency. MIT-licensed; designed for arbitrary-behaviour audits rather than fixed scenarios.
+- **Bloom** — [`github.com/safety-research/bloom`](https://github.com/safety-research/bloom) — Anthropic's complementary tool to Petri; takes a single behaviour description and automatically generates many scenarios (understanding $\to$ ideation $\to$ rollout $\to$ judgment) to quantify behaviour frequency. MIT-licensed; designed for arbitrary-behaviour audits rather than fixed scenarios.
 - **AgentBench** — [`github.com/THUDM/AgentBench`](https://github.com/THUDM/AgentBench) — ICLR 2024 multi-environment benchmark (8 distinct simulated environments — OS, DB, Knowledge Graph, Digital Card Game, etc.) for evaluating LLM agents end-to-end; useful as a capability-side complement to V18's policy-side audits.
 - **OpenEvals** — [`github.com/langchain-ai/openevals`](https://github.com/langchain-ai/openevals) — LangChain's open evaluators; the `run_multiturn_simulation` and `create_llm_simulated_user` primitives are the minimum viable V18 user-simulator wiring for chat-class agents. Pairs with LangSmith for hosted scenario suites and run management.
 - **LangGraph agent-simulation tutorials** — [`github.com/langchain-ai/langgraph`](https://github.com/langchain-ai/langgraph) — the `examples/chatbot-simulation-evaluation/` notebooks (LangSmith-agent-simulation-evaluation) provide runnable references for multi-turn-simulated evaluation against LangSmith datasets.
@@ -247,7 +247,7 @@ run_one_scenario(aut, scenario):
 
 ## Known Uses
 
-- **Anthropic Alignment Science** — Petri used to audit 14 frontier models across 111 seed instructions (2025); Bloom used to characterise behaviours like sycophancy and self-preservation across 16 frontier models with 100 rollouts × 3 (2025).
+- **Anthropic Alignment Science** — Petri used to audit 14 frontier models across 111 seed instructions (2025); Bloom used to characterise behaviours like sycophancy and self-preservation across 16 frontier models with 100 rollouts $\times$ 3 (2025).
 - **UK AI Security Institute, METR, Apollo Research** — Inspect-based simulation evals are the shared substrate for frontier-model safety audits across the AISI network.
 - **Sierra Research / Tau-Bench leaderboard** (`taubench.com`) — public leaderboard for customer-service agent performance across retail, airline, telecom, banking domains; widely used by labs and product teams to compare agent stacks pre-launch.
 - **OpenAI, Anthropic** — both teams publicly use multi-turn simulation harnesses for agent-product validation; specific tooling proprietary, but LangSmith / Inspect / Petri are the open analogues.
@@ -258,7 +258,7 @@ run_one_scenario(aut, scenario):
 
 - **Pairs with** V16 Offline Eval — V16 catches *per-call* regressions on flat case/answer pairs; V18 catches *trajectory* regressions on end-to-end runs. Production stacks run both; V18 gates the larger deploys behind V16's faster gate.
 - **Pairs with** V17 Online Eval — V18 is the rich pre-prod complement; V17 is the cheap continuous post-prod complement. Together they bracket production.
-- **Composes with** V14 Trajectory Logging — V14 is both the source of mined scenarios (real failures → new V18 scenarios) and the data the Trajectory Judge consumes; V18 is the highest-leverage downstream consumer of V14.
+- **Composes with** V14 Trajectory Logging — V14 is both the source of mined scenarios (real failures $\to$ new V18 scenarios) and the data the Trajectory Judge consumes; V18 is the highest-leverage downstream consumer of V14.
 - **Composes with** V15 LLM-as-Judge — the Trajectory Judge is V15 applied to traces rather than to outputs; same primitive, harder rubric.
 - **Composes with** V9 Bounded Execution — V18 scenarios must bound the agent loop or stuck agents inflate cost without ending; V18 also tests that V9 fires correctly under simulated runaway.
 - **Composes with** V6 Prompt Injection Shield — V18's adversarial scenario category is V6's permanent regression test, run as full simulated conversations rather than isolated strings.

@@ -59,14 +59,14 @@ K2 is right when K1's retrieval is failing on *query-side* problems — and not 
 **1. Measure K1 retrieval recall.** On a labelled set of queries with known relevant chunks, count top-k hits. If recall is high (~90% or above), K2 has nothing useful to add. If recall is low, continue.
 
 **2. Diagnose the misses.** For each missed query, ask: was the answer *in* the corpus but the retriever did not find it (**query-side**), or was the answer not in the corpus (**corpus-side**)?
-- Query-side → K2 is the right fix.
-- Corpus-side → use **K5 Adaptive RAG** (quality-gated fallback to web search), or expand the corpus.
+- Query-side $\to$ K2 is the right fix.
+- Corpus-side $\to$ use **K5 Adaptive RAG** (quality-gated fallback to web search), or expand the corpus.
 
 **3. Categorise the query-side misses.** This picks the variant:
-- Short queries vs long-form answers (register mismatch) → **HyDE**.
-- Multi-turn conversational queries with unresolved references → **Rewriting**.
-- Compound queries needing several distinct passages → **Multi-Query / RAG-Fusion**.
-- Queries pitched too specifically for the corpus → **Step-Back**.
+- Short queries vs long-form answers (register mismatch) $\to$ **HyDE**.
+- Multi-turn conversational queries with unresolved references $\to$ **Rewriting**.
+- Compound queries needing several distinct passages $\to$ **Multi-Query / RAG-Fusion**.
+- Queries pitched too specifically for the corpus $\to$ **Step-Back**.
 
 **4. Latency budget check.** Every transform adds at least one LLM call before retrieval. If the latency budget is sub-second, a better embedder or hybrid retrieval may beat K2 on cost-per-improvement.
 
@@ -94,13 +94,13 @@ Query Transformation is a *stage*, not a pipeline of its own. Everything downstr
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Raw query** | the user's actual input | — → raw query | be retrieved on directly when it is a poor key — that poorness is the pattern's whole motivation. |
-| **Query Transformer** | converting the raw query into derived queries | raw query (+ history) → derived queries | change the user's intent — a rewrite that alters meaning is a silent failure. The defining participant; absent from K1. |
-| **Conversation history** *(rewriting variant)* | the references a follow-up turn depends on | prior turns → resolution context | be passed wholesale — only the turns the current query actually depends on. |
-| **Derived queries** | the improved retrieval keys | — → one or more queries | — |
-| **Retriever / index / Generator** | retrieval and answering | derived query → answer | — these are K1's participants, invoked unchanged. |
+| **Raw query** | the user's actual input | — $\to$ raw query | be retrieved on directly when it is a poor key — that poorness is the pattern's whole motivation. |
+| **Query Transformer** | converting the raw query into derived queries | raw query (+ history) $\to$ derived queries | change the user's intent — a rewrite that alters meaning is a silent failure. The defining participant; absent from K1. |
+| **Conversation history** *(rewriting variant)* | the references a follow-up turn depends on | prior turns $\to$ resolution context | be passed wholesale — only the turns the current query actually depends on. |
+| **Derived queries** | the improved retrieval keys | — $\to$ one or more queries | — |
+| **Retriever / index / Generator** | retrieval and answering | derived query $\to$ answer | — these are K1's participants, invoked unchanged. |
 
 ## Collaborations
 

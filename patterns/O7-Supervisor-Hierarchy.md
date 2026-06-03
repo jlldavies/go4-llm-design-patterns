@@ -27,7 +27,7 @@ The O6 bottleneck is mechanical, not just architectural. As the orchestrator acc
 Use when:
 
 - O6 is provably bottlenecked — the orchestrator's context fills with worker chatter, or its tool surface exceeds the V13 budget, or coordination latency dominates;
-- the domain has natural hierarchical decomposition — project → workstream → task, research goal → strategy → hypothesis-action, ticket → triage-class → resolution-step;
+- the domain has natural hierarchical decomposition — project $\to$ workstream $\to$ task, research goal $\to$ strategy $\to$ hypothesis-action, ticket $\to$ triage-class $\to$ resolution-step;
 - worker count exceeds the ~5–10 a single orchestrator can coordinate cleanly;
 - different sub-tree branches need genuinely different coordination policies (the Generation-branch supervisor in co-scientist runs a tournament; the Reflection-branch supervisor runs a review queue).
 
@@ -94,14 +94,14 @@ Each non-leaf node is an O6 instance: it dispatches downward and synthesises upw
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Root Supervisor** | the top-level goal and the workstream decomposition | user goal → workstream assignments + final synthesis | execute tasks, or reach past its direct children. If the root is making task-level decisions, the tree has collapsed back to O6 and the levels below are wasted. |
-| **Sub-Supervisor** | one workstream — its task decomposition and worker dispatch | workstream brief from parent → task results synthesised for the parent | reach across to peer sub-supervisors (siblings communicate only through the parent), or escalate trivia. Cross-branch chatter destroys the bounded-scope property. |
-| **Worker** | executing one task with its tool set | task brief → task result | spawn its own sub-tree (only supervisors spawn), or report sideways. A worker that delegates is a sub-supervisor in disguise — promote it explicitly. |
-| **Handoff Contract** | the schema for parent ↔ child messages | structured brief schema; result schema | be free-form prose. Schema drift between levels is the most common failure mode — each handoff loses fidelity. |
-| **Trajectory Logger** *(required, not optional)* | full trace across all levels | every supervisor and worker call → linked, queryable trace | be per-level — a hierarchy without an end-to-end trace is undebuggable. (See V14.) |
-| **Budget Governor** *(required, not optional)* | per-level iteration, cost, and time caps | each supervisor's run state → continue / halt | be set only at the root — every level needs its own cap, or one branch cascades while another sits idle. (See V9.) |
+| **Root Supervisor** | the top-level goal and the workstream decomposition | user goal $\to$ workstream assignments + final synthesis | execute tasks, or reach past its direct children. If the root is making task-level decisions, the tree has collapsed back to O6 and the levels below are wasted. |
+| **Sub-Supervisor** | one workstream — its task decomposition and worker dispatch | workstream brief from parent $\to$ task results synthesised for the parent | reach across to peer sub-supervisors (siblings communicate only through the parent), or escalate trivia. Cross-branch chatter destroys the bounded-scope property. |
+| **Worker** | executing one task with its tool set | task brief $\to$ task result | spawn its own sub-tree (only supervisors spawn), or report sideways. A worker that delegates is a sub-supervisor in disguise — promote it explicitly. |
+| **Handoff Contract** | the schema for parent $\leftrightarrow$ child messages | structured brief schema; result schema | be free-form prose. Schema drift between levels is the most common failure mode — each handoff loses fidelity. |
+| **Trajectory Logger** *(required, not optional)* | full trace across all levels | every supervisor and worker call $\to$ linked, queryable trace | be per-level — a hierarchy without an end-to-end trace is undebuggable. (See V14.) |
+| **Budget Governor** *(required, not optional)* | per-level iteration, cost, and time caps | each supervisor's run state $\to$ continue / halt | be set only at the root — every level needs its own cap, or one branch cascades while another sits idle. (See V9.) |
 
 The pattern's load-bearing rule: **a worker that delegates is a sub-supervisor.** If the role grows delegation responsibility, promote it formally — adding a level in the tree — rather than letting workers spawn workers ad hoc.
 
@@ -124,7 +124,7 @@ Google's AI co-scientist runs exactly this shape: Supervisor at the root; specia
 
 **Costs**
 - Multiplied LLM calls — every level adds at least one supervisor decision per step.
-- Increased latency on the critical path through the tree (depth × supervisor-call time).
+- Increased latency on the critical path through the tree (depth $\times$ supervisor-call time).
 - Schema discipline — every Handoff Contract between levels must be maintained as the system evolves.
 - Cross-level debugging is hard without first-class V14 trace plumbing.
 

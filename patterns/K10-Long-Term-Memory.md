@@ -80,13 +80,13 @@ If items are *connected knowledge with structure*, prefer **K12 Karpathy Memory*
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Memory store** | persistent storage of memories across sessions | memory items → queryable store | be unbounded — episodic memory must decay, or it accumulates noise. The reason noise is harmful: retrieved items are injected into the context (mechanism 9). Irrelevant injected items consume finite window space, and if they land in mid-context positions they are subject to the lost-in-the-middle geometric under-attention (mechanism 4), simultaneously wasting space and suppressing useful content nearby. |
-| **Memory Writer** | extracting what is worth keeping, routing it | session events → store writes | store everything — write-time selectivity is what keeps retrieval useful, and is the poisoning surface. |
-| **Retriever** | surfacing relevant memories | query → memory items | inject stale or conflicting memories without resolution. |
-| **Distiller** *(procedural variant)* | abstracting episodes into reusable procedures | episodes → procedures | distil unverified episodes — a procedure is a *verified* pattern. |
-| **Generator (LLM)** | reasoning with retrieved memory injected | query + memories → answer | — |
+| **Memory store** | persistent storage of memories across sessions | memory items $\to$ queryable store | be unbounded — episodic memory must decay, or it accumulates noise. The reason noise is harmful: retrieved items are injected into the context (mechanism 9). Irrelevant injected items consume finite window space, and if they land in mid-context positions they are subject to the lost-in-the-middle geometric under-attention (mechanism 4), simultaneously wasting space and suppressing useful content nearby. |
+| **Memory Writer** | extracting what is worth keeping, routing it | session events $\to$ store writes | store everything — write-time selectivity is what keeps retrieval useful, and is the poisoning surface. |
+| **Retriever** | surfacing relevant memories | query $\to$ memory items | inject stale or conflicting memories without resolution. |
+| **Distiller** *(procedural variant)* | abstracting episodes into reusable procedures | episodes $\to$ procedures | distil unverified episodes — a procedure is a *verified* pattern. |
+| **Generator (LLM)** | reasoning with retrieved memory injected | query + memories $\to$ answer | — |
 
 ## Collaborations
 
@@ -124,7 +124,7 @@ If items are *connected knowledge with structure*, prefer **K12 Karpathy Memory*
 
 > `LLM` = configured session; `code` = wiring.
 
-**Composition:** Two main paths — a *write* path during a session (Extractor → Embedder → store) and a *read* path in later sessions (Embedder → similarity search → Generator). The procedural variant adds a periodic *distillation* path.
+**Composition:** Two main paths — a *write* path during a session (Extractor $\to$ Embedder $\to$ store) and a *read* path in later sessions (Embedder $\to$ similarity search $\to$ Generator). The procedural variant adds a periodic *distillation* path.
 
 **The chain — write:**
 

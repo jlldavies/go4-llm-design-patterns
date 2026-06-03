@@ -52,7 +52,7 @@ All Humanizer patterns require K11 (Observational Memory) or K10 (Long-Term Memo
 ## Anti-Patterns
 
 - **HA1 — Simulated Emotion**: emotional language without genuine affective model (manipulation)
-- **HA2 — Unbounded Relationship Depth**: H10 without ethical guardrails → parasocial harm
-- **HA3 — Identity Drift**: H7/H10 without H1 → agent becomes whoever the user wants
-- **HA4 — Autonomous Principle Adoption**: H5 without human review → alignment risk
-- **HA5 — Stale Self-Model**: H9 without decay functions → overconfident outdated self-assessment
+- **HA2 — Unbounded Relationship Depth**: H10 without ethical guardrails $\to$ parasocial harm
+- **HA3 — Identity Drift**: H7/H10 without H1 $\to$ agent becomes whoever the user wants
+- **HA4 — Autonomous Principle Adoption**: H5 without human review $\to$ alignment risk
+- **HA5 — Stale Self-Model**: H9 without decay functions $\to$ overconfident outdated self-assessment

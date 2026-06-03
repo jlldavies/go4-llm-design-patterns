@@ -104,14 +104,14 @@ If none of these hold — a one-off script, a hand-driven prototype — narrativ
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Trace Emitter** | producing spans from inside the agent | agent step → span (typed, attributed, parent-linked) | block or fail the agent step if emission fails — telemetry must degrade silently, never break the host. |
-| **Span Schema** | the attribute vocabulary used (OTel GenAI conventions) | — → consistent attribute namespace | invent ad-hoc attribute names. The whole point is that downstream tools recognise the schema; bespoke names defeat it. |
-| **Context Propagator** | passing trace identity across boundaries (sub-agent, tool, HTTP, queue) | parent context → child context, on every cross-boundary call | drop the parent on async, sub-agent, or queue handoffs — orphaned spans break the run reconstruction. |
-| **OTel Collector** | receiving spans, scrubbing PII, batching, routing | raw span stream → cleaned span stream | leak unredacted prompt or tool-parameter values to the backend; PII scrubbing is the collector's job, not "later". |
-| **Trace Backend** | durable storage and query | spans → indexed, queryable history | be the only consumer — if no analyser, dashboard, or alert reads it, the trace is archaeology. |
-| **Trace Analyser** | turning stored traces into action | spans → debug answer / eval score / alert / regression test | conflate this role with the emitter; analysis is downstream, not part of the agent. |
+| **Trace Emitter** | producing spans from inside the agent | agent step $\to$ span (typed, attributed, parent-linked) | block or fail the agent step if emission fails — telemetry must degrade silently, never break the host. |
+| **Span Schema** | the attribute vocabulary used (OTel GenAI conventions) | — $\to$ consistent attribute namespace | invent ad-hoc attribute names. The whole point is that downstream tools recognise the schema; bespoke names defeat it. |
+| **Context Propagator** | passing trace identity across boundaries (sub-agent, tool, HTTP, queue) | parent context $\to$ child context, on every cross-boundary call | drop the parent on async, sub-agent, or queue handoffs — orphaned spans break the run reconstruction. |
+| **OTel Collector** | receiving spans, scrubbing PII, batching, routing | raw span stream $\to$ cleaned span stream | leak unredacted prompt or tool-parameter values to the backend; PII scrubbing is the collector's job, not "later". |
+| **Trace Backend** | durable storage and query | spans $\to$ indexed, queryable history | be the only consumer — if no analyser, dashboard, or alert reads it, the trace is archaeology. |
+| **Trace Analyser** | turning stored traces into action | spans $\to$ debug answer / eval score / alert / regression test | conflate this role with the emitter; analysis is downstream, not part of the agent. |
 
 Six narrow responsibilities. The **Emitter and Analyser must be separate concerns** — the agent emits without knowing who will read; the analyser reads without depending on agent internals. This separation is what lets the same trace serve a human debugger, the V15 judge, the V17 monitor, and an auditor — without re-instrumenting for each.
 
@@ -152,7 +152,7 @@ The agent runs. As it executes each step — an LLM call, a tool invocation, a g
 - **Sample with intent.** 100% in dev; head sampling 1–10% in production for routine spans; always 100% on errors, V1 approvals, V7 policy denials, V9 budget terminations.
 - **Pair with K11 (Observational Memory)** when the agent itself needs to reason over its own activity — K11's "agent reads the raw record" is reading the V14 trace.
 - **Pair with K12 (Karpathy Memory)** when the trace becomes the substrate for an LLM-curator: the Curator reads V14 and writes structured notes (K12) that distil the trajectory into reusable knowledge.
-- **Retention policy** drives storage cost more than emission volume. Short retention (7–30 days) for routine traces; longer (≥ regulatory requirement) for compliance-relevant runs, error runs, and approval runs.
+- **Retention policy** drives storage cost more than emission volume. Short retention (7–30 days) for routine traces; longer ($\geq$ regulatory requirement) for compliance-relevant runs, error runs, and approval runs.
 
 ## Implementation Sketch
 

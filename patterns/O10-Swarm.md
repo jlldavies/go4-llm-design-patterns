@@ -42,9 +42,9 @@ Do not use when:
 
 O10 is right when the work is genuinely peer-to-peer in shape, the specialist set is small, and the team is willing to pay the debugging cost.
 
-**1. Confirm the topology is a graph, not a tree.** List the legal transitions between agents. If they form a DAG with one root, you have O7 dressed up. If you have cycles (A → B → A → C → A) or any-to-any handoffs, the topology is genuinely a mesh. If every legal handoff actually goes through some "default" agent first, that default is a supervisor — switch to **O7**.
+**1. Confirm the topology is a graph, not a tree.** List the legal transitions between agents. If they form a DAG with one root, you have O7 dressed up. If you have cycles (A $\to$ B $\to$ A $\to$ C $\to$ A) or any-to-any handoffs, the topology is genuinely a mesh. If every legal handoff actually goes through some "default" agent first, that default is a supervisor — switch to **O7**.
 
-**2. Bound the agent count.** Each agent needs to know enough about each peer to route to it. The handoff-decision context grows with the square of agent count (every agent must consider every peer). Practical ceiling: **≤ 8 specialised agents**. Beyond this, routing accuracy collapses and the supervisor's-eye view becomes necessary; switch to **O7**.
+**2. Bound the agent count.** Each agent needs to know enough about each peer to route to it. The handoff-decision context grows with the square of agent count (every agent must consider every peer). Practical ceiling: **$\leq$ 8 specialised agents**. Beyond this, routing accuracy collapses and the supervisor's-eye view becomes necessary; switch to **O7**.
 
 The routing-decision complexity grows with the number of peers each agent must reason over, and this compounds with the attention mechanism's own quadratic cost over sequence length (mechanism 2). Each active agent's context contains the conversation history (growing with turns) plus a peer-list description growing with agent count. A 10-agent swarm with a 50-turn conversation means each turn's active agent processes a context containing peer descriptions for 9 other agents, all embedded in a long shared history. The learned bilinear form Q_α K^α must discriminate which peer is relevant from an increasingly crowded K-space (mechanism 1). (Mechanisms 1, 2.)
 
@@ -52,12 +52,12 @@ The routing-decision complexity grows with the number of peers each agent must r
 
 **4. Cost the debugging story.** O10 traces are graphs of handoffs, not call trees. A failed conversation can have been corrupted by any agent on the path. Confirm **V14 Trajectory Logging** is in place *before launch* — including which agent held control at each turn, why each handoff fired, and the context that transferred. Without V14 a swarm is operationally opaque.
 
-**5. Loop and budget discipline.** Handoff cycles (A → B → A → B → …) are the catastrophic failure mode — agents bounce a hard request between specialisations none can solve. Pair with **V9 Bounded Execution** on (a) total turns, (b) handoffs per turn, and (c) cycle detection — if the same agent reactivates without progress, escalate to a human or fall back.
+**5. Loop and budget discipline.** Handoff cycles (A $\to$ B $\to$ A $\to$ B $\to$ …) are the catastrophic failure mode — agents bounce a hard request between specialisations none can solve. Pair with **V9 Bounded Execution** on (a) total turns, (b) handoffs per turn, and (c) cycle detection — if the same agent reactivates without progress, escalate to a human or fall back.
 
 **Quick test — O10 is the right pattern when:**
 
 - the legal handoff graph has cycles or any-to-any edges (not a tree), *and*
-- specialist count is ≤ 8 and each peer's role is namable in one sentence, *and*
+- specialist count is $\leq$ 8 and each peer's role is namable in one sentence, *and*
 - the routing decision is recognisable from the active agent's own context, *and*
 - V14 logging and V9 cycle-detection bounds are in place before launch.
 
@@ -93,14 +93,14 @@ The shared conversation state grows monotonically with turns — this is the pri
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Peer Agent** *(one per specialisation)* | executing within its specialisation **and** deciding when to hand off | conversation state + user turn → response *or* handoff call | reach outside its specialisation to "help" with another agent's work — that is exactly what handoff is for. A peer that answers questions it should hand off destroys the routing structure. |
-| **Handoff Tool** *(one per agent, lists its legal targets)* | the routing primitive — names the receiving peer and the context to transfer | `handoff_to(peer, brief)` → control transfer | be free-form ("transfer to whoever") — every handoff call must name a specific peer, or the routing structure dissolves into ad hoc forwarding. |
+| **Peer Agent** *(one per specialisation)* | executing within its specialisation **and** deciding when to hand off | conversation state + user turn $\to$ response *or* handoff call | reach outside its specialisation to "help" with another agent's work — that is exactly what handoff is for. A peer that answers questions it should hand off destroys the routing structure. |
+| **Handoff Tool** *(one per agent, lists its legal targets)* | the routing primitive — names the receiving peer and the context to transfer | `handoff_to(peer, brief)` $\to$ control transfer | be free-form ("transfer to whoever") — every handoff call must name a specific peer, or the routing structure dissolves into ad hoc forwarding. |
 | **Shared State** | the conversation history and the active-agent pointer | reads / writes from all agents | be private to one agent — the next agent must see what happened, or every handoff resets the context. |
-| **Handoff Graph** *(design artefact, enforced at tool registration)* | the legal peer-to-peer edges | static configuration → tool definitions | be implicit — undocumented "any agent may call any agent" produces cycles you cannot reason about. The graph is the contract. |
-| **Trajectory Logger** *(required, not optional)* | the per-turn record of holder, action, handoff target, and reason | every turn → linked trace | be optional. A swarm without V14 has no "who did what when" view, and incidents become unrecoverable. |
-| **Cycle Governor** *(required, not optional)* | detects handoff cycles, total-turn caps, and handoffs-per-turn caps | running trace → continue / escalate | be set only on total turns. Cycle detection is the load-bearing rule — A → B → A → B without progress is the primary failure. (See V9.) |
+| **Handoff Graph** *(design artefact, enforced at tool registration)* | the legal peer-to-peer edges | static configuration $\to$ tool definitions | be implicit — undocumented "any agent may call any agent" produces cycles you cannot reason about. The graph is the contract. |
+| **Trajectory Logger** *(required, not optional)* | the per-turn record of holder, action, handoff target, and reason | every turn $\to$ linked trace | be optional. A swarm without V14 has no "who did what when" view, and incidents become unrecoverable. |
+| **Cycle Governor** *(required, not optional)* | detects handoff cycles, total-turn caps, and handoffs-per-turn caps | running trace $\to$ continue / escalate | be set only on total turns. Cycle detection is the load-bearing rule — A $\to$ B $\to$ A $\to$ B without progress is the primary failure. (See V9.) |
 
 The pattern's load-bearing rule: **the handoff tool is the only legal cross-agent communication.** Any other mechanism (agents writing to each other's prompts, agents calling each other as functions, agents sharing private memory) collapses the structure and re-creates an implicit supervisor or an unauditable mesh.
 
@@ -126,7 +126,7 @@ LangGraph Swarm runs exactly this shape: each agent is a LangGraph node with a `
 - Production evidence is thinner than for O6 or O7 — most "swarm" deployments quietly degrade to O7.
 
 **Risks and failure modes**
-- *Handoff cycles* — A → B → A → B without progress; the canonical swarm failure. Mitigation: V9 cycle detection on the trace.
+- *Handoff cycles* — A $\to$ B $\to$ A $\to$ B without progress; the canonical swarm failure. Mitigation: V9 cycle detection on the trace.
 - *Greedy retention* — an agent that should hand off keeps answering ("I can probably help with this too"). Mitigation: explicit prompts that name the boundary, plus a coverage audit on which agents are *receiving* handoffs.
 - *Orphan specialist* — an agent that no peer ever hands to. Mitigation: review the realised handoff graph against the design graph weekly.
 - *Implicit supervisor* — one agent ends up as the default first-contact and the others rarely hand back; the swarm has collapsed to O7 with one supervisor and the rest as workers. If observed, accept the reality and switch to O7.
@@ -141,7 +141,7 @@ LangGraph Swarm runs exactly this shape: each agent is a LangGraph node with a `
 - **Use O15 Agent Handoff** as the schema for what transfers between agents. Free-form briefs corrupt the receiving agent's context.
 - **One handoff tool per agent, listing its legal targets explicitly** — never a single global `transfer_to(any_agent)` tool. The tool-shape encodes the graph.
 - **V14 is non-negotiable.** Log: turn number, active agent, action (respond / handoff), target if handoff, brief if handoff, reason. Reconstruct any conversation end-to-end from this log.
-- **V9 cycle detection** at handoff layer: same agent reactivated within N turns without progress → escalate. Total turns and handoffs-per-turn caps in addition.
+- **V9 cycle detection** at handoff layer: same agent reactivated within N turns without progress $\to$ escalate. Total turns and handoffs-per-turn caps in addition.
 - **Pair with O17 Agent Isolation** when an agent's specialisation needs a fresh context (e.g., one-shot tools that should not see the full conversation). Most swarm agents do *not* isolate — they need the shared history — but tool-execution sub-tasks within an agent often should.
 - **Specialist roles must be namable in one sentence.** If you cannot describe an agent's role and boundary in one sentence, peers will not know when to hand to it.
 
@@ -159,7 +159,7 @@ LangGraph Swarm runs exactly this shape: each agent is a LangGraph node with a `
 | 2 | Active agent processes user turn and decides: respond or hand off | `LLM` | active agent's session |
 | 3 | Branch on the decision | `code` | |
 | 3a | If respond: write reply, return to user | `code` | |
-| 3b | If handoff: construct brief; invoke handoff tool with target peer | `LLM` (tool call) → `code` | O15 schema |
+| 3b | If handoff: construct brief; invoke handoff tool with target peer | `LLM` (tool call) $\to$ `code` | O15 schema |
 | 4 | Update active-agent pointer; log the turn (holder, action, target, reason) | `code` | V14 |
 | 5 | Cycle Governor checks: same-agent-without-progress / turn cap / handoff cap | `code` | V9 |
 | 6 | On next user turn, loop to step 1 with the (possibly new) active agent | `code` | |

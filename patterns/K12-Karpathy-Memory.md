@@ -46,19 +46,19 @@ Do not use it when:
 
 K12 is right when curation amortises against many reads, structure earns its keep, and editability matters.
 
-**1. Estimate read-to-write ratio.** Count expected reads of the memory between curations (R) versus curator calls per cycle (W). Practical threshold: if **R / W ≥ 10**, curation amortises clearly; below that, K10 or K11 is usually cheaper.
+**1. Estimate read-to-write ratio.** Count expected reads of the memory between curations (R) versus curator calls per cycle (W). Practical threshold: if **R / W $\geq$ 10**, curation amortises clearly; below that, K10 or K11 is usually cheaper.
 
 **2. Score the structure benefit.** Would a human reader of this memory want pages, sections, links? Entity profiles, decision logs, evolving project notes — yes, K12. A bag of independent facts — no, K10.
 
-**3. Cost the curator.** Curation calls dominate the write side. Annualise: curator calls per day × cost per call. Compare to (a) the K11 cost of re-reading uncurated logs and (b) the K10 cost of similarity calls plus retrieval-miss errors.
+**3. Cost the curator.** Curation calls dominate the write side. Annualise: curator calls per day $\times$ cost per call. Compare to (a) the K11 cost of re-reading uncurated logs and (b) the K10 cost of similarity calls plus retrieval-miss errors.
 
-**4. Read-time efficiency check.** A curated note is typically 5–20× denser than the raw observations it digested. This density directly reduces context-window cost (mechanism 9): in-context storage costs O(n²) per step in attention compute (mechanism 2). A 10× denser note means 10× fewer tokens in the context, which is not a linear saving — it collapses the per-step attention cost toward the sparser regime of the n² curve. If that compression unlocks the read budget — letting the agent hold its working memory in a small fraction of the window — K12 has paid.
+**4. Read-time efficiency check.** A curated note is typically 5–20$\times$ denser than the raw observations it digested. This density directly reduces context-window cost (mechanism 9): in-context storage costs O(n²) per step in attention compute (mechanism 2). A 10$\times$ denser note means 10$\times$ fewer tokens in the context, which is not a linear saving — it collapses the per-step attention cost toward the sparser regime of the n² curve. If that compression unlocks the read budget — letting the agent hold its working memory in a small fraction of the window — K12 has paid.
 
 **5. Editability requirement.** Does a human or another agent need to read, audit, or correct the memory? Curated notes are inspectable and editable. Vector-store memory (K10) effectively is not; raw observation logs (K11) are inspectable but not navigable.
 
 **Quick test — K12 is the right pattern when:**
 
-- R / W ≥ 10 (curation amortises against many reads), *and*
+- R / W $\geq$ 10 (curation amortises against many reads), *and*
 - the memory has structure worth preserving (entities, projects, linked concepts), *and*
 - read-time token efficiency is a material concern, *and*
 - inspectability and editability matter to operators or downstream systems.
@@ -88,13 +88,13 @@ If R / W is low, choose **K11** — the raw log is already a record and curation
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Memory store** | the structured notes themselves | structured store → reads/writes | be unstructured — the structure is what makes reading cheap. |
-| **Note schema** | what an entry looks like (block? page? section + links?) | — → editable structure | be over-engineered — the schema must be one the Curator can reliably produce. |
-| **Curator (LLM)** | writing, editing, merging, refactoring notes | current notes + recent activity → updated notes | rewrite notes on every turn — curation must be triggered (end of session, milestone), or the cache and the operator both lose. |
-| **Selector** | choosing which notes to load for a given query | query + index of notes → relevant subset | load everything — that undermines the read-efficiency point. |
-| **Agent (LLM)** | reasoning with the loaded notes | query + loaded notes → answer | edit notes inline; that is the Curator's job. The separation prevents accidental drift. |
+| **Memory store** | the structured notes themselves | structured store $\to$ reads/writes | be unstructured — the structure is what makes reading cheap. |
+| **Note schema** | what an entry looks like (block? page? section + links?) | — $\to$ editable structure | be over-engineered — the schema must be one the Curator can reliably produce. |
+| **Curator (LLM)** | writing, editing, merging, refactoring notes | current notes + recent activity $\to$ updated notes | rewrite notes on every turn — curation must be triggered (end of session, milestone), or the cache and the operator both lose. |
+| **Selector** | choosing which notes to load for a given query | query + index of notes $\to$ relevant subset | load everything — that undermines the read-efficiency point. |
+| **Agent (LLM)** | reasoning with the loaded notes | query + loaded notes $\to$ answer | edit notes inline; that is the Curator's job. The separation prevents accidental drift. |
 
 The **Curator and the Agent are kept distinct sessions, even when the same model serves both.** The Agent reads; the Curator writes. Mixing them is the pattern's most common failure: an Agent that edits notes mid-reasoning destabilises the memory and erodes the cache. There is a mechanistic reason beyond semantic confusion: if the Agent writes to the note store mid-reasoning, the note tokens change position, invalidating the provider-side KV cache for those positions mid-session (mechanism 3 and 5). The separation is a cache correctness requirement as much as a design principle.
 

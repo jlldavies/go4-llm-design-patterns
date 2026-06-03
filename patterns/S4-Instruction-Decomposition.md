@@ -24,7 +24,7 @@ S4 is the *prompt-level* solution to ordered execution. Two stronger rungs exist
 
 Use Instruction Decomposition when:
 
-- the task has a clear sequential process (validate → transform → format → output) and you can enumerate the steps at design time;
+- the task has a clear sequential process (validate $\to$ transform $\to$ format $\to$ output) and you can enumerate the steps at design time;
 - previous single-instruction prompts produced output that skipped requirements or fused steps;
 - steps are short enough that one model context can hold all of them with room for the data;
 - you need auditability — to point at *which* step was dropped when output is wrong;
@@ -49,7 +49,7 @@ S4 is right when the steps are known, fixed, short, and need to run in order ins
 
 **3. Test the inter-step state.** Can each next step use the previous step's result with no transformation, gate, or branching? If yes, S4. If a step needs to be parsed, validated, or routed before the next, you need a *boundary* between steps — choose **O2**.
 
-**4. Check the audit need.** Do you need to log, store, or human-review what happened at each step? S4 cannot give you that — the steps are internal to one model turn. Need it → **O2** (each step a separate call, each loggable). Don't need it → S4.
+**4. Check the audit need.** Do you need to log, store, or human-review what happened at each step? S4 cannot give you that — the steps are internal to one model turn. Need it $\to$ **O2** (each step a separate call, each loggable). Don't need it $\to$ S4.
 
 **5. Pair with an output contract.** S4 should almost always specify, in its final step, the exact output format. Otherwise the model conflates "do the steps" with "show the working", and emits noisy intermediate state. Compose with **S6 Output Template** to lock the final form.
 
@@ -60,7 +60,7 @@ S4 is right when the steps are known, fixed, short, and need to run in order ins
 - no inter-step inspection, gating, or routing is needed, *and*
 - the final output format is specified (typically via S6).
 
-If any condition fails: too many steps or inter-step inspection needed → **O2 Prompt Chaining**; step list depends on the input → **R3 Plan-and-Solve**; steps need tools mid-sequence → **R4 ReAct**; steps are independent → **O4 Parallelization**.
+If any condition fails: too many steps or inter-step inspection needed $\to$ **O2 Prompt Chaining**; step list depends on the input $\to$ **R3 Plan-and-Solve**; steps need tools mid-sequence $\to$ **R4 ReAct**; steps are independent $\to$ **O4 Parallelization**.
 
 ## Structure
 
@@ -90,12 +90,12 @@ One prompt, one model call. The steps live *inside* the prompt; the model's job 
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Step List** | the ordered, numbered procedure inside the prompt | task analysis → enumerated steps | be unbounded — more than ~7 steps overwhelms a single call; split into **O2** instead. |
-| **Output Contract** | what the final step must emit, and only that | step N specification → format rule | leave intermediate steps' output unconstrained — without this the model dumps working state. Usually delegated to **S6 Output Template**. |
-| **Prompt Author** | composing Step List + Output Contract + input into one prompt | requirements → prompt string | invent steps that depend on external state, tools, or branching — those need **R4**, **O2**, or **R3**. |
-| **Model (single call)** | executing the steps in order and emitting the final result | prompt → answer | be asked to log, return, or expose intermediate-step results unless the contract explicitly says so. Mixing audit output with final output defeats S6. |
+| **Step List** | the ordered, numbered procedure inside the prompt | task analysis $\to$ enumerated steps | be unbounded — more than ~7 steps overwhelms a single call; split into **O2** instead. |
+| **Output Contract** | what the final step must emit, and only that | step N specification $\to$ format rule | leave intermediate steps' output unconstrained — without this the model dumps working state. Usually delegated to **S6 Output Template**. |
+| **Prompt Author** | composing Step List + Output Contract + input into one prompt | requirements $\to$ prompt string | invent steps that depend on external state, tools, or branching — those need **R4**, **O2**, or **R3**. |
+| **Model (single call)** | executing the steps in order and emitting the final result | prompt $\to$ answer | be asked to log, return, or expose intermediate-step results unless the contract explicitly says so. Mixing audit output with final output defeats S6. |
 
 Four narrow roles. The pattern's discipline is in the Step List (correctly ordered and bounded) and the Output Contract (final step only). Everything else is a single ordinary call.
 

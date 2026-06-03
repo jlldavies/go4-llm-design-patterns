@@ -107,14 +107,14 @@ Four guard points, each independently testable, each logged. Guards [2] and [3] 
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Input Guard** | the verdict on incoming user text | raw user input → pass / sanitise / reject | look at agent state or tool data — it grades the *input* alone. An Input Guard that reasons about agent context has lost its independence and cannot fail safe. |
-| **Pre-Call Guard** | the verdict on a proposed tool invocation | (tool name + parameters + agent context) → allow / deny / require-approval | execute the tool or modify its parameters silently. If parameters need to change, the guard must reject and let the agent retry — silent mutation hides the policy from the audit log. |
-| **Response Guard** | the verdict on a tool's response before it enters context | (tool response + originating call) → sanitised content or rejection | trust schema or content unchecked. A tool response is *untrusted content* until validated, regardless of which tool produced it (A14 Trust Handoff). |
-| **Output Guard** | the verdict on the final agent response | (response + originating query) → release / redact / block | be the only guard. An Output Guard alone cannot detect upstream corruption; if it is the only layer, the system is in the A5 anti-pattern. |
-| **Policy Registry** *(optional)* | the declarative rules each guard enforces | — → policy bundle per guard point | be implicit in code. Policies must be a named artifact (a config file, an AgentSpec, a `.rail` file) so compliance and security can read them. |
-| **Guard Logger** | recording every guard decision | (guard, verdict, evidence) → V14 trajectory entry | drop the evidence. A "rejected" verdict without the matched rule is useless for tuning false positives. |
+| **Input Guard** | the verdict on incoming user text | raw user input $\to$ pass / sanitise / reject | look at agent state or tool data — it grades the *input* alone. An Input Guard that reasons about agent context has lost its independence and cannot fail safe. |
+| **Pre-Call Guard** | the verdict on a proposed tool invocation | (tool name + parameters + agent context) $\to$ allow / deny / require-approval | execute the tool or modify its parameters silently. If parameters need to change, the guard must reject and let the agent retry — silent mutation hides the policy from the audit log. |
+| **Response Guard** | the verdict on a tool's response before it enters context | (tool response + originating call) $\to$ sanitised content or rejection | trust schema or content unchecked. A tool response is *untrusted content* until validated, regardless of which tool produced it (A14 Trust Handoff). |
+| **Output Guard** | the verdict on the final agent response | (response + originating query) $\to$ release / redact / block | be the only guard. An Output Guard alone cannot detect upstream corruption; if it is the only layer, the system is in the A5 anti-pattern. |
+| **Policy Registry** *(optional)* | the declarative rules each guard enforces | — $\to$ policy bundle per guard point | be implicit in code. Policies must be a named artifact (a config file, an AgentSpec, a `.rail` file) so compliance and security can read them. |
+| **Guard Logger** | recording every guard decision | (guard, verdict, evidence) $\to$ V14 trajectory entry | drop the evidence. A "rejected" verdict without the matched rule is useless for tuning false positives. |
 
 Each guard sits at exactly one boundary and grades exactly the data crossing that boundary. The pattern's reliability comes from that separation: a single shared "safety module" that runs at all four points is *not* V5 — it is one guard called four times, and its failure is uniformly correlated across all boundaries.
 

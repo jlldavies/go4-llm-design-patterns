@@ -45,19 +45,19 @@ Use Zero-Shot CoT when:
 
 Do not use it when:
 
-- the task is well-defined and S1 already returns correct answers with a stable format — the reasoning trace is then pure overhead → **S1 Zero-Shot**.
-- the model is small or weakly instruction-tuned and does not follow the trigger reliably → use **R2 Few-Shot CoT** instead, where worked examples teach the format explicitly.
-- the reasoning format itself matters (specific intermediate steps, a domain-standard layout, a citation pattern) and R1's free-form reasoning is too variable → **R2 Few-Shot CoT**.
-- the task needs an *inspectable plan before execution* (regulated workflow, multi-tool orchestration, human review checkpoint) → **R3 Plan-and-Solve**.
-- the task is open-ended and needs *exploration* or *adaptation* mid-run → **R4 ReAct**.
-- the task is numerical or computational and the model hallucinates arithmetic even with CoT → **R14 Program of Thoughts** (offload computation to an executor).
-- single-shot CoT is right but its output is noisy and you need a reliability lift → wrap with **R17 Self-Consistency Voting** (R1 × N + vote is the canonical composition).
+- the task is well-defined and S1 already returns correct answers with a stable format — the reasoning trace is then pure overhead $\to$ **S1 Zero-Shot**.
+- the model is small or weakly instruction-tuned and does not follow the trigger reliably $\to$ use **R2 Few-Shot CoT** instead, where worked examples teach the format explicitly.
+- the reasoning format itself matters (specific intermediate steps, a domain-standard layout, a citation pattern) and R1's free-form reasoning is too variable $\to$ **R2 Few-Shot CoT**.
+- the task needs an *inspectable plan before execution* (regulated workflow, multi-tool orchestration, human review checkpoint) $\to$ **R3 Plan-and-Solve**.
+- the task is open-ended and needs *exploration* or *adaptation* mid-run $\to$ **R4 ReAct**.
+- the task is numerical or computational and the model hallucinates arithmetic even with CoT $\to$ **R14 Program of Thoughts** (offload computation to an executor).
+- single-shot CoT is right but its output is noisy and you need a reliability lift $\to$ wrap with **R17 Self-Consistency Voting** (R1 $\times$ N + vote is the canonical composition).
 
 ## Decision Criteria
 
 R1 is right when S1 underperforms on a reasoning task, the model is capable enough to follow a trigger, and you want the cheapest possible reasoning upgrade before paying for examples or multi-call patterns.
 
-**1. Measure the S1 gap.** On a labelled set of ~50 reasoning items, run S1 and R1 head-to-head with identical model and decoding. If R1 lifts accuracy by **≥ 5 percentage points**, R1 has earned its sentence. If the lift is **< 2 points**, S1 alone is fine. The middle band (2–5 points) is a judgement call about how much the failures cost downstream.
+**1. Measure the S1 gap.** On a labelled set of ~50 reasoning items, run S1 and R1 head-to-head with identical model and decoding. If R1 lifts accuracy by **$\geq$ 5 percentage points**, R1 has earned its sentence. If the lift is **< 2 points**, S1 alone is fine. The middle band (2–5 points) is a judgement call about how much the failures cost downstream.
 
 **2. Check that the model actually reasons.** Inspect 10 R1 completions. The trace should be substantive — multiple short steps, intermediate values, an explicit final answer. If the model emits *"Let's think step by step. The answer is 42."* (trigger acknowledged, no actual reasoning), the model is too small or too weakly tuned for R1. Escalate to **R2 Few-Shot CoT** where worked examples demonstrate the depth expected.
 
@@ -70,7 +70,7 @@ R1 is right when S1 underperforms on a reasoning task, the model is capable enou
 **Quick test — R1 is the right pattern when:**
 
 - the task involves explicit reasoning (arithmetic, multi-hop, symbolic, commonsense composition), *and*
-- S1 underperforms on a labelled probe by ≥ 5 points, *and*
+- S1 underperforms on a labelled probe by $\geq$ 5 points, *and*
 - the model is capable enough that the trigger produces a substantive trace, *and*
 - the reasoning format does not need to be controlled tightly enough to require examples.
 
@@ -100,12 +100,12 @@ A single call. One prompt, one completion. The trigger sits at the end of the us
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Prompt builder** | composing the task prompt and appending the reasoning trigger | task spec + input → instruction string ending in the trigger phrase | smuggle in worked examples (that is **R2**), numbered step lists (that is **S4**), a persona (that is **S3**), or a plan template — any of those moves the pattern off R1 and must be named as the upgrade it is. |
-| **Trigger** | the short elicitation phrase that biases the completion toward reasoning-then-answer | — → a fixed sentence appended after the task | be silently reworded between calls — the trigger is part of the baseline; A/B different phrasings deliberately, not accidentally. |
-| **Model** | producing a single completion containing reasoning followed by the answer | trigger-augmented prompt → completion (trace + answer) | be a small or weakly-tuned model that ignores the trigger; if 10-sample inspection shows shallow or absent traces, the model is wrong for R1 — escalate to R2 or change model. |
-| **Answer extractor** | pulling the final answer out of the completion for downstream code | completion → answer token / value / class | rely on free-form text matching; use a strict regex, a final-line convention, or a two-stage extraction call (R1 two-stage variant). Brittle extraction silently degrades the pattern. |
+| **Prompt builder** | composing the task prompt and appending the reasoning trigger | task spec + input $\to$ instruction string ending in the trigger phrase | smuggle in worked examples (that is **R2**), numbered step lists (that is **S4**), a persona (that is **S3**), or a plan template — any of those moves the pattern off R1 and must be named as the upgrade it is. |
+| **Trigger** | the short elicitation phrase that biases the completion toward reasoning-then-answer | — $\to$ a fixed sentence appended after the task | be silently reworded between calls — the trigger is part of the baseline; A/B different phrasings deliberately, not accidentally. |
+| **Model** | producing a single completion containing reasoning followed by the answer | trigger-augmented prompt $\to$ completion (trace + answer) | be a small or weakly-tuned model that ignores the trigger; if 10-sample inspection shows shallow or absent traces, the model is wrong for R1 — escalate to R2 or change model. |
+| **Answer extractor** | pulling the final answer out of the completion for downstream code | completion $\to$ answer token / value / class | rely on free-form text matching; use a strict regex, a final-line convention, or a two-stage extraction call (R1 two-stage variant). Brittle extraction silently degrades the pattern. |
 
 Four narrow responsibilities. The discipline of R1 is in the *Must not* column: every addition (examples, role, steps, plan) moves the pattern off R1 onto a heavier sibling. R1 is the trigger and nothing else.
 
@@ -119,7 +119,7 @@ The Prompt builder composes the task instruction — exactly as it would for S1 
 - **Free upgrade over S1** — one extra sentence in the prompt; no examples, no extra calls, no fine-tune.
 - Substantial accuracy lifts reported on arithmetic, symbolic, and commonsense reasoning benchmarks against capable instruction-tuned models.
 - Easiest reasoning pattern to deploy and to roll back — the trigger is a one-line change, the comparison against S1 is one A/B.
-- Composes cleanly with **R17 Self-Consistency Voting** — R1 × N + vote is the canonical reliability composition.
+- Composes cleanly with **R17 Self-Consistency Voting** — R1 $\times$ N + vote is the canonical reliability composition.
 - Model-agnostic — any capable instruction-tuned generalist follows a reasoning trigger; no specialist build dependency.
 
 **Costs**
@@ -143,7 +143,7 @@ The Prompt builder composes the task instruction — exactly as it would for S1 
 - **Run the S1 vs R1 A/B before deploying.** If S1 is already correct on the task, R1's tokens are pure overhead. The pattern earns its keep on tasks where the gap is measurable.
 - **Lock model and decoding parameters** when comparing S1 to R1 — temperature, top-p, model ID. A model swap is a regression test.
 - **Strict answer extraction is worth it.** Either a final-line convention (*"Answer: X"* in the prompt) or the two-stage variant. Free-form parsing is a silent-bug factory.
-- **Compose with R17, not replace it.** R17 wraps R1 (N samples of R1 + vote) and is the canonical reliability lift for reasoning tasks. R1 alone is fast and cheap; R1 × N is reliable and N× costly. Choose by the failure profile.
+- **Compose with R17, not replace it.** R17 wraps R1 (N samples of R1 + vote) and is the canonical reliability lift for reasoning tasks. R1 alone is fast and cheap; R1 $\times$ N is reliable and N$\times$ costly. Choose by the failure profile.
 - **Watch for sycophantic reasoning.** Where the cost of a confident-wrong answer is high, never rely on a single R1 trace; wrap with R17 or **V15 LLM-as-Judge**.
 - **Do not stack R1 inside R2.** R2's worked examples already contain reasoning traces — adding the R1 trigger to a few-shot prompt is redundant on capable models and confuses small ones. Pick one.
 
@@ -151,7 +151,7 @@ The Prompt builder composes the task instruction — exactly as it would for S1 
 
 > `LLM` = configured session (model + setup + per-call prompt); `code` = wiring.
 
-**Composition:** R1 is a near-degenerate composition — it is **S1 Zero-Shot** plus a single appended trigger phrase. R1 is itself the inner step of several heavier patterns: **R17 Self-Consistency Voting** wraps R1 with N samples and a vote (the canonical *CoT × N + vote*); **R7 Reflexion** wraps R1 with retry-with-memory; **R8 Self-Refine** wraps R1 with critique-and-revise. The Prompt builder may compose with **S6 Output Template** to fix the answer's final-line format for the extractor.
+**Composition:** R1 is a near-degenerate composition — it is **S1 Zero-Shot** plus a single appended trigger phrase. R1 is itself the inner step of several heavier patterns: **R17 Self-Consistency Voting** wraps R1 with N samples and a vote (the canonical *CoT $\times$ N + vote*); **R7 Reflexion** wraps R1 with retry-with-memory; **R8 Self-Refine** wraps R1 with critique-and-revise. The Prompt builder may compose with **S6 Output Template** to fix the answer's final-line format for the extractor.
 
 **The chain:**
 
@@ -214,7 +214,7 @@ R1 is the canonical *prompt-engineering-only* pattern — there is no library to
 - **Distinct from R3 Plan-and-Solve** — R3 produces an *explicit plan artifact* in a first call before any execution; R1 produces reasoning and answer together in one call with no separable plan. R3 is for inspectable workflows; R1 is for single-shot reasoning.
 - **Distinct from R4 ReAct** — R4 interleaves reasoning with *tool calls and observations* in a loop; R1 is a single completion with no tools. Use R4 when external information must enter the trace mid-reasoning.
 - **Distinct from R14 Program of Thoughts** — R14 generates *code* that an executor runs; R1 generates *natural-language reasoning* that the model itself produces. For numerical tasks where arithmetic hallucination is the failure, R14 strictly dominates R1.
-- **Wrapped by R17 Self-Consistency Voting** — R17's canonical composition is *R1 × N + vote* (Wang et al., 2022); the explicit chain-of-thought that R1 elicits is what gives sampling diversity room to express itself, and without R1 the samples lack the variation that makes voting informative.
+- **Wrapped by R17 Self-Consistency Voting** — R17's canonical composition is *R1 $\times$ N + vote* (Wang et al., 2022); the explicit chain-of-thought that R1 elicits is what gives sampling diversity room to express itself, and without R1 the samples lack the variation that makes voting informative.
 - **Wrapped by R7 Reflexion** — R7 retries R1 (or another reasoning pattern) with a memory of prior failures from an external evaluator; the per-attempt call is typically R1.
 - **Wrapped by R8 Self-Refine** — R8 generates with R1, critiques, and revises in a sequential loop with the same model.
 - **Composes with S6 Output Template** — fixing the answer's final-line format ("Answer: X") makes the deterministic extractor reliable and removes most parsing failures without forcing the two-stage variant.
@@ -225,7 +225,7 @@ R1 is the canonical *prompt-engineering-only* pattern — there is no library to
 
 - Kojima, Gu, Reid, Matsuo, Iwasawa (2022) — *Large Language Models are Zero-Shot Reasoners* (arXiv [2205.11916](https://arxiv.org/abs/2205.11916), NeurIPS 2022). The canonical reference; introduces *"Let's think step by step"* and the one-stage / two-stage variants.
 - Wei et al. (2022) — *Chain-of-Thought Prompting Elicits Reasoning in Large Language Models* (arXiv [2201.11903](https://arxiv.org/abs/2201.11903)). The few-shot CoT paper R1 is the zero-example counterpart of.
-- Wang et al. (2022) — *Self-Consistency Improves Chain of Thought Reasoning in Language Models* (arXiv [2203.11171](https://arxiv.org/abs/2203.11171)). The canonical *R1 × N + vote* composition.
+- Wang et al. (2022) — *Self-Consistency Improves Chain of Thought Reasoning in Language Models* (arXiv [2203.11171](https://arxiv.org/abs/2203.11171)). The canonical *R1 $\times$ N + vote* composition.
 - Turpin et al. (2023) — *Language Models Don't Always Say What They Think* (arXiv 2305.04388). Documents sycophantic / unfaithful CoT — the trace-supports-wrong-answer failure mode.
 - Yang et al. (2023) — *Large Language Models as Optimizers* (OPRO, arXiv 2309.03409). Discovered the *"Take a deep breath and work on this problem step-by-step"* trigger phrasing.
 - Zhang et al. (2022) — *Automatic Chain of Thought Prompting in Large Language Models* (Auto-CoT, arXiv 2210.03493). Uses Zero-Shot CoT as the inner step to generate demonstrations for Few-Shot CoT.

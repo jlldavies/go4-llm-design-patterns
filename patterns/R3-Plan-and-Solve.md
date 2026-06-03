@@ -20,7 +20,7 @@ ReAct (**R4**) goes the other way: every step is its own LLM call, with a fresh 
 
 Plan-and-Solve resolves the tension with a single structural move: lift planning into its own call. Wang et al. (2023) showed that prompting a model to "devise a plan to divide the entire task into smaller subtasks, then carry out the subtasks according to the plan" beats Zero-Shot CoT on arithmetic, symbolic, and commonsense reasoning — the same model, the same task, with the planning step separated. The plan is a first-class artifact: it can be inspected before execution, edited by a human, validated by a checker, or replanned if execution fails. Execution becomes cheap (a smaller model, a tighter prompt) because the hard reasoning was done once, upfront.
 
-The defining claim is asymmetric in time: *one expensive planning call buys many cheap execution calls.* That asymmetry — and the separability of the plan as an artifact — is what makes R3 a distinct pattern, not a configuration of CoT or ReAct. This asymmetry is mechanically grounded in model size (mechanism 8): a 70B Planner and a 7B Executor have a ~10× per-token compute cost difference; the Planner runs once while the Executor runs O(steps) times, so the total cost is dominated by the cheaper session. Each Executor call operates on its own bounded context rather than on the full accumulated history (mechanism 6), which keeps each step's attention cost independent of prior steps.
+The defining claim is asymmetric in time: *one expensive planning call buys many cheap execution calls.* That asymmetry — and the separability of the plan as an artifact — is what makes R3 a distinct pattern, not a configuration of CoT or ReAct. This asymmetry is mechanically grounded in model size (mechanism 8): a 70B Planner and a 7B Executor have a ~10$\times$ per-token compute cost difference; the Planner runs once while the Executor runs O(steps) times, so the total cost is dominated by the cheaper session. Each Executor call operates on its own bounded context rather than on the full accumulated history (mechanism 6), which keeps each step's attention cost independent of prior steps.
 
 ## Applicability
 
@@ -48,11 +48,11 @@ R3 is right when planning is harder than execution, the step list cannot be auth
 
 **2. Step-count and predictability.** R3 fits roughly 3–15 steps that are *predictable* once the task is surveyed. Below 3 steps, **S4** in one prompt suffices. Above ~15 steps, plan reliability degrades and you should either decompose hierarchically (Planner emits sub-tasks, each sub-task is its own R3) or move to **R4 ReAct** with mid-run adaptation.
 
-**3. Inspectability requirement.** Does anyone — a human reviewer, a policy checker, an audit log, a downstream component — need to *see the plan before it runs*? Yes → R3 (the plan is a discrete artifact). No → consider **R4** or **R5 ReWOO**. R3 is the natural pattern for high-stakes or regulated workflows because the plan can be gated by **V1 Human-in-the-Loop**.
+**3. Inspectability requirement.** Does anyone — a human reviewer, a policy checker, an audit log, a downstream component — need to *see the plan before it runs*? Yes $\to$ R3 (the plan is a discrete artifact). No $\to$ consider **R4** or **R5 ReWOO**. R3 is the natural pattern for high-stakes or regulated workflows because the plan can be gated by **V1 Human-in-the-Loop**.
 
-**4. Adaptation budget.** Count how often, on a labelled test set, the plan needs to change mid-execution because reality diverged. **Replan rate ≤ ~20%** → R3 is efficient (most runs execute the plan as-is). **Replan rate ≥ ~50%** → planning is wasted work; choose **R4 ReAct**, where every step is already adaptive.
+**4. Adaptation budget.** Count how often, on a labelled test set, the plan needs to change mid-execution because reality diverged. **Replan rate $\leq$ ~20%** $\to$ R3 is efficient (most runs execute the plan as-is). **Replan rate $\geq$ ~50%** $\to$ planning is wasted work; choose **R4 ReAct**, where every step is already adaptive.
 
-**5. Loop discipline.** When replanning is enabled, it is a loop — Plan → Execute → Detect failure → Replan → Execute. Pair with **V9 Bounded Execution** to cap replans (3 is a common ceiling). Without a bound, a hard task can cascade replans indefinitely. Pair with **V14 Trajectory Logging** to record both the plans and the deltas between them — the diff is the diagnostic.
+**5. Loop discipline.** When replanning is enabled, it is a loop — Plan $\to$ Execute $\to$ Detect failure $\to$ Replan $\to$ Execute. Pair with **V9 Bounded Execution** to cap replans (3 is a common ceiling). Without a bound, a hard task can cascade replans indefinitely. Pair with **V14 Trajectory Logging** to record both the plans and the deltas between them — the diff is the diagnostic.
 
 **Quick test — R3 is the right pattern when:**
 
@@ -100,18 +100,18 @@ If the step list *is* fixed at design time, drop to **S4 Instruction Decompositi
        └──────────────┘
 ```
 
-The two-call minimum is Planner → Executor. The full pattern adds an optional Plan Reviewer (gate) before execution and a Replanner (recovery) after a step fails. The Executor is "one call per step" in the default form; the executor can also be a chain (**O2**), a parallel fan-out (**O4**), or a delegation to workers (**O6**).
+The two-call minimum is Planner $\to$ Executor. The full pattern adds an optional Plan Reviewer (gate) before execution and a Replanner (recovery) after a step fails. The Executor is "one call per step" in the default form; the executor can also be a chain (**O2**), a parallel fan-out (**O4**), or a delegation to workers (**O6**).
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Planner (LLM)** | producing the ordered plan from the full task | task description → ordered step list | execute the steps it plans — a Planner that also executes loses the asymmetry the pattern depends on, and is incentivised to write plans it can run rather than plans that are right. |
-| **Plan** *(artifact, not a process)* | the inspectable step list itself | — → ordered steps | be implicit or buried in the Planner's free-form output. The plan must be a structured, parseable artifact (numbered list, JSON, etc.) so the Executor and any reviewer can read it. |
-| **Plan Reviewer** *(optional)* | gating the plan before execution | plan → approve / revise / reject | rewrite the plan inline — review is approve/reject; revisions go back to the Planner so the Planner's behaviour can be tracked and improved. |
-| **Executor (LLM or chain)** | running each step of an approved plan | plan + step index → step result | rewrite the plan to suit itself. An Executor that edits the plan mid-run undoes the inspectability the Planner produced and silently shifts where decisions are made. |
-| **State / Scratchpad** | carrying step results forward across executions | step *n* result → step *n+1* input | grow unboundedly — a long plan must compact or summarise old step results (**K6**) before the Executor's context overflows. Typically a **K8 Working Memory** entry. |
-| **Replanner (LLM)** *(optional)* | producing a revised plan when execution fails | original plan + failure signal + state → new plan | retry the failed step verbatim — that is the Executor's retry. The Replanner's job is structural: re-order, drop, or add steps in light of what was learned. |
+| **Planner (LLM)** | producing the ordered plan from the full task | task description $\to$ ordered step list | execute the steps it plans — a Planner that also executes loses the asymmetry the pattern depends on, and is incentivised to write plans it can run rather than plans that are right. |
+| **Plan** *(artifact, not a process)* | the inspectable step list itself | — $\to$ ordered steps | be implicit or buried in the Planner's free-form output. The plan must be a structured, parseable artifact (numbered list, JSON, etc.) so the Executor and any reviewer can read it. |
+| **Plan Reviewer** *(optional)* | gating the plan before execution | plan $\to$ approve / revise / reject | rewrite the plan inline — review is approve/reject; revisions go back to the Planner so the Planner's behaviour can be tracked and improved. |
+| **Executor (LLM or chain)** | running each step of an approved plan | plan + step index $\to$ step result | rewrite the plan to suit itself. An Executor that edits the plan mid-run undoes the inspectability the Planner produced and silently shifts where decisions are made. |
+| **State / Scratchpad** | carrying step results forward across executions | step *n* result $\to$ step *n+1* input | grow unboundedly — a long plan must compact or summarise old step results (**K6**) before the Executor's context overflows. Typically a **K8 Working Memory** entry. |
+| **Replanner (LLM)** *(optional)* | producing a revised plan when execution fails | original plan + failure signal + state $\to$ new plan | retry the failed step verbatim — that is the Executor's retry. The Replanner's job is structural: re-order, drop, or add steps in light of what was learned. |
 
 The pattern's discipline is the separation of Planner and Executor. They are *different sessions*, even when they use the same model — different setups, different prompts, different success criteria. Mixing them is the pattern's most common failure: a Planner that drifts into executing produces vague plans; an Executor that drifts into replanning produces inconsistent runs.
 
@@ -126,7 +126,7 @@ Once approved, the Executor runs steps in order. Each step is a separate LLM cal
 **Benefits**
 - Plan quality and execution efficiency tune independently — strong model for planning, cheap model (or deterministic code) for execution.
 - The plan is an inspectable artifact: humans, policy checks, and audit logs can read it before any step runs.
-- 5–10× fewer LLM calls than **R4 ReAct** on tasks whose step sequence holds up — the bulk of reasoning happens once, in the Planner, not at every step.
+- 5–10$\times$ fewer LLM calls than **R4 ReAct** on tasks whose step sequence holds up — the bulk of reasoning happens once, in the Planner, not at every step.
 - Failure localises to a step, with the surrounding plan visible — debugging is straightforward.
 - Composes cleanly with **O6 Orchestrator-Workers** (R3 is the orchestrator's inner pattern), **O4 Parallelization** (an executor that runs independent steps in parallel), and **K8 Working Memory** (the plan and step results live in the scratchpad).
 
@@ -172,7 +172,7 @@ Once approved, the Executor runs steps in order. Each step is a separate LLM cal
 | 3 | Write plan to scratchpad | `code` | K8 Working Memory |
 | 4 | For each step in plan: Executor — run step *n* | `LLM` | Executor session, S6 |
 | 5 | Append step result to scratchpad | `code` | K8 |
-| 6 | Branch — step failed? → Replanner; else next step | `code` | V9 |
+| 6 | Branch — step failed? $\to$ Replanner; else next step | `code` | V9 |
 | 7 | Replanner — produce a revised plan from failure + state | `LLM` | Replanner session |
 | 8 | Loop to step 3 with the new plan; cap by V9 | `code` | V9 |
 
@@ -235,7 +235,7 @@ A capable generalist suffices for both. The artifact that does the heavy lifting
 ## Related Patterns
 
 - **Refines** **R1 Zero-Shot CoT** and **R2 Few-Shot CoT** — CoT thinks step-by-step inside one call; R3 lifts the "plan" out into its own call so the plan is a separable artifact. R3 is what CoT becomes when planning quality matters enough to pay an extra call.
-- **Sibling of** **S4 Instruction Decomposition** at agent scope — S4 is the *prompt-level* instance of ordered execution (one call carrying an authored step list); R3 is the *agent-level* instance (two or more calls, with the step list generated at runtime by a Planner). S4 ↑ R3 is the upgrade path when the step list cannot be authored at design time.
+- **Sibling of** **S4 Instruction Decomposition** at agent scope — S4 is the *prompt-level* instance of ordered execution (one call carrying an authored step list); R3 is the *agent-level* instance (two or more calls, with the step list generated at runtime by a Planner). S4 $\uparrow$ R3 is the upgrade path when the step list cannot be authored at design time.
 - **Distinct from** **R4 ReAct** — R4 makes decisions step-by-step with full observation feedback; R3 commits to a plan upfront and replans only on failure. R3 trades adaptability for efficiency and inspectability; R4 trades efficiency for adaptability. Production systems often use **R3 as the outer loop with R4 inside individual execution steps** when a step itself needs to be exploratory.
 - **Distinct from** **R5 ReWOO** — ReWOO is plan + parallel tool execution + solver, with placeholder variables flowing between them; R3 is plan + sequential (or fan-out) execution against a state scratchpad. ReWOO is more token-efficient when steps are independent; R3 is more flexible when steps depend on prior results.
 - **Distinct from** **R9 Tree of Thoughts** / **R10 LATS** — ToT and LATS search over alternative plans; R3 commits to one plan and replans only on failure. Use ToT / LATS when the right plan is unknown and worth searching for; use R3 when a competent Planner can produce a workable plan first-try.

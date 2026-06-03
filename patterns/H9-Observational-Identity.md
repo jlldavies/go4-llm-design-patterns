@@ -45,7 +45,7 @@ H9 is right when an *honest record* of what the agent has done, can do, and is d
 
 **2. Capability-routing pay-off.** In a multi-agent system, would routing on demonstrated competence (rather than declared capability) improve outcomes? Measure the *mis-routing rate* under **O3 Routing** with static capability declarations versus a track-record-driven router. If mis-routing > 10%, H9 is the upgrade path; if < 5%, static declarations are fine.
 
-**3. Commitment-tracking volume.** Count outstanding commitments per agent at any time — promises made, follow-ups owed, "next session we will…" markers. If consistently ≥ 3 open commitments, H9's commitment-tracker block earns its keep; under 1, H1's commitments line is enough.
+**3. Commitment-tracking volume.** Count outstanding commitments per agent at any time — promises made, follow-ups owed, "next session we will…" markers. If consistently $\geq$ 3 open commitments, H9's commitment-tracker block earns its keep; under 1, H1's commitments line is enough.
 
 **4. Decay discipline.** A self-model without decay degrades into **HA5 Stale Self-Model**. Practical thresholds: success counts older than 90 days lose half their weight; entries untouched for 180 days are flagged for refresh; entries untouched for 365 days are archived. If you cannot operate this discipline, do not build H9.
 
@@ -95,16 +95,16 @@ If sessions are independent, **H1**'s static self-model line is enough. If the v
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Self-Knowledge Store** | the persistent record (capabilities, tools, domains, history, commitments, current state) | — → durable, versioned, per-agent record | be the only copy; identity-data loss is a critical failure. Versioned, backed up, inspectable. |
-| **Capability Map** | demonstrated competence by task type, with attempts, success rate, last-seen date, confidence | task outcomes → calibrated competence record | claim capability the agent has not demonstrated. Declared-but-untested capability belongs in H1's self-model line, not here. |
-| **Action History** | the compressed record of past sessions: what was done, what was decided | K11 logs (often) → compressed life-span trace | grow unbounded; compress with K6 or archive to K12. |
-| **Commitment Tracker** | active promises and follow-ups | session events → live commitment list | drop a commitment silently. Closing a commitment is an explicit event, not an omission. |
-| **Selector** | choosing which self-knowledge entries to load for the current session / task | session context + index → relevant subset | load the whole store; defeating the budget defeats the pattern. |
-| **Updater** *(separate session)* | writing self-model changes between sessions | K11 activity + current entries → proposed updates | run mid-session, or write to fields that belong in H1. Same session-end discipline as H1's Updater. |
-| **Decay function** | ageing the confidence and freshness of entries over time | entry + elapsed time → adjusted confidence | be optional. Without decay, H9 becomes **HA5 Stale Self-Model**. |
-| **Self-Query Handler** | answering "what do I know about X?" / "have I done Y?" from the store | query → grounded self-report | fabricate. If the store has no entry, the answer is "I have no record of doing X" — never "yes, I have." |
+| **Self-Knowledge Store** | the persistent record (capabilities, tools, domains, history, commitments, current state) | — $\to$ durable, versioned, per-agent record | be the only copy; identity-data loss is a critical failure. Versioned, backed up, inspectable. |
+| **Capability Map** | demonstrated competence by task type, with attempts, success rate, last-seen date, confidence | task outcomes $\to$ calibrated competence record | claim capability the agent has not demonstrated. Declared-but-untested capability belongs in H1's self-model line, not here. |
+| **Action History** | the compressed record of past sessions: what was done, what was decided | K11 logs (often) $\to$ compressed life-span trace | grow unbounded; compress with K6 or archive to K12. |
+| **Commitment Tracker** | active promises and follow-ups | session events $\to$ live commitment list | drop a commitment silently. Closing a commitment is an explicit event, not an omission. |
+| **Selector** | choosing which self-knowledge entries to load for the current session / task | session context + index $\to$ relevant subset | load the whole store; defeating the budget defeats the pattern. |
+| **Updater** *(separate session)* | writing self-model changes between sessions | K11 activity + current entries $\to$ proposed updates | run mid-session, or write to fields that belong in H1. Same session-end discipline as H1's Updater. |
+| **Decay function** | ageing the confidence and freshness of entries over time | entry + elapsed time $\to$ adjusted confidence | be optional. Without decay, H9 becomes **HA5 Stale Self-Model**. |
+| **Self-Query Handler** | answering "what do I know about X?" / "have I done Y?" from the store | query $\to$ grounded self-report | fabricate. If the store has no entry, the answer is "I have no record of doing X" — never "yes, I have." |
 
 The Self-Knowledge Store is **read by the running session and written only by the Updater between sessions** — the same read/write separation H1 and K12 enforce, for the same reason: an agent that edits its own track record mid-task can produce self-flattering drift no operator can detect.
 

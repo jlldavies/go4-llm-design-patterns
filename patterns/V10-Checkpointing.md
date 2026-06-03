@@ -19,7 +19,7 @@ An agent running a multi-hour task — a research run, a code-modification sessi
 Three production scenarios force the issue:
 
 - **Failure recovery.** A tool call times out at step 17 of 20. Without a checkpoint at step 16, the work of steps 1–16 is lost and the agent must redo them — often non-deterministically, sometimes diverging from the original trajectory and producing a different (and possibly worse) outcome.
-- **Human-in-the-loop pauses (V1).** The agent reaches a decision point that requires human approval. Approval may take hours or days. The process cannot stay resident for that long. The mechanistic reason is that the model's KV cache — the 4D tensor [num_layers × seq_len × num_kv_heads × d_head] that stores the computed key-value pairs for the current session — exists only in GPU memory during an active inference session and is not persisted between API calls (mechanism 3). Each new invocation starts with an empty cache and pays full prefill cost on the context provided. Checkpointing externalises the agent's *application state* (plan, partial results, position in the loop) so that a fresh invocation can reconstruct where it left off, even though it cannot recover the prior KV cache state. Without checkpointing, V1 is theoretical; with it, the agent simply suspends, the state lives in a database, and resumption is a fresh load.
+- **Human-in-the-loop pauses (V1).** The agent reaches a decision point that requires human approval. Approval may take hours or days. The process cannot stay resident for that long. The mechanistic reason is that the model's KV cache — the 4D tensor [num_layers $\times$ seq_len $\times$ num_kv_heads $\times$ d_head] that stores the computed key-value pairs for the current session — exists only in GPU memory during an active inference session and is not persisted between API calls (mechanism 3). Each new invocation starts with an empty cache and pays full prefill cost on the context provided. Checkpointing externalises the agent's *application state* (plan, partial results, position in the loop) so that a fresh invocation can reconstruct where it left off, even though it cannot recover the prior KV cache state. Without checkpointing, V1 is theoretical; with it, the agent simply suspends, the state lives in a database, and resumption is a fresh load.
 - **Bounded-execution termination (V9).** The agent hits its iteration or cost cap. Without a checkpoint, the work done up to the cap is discarded — bounded execution becomes a pure-loss circuit breaker. With a checkpoint, the cap is a *pause*, not a *drop*, and a human (or a higher budget) can resume.
 
 The 12-Factor Agents framework names both halves of this problem: Factor 5 ("Unify execution state and business state") and Factor 6 ("Launch/Pause/Resume with simple APIs"). Database savepoints, workflow orchestrators (Temporal, DBOS, Restate), and Kubernetes job-checkpointing all solve the same underlying problem in their own domains. V10 is what they look like when the running process is an LLM agent loop.
@@ -46,9 +46,9 @@ Do not use it when:
 
 V10 is right when the cost of losing in-progress work, or the inability to pause for review, exceeds the cost of snapshot storage and serialisation.
 
-**1. Measure expected work-loss without it.** Estimate the agent's mean-time-to-failure (MTTF) and mean task duration (T). If T ≥ 10% × MTTF, work loss without checkpointing is material. Below 1%, V10 is overhead; **V9 Bounded Execution** alone is enough. Note that prefix caching (mechanism 5) can recover some of the prefill cost if a stable, lengthy system prompt is re-sent on resume — configure the checkpoint load to prepend the full system prompt before the restored state to allow the provider to serve it from cache.
+**1. Measure expected work-loss without it.** Estimate the agent's mean-time-to-failure (MTTF) and mean task duration (T). If T $\geq$ 10% $\times$ MTTF, work loss without checkpointing is material. Below 1%, V10 is overhead; **V9 Bounded Execution** alone is enough. Note that prefix caching (mechanism 5) can recover some of the prefill cost if a stable, lengthy system prompt is re-sent on resume — configure the checkpoint load to prepend the full system prompt before the restored state to allow the provider to serve it from cache.
 
-**2. Pause requirement.** Is V1 (Human-in-the-Loop) required for any action in the agent's repertoire? If yes, V10 is mandatory — there is no other way to pause a stateful agent without dropping its state. No pause requirement and no V1 dependency → V10 is optional.
+**2. Pause requirement.** Is V1 (Human-in-the-Loop) required for any action in the agent's repertoire? If yes, V10 is mandatory — there is no other way to pause a stateful agent without dropping its state. No pause requirement and no V1 dependency $\to$ V10 is optional.
 
 **3. Checkpoint granularity.** Choose where the snapshot boundary sits:
    - **Every step** — strongest recovery; highest write cost. Default for high-stakes, low-throughput agents.
@@ -62,7 +62,7 @@ V10 is right when the cost of losing in-progress work, or the inability to pause
 
 **Quick test — V10 is the right pattern when:**
 
-- the task is long enough that failure costs real work (T ≥ 10% of MTTF), *and*
+- the task is long enough that failure costs real work (T $\geq$ 10% of MTTF), *and*
 - pause-for-review or graceful termination is a real requirement (V1 or V9 in play), *and*
 - the agent's state is — or can be made — fully serialisable, *and*
 - a restore path has been exercised, not just designed.
@@ -96,14 +96,14 @@ If the task is short-lived and self-contained, skip V10 and bound it with V9 alo
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **State Serialiser** | turning the in-memory agent state into a durable representation | live state object → bytes / JSON / row | leak references to in-process resources (open sockets, file handles, secrets) — those do not survive serialisation and corrupt the snapshot. |
-| **Checkpoint Store** | durable, external storage of snapshots keyed by session and step | (session_id, step, state) → ack; (session_id, step?) → state | be in-process memory. An in-memory checkpointer is a development convenience, not a production component. |
-| **Checkpoint Policy** | deciding *when* to checkpoint (every step, significant event, periodic) | step event → save or skip | be the agent itself. If the agent decides when to checkpoint, it can quietly skip the snapshot before a risky action. |
-| **State Loader** | hydrating a fresh agent invocation from a stored snapshot | (session_id, step?) → state | mutate the snapshot during load — the store is the source of truth; the loader returns a copy. |
-| **Restore Verifier** *(optional but recommended)* | confirming that a loaded snapshot reproduces the prior agent state correctly | loaded state + expected hash/invariants → ok/fail | be skipped in production. Silent restore corruption is worse than no checkpoint at all. |
-| **Agent Function** | producing `(output, state')` from `(state, input)` — pure, stateless | (state, input) → (output, state') | hold any state of its own. This is V12 Stateless Reducer's job, and the only way V10 stays clean. |
+| **State Serialiser** | turning the in-memory agent state into a durable representation | live state object $\to$ bytes / JSON / row | leak references to in-process resources (open sockets, file handles, secrets) — those do not survive serialisation and corrupt the snapshot. |
+| **Checkpoint Store** | durable, external storage of snapshots keyed by session and step | (session_id, step, state) $\to$ ack; (session_id, step?) $\to$ state | be in-process memory. An in-memory checkpointer is a development convenience, not a production component. |
+| **Checkpoint Policy** | deciding *when* to checkpoint (every step, significant event, periodic) | step event $\to$ save or skip | be the agent itself. If the agent decides when to checkpoint, it can quietly skip the snapshot before a risky action. |
+| **State Loader** | hydrating a fresh agent invocation from a stored snapshot | (session_id, step?) $\to$ state | mutate the snapshot during load — the store is the source of truth; the loader returns a copy. |
+| **Restore Verifier** *(optional but recommended)* | confirming that a loaded snapshot reproduces the prior agent state correctly | loaded state + expected hash/invariants $\to$ ok/fail | be skipped in production. Silent restore corruption is worse than no checkpoint at all. |
+| **Agent Function** | producing `(output, state')` from `(state, input)` — pure, stateless | (state, input) $\to$ (output, state') | hold any state of its own. This is V12 Stateless Reducer's job, and the only way V10 stays clean. |
 
 The split between *Agent Function* and *Checkpoint Store* is the discipline of the pattern. The agent never persists anything itself; the framework around it does. Conflating the two — letting the agent "remember" between calls — is the failure mode that turns V10 into theatre.
 
@@ -158,9 +158,9 @@ A new step begins. The framework loads the current state from the Checkpoint Sto
 | 1 | Resolve session_id from request | `code` | |
 | 2 | Load: state ← Checkpoint Store[session_id] (or initial) | `code` | State Loader |
 | 3 | *(optional)* Verify loaded state against invariants/hash | `code` | Restore Verifier |
-| 4 | Run one agent step: (state, input) → (output, state') | `LLM` | V12 Agent Function |
+| 4 | Run one agent step: (state, input) $\to$ (output, state') | `LLM` | V12 Agent Function |
 | 5 | Decide: should this step be a checkpoint? | `code` | Checkpoint Policy |
-| 6 | If yes: serialise state' → durable form | `code` | State Serialiser |
+| 6 | If yes: serialise state' $\to$ durable form | `code` | State Serialiser |
 | 7 | If yes: write Checkpoint Store[session_id, step+1] ← bytes | `code` | Checkpoint Store |
 | 8 | Emit V14 trace event: checkpoint.write / checkpoint.load | `code` | V14 |
 | 9 | Branch: continue loop / pause (V1) / terminate (V9) / fail (rollback) | `code` | V1, V9 |

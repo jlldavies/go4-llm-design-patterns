@@ -97,14 +97,14 @@ The policy artefact is a separate, versioned file. The engine is a separate proc
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **AgentSpec** | the declarative policy artefact — the rules themselves | — → a versioned, human-readable bundle of PERMIT / PROHIBIT / OBLIGATE / WAIVE rules with conditions | live inside the prompt or inside the agent's code. The artefact must be a separate, named, versioned file — otherwise compliance cannot read it and the engine has no single source of truth. |
-| **Policy Engine** | runtime enforcement | (proposed action + agent context + AgentSpec) → allow / deny / inject obligation / escalate | depend on the LLM. The engine must be deterministic for the rules it covers; an LLM-based "policy engine" is **V15 LLM-as-Judge** — useful, but not V7. The engine's decisions must be reproducible from inputs alone. |
-| **Action Interceptor** | wiring the engine into the agent's execution path | every proposed tool call / outbound action → engine query | let any action bypass it. A single uninstrumented action path is the failure surface for the whole pattern. The interceptor must cover *all* outbound actions, not just tool calls (state changes, memory writes, external sends). |
-| **Waiver Authority** | the audited exception path | (PROHIBIT rule + justification + scope) → time-bounded waiver token | grant permanent waivers. A waiver without an expiry, a scope, and a named authoriser is the start of governance erosion (the WAIVE-proliferation failure mode). |
-| **Compliance Log** | the durable record of every engine decision | (rule, inputs, decision, waiver-if-any, timestamp) → V14 trajectory entry | drop the matched rule or the inputs. A decision without its evidence is useless for audit and for tuning false positives / false negatives. |
-| **Policy Author** *(human role)* | the rules themselves | (regulatory requirements + threat model + product needs) → AgentSpec updates with review and sign-off | write rules without a review process. Self-authored unreviewed policies are how WAIVE becomes the default and how rule gaps proliferate. |
+| **AgentSpec** | the declarative policy artefact — the rules themselves | — $\to$ a versioned, human-readable bundle of PERMIT / PROHIBIT / OBLIGATE / WAIVE rules with conditions | live inside the prompt or inside the agent's code. The artefact must be a separate, named, versioned file — otherwise compliance cannot read it and the engine has no single source of truth. |
+| **Policy Engine** | runtime enforcement | (proposed action + agent context + AgentSpec) $\to$ allow / deny / inject obligation / escalate | depend on the LLM. The engine must be deterministic for the rules it covers; an LLM-based "policy engine" is **V15 LLM-as-Judge** — useful, but not V7. The engine's decisions must be reproducible from inputs alone. |
+| **Action Interceptor** | wiring the engine into the agent's execution path | every proposed tool call / outbound action $\to$ engine query | let any action bypass it. A single uninstrumented action path is the failure surface for the whole pattern. The interceptor must cover *all* outbound actions, not just tool calls (state changes, memory writes, external sends). |
+| **Waiver Authority** | the audited exception path | (PROHIBIT rule + justification + scope) $\to$ time-bounded waiver token | grant permanent waivers. A waiver without an expiry, a scope, and a named authoriser is the start of governance erosion (the WAIVE-proliferation failure mode). |
+| **Compliance Log** | the durable record of every engine decision | (rule, inputs, decision, waiver-if-any, timestamp) $\to$ V14 trajectory entry | drop the matched rule or the inputs. A decision without its evidence is useless for audit and for tuning false positives / false negatives. |
+| **Policy Author** *(human role)* | the rules themselves | (regulatory requirements + threat model + product needs) $\to$ AgentSpec updates with review and sign-off | write rules without a review process. Self-authored unreviewed policies are how WAIVE becomes the default and how rule gaps proliferate. |
 
 The pattern's reliability comes from the separation: the artefact is *only* declarative; the engine is *only* an evaluator; the interceptor is *only* wiring; the log is *only* a record. A monolithic "governance module" that performs all four collapses the audit story — there is no longer a separate artefact a regulator can read.
 
@@ -167,7 +167,7 @@ The system loads the AgentSpec at startup; the Policy Engine indexes the rules. 
 | 5c | On PERMIT (or no match + default-allow) — proceed | `code` | |
 | 6 | Tool / action executes | `code` | |
 | 7 | *(optional)* Policy Engine re-evaluates the result against post-action rules | `code` | AgentSpec artefact |
-| 8 | Every decision + matched rule + inputs → V14 trajectory entry | `code` | V14 |
+| 8 | Every decision + matched rule + inputs $\to$ V14 trajectory entry | `code` | V14 |
 
 **Skeleton** — the wiring; the engine and AgentSpec are configuration, not LLM calls:
 

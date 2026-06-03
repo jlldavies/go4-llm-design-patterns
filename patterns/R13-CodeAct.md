@@ -18,7 +18,7 @@ R4 ReAct's action is one structured tool call per turn: pick a tool, fill its JS
 
 Wang et al. (2024) ran the obvious experiment: replace JSON-action with *Python-code-action*. The agent emits a block of code; the runtime executes it; the block can call any number of tools (each is a Python function), can compose them, can branch and loop, can hold intermediate values in local variables that *never enter the LLM context*. The Observation is what the code printed plus any exception trace. Across multi-tool benchmarks (M3 ToolEval, API-Bank, MINT) they reported **~20 percentage points higher success rate** than JSON / text actions and **~30% fewer agent steps** to completion. The mechanistic basis of R13's accuracy advantage is context discipline (mechanisms 2 and 3): when one code block calls three tools, the intermediate values are Python variables in the kernel — they never enter the LLM's KV cache. Under R4, the same three tools would require three Observations, each adding to the growing trajectory that every subsequent LLM call attends over at O(seq_len²) cost (mechanism 2). R13 keeps the O(n²) attention budget bounded to the goal + code + stdout, not to intermediate data that the LLM has already processed. The mechanism is mundane and large: code is a denser, more expressive action language than JSON, and Python's call stack is a cheaper place to hold intermediate state than the LLM's prompt.
 
-R13 is not a variant of R4. The loop shape is the same (Thought → Action → Observation), but the Participants differ — there is now a **Code Executor** with its own behavioural contract (must run sandboxed, must return stdout *and* errors as Observations, must persist variables across iterations), and the action language change cascades through almost every Implementation Note. Most importantly, the security envelope changes completely: a JSON tool call is constrained by the schema you wrote; an arbitrary Python block is constrained by *nothing the model is incentivised to respect*. This makes **V8 Tool Sandboxing a hard prerequisite, not a recommendation** — see CONFLICTS.md CRITICAL 5. R13 without V8 is not a deployable pattern in any environment that matters.
+R13 is not a variant of R4. The loop shape is the same (Thought $\to$ Action $\to$ Observation), but the Participants differ — there is now a **Code Executor** with its own behavioural contract (must run sandboxed, must return stdout *and* errors as Observations, must persist variables across iterations), and the action language change cascades through almost every Implementation Note. Most importantly, the security envelope changes completely: a JSON tool call is constrained by the schema you wrote; an arbitrary Python block is constrained by *nothing the model is incentivised to respect*. This makes **V8 Tool Sandboxing a hard prerequisite, not a recommendation** — see CONFLICTS.md CRITICAL 5. R13 without V8 is not a deployable pattern in any environment that matters.
 
 R13 is also not R14 Program of Thoughts. R14 generates code to do *arithmetic / numerical work* the LLM is bad at — no tools, no agent loop, one shot. R13 generates code to *orchestrate tools* across an agent loop. Same syntax, different job; an R13 step may also do R14-style computation inside its block, but R14 alone is not an agent pattern.
 
@@ -36,7 +36,7 @@ Do not use it when:
 
 - there is no sandbox available and one cannot be deployed — **V8** prerequisite fails; fall back to **R4 ReAct** with JSON tool calls;
 - the task is a single tool call per step with no composition — the code wrapper is pure overhead; use **R4** or a plain **I2 Function Call**;
-- the tool sequence is independent and plannable up front — **R5 ReWOO** is 5× more token-efficient;
+- the tool sequence is independent and plannable up front — **R5 ReWOO** is 5$\times$ more token-efficient;
 - the model cannot reliably write Python against your tool surface — error rates and re-tries will erase the 20pp gain; use **R4** instead;
 - the loop cannot be bounded — never run R13 unbounded; pair with **V9 Bounded Execution** or it becomes anti-pattern **A3 Uncontrolled Recursion**;
 - the task is pure numerical reasoning with no tools — use **R14 Program of Thoughts**, which is the same syntactic device for a different job.
@@ -47,7 +47,7 @@ R13 is right when actions naturally chain tools per step, a sandbox is available
 
 **1. Test for per-step composition.** Sketch the trajectory. If a *single logical step* naturally calls 2+ tools, or needs `if` / `for` over a returned collection, that step is one R13 action — but would be 2–4 R4 actions. Wang et al.'s ~30% step reduction comes entirely from this collapse. If every logical step is a single atomic tool call, R13's expressivity buys nothing and **R4** is simpler.
 
-**2. Sandbox available?** This is a gate, not a slider. R13 executes LLM-generated Python; without **V8 Tool Sandboxing** (Docker, gVisor, E2B, Modal, Blaxel — see Implementation Notes) the pattern is a remote-code-execution channel to your filesystem and network. No V8 → no R13. If V8 cannot be provisioned in the deployment environment, fall back to **R4 ReAct**.
+**2. Sandbox available?** This is a gate, not a slider. R13 executes LLM-generated Python; without **V8 Tool Sandboxing** (Docker, gVisor, E2B, Modal, Blaxel — see Implementation Notes) the pattern is a remote-code-execution channel to your filesystem and network. No V8 $\to$ no R13. If V8 cannot be provisioned in the deployment environment, fall back to **R4 ReAct**.
 
 **3. Score the model's Python-against-tools quality.** Run a representative sample. Measure: parse-failure rate (model emits non-runnable code), tool-misuse rate (wrong argument shape), error-recovery rate (does the model correctly read a traceback Observation and fix the next block?). Wang et al.'s gains come from frontier or tool-tuned models. Below a quality threshold, R13 spends its accuracy advantage on retry overhead and **R4** wins.
 
@@ -62,7 +62,7 @@ R13 is right when actions naturally chain tools per step, a sandbox is available
 - the model reliably writes Python against the available tool surface (low parse / misuse rate on a sample), *and*
 - the agent loop and the sandbox both have hard bounds (**V9** for the loop, sandbox limits for each block).
 
-If actions are single atomic tool calls, use **R4 ReAct** — the code wrapper is overhead. If the tool sequence is independent and plannable, use **R5 ReWOO** for 5× token efficiency. If the work is pure numerical computation with no tools, use **R14 Program of Thoughts**. If no sandbox is available, the pattern is unsafe — fall back to **R4**.
+If actions are single atomic tool calls, use **R4 ReAct** — the code wrapper is overhead. If the tool sequence is independent and plannable, use **R5 ReWOO** for 5$\times$ token efficiency. If the work is pure numerical computation with no tools, use **R14 Program of Thoughts**. If no sandbox is available, the pattern is unsafe — fall back to **R4**.
 
 ## Structure
 
@@ -90,17 +90,17 @@ The single change from R4 is that **Action** has become a **Code Block** execute
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Agent (LLM)** | producing the next *Thought* and *Code Block* given the trajectory so far | trajectory → (Thought, Code) | execute its own code, or fabricate stdout / errors. If it produces both the code *and* its purported output in the same turn, the loop has collapsed and the agent is now hallucinating execution results. |
-| **Tool surface** | the Python functions the code block may call (`search(...)`, `read_file(...)`, `fetch(...)`, etc.) | function calls → return values | reason or decide what to call next. Tools are passive callables in the sandbox namespace; the agent decides composition. |
-| **Code Executor (Sandbox, V8)** | safely running each emitted code block in an isolated environment with a persistent kernel | Code Block + kernel state → (stdout, return value, stack trace, updated kernel) | run code outside the isolation envelope. *This is the load-bearing prohibition* — a Code Executor without V8 isolation is a remote-code-execution endpoint. The executor must enforce filesystem / network / CPU / memory / wall-time policy on every block. |
-| **Kernel state** | the Python session's local variables, persisted across loop iterations | block N's bindings → block N+1's namespace | leak across agent sessions or users. Each agent run gets a fresh kernel; a kernel reused across users is a data-leak channel. |
-| **Trajectory** | the append-only record `[(Thought, Code, Observation), …]` fed back into each LLM call | each completed triple → updated history | be edited or reordered mid-run. The *kernel* holds the heavy state (large results in variables); the *trajectory* holds the audit-grade history. Conflating them undoes R13's context-discipline win. |
-| **Termination check** | deciding when the loop ends | trajectory + step count + cost → continue / halt | be implicit. R13 inherits R4's bound-or-die rule. Implicit termination ("the model will know") is anti-pattern **A3**. |
-| **Trajectory logger** *(V14)* | persistent record of every triple for audit and debugging | each triple → log | be optional. R13 trajectories include *executable code the model wrote* — the audit log is also evidence. |
+| **Agent (LLM)** | producing the next *Thought* and *Code Block* given the trajectory so far | trajectory $\to$ (Thought, Code) | execute its own code, or fabricate stdout / errors. If it produces both the code *and* its purported output in the same turn, the loop has collapsed and the agent is now hallucinating execution results. |
+| **Tool surface** | the Python functions the code block may call (`search(...)`, `read_file(...)`, `fetch(...)`, etc.) | function calls $\to$ return values | reason or decide what to call next. Tools are passive callables in the sandbox namespace; the agent decides composition. |
+| **Code Executor (Sandbox, V8)** | safely running each emitted code block in an isolated environment with a persistent kernel | Code Block + kernel state $\to$ (stdout, return value, stack trace, updated kernel) | run code outside the isolation envelope. *This is the load-bearing prohibition* — a Code Executor without V8 isolation is a remote-code-execution endpoint. The executor must enforce filesystem / network / CPU / memory / wall-time policy on every block. |
+| **Kernel state** | the Python session's local variables, persisted across loop iterations | block N's bindings $\to$ block N+1's namespace | leak across agent sessions or users. Each agent run gets a fresh kernel; a kernel reused across users is a data-leak channel. |
+| **Trajectory** | the append-only record `[(Thought, Code, Observation), …]` fed back into each LLM call | each completed triple $\to$ updated history | be edited or reordered mid-run. The *kernel* holds the heavy state (large results in variables); the *trajectory* holds the audit-grade history. Conflating them undoes R13's context-discipline win. |
+| **Termination check** | deciding when the loop ends | trajectory + step count + cost $\to$ continue / halt | be implicit. R13 inherits R4's bound-or-die rule. Implicit termination ("the model will know") is anti-pattern **A3**. |
+| **Trajectory logger** *(V14)* | persistent record of every triple for audit and debugging | each triple $\to$ log | be optional. R13 trajectories include *executable code the model wrote* — the audit log is also evidence. |
 
-The defining separation is **Agent ↔ Code Executor**: the Agent writes the program, the Executor runs it. The defining hard dependency is **Code Executor ↔ V8 Sandbox**: the Executor *is* a V8 implementation, not a `subprocess.run` shortcut. Both separations failing — agent fabricates outputs, or executor runs without isolation — produce the pattern's two canonical disasters (hallucinated tool use; arbitrary code execution).
+The defining separation is **Agent $\leftrightarrow$ Code Executor**: the Agent writes the program, the Executor runs it. The defining hard dependency is **Code Executor $\leftrightarrow$ V8 Sandbox**: the Executor *is* a V8 implementation, not a `subprocess.run` shortcut. Both separations failing — agent fabricates outputs, or executor runs without isolation — produce the pattern's two canonical disasters (hallucinated tool use; arbitrary code execution).
 
 ## Collaborations
 
@@ -215,7 +215,7 @@ run(goal, tools, max_steps, max_cost):
 ## Related Patterns
 
 - **Sibling of** **R4 ReAct** — same Thought / Action / Observation loop, different action language. R4: structured JSON tool calls, one tool per step. R13: Python code, many tools + control flow per step. R13 reports ~20pp accuracy gain and ~30% fewer steps on multi-tool benchmarks but adds a hard sandbox dependency.
-- **Sibling of** **R5 ReWOO** — same loop family, different stance on observation. R5 plans tool calls up front, no observation feedback; R13 conditions on observations every step. Mutually exclusive on the same task (the R4 ⊕ R5 logic applies to R13 ⊕ R5 identically).
+- **Sibling of** **R5 ReWOO** — same loop family, different stance on observation. R5 plans tool calls up front, no observation feedback; R13 conditions on observations every step. Mutually exclusive on the same task (the R4 $\oplus$ R5 logic applies to R13 $\oplus$ R5 identically).
 - **Required by** **V8 Tool Sandboxing** — *hard prerequisite*, not a recommendation. See CONFLICTS.md CRITICAL 5. R13 without V8 is a remote-code-execution channel and is not a valid configuration in any production or shared environment.
 - **Required by** **V9 Bounded Execution** — the agent loop must be capped; unbounded R13 is anti-pattern **A3**.
 - **Pairs with** **V14 Trajectory Logging** — R13 logs are also security / audit artefacts because the model is emitting executable code.

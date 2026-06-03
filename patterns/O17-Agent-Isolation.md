@@ -20,7 +20,7 @@ A long-running agent session accumulates context: tool returns, partial drafts, 
 
 - **Attention dilution.** Modern long-context models do degrade with irrelevant tokens. A focused sub-task processed in a 100k-token accumulated context is empirically less reliable than the same sub-task processed in a clean 5k-token brief — the KV cache grows monotonically with the accumulated history, and each generation step queries all cached K-vectors at O(n²) cost, diluting attention over an increasingly large irrelevant context (mechanism 2, mechanism 3). Anthropic measured this directly: their multi-agent research system, where each sub-agent operates in its own context, outperformed a single-agent baseline by ~90% on internal research evaluations, with the gain "strongly linked to the ability to spread reasoning across multiple independent context windows" — a direct consequence of context bounding (mechanism 6).
 - **Context pollution.** Earlier tool returns or sibling sub-task outputs can mislead the sub-agent — irrelevant facts get treated as relevant, prior errors propagate, the sub-task quietly inherits the parent's frame. The sub-agent then optimises for the wrong thing.
-- **Cost and latency at scale.** Every token in the prefix is paid for on every call. If the parent has 80k tokens of history and a sub-task only needs a 3k-token brief, running the sub-task in the parent context pays 27× more per call than necessary — because prefill cost is quadratic in sequence length (mechanism 2), not linear.
+- **Cost and latency at scale.** Every token in the prefix is paid for on every call. If the parent has 80k tokens of history and a sub-task only needs a 3k-token brief, running the sub-task in the parent context pays 27$\times$ more per call than necessary — because prefill cost is quadratic in sequence length (mechanism 2), not linear.
 
 The obvious response is "compress the context before the sub-task" — that is what **K6 Context Compression** does. But compression keeps a *single shared* context: the parent loses information, every subsequent sub-task still sees the compressed digest, and parallel sub-tasks must share one window. The structural move that resolves all three failure modes at once is different: **don't compress, isolate**. Spawn the sub-agent in a separate context window. Pass it only what it needs. Throw the sub-agent's context away when it returns; keep only the result.
 
@@ -49,7 +49,7 @@ O17 is right when the sub-task's required inputs are enumerable, the parent's ac
 
 **1. Enumerability test.** Can you write down the sub-agent's full brief in under ~5k tokens (instructions + inputs + relevant context)? If yes, isolation is cheap and clean. If no — if you find yourself wanting to pass "and also everything the parent knows" — the sub-task is not self-contained; keep it in the parent or restructure into **O15 Agent Handoff** with a structured handoff package. Use as a hard test: if the brief cannot be written down, the sub-task is not isolated.
 
-**2. Context-bloat threshold.** Measure parent context size at the moment of delegation. **Parent ≥ 30% of window** with a sub-task that only needs a small fraction — isolation pays for itself immediately in attention quality and per-call cost. **Parent ≥ 70% of window** — isolation is mandatory; running the sub-task in-context risks overflow.
+**2. Context-bloat threshold.** Measure parent context size at the moment of delegation. **Parent $\geq$ 30% of window** with a sub-task that only needs a small fraction — isolation pays for itself immediately in attention quality and per-call cost. **Parent $\geq$ 70% of window** — isolation is mandatory; running the sub-task in-context risks overflow.
 
 **3. Parallelism check.** Will two or more sub-tasks run concurrently? Parallel execution *requires* separate contexts — O17 is not optional, it is implied by **O4 Parallelization**. Sequential sub-tasks can in principle share the parent context, but lose the cost and focus benefits of isolation.
 
@@ -95,13 +95,13 @@ If any condition fails, the alternatives are: **O1 Single Agent** if everything 
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Parent (Spawning) Agent** | the decision to delegate, and what the sub-agent gets | parent context + sub-task → spawn call (brief) | dump its full context into the sub-agent — that re-introduces every failure mode the pattern exists to prevent. |
-| **Brief Builder** | constructing the sub-agent's starting context | sub-task spec + selected parent state → minimal, self-contained brief | guess what the sub-agent might need "just in case"; under-isolation is recoverable, over-stuffing destroys the pattern. |
-| **Sub-Agent** | executing the sub-task in its fresh context | brief → result (and only the result) | persist anything beyond its lifetime, or rely on parent-visible state not passed in the brief; it sees only what the brief contains. |
-| **Result Channel** | the narrow return surface | sub-agent's intermediate work → compact, structured result | leak the sub-agent's full transcript into the parent; only the contracted result returns. The contract is the discipline. |
-| **Spawn Guard** *(V9)* | the cap on sub-agent count and depth | spawn requests → admit or deny | be optional. Without it, the pattern is **A3 Uncontrolled Recursion** with multipliers. |
+| **Parent (Spawning) Agent** | the decision to delegate, and what the sub-agent gets | parent context + sub-task $\to$ spawn call (brief) | dump its full context into the sub-agent — that re-introduces every failure mode the pattern exists to prevent. |
+| **Brief Builder** | constructing the sub-agent's starting context | sub-task spec + selected parent state $\to$ minimal, self-contained brief | guess what the sub-agent might need "just in case"; under-isolation is recoverable, over-stuffing destroys the pattern. |
+| **Sub-Agent** | executing the sub-task in its fresh context | brief $\to$ result (and only the result) | persist anything beyond its lifetime, or rely on parent-visible state not passed in the brief; it sees only what the brief contains. |
+| **Result Channel** | the narrow return surface | sub-agent's intermediate work $\to$ compact, structured result | leak the sub-agent's full transcript into the parent; only the contracted result returns. The contract is the discipline. |
+| **Spawn Guard** *(V9)* | the cap on sub-agent count and depth | spawn requests $\to$ admit or deny | be optional. Without it, the pattern is **A3 Uncontrolled Recursion** with multipliers. |
 
 The defining responsibility split is **Brief Builder** vs **Sub-Agent**: the Brief Builder decides *what context exists* for the sub-task; the Sub-Agent reasons over it. That separation is what makes the isolation real — if the sub-agent could pull context from the parent on demand, there is no isolation, only the illusion of it.
 

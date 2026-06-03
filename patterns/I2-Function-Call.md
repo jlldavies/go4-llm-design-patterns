@@ -42,40 +42,40 @@ Use I2 when:
 
 Do not use I2 when:
 
-- the action is fully determined by code and no LLM judgment is needed → use **I1 Direct API Call** (and remember I2's execution step *is* I1 internally);
-- the tool set is large (> ~15) or must be **shared across multiple agents or clients** → use **I3 MCP Server** (often I3 + I2 hybrid: MCP for discovery, function-call surface for invocation);
-- the tool already has a **battle-tested CLI** and you want zero schema-token overhead → use **I4 CLI Invocation**;
+- the action is fully determined by code and no LLM judgment is needed $\to$ use **I1 Direct API Call** (and remember I2's execution step *is* I1 internally);
+- the tool set is large (> ~15) or must be **shared across multiple agents or clients** $\to$ use **I3 MCP Server** (often I3 + I2 hybrid: MCP for discovery, function-call surface for invocation);
+- the tool already has a **battle-tested CLI** and you want zero schema-token overhead $\to$ use **I4 CLI Invocation**;
 - the agent's action selection needs to interleave with reasoning over tool *outputs* turn by turn — I2 is the *substrate* for that, but the reasoning loop wrapping it is **R4 ReAct** or **R13 CodeAct**;
-- the action is privileged (financial, irreversible, externally-visible) and an LLM should not unilaterally trigger it → keep I2 for the *proposal* and gate execution with **V1 Human-in-the-Loop**.
+- the action is privileged (financial, irreversible, externally-visible) and an LLM should not unilaterally trigger it $\to$ keep I2 for the *proposal* and gate execution with **V1 Human-in-the-Loop**.
 
 ## Decision Criteria
 
 I2 is right when the LLM must interpret natural language to choose the action *and* the tool count is small enough that schemas fit comfortably in the prompt.
 
 **1. Tool count.** How many tools does this agent need?
-- **1–5** → **I2** is the obvious choice; native API support, low schema cost, simple wiring.
-- **5–15** → **I2** still works; watch the schema-token footprint and selection accuracy.
-- **15–20** → boundary zone; consider **I3 MCP Server** with dynamic tool injection, or split into sub-agents via **O17 Agent Isolation**.
-- **20+** → **I3** with a gateway / dynamic discovery is mandatory; I2's flat schema list collapses selection accuracy (43% → 14% degradation reported at high counts; see V13).
+- **1–5** $\to$ **I2** is the obvious choice; native API support, low schema cost, simple wiring.
+- **5–15** $\to$ **I2** still works; watch the schema-token footprint and selection accuracy.
+- **15–20** $\to$ boundary zone; consider **I3 MCP Server** with dynamic tool injection, or split into sub-agents via **O17 Agent Isolation**.
+- **20+** $\to$ **I3** with a gateway / dynamic discovery is mandatory; I2's flat schema list collapses selection accuracy (43% $\to$ 14% degradation reported at high counts; see V13).
 
 **2. Schema footprint.** Sum the JSON Schema bytes of every tool description and parameter spec, then measure as a fraction of the model's context window.
-- **< 5%** of context → safe, I2 is fine.
-- **5–10%** → cap the tool set; tighten descriptions; consider per-tool prompt caching (Anthropic `cache_control`).
-- **> 10%** → V13's hard threshold; move to I3 with lazy schema loading, or restructure with O17.
+- **< 5%** of context $\to$ safe, I2 is fine.
+- **5–10%** $\to$ cap the tool set; tighten descriptions; consider per-tool prompt caching (Anthropic `cache_control`).
+- **> 10%** $\to$ V13's hard threshold; move to I3 with lazy schema loading, or restructure with O17.
 
 **Schema tokens are in seq_len on every generation step (mechanism 2 + mechanism 3).** Tool schemas are part of the KV cache for the entire request. Unlike human working memory, the model does not selectively activate tool schemas only when relevant — every generated Q vector performs a full similarity search over all cached K vectors, including all schema tokens, on every generation step. A 5,000-token tool schema list adds 5,000 K-vector comparisons per generated token, compounding across the entire response length. This is not a flat 5,000-token cost consumed once — it is a per-generation-step compute overhead that scales with response length. **Tool Budget pattern (V13)** addresses this directly: trim schemas aggressively, expose only the tools relevant to the current task, and use I3 MCP Server with dynamic tool discovery for large catalogues rather than loading all schemas statically. The practical implication: a 20-tool static schema list with 200 tokens each costs 4,000 K-vector comparisons per generated token; a dynamically loaded 3-tool schema costs 600.
 
 **3. Sharing scope.** Will these tools be reused across other agents or other clients?
-- **No, one agent owns them** → **I2** — the simpler deploy.
-- **Yes, multiple agents or external clients** → **I3 MCP Server** earns its standardisation cost.
+- **No, one agent owns them** $\to$ **I2** — the simpler deploy.
+- **Yes, multiple agents or external clients** $\to$ **I3 MCP Server** earns its standardisation cost.
 
 **4. Determinism / latency budget.** Is the LLM's judgment actually needed on this call?
-- **Yes** (natural-language input drives the choice) → **I2**.
-- **No** (code already knows what to call) → **I1 Direct API Call**; routing through I2 just adds latency and a small malformed-argument rate.
+- **Yes** (natural-language input drives the choice) $\to$ **I2**.
+- **No** (code already knows what to call) $\to$ **I1 Direct API Call**; routing through I2 just adds latency and a small malformed-argument rate.
 
 **5. Schema conformance discipline.** Are you willing to enable strict decoding (`strict: true` on OpenAI / Anthropic) and treat schema validation failures as bugs, not warnings?
-- **Yes** → I2 delivers near-zero malformed-argument rates; pairs cleanly with **V20 Schema Validation**.
-- **No** → expect a long tail of subtly wrong arguments and the silent failures that come with them; either commit to strict, or move the routing back into deterministic code.
+- **Yes** $\to$ I2 delivers near-zero malformed-argument rates; pairs cleanly with **V20 Schema Validation**.
+- **No** $\to$ expect a long tail of subtly wrong arguments and the silent failures that come with them; either commit to strict, or move the routing back into deterministic code.
 
 **Quick test — I2 is the right pattern when:**
 
@@ -123,15 +123,15 @@ If routing is unnecessary, choose **I1 Direct API Call**. If the tool set has ou
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Tool Schema** | the typed contract for one function (name, description, parameter JSON Schema) | tool definition → API-ready schema | hide ambiguity in the description. The description is the *only* thing the LLM uses to choose between tools; "Searches stuff" is the most common cause of wrong-tool selection. |
-| **Tool Registry** | the agent's full set of available tools and the dispatcher mapping name → handler | tool definitions → assembled `tools=[...]` array + handler map | grow without a budget (V13). Tools added on autopilot are A12 Tool Proliferation. |
-| **LLM Router** | choosing which tool(s) to invoke and with what arguments | user message + tools[] + history → `tool_call` blocks or plain text | execute the call. Selection only; if a model could also execute, it would have no incentive to ever say "no tool needed". |
-| **Schema Validator** | enforcing that every emitted `tool_call` conforms to its declared schema before execution | `tool_call` → validated args, or rejection | trust the provider's claim of `strict` blindly on long-tail parameter shapes; validate again at the seam — providers and SDKs version-skew. |
-| **Tool Dispatcher** | routing the validated `tool_call` to the right handler | `tool_call` (name + args) → handler invocation | embed business logic. Lookup and dispatch only; the handler does the work. |
-| **Tool Executor** | actually performing the external action (an **I1 Direct API Call** internally) | validated args → raw result or error | re-route. It executes the named action; it does not second-guess the LLM's choice. |
-| **Result Injector** | shaping the tool result and returning it to the LLM's context as a `tool_result` block | raw result → token-shaped `tool_result` | leak transport noise into the LLM's context — that bloats tokens, exposes implementation, and (V6) widens the prompt-injection surface. |
+| **Tool Schema** | the typed contract for one function (name, description, parameter JSON Schema) | tool definition $\to$ API-ready schema | hide ambiguity in the description. The description is the *only* thing the LLM uses to choose between tools; "Searches stuff" is the most common cause of wrong-tool selection. |
+| **Tool Registry** | the agent's full set of available tools and the dispatcher mapping name $\to$ handler | tool definitions $\to$ assembled `tools=[...]` array + handler map | grow without a budget (V13). Tools added on autopilot are A12 Tool Proliferation. |
+| **LLM Router** | choosing which tool(s) to invoke and with what arguments | user message + tools[] + history $\to$ `tool_call` blocks or plain text | execute the call. Selection only; if a model could also execute, it would have no incentive to ever say "no tool needed". |
+| **Schema Validator** | enforcing that every emitted `tool_call` conforms to its declared schema before execution | `tool_call` $\to$ validated args, or rejection | trust the provider's claim of `strict` blindly on long-tail parameter shapes; validate again at the seam — providers and SDKs version-skew. |
+| **Tool Dispatcher** | routing the validated `tool_call` to the right handler | `tool_call` (name + args) $\to$ handler invocation | embed business logic. Lookup and dispatch only; the handler does the work. |
+| **Tool Executor** | actually performing the external action (an **I1 Direct API Call** internally) | validated args $\to$ raw result or error | re-route. It executes the named action; it does not second-guess the LLM's choice. |
+| **Result Injector** | shaping the tool result and returning it to the LLM's context as a `tool_result` block | raw result $\to$ token-shaped `tool_result` | leak transport noise into the LLM's context — that bloats tokens, exposes implementation, and (V6) widens the prompt-injection surface. |
 
 Seven narrow responsibilities, all but one in code; the LLM occupies exactly one of them. The pattern's reliability comes from keeping the LLM strictly inside the *Router* role and refusing to let any of the others drift back into prose-and-prayer.
 
@@ -169,7 +169,7 @@ Two collaborations matter especially. **With R4 ReAct:** I2 is the action substr
 - **Enable strict mode** wherever the provider offers it — OpenAI `strict: true`, Anthropic `strict`. It is the single highest-leverage knob on argument quality.
 - **Write tool descriptions from the model's perspective**, not the developer's. State *when to use this tool* and *when not to* — the negative half is what disambiguates against the other tools in the registry.
 - **Include a one-line example** in the description for any tool with a non-obvious parameter ("query: a search phrase like 'pricing policy 2024', not a question").
-- **Measure schema tokens** before deploying; tokens per tool × count must fit comfortably under V13's footprint threshold (< 10% of context).
+- **Measure schema tokens** before deploying; tokens per tool $\times$ count must fit comfortably under V13's footprint threshold (< 10% of context).
 - **Cache the tool prefix** where the provider supports it (Anthropic `cache_control`) — tool lists rarely change between calls, so prefix caching is free latency.
 - **Validate twice**: enable provider-side strict decoding, *and* run a JSON Schema validator on arrival (V20). Providers version-skew.
 - **Do not let a tool return a string the next prompt assumes is structured** — shape the `tool_result` payload deliberately; strip transport noise (V11 Error Compaction on errors).
@@ -235,7 +235,7 @@ If the agent is multi-provider, a library like **Instructor** (Pydantic-backed) 
 - **OpenAI Python SDK** — [`github.com/openai/openai-python`](https://github.com/openai/openai-python) — the reference function-calling client; supports `tools=[]` and `strict: true` natively against the Chat Completions and Responses APIs.
 - **Anthropic Python SDK** — [`github.com/anthropics/anthropic-sdk-python`](https://github.com/anthropics/anthropic-sdk-python) — reference tool-use client for Claude; supports `tools=[]`, `tool_use` / `tool_result` blocks, and `cache_control` for prefix caching of tool definitions.
 - **Google Gen AI SDK** — [`github.com/googleapis/python-genai`](https://github.com/googleapis/python-genai) — the official Gemini SDK; supports function calling with parallel and compositional invocation.
-- **Vercel AI SDK** — [`github.com/vercel/ai`](https://github.com/vercel/ai) — TypeScript toolkit with a provider-neutral `tool()` primitive and a `ToolLoopAgent` that closes the call → execute → return loop for you; runs against OpenAI, Anthropic, Gemini, and others.
+- **Vercel AI SDK** — [`github.com/vercel/ai`](https://github.com/vercel/ai) — TypeScript toolkit with a provider-neutral `tool()` primitive and a `ToolLoopAgent` that closes the call $\to$ execute $\to$ return loop for you; runs against OpenAI, Anthropic, Gemini, and others.
 - **Instructor** — [`github.com/567-labs/instructor`](https://github.com/567-labs/instructor) — Pydantic-backed structured output / tool-use across 15+ providers; the cleanest way to land typed arguments from a function-call without provider-specific glue.
 - **LangChain `bind_tools`** — [`github.com/langchain-ai/langchain`](https://github.com/langchain-ai/langchain) — the framework-level abstraction for binding a tool list to any provider; useful if already in LangChain, heavier than necessary if not.
 - **JSON Schema (2020-12)** — [`json-schema.org/specification`](https://json-schema.org/specification) — the schema dialect every major provider uses for tool definitions; the underlying contract format.

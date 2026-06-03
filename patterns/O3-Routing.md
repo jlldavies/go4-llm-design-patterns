@@ -44,9 +44,9 @@ Do not use Routing when:
 
 O3 is right when inputs split into distinct categories, a specialist beats a generalist on at least one, and the routes are enumerable at design time.
 
-**1. Measure category separation.** On a labelled sample of historical inputs, can the categories be labelled with ≥ 90% inter-annotator agreement? Below ~80%, the categories are not crisp enough; the classifier will inherit the ambiguity. Fallback: collapse to **O1 Single Agent** with a stronger generalist prompt, or move the resolution into a downstream **O5 Evaluator-Optimizer** pass.
+**1. Measure category separation.** On a labelled sample of historical inputs, can the categories be labelled with $\geq$ 90% inter-annotator agreement? Below ~80%, the categories are not crisp enough; the classifier will inherit the ambiguity. Fallback: collapse to **O1 Single Agent** with a stronger generalist prompt, or move the resolution into a downstream **O5 Evaluator-Optimizer** pass.
 
-**2. Measure the specialist lift.** For each candidate category, build a category-specific handler and a generalist handler; compare quality on held-out inputs. If the specialist gives a measurable lift (typically ≥ 5–10pp on the category's primary metric), the route earns its place. If no category clears the bar, fall back to **O1**.
+**2. Measure the specialist lift.** For each candidate category, build a category-specific handler and a generalist handler; compare quality on held-out inputs. If the specialist gives a measurable lift (typically $\geq$ 5–10pp on the category's primary metric), the route earns its place. If no category clears the bar, fall back to **O1**.
 
 **3. Pick the classifier.** Three implementations, in increasing flexibility and cost:
 - **Rule-based** (regex, keyword, deterministic feature) — sub-millisecond, free, brittle. Good when categories carry obvious surface signals.
@@ -56,12 +56,12 @@ If the classifier itself is wrong > 5% of the time on held-out data, the routing
 
 **4. Always define an `other` route.** A miscategorised input that falls into the wrong specialist handler is a worse failure than one that lands in a deliberate fallback. The `other` / `unknown` route should escalate to a generalist handler, a human, or a clarification prompt — never to the closest-matching specialist by default.
 
-**5. Cost the routing layer.** Total per-request cost ≈ classifier cost + chosen handler cost. If the classifier is a large LLM call but the routed handlers are cheap, the router dominates spend and a smaller classifier (embedding or rule-based) likely pays. If routing accuracy matters more than cost, the LLM classifier earns its tokens.
+**5. Cost the routing layer.** Total per-request cost $\approx$ classifier cost + chosen handler cost. If the classifier is a large LLM call but the routed handlers are cheap, the router dominates spend and a smaller classifier (embedding or rule-based) likely pays. If routing accuracy matters more than cost, the LLM classifier earns its tokens.
 
 **Quick test — O3 is the right pattern when:**
 
-- inputs are categorisable with ≥ 90% inter-annotator agreement, *and*
-- at least one category shows ≥ 5pp specialist lift over a generalist baseline, *and*
+- inputs are categorisable with $\geq$ 90% inter-annotator agreement, *and*
+- at least one category shows $\geq$ 5pp specialist lift over a generalist baseline, *and*
 - the route set is enumerable at design time (with an explicit `other` route), *and*
 - routing decisions need to be logged or used to control cost.
 
@@ -84,14 +84,14 @@ If categories are too fuzzy, fall back to **O1** with a stronger generalist or l
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Classifier** | the routing decision | raw input → route label | answer the input or look at handler output; a classifier that can also generate has no incentive to admit uncertainty and will overfit to the `default` route. |
-| **Route Registry** | the enumerable set of valid routes and their handlers | — → `{label: handler}` table | accept new routes silently at runtime; route changes are a deployment event, not a runtime mutation. |
-| **Dispatcher** | invoking the handler the Classifier named | route label + input → handler invocation | reinterpret the label or pick a different route; if the Classifier's label is invalid, it must go to `other`, not be quietly corrected. |
-| **Specialist Handler(s)** | producing the answer for a specific input category | input → answer | handle inputs outside their category; a specialist that tries to be useful on the wrong input erodes the value of routing. Each is typically an **O1** instance. |
-| **Fallback / `other` route** | catching inputs that do not fit any defined route | input → answer or escalation | be the dumping ground for low-confidence routes — that is misuse; the Classifier should send genuinely-ambiguous inputs here, not borderline ones it should have handled. |
-| **Routing Logger** *(V14)* | recording each routing decision with its inputs and outcomes | input + label + handler outcome → audit record | be optional. Without it, misrouting is undebuggable and drift is invisible. |
+| **Classifier** | the routing decision | raw input $\to$ route label | answer the input or look at handler output; a classifier that can also generate has no incentive to admit uncertainty and will overfit to the `default` route. |
+| **Route Registry** | the enumerable set of valid routes and their handlers | — $\to$ `{label: handler}` table | accept new routes silently at runtime; route changes are a deployment event, not a runtime mutation. |
+| **Dispatcher** | invoking the handler the Classifier named | route label + input $\to$ handler invocation | reinterpret the label or pick a different route; if the Classifier's label is invalid, it must go to `other`, not be quietly corrected. |
+| **Specialist Handler(s)** | producing the answer for a specific input category | input $\to$ answer | handle inputs outside their category; a specialist that tries to be useful on the wrong input erodes the value of routing. Each is typically an **O1** instance. |
+| **Fallback / `other` route** | catching inputs that do not fit any defined route | input $\to$ answer or escalation | be the dumping ground for low-confidence routes — that is misuse; the Classifier should send genuinely-ambiguous inputs here, not borderline ones it should have handled. |
+| **Routing Logger** *(V14)* | recording each routing decision with its inputs and outcomes | input + label + handler outcome $\to$ audit record | be optional. Without it, misrouting is undebuggable and drift is invisible. |
 
 The Classifier's separation from the Handlers is the pattern's load-bearing wall. Collapsing them — a generalist handler that "also decides what kind of question this is" — recreates the God-Prompt that motivated the pattern.
 
@@ -141,7 +141,7 @@ An input arrives. The Classifier produces a route label, drawn from the Route Re
 
 | # | Step | Kind | Draws on |
 |---|---|---|---|
-| 1 | Classify the input → route label + confidence | `code` *or* `LLM (or rule)` | Classifier session (if LLM) |
+| 1 | Classify the input $\to$ route label + confidence | `code` *or* `LLM (or rule)` | Classifier session (if LLM) |
 | 2 | Look up handler from Route Registry | `code` | |
 | 3 | If label invalid or confidence < threshold, switch to `other` | `code` | |
 | 4 | Dispatch input to chosen handler | `code` | O1 / O2 |

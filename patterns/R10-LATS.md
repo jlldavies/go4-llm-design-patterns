@@ -4,7 +4,7 @@
 
 **Also Known As:** LATS, MCTS for LLM Agents, Monte Carlo Agent Search. (LATS unifies ReAct (R4) + Tree of Thoughts (R9) + Reflexion (R7) under MCTS — see Related Patterns.)
 
-**Classification:** Category III — Reasoning · Band III-B Search-structured · the formal MCTS variant of branching reasoning — sibling of R9 ToT, strictly more powerful and roughly 10× more expensive.
+**Classification:** Category III — Reasoning · Band III-B Search-structured · the formal MCTS variant of branching reasoning — sibling of R9 ToT, strictly more powerful and roughly 10$\times$ more expensive.
 
 ---
 
@@ -18,7 +18,7 @@ R4 ReAct walks one trajectory; if a step is wrong, the trajectory limps to a wro
 
 The move that distinguishes LATS is **value backpropagation** under a principled exploration/exploitation rule. MCTS, the algorithm that powered AlphaGo, maintains for every node a visit count and a running value estimate; at each step it descends the tree by the UCB rule (favour high-value *and* under-explored branches); it expands a leaf, simulates forward to a terminal, observes the outcome, and **propagates that outcome up to every ancestor**. After enough iterations, the value estimates concentrate on the best subtrees and the agent commits to the best-explored action from the root. LATS (Zhou et al., 2023) ports this algorithm onto LLM agent trajectories: each tree node is a state (a prefix of Thought–Action–Observation steps); the LLM proposes actions (mechanism 7 — each proposal is a stochastic sample from the model's distribution), scores states, and — when a simulation fails — emits a Reflexion-style verbal critique that is folded into the value update.
 
-The pay-off is genuinely new behaviour, not just more compute. ToT can prune a bad branch but cannot *learn* across simulations that "this whole region of the tree is unpromising"; LATS does, because backpropagation makes every rollout inform every ancestor. ToT cannot backtrack to a node it already explored and *try the next-best child* — it has no statistics to make that choice; LATS does. The cost is high: 5–20× more LLM calls than ToT, ~50–100× more than ReAct. So R10's place in the language is narrow but real — the pattern of last resort, used when correctness on a hard problem is worth the call budget.
+The pay-off is genuinely new behaviour, not just more compute. ToT can prune a bad branch but cannot *learn* across simulations that "this whole region of the tree is unpromising"; LATS does, because backpropagation makes every rollout inform every ancestor. ToT cannot backtrack to a node it already explored and *try the next-best child* — it has no statistics to make that choice; LATS does. The cost is high: 5–20$\times$ more LLM calls than ToT, ~50–100$\times$ more than ReAct. So R10's place in the language is narrow but real — the pattern of last resort, used when correctness on a hard problem is worth the call budget.
 
 ## Applicability
 
@@ -26,7 +26,7 @@ Use LATS when:
 
 - the task is hard enough that ReAct (R4), Reflexion (R7), and Tree of Thoughts (R9) have all been tried and demonstrably fail;
 - the task admits a useful value signal — a verifier, a test suite, a programmatic correctness check, or at minimum a reliable LLM critic — that can score partial trajectories;
-- correctness or quality is worth roughly 10× ToT's cost (10–100× ReAct's);
+- correctness or quality is worth roughly 10$\times$ ToT's cost (10–100$\times$ ReAct's);
 - the task is bounded enough that a tree with depth in the tens and branching factor of 3–5 can plausibly contain a solution.
 
 Do not use when:
@@ -39,16 +39,16 @@ Do not use when:
 
 ## Decision Criteria
 
-R10 is right when ToT-class search is genuinely insufficient, a value signal exists, and the budget for ~10× more LLM calls is justified by the quality of the answer.
+R10 is right when ToT-class search is genuinely insufficient, a value signal exists, and the budget for ~10$\times$ more LLM calls is justified by the quality of the answer.
 
 **1. Did the simpler pattern already fail?** Run R4, then R7, then R9 on a held-out hard set. If any of them solves the task at acceptable cost, stop — that is the right pattern. Only when all three plateau below the required quality bar does R10 become worth considering. Falling back upward: if R10 is in question and R9 is untested, **test R9 first**.
 
 **2. Does a value signal exist?** MCTS needs to score trajectories — partial and complete.
-- *Strong signal* (executable verifier: test suite, type check, simulator) → LATS is appropriate.
-- *Medium signal* (LLM-as-judge against a rubric, V15) → LATS works but is noisier; calibrate the critic carefully.
-- *No signal* (no verifier, no rubric) → LATS degenerates to UCB over random; fall back to R9 with heuristic pruning, or R7 if a retry signal exists.
+- *Strong signal* (executable verifier: test suite, type check, simulator) $\to$ LATS is appropriate.
+- *Medium signal* (LLM-as-judge against a rubric, V15) $\to$ LATS works but is noisier; calibrate the critic carefully.
+- *No signal* (no verifier, no rubric) $\to$ LATS degenerates to UCB over random; fall back to R9 with heuristic pruning, or R7 if a retry signal exists.
 
-**3. Cost the call budget.** Typical LATS uses ≈ (depth × branching × rollouts) LLM calls per task; in published reports that is 50–300 calls per problem. Compare against R9 (~20–50) and R4 (~5–15). If the per-task budget is < ~50 LLM calls, LATS is out of scope — use R9.
+**3. Cost the call budget.** Typical LATS uses $\approx$ (depth $\times$ branching $\times$ rollouts) LLM calls per task; in published reports that is 50–300 calls per problem. Compare against R9 (~20–50) and R4 (~5–15). If the per-task budget is < ~50 LLM calls, LATS is out of scope — use R9.
 
 **4. Search space shape.** LATS suits trees with branching factor 3–8 and depth 5–30. Below that, exhaustive enumeration is cheaper. Above that, even MCTS will not concentrate value estimates within the budget — re-frame the task or apply R11 Buffer of Thoughts to seed templates.
 
@@ -58,7 +58,7 @@ R10 is right when ToT-class search is genuinely insufficient, a value signal exi
 
 - R4 / R7 / R9 have been tried and demonstrably plateau below the quality bar, *and*
 - a usable value signal exists (verifier, test suite, or calibrated LLM judge), *and*
-- the per-task call budget can absorb ~10× R9's cost, *and*
+- the per-task call budget can absorb ~10$\times$ R9's cost, *and*
 - the search tree is shaped for MCTS (branching 3–8, depth 5–30), *and*
 - V9 bounds are in place.
 
@@ -107,16 +107,16 @@ If any condition fails, choose the cheaper sibling: **R9 ToT** when branching he
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
 | **Tree Store** | the search tree: nodes, edges, visit counts, value estimates | reads/writes from the controller | persist beyond one task; LATS state is per-task scratch, not memory (that is K10 / K12). |
-| **UCB Selector** | the descent decision at each iteration | tree + UCB constant `c` → next leaf to expand | use raw value alone (collapses to greedy) or raw visits alone (collapses to BFS); the UCB *combination* is the pattern. |
-| **Action Generator (LLM)** | proposing candidate next actions at an expansion node | current state (prefix of thoughts/actions/observations) → k candidate actions | propose the same action across siblings (kills diversity); the prompt must enforce variation. |
-| **Value Estimator (LLM)** | scoring a state's promise (and rolled-out trajectory's outcome) | state or trajectory → scalar value in `[0, 1]` | be the same session as the Action Generator — value estimation must be a separate setup or the scorer rationalises its own proposal. |
-| **Simulator** | rolling forward from an expanded node to a terminal | state + policy → terminal trajectory + outcome | exceed the per-rollout step cap (V9) — an unbounded simulation defeats the budget. |
-| **Reflection Critic (LLM, optional)** | verbal post-mortem on a failed rollout | failed trajectory + outcome → verbal critique folded into the value update | rewrite the tree structure; reflections inform values, they do not edit branches. |
-| **Backpropagator** | propagating the rollout outcome up to root | leaf outcome → updated values & visits on every ancestor | re-evaluate any node with the LLM during the update; backprop is pure arithmetic over already-collected signals. |
-| **Controller / Bound (code, V9)** | the outer loop: iterate, terminate, commit | configured budget → final answer trajectory | run without a hard cap — every dimension (calls, nodes, time, plateau) must be bounded. |
+| **UCB Selector** | the descent decision at each iteration | tree + UCB constant `c` $\to$ next leaf to expand | use raw value alone (collapses to greedy) or raw visits alone (collapses to BFS); the UCB *combination* is the pattern. |
+| **Action Generator (LLM)** | proposing candidate next actions at an expansion node | current state (prefix of thoughts/actions/observations) $\to$ k candidate actions | propose the same action across siblings (kills diversity); the prompt must enforce variation. |
+| **Value Estimator (LLM)** | scoring a state's promise (and rolled-out trajectory's outcome) | state or trajectory $\to$ scalar value in `[0, 1]` | be the same session as the Action Generator — value estimation must be a separate setup or the scorer rationalises its own proposal. |
+| **Simulator** | rolling forward from an expanded node to a terminal | state + policy $\to$ terminal trajectory + outcome | exceed the per-rollout step cap (V9) — an unbounded simulation defeats the budget. |
+| **Reflection Critic (LLM, optional)** | verbal post-mortem on a failed rollout | failed trajectory + outcome $\to$ verbal critique folded into the value update | rewrite the tree structure; reflections inform values, they do not edit branches. |
+| **Backpropagator** | propagating the rollout outcome up to root | leaf outcome $\to$ updated values & visits on every ancestor | re-evaluate any node with the LLM during the update; backprop is pure arithmetic over already-collected signals. |
+| **Controller / Bound (code, V9)** | the outer loop: iterate, terminate, commit | configured budget $\to$ final answer trajectory | run without a hard cap — every dimension (calls, nodes, time, plateau) must be bounded. |
 
 Eight responsibilities, three of them LLM-backed. The split between Action Generator and Value Estimator is the structural move that separates LATS from R9 ToT — ToT collapses both into a single "judge the next thoughts" prompt; LATS keeps them as different sessions so that value cannot be inflated by the proposer.
 
@@ -133,8 +133,8 @@ The Controller initialises the Tree Store with the root state and enters the bou
 - Reflection (R7-style) folds in cleanly as a value signal, unifying three reasoning patterns under one search.
 
 **Costs**
-- 5–20× more LLM calls than R9 ToT, 50–100× more than ReAct.
-- Latency is heavy: even with parallel expansion, depth × rollouts dominates.
+- 5–20$\times$ more LLM calls than R9 ToT, 50–100$\times$ more than ReAct.
+- Latency is heavy: even with parallel expansion, depth $\times$ rollouts dominates.
 - Implementation complexity: tree management, UCB tuning, parallel simulation, bound enforcement — much more code than R4 / R7 / R9.
 
 **Risks and failure modes**
@@ -150,7 +150,7 @@ The Controller initialises the Tree Store with the root state and enters the bou
 - Tune the UCB exploration constant `c` empirically — too low and search becomes greedy; too high and it becomes random. Start at √2 (the textbook default) and adjust by measuring how much of the budget lands on the top-value subtree at termination.
 - Run expansion in parallel: the k child candidates from one node can be generated and value-estimated concurrently. This is the only practical way to keep latency tolerable.
 - Prefix caching (mechanism 5) is the single largest LATS cost lever. LATS trajectories share prefixes naturally: all paths from root share at least the root state; siblings at the same depth share the full path to their parent. At Anthropic pricing (5-min TTL, ~10% of normal input cost on cache hit, minimum 1024 tokens), a 2000-token shared prefix read 50 times across a single LATS run saves ~90% of that prefix's input cost per call. Structure prompts so the stable path-to-current-node appears as a single contiguous prefix before any variable content.
-- Use the strongest available model for the Value Estimator (mechanism 8 — per-token compute differs roughly 10× between 7B and 70B models; value-estimation accuracy caps search quality and a stronger model here compounds over every subsequent UCB decision). The Action Generator can be smaller — diversity matters more than depth there.
+- Use the strongest available model for the Value Estimator (mechanism 8 — per-token compute differs roughly 10$\times$ between 7B and 70B models; value-estimation accuracy caps search quality and a stronger model here compounds over every subsequent UCB decision). The Action Generator can be smaller — diversity matters more than depth there.
 - Add a *no-improvement plateau* bound: terminate after K rollouts without the best-value path changing. Often half the budget is wasted polishing an already-converged answer.
 - If a verifier exists (test suite, type-checker, simulator), prefer it over LLM scoring at the leaves. LATS's quality cap is the value signal's quality.
 - Log every rollout (V14 Trajectory Logging) — replaying the tree is the only practical way to debug a misbehaving LATS run.
@@ -223,7 +223,7 @@ The Action Generator and Value Estimator **must be separate sessions**, even whe
 
 ## Related Patterns
 
-- **Sibling of** R9 Tree of Thoughts — both branch and evaluate; LATS adds visit-count statistics, UCB selection, and full value backpropagation. R10 is strictly more powerful and roughly 10× more expensive. Default to R9; escalate to R10 only when R9 plateaus.
+- **Sibling of** R9 Tree of Thoughts — both branch and evaluate; LATS adds visit-count statistics, UCB selection, and full value backpropagation. R10 is strictly more powerful and roughly 10$\times$ more expensive. Default to R9; escalate to R10 only when R9 plateaus.
 - **Unifies** R4 ReAct + R7 Reflexion + R9 Tree of Thoughts — the original LATS paper's framing. The inner step is R4; the verbal critique on failure is R7; the tree shape is R9. R10's contribution is the MCTS algorithm that ties them together.
 - **Required by** V9 Bounded Execution — non-negotiable. MCTS on an LLM without strict bounds is the catalogue's most expensive single failure mode.
 - **Pairs with** V14 Trajectory Logging — the only practical way to debug a misbehaving LATS run is to replay the tree.

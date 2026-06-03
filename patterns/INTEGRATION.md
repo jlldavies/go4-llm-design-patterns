@@ -50,7 +50,7 @@ Patterns differ in *who routes* — code alone (I1), the LLM choosing from a sta
 - **I2 Function / Tool Call** — LLM selects from a JSON Schema catalogue defined in-agent.
 
 **VI-B — Standardised tool protocols.** The catalogue is discovered over a protocol, not hard-coded.
-- **I3 MCP Server** — tools published as MCP servers; discovered, authenticated, and invoked over JSON-RPC; the schema-cost ↔ ecosystem-richness tradeoff (CRITICAL 6 with V13).
+- **I3 MCP Server** — tools published as MCP servers; discovered, authenticated, and invoked over JSON-RPC; the schema-cost $\leftrightarrow$ ecosystem-richness tradeoff (CRITICAL 6 with V13).
 - **I4 CLI Invocation** — agent shells out to existing CLI binaries; zero schema tokens; the Unix-philosophy counterpart to I3.
 
 **VI-C — Inter-agent discovery and delegation.** The boundary is between whole agents, not between an agent and a tool.
@@ -62,7 +62,7 @@ Patterns differ in *who routes* — code alone (I1), the LLM choosing from a sta
 - **Category II — Knowledge patterns** — Integration brings external *capabilities* into the loop; Knowledge brings external *information* into the context.
 - **Category III — Reasoning patterns** — R4 ReAct and R13 CodeAct are reasoning patterns built directly on top of I2/I3/I4; the reasoning loop and the tool loop are the same loop.
 - **Category IV — Orchestration patterns** — O6 Orchestrator-Workers and O15 Agent Handoff are the in-system counterparts of I6's cross-system delegation; I5 is how O6 discovers workers it doesn't own.
-- **Category V — Reliability patterns** — V13 Tool Budget, V8 Tool Sandboxing, V6 Prompt Injection Shield, and V3 Rule of Two all attach directly to the integration layer; CRITICAL 6 (`CONFLICTS.md`) names the I3 ↔ V13 tradeoff as the defining cost question of the category.
+- **Category V — Reliability patterns** — V13 Tool Budget, V8 Tool Sandboxing, V6 Prompt Injection Shield, and V3 Rule of Two all attach directly to the integration layer; CRITICAL 6 (`CONFLICTS.md`) names the I3 $\leftrightarrow$ V13 tradeoff as the defining cost question of the category.
 
 *Both protocol layers — MCP and A2A — sit under the Linux Foundation's **Agentic AI Foundation (AAIF)**, the LF directed fund that anchors MCP, AGENTS.md, and Goose, with A2A as a sibling LF project under the same umbrella.*
 
@@ -119,7 +119,7 @@ Describe external capabilities as typed, JSON-Schema-wrapped functions; let the 
 
 ## I3 — MCP Server
 
-Deploy tools as standardised, discoverable Model Context Protocol servers — JSON-RPC 2.0 over stdio, SSE, or HTTP — so any compliant client can discover, authenticate, and invoke them without per-framework integration. Pays the **schema-cost ↔ ecosystem-richness** tradeoff explicitly: every connected server contributes its full `tools/list` schema to the context window before the agent has read the user's first message (GitHub MCP alone occupies ~40,000–55,000 tokens by 2026), so V13 Tool Budget becomes a hard constraint rather than a guideline. This is the defining cost tension of the category — CRITICAL 6 in `CONFLICTS.md` — and the reason the SEP-1576 proposal ("Mitigating Token Bloat in MCP") exists.
+Deploy tools as standardised, discoverable Model Context Protocol servers — JSON-RPC 2.0 over stdio, SSE, or HTTP — so any compliant client can discover, authenticate, and invoke them without per-framework integration. Pays the **schema-cost $\leftrightarrow$ ecosystem-richness** tradeoff explicitly: every connected server contributes its full `tools/list` schema to the context window before the agent has read the user's first message (GitHub MCP alone occupies ~40,000–55,000 tokens by 2026), so V13 Tool Budget becomes a hard constraint rather than a guideline. This is the defining cost tension of the category — CRITICAL 6 in `CONFLICTS.md` — and the reason the SEP-1576 proposal ("Mitigating Token Bloat in MCP") exists.
 
 **Full entry:** [`I3-MCP-Server.md`](I3-MCP-Server.md)
 
@@ -153,6 +153,6 @@ Delegate a task from one agent to another across a system, vendor, or organisati
 
 - **Agent Card path.** The current canonical well-known URL is `/.well-known/agent-card.json`. Older A2A drafts used `/.well-known/agent.json`; that path is deprecated and should not be relied upon in new implementations.
 - **AAIF.** "AAIF" in this category always refers to the Linux Foundation's **Agentic AI Foundation** — the LF directed fund that anchors MCP, AGENTS.md, and Goose, with A2A as a sibling LF project under the same umbrella. It is not the "Agentic AI Interoperability Framework" — that expansion appeared in some 2025 drafts and is incorrect.
-- **ACP → A2A.** The IBM/Red Hat Agent Communication Protocol was a competing variant in early 2025; it **merged into A2A under the Linux Foundation in August/September 2025**. New deployments target A2A; ACP is listed only for historical context.
+- **ACP $\to$ A2A.** The IBM/Red Hat Agent Communication Protocol was a competing variant in early 2025; it **merged into A2A under the Linux Foundation in August/September 2025**. New deployments target A2A; ACP is listed only for historical context.
 
-*Common integration anti-patterns: MCP-first without cost analysis, `shell=True` with LLM output, I2 overloading past V13, undiscovered agent dependencies, delegate-and-forget. The defining cost tension of the category — I3 ↔ V13 — is Appendix A (Conflicts) CRITICAL 6.*
+*Common integration anti-patterns: MCP-first without cost analysis, `shell=True` with LLM output, I2 overloading past V13, undiscovered agent dependencies, delegate-and-forget. The defining cost tension of the category — I3 $\leftrightarrow$ V13 — is Appendix A (Conflicts) CRITICAL 6.*

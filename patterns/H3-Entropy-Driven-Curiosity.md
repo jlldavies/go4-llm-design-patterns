@@ -18,7 +18,7 @@ Long-running reasoning loops fail in a characteristic way: they do not crash, th
 
 The problem is the absence of a *signal that the loop has stalled* and an *action coupled to the signal*. Without that pair, the agent has no way to know it is stuck and no mechanism to escape. Curiosity-driven reinforcement learning (Pathak et al., 2017; Burda et al., 2018) names the mechanism: an *intrinsic* reward that fires when the agent's predicted next-state distribution has collapsed, driving the policy toward novelty. The Theater of Mind framework (Shang, 2026) ports the mechanism to LLM agents: monitor the Shannon entropy of the workspace, and when it falls below a threshold, raise the generation temperature until diversity recovers. Berlyne's (1966) optimal-arousal theory and the noradrenergic system's locus-coeruleus function (a biological deadlock-breaker that releases noradrenaline when prefrontal activity becomes stereotyped) are the cognitive grounding for why the mechanism works.
 
-H3 is that pair, made into a pattern. A **Stagnation Detector** measures a diversity statistic over the recent output; a **Threshold Controller** fires on collapse; a **Novelty Injector** acts — temperature, prompt cue, or context pivot — then **decays** back to baseline. It is the *humanizing* counterpart to R17 Self-Consistency Voting, which deliberately *reduces* diversity by majority vote. The two are direct opposites and cannot be applied to the same task simultaneously — diversity injection during a voting round corrupts the vote, vote-by-majority during a stuck loop suppresses the only signal H3 has. This is **CRITICAL 4** in the conflict registry: H3 ⊕ R17.
+H3 is that pair, made into a pattern. A **Stagnation Detector** measures a diversity statistic over the recent output; a **Threshold Controller** fires on collapse; a **Novelty Injector** acts — temperature, prompt cue, or context pivot — then **decays** back to baseline. It is the *humanizing* counterpart to R17 Self-Consistency Voting, which deliberately *reduces* diversity by majority vote. The two are direct opposites and cannot be applied to the same task simultaneously — diversity injection during a voting round corrupts the vote, vote-by-majority during a stuck loop suppresses the only signal H3 has. This is **CRITICAL 4** in the conflict registry: H3 $\oplus$ R17.
 
 At the attention level, output-entropy collapse traces to the KV cache (mechanism 3): after K steps of near-identical reasoning, the KV cache contains nearly identical K vectors. Every new Q vector — itself shaped by the recent context — finds the same K neighbours via the learned bilinear attention form (mechanism 1), producing the same attention-weighted aggregate and the same generation distribution. Entropy collapse in the output is the observable symptom of this Q-K repetition at the cache level. The temperature-lift intervention acts directly on the softmax distribution before sampling (mechanism 7): raising T from 0.7 to 1.2 scales all logits by 1/T, flattening the probability mass and increasing variance in the sampled token. This is the mechanical reason the intervention escapes the stuck loop — the Q-K structure is unchanged, but the sampling process draws from a broader distribution over the existing logit landscape.
 
@@ -48,7 +48,7 @@ H3 is right when stagnation is a measurable failure mode, novelty is a valid res
 - **Tool-call repetition** — same tool with > 80% argument similarity called 3+ times in a row.
 If none of these signals can be measured cheaply, H3 is not implementable in this deployment — fall back to **V9 Bounded Execution** + human escalation.
 
-**2. Confirm novelty is a valid response.** Is the task open-ended (creative, exploratory) or constrained (math, classification, structured extraction)? Open-ended → H3 fits. Constrained → use **R17 Self-Consistency Voting** for reliability or **R20 Chain-of-Verification** for correctness; H3 is the wrong tool.
+**2. Confirm novelty is a valid response.** Is the task open-ended (creative, exploratory) or constrained (math, classification, structured extraction)? Open-ended $\to$ H3 fits. Constrained $\to$ use **R17 Self-Consistency Voting** for reliability or **R20 Chain-of-Verification** for correctness; H3 is the wrong tool.
 
 **3. Cost the detector.** Embedding-similarity is the cheap option (one embedding per output, one cosine). True Shannon entropy over token logits requires logprob access and is more expensive. Budget: detector should cost < **5%** of the loop's per-step token cost. If it costs more, simplify the signal (cosine, not entropy) or sample only every Kth step.
 
@@ -105,14 +105,14 @@ If the task wants consistency rather than diversity, **R17** is the pattern, not
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Stagnation Detector** | the diversity measurement | recent outputs → diversity statistic | judge whether the output is *correct* — that is the Verifier's job (V15 / R20). The Detector only measures *sameness*. |
-| **Threshold Controller** | the fire/don't-fire decision | diversity statistic + thresholds → boolean | be the only escalation point — if it fires too often, V9 must escalate the loop, not let the Controller keep firing. |
-| **Novelty Injector** | the intervention itself (temp lift, prompt cue, or context pivot) | trigger + current state → perturbed generation parameters or prompt | act on H1's Identity Block. The Identity Block is non-overrideable; H3 perturbs *expression* (style, approach, framing), never *identity* (values, voice rules, commitments). |
-| **Decay Scheduler** | returning temperature / cue to baseline | step count + perturbation params → decaying schedule | leave the agent in the perturbed regime indefinitely. Without decay, every output becomes high-temperature noise. |
-| **Verifier** *(optional but recommended)* | distinguishing stall from convergence-on-correct-answer | output + task → confirmed-stall / done | be invoked on every output (cost). Run only when the Threshold Controller has already fired; if Verifier says "done," do not perturb. |
-| **Event Logger** | recording H3 events for downstream learning | stagnation event → log entry | be a side effect the agent cannot inspect. Feeds **H2 Episodic Self-Improvement** ("we got stuck on tasks of type X") and **K11 Observational Memory**. |
+| **Stagnation Detector** | the diversity measurement | recent outputs $\to$ diversity statistic | judge whether the output is *correct* — that is the Verifier's job (V15 / R20). The Detector only measures *sameness*. |
+| **Threshold Controller** | the fire/don't-fire decision | diversity statistic + thresholds $\to$ boolean | be the only escalation point — if it fires too often, V9 must escalate the loop, not let the Controller keep firing. |
+| **Novelty Injector** | the intervention itself (temp lift, prompt cue, or context pivot) | trigger + current state $\to$ perturbed generation parameters or prompt | act on H1's Identity Block. The Identity Block is non-overrideable; H3 perturbs *expression* (style, approach, framing), never *identity* (values, voice rules, commitments). |
+| **Decay Scheduler** | returning temperature / cue to baseline | step count + perturbation params $\to$ decaying schedule | leave the agent in the perturbed regime indefinitely. Without decay, every output becomes high-temperature noise. |
+| **Verifier** *(optional but recommended)* | distinguishing stall from convergence-on-correct-answer | output + task $\to$ confirmed-stall / done | be invoked on every output (cost). Run only when the Threshold Controller has already fired; if Verifier says "done," do not perturb. |
+| **Event Logger** | recording H3 events for downstream learning | stagnation event $\to$ log entry | be a side effect the agent cannot inspect. Feeds **H2 Episodic Self-Improvement** ("we got stuck on tasks of type X") and **K11 Observational Memory**. |
 
 Six narrow responsibilities. The critical separation is between **measurement** (Detector), **decision** (Threshold Controller), and **action** (Novelty Injector). Collapsing them — letting one component both measure and act — produces the H3 anti-pattern where the perturbation re-fires on its own output and the agent spirals into incoherence.
 
@@ -168,11 +168,11 @@ The reasoning loop (R4, R3, R7, R9, or R10) runs as normal. After each step, the
 | 3 | Compute diversity statistic over last K outputs | `code` | — |
 | 4 | Threshold check: stall? | `code` | configured threshold |
 | 5 | If stall: verifier check — is it actually convergence? | `LLM` *(or rule)* | V15 / R20 |
-| 6 | If genuine stall: pick intervention (cue → lift → pivot) | `code` | escalation ladder |
+| 6 | If genuine stall: pick intervention (cue $\to$ lift $\to$ pivot) | `code` | escalation ladder |
 | 7 | Apply intervention to next step's session config or prompt | `code` | — |
 | 8 | Decay scheduler: step intervention back toward baseline | `code` | configured decay |
 | 9 | Log stagnation event | `code` | K11; H2 at session end |
-| 10 | Bound check: H3 firings ≥ cap? → V9 escalate | `code` | V9 |
+| 10 | Bound check: H3 firings $\geq$ cap? $\to$ V9 escalate | `code` | V9 |
 
 **Skeleton:**
 

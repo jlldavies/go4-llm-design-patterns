@@ -45,21 +45,21 @@ Do not use I4 when:
 I4 is right when an established CLI already does the job, the model knows that CLI, and a sandboxed shell is acceptable in the runtime.
 
 **1. Does a mature CLI exist?**
-- Yes, and it has been stable for years (`git`, `docker`, `gh`, `kubectl`, `aws`, `gcloud`, `terraform`, `jq`, `rg`, standard Unix) → **I4** is a strong default.
-- Yes, but it is the project's own internal CLI with non-public documentation → consider **I2** so the schema description teaches the model.
-- No CLI; only an API → **I1** (deterministic) or **I2** (LLM-routed).
+- Yes, and it has been stable for years (`git`, `docker`, `gh`, `kubectl`, `aws`, `gcloud`, `terraform`, `jq`, `rg`, standard Unix) $\to$ **I4** is a strong default.
+- Yes, but it is the project's own internal CLI with non-public documentation $\to$ consider **I2** so the schema description teaches the model.
+- No CLI; only an API $\to$ **I1** (deterministic) or **I2** (LLM-routed).
 
 **2. Schema token cost.** Estimate the I3 cost of an equivalent MCP server: `tools/list` plus all schemas. If that approaches or exceeds 10,000 tokens (GitHub MCP alone runs 40,000–55,000), and the underlying tool has a usable CLI, **I4** wins on token economics alone.
 
 **3. Sandbox feasibility.** Can the runtime confine subprocess execution? Filesystem path allow-list, network policy, no setuid, time-bounded — **V8 Tool Sandboxing** must be in place. If not, **I4** is unsafe; use **I2** + **I1** in code where the blast radius is bounded by what the developer wrote.
 
 **4. Output shape.** Is the agent reading the stdout to *reason*, or does code need to *parse* it?
-- Reasoning over text → **I4** fits; the model handles free-form output natively.
-- Code parsing → use the CLI's structured-output flag (`--json`, `-o json`) or move to **I1** against the underlying API where the contract is typed.
+- Reasoning over text $\to$ **I4** fits; the model handles free-form output natively.
+- Code parsing $\to$ use the CLI's structured-output flag (`--json`, `-o json`) or move to **I1** against the underlying API where the contract is typed.
 
 **5. Reversibility and authority.** Score the worst-case command effect on a per-tool basis.
-- Read-only or scoped to an ephemeral workdir → **I4** is fine under V8.
-- Mutating with global effect (`rm -rf`, `kubectl delete`, `aws s3 rm`, `terraform apply`) → require **V1 Human-in-the-Loop** approval at the command-construction step, or restrict the allow-list to non-destructive subcommands and force the destructive ones through **I1**.
+- Read-only or scoped to an ephemeral workdir $\to$ **I4** is fine under V8.
+- Mutating with global effect (`rm -rf`, `kubectl delete`, `aws s3 rm`, `terraform apply`) $\to$ require **V1 Human-in-the-Loop** approval at the command-construction step, or restrict the allow-list to non-destructive subcommands and force the destructive ones through **I1**.
 
 **Quick test — I4 is the right pattern when:**
 
@@ -99,14 +99,14 @@ If the underlying tool has no CLI, choose **I1 Direct API Call** (deterministic)
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Agent (LLM)** | choosing the CLI and constructing the command string | task + prior CLI knowledge → shell command | invent flags it has not seen — hallucinated flags fail loudly under exec, but only after burning a turn. Constrain by allow-list so unknown binaries are refused before exec. |
-| **Command Constructor** *(part of the Agent's per-call prompt)* | the format contract — *what* a valid command emission looks like | task → `argv`-shaped output (binary + args), never a shell-string with operators baked in | emit a single shell string for `subprocess(shell=True)`; the contract is an argument list. The moment the contract becomes "raw shell," injection is wide open. |
-| **Command Validator** | gatekeeping the binary, flags, and argument shapes before exec | argv → pass / fail | trust an internal-caller bypass; the validator runs on every command, including ones the model emitted via a "safe-looking" allow-listed binary. `rg` is safe; `rg --exec=...` may not be. |
-| **V8 Sandbox** | confining the actual exec (paths, network, time, capabilities) | argv → bounded subprocess | be optional. I4 without V8 is the pattern's primary failure mode — the page does not claim to be I4 in a production sense unless V8 is present. |
-| **Output Shaper** | turning raw stdout/stderr/exit into something useful in context | (stdout, stderr, exit_code) → trimmed text + status | flood the agent's context with raw stderr on failure; that is what **V11 Error Compaction** is for. Likewise, ANSI escapes and long-tail noise get stripped here. |
-| **Result Returner** | handing text back to the agent | shaped output → text in the next message | restructure the CLI's natural output format unnecessarily — the LLM is good at reading CLI output as-is, and rewrites can erase signal. |
+| **Agent (LLM)** | choosing the CLI and constructing the command string | task + prior CLI knowledge $\to$ shell command | invent flags it has not seen — hallucinated flags fail loudly under exec, but only after burning a turn. Constrain by allow-list so unknown binaries are refused before exec. |
+| **Command Constructor** *(part of the Agent's per-call prompt)* | the format contract — *what* a valid command emission looks like | task $\to$ `argv`-shaped output (binary + args), never a shell-string with operators baked in | emit a single shell string for `subprocess(shell=True)`; the contract is an argument list. The moment the contract becomes "raw shell," injection is wide open. |
+| **Command Validator** | gatekeeping the binary, flags, and argument shapes before exec | argv $\to$ pass / fail | trust an internal-caller bypass; the validator runs on every command, including ones the model emitted via a "safe-looking" allow-listed binary. `rg` is safe; `rg --exec=...` may not be. |
+| **V8 Sandbox** | confining the actual exec (paths, network, time, capabilities) | argv $\to$ bounded subprocess | be optional. I4 without V8 is the pattern's primary failure mode — the page does not claim to be I4 in a production sense unless V8 is present. |
+| **Output Shaper** | turning raw stdout/stderr/exit into something useful in context | (stdout, stderr, exit_code) $\to$ trimmed text + status | flood the agent's context with raw stderr on failure; that is what **V11 Error Compaction** is for. Likewise, ANSI escapes and long-tail noise get stripped here. |
+| **Result Returner** | handing text back to the agent | shaped output $\to$ text in the next message | restructure the CLI's natural output format unnecessarily — the LLM is good at reading CLI output as-is, and rewrites can erase signal. |
 
 Six narrow responsibilities, three of them in code, one of them an LLM emission. The pattern works because Command Validator and V8 Sandbox sit between the LLM's string and the kernel — the LLM proposes; code disposes.
 

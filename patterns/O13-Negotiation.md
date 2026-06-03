@@ -54,7 +54,7 @@ O13 is right when objectives differ by structure, a single deal must be produced
 
 **3. Define each agent's BATNA.** *Best Alternative To a Negotiated Agreement* — what each agent will do if the negotiation breaks down. Without an explicit BATNA, agents cannot rationally walk away; they accept bad deals or argue indefinitely. Threshold: every participating agent must declare a BATNA (numeric where possible) before the first offer. If BATNA cannot be defined, the problem is not negotiation — it is a forced-deal under **O6**.
 
-**4. Bound the rounds and instrument the floor.** Pair with **V9 Bounded Execution** — cap rounds, total offers, wall-clock. Pair with **V14 Trajectory Logging** — every offer, counter-offer, and concession must be recorded; otherwise concession patterns are invisible and post-hoc audit is impossible. ASTRA's walk-away rule (no concession for K consecutive rounds → walk) is a good default stagnation detector.
+**4. Bound the rounds and instrument the floor.** Pair with **V9 Bounded Execution** — cap rounds, total offers, wall-clock. Pair with **V14 Trajectory Logging** — every offer, counter-offer, and concession must be recorded; otherwise concession patterns are invisible and post-hoc audit is impossible. ASTRA's walk-away rule (no concession for K consecutive rounds $\to$ walk) is a good default stagnation detector.
 
 **5. Decide on a Mediator.** A mediator agent is optional but materially raises agreement rates when (a) there are 3+ parties (combinatorial complexity), (b) parties have low information about each other's utility, or (c) the system needs to actively propose Pareto-improving package deals neither agent would think of. Two-party single-issue: no mediator needed. Three-plus parties or multi-issue: mediator usually pays for itself.
 
@@ -109,17 +109,17 @@ If utilities are aligned, choose **O12 Debate**. If only output quality matters 
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Stakeholder Agent A / B / ...** | one party's utility function and BATNA; the moves it makes on its turn | offers + counter-offers from others → its next move (offer, counter, accept, reject, walk) | reveal its full utility function or BATNA to other agents unless the protocol permits; share its private reservation price destroys the bargaining game. |
-| **Utility Function** *(per agent, private)* | how this agent scores any offer | candidate offer → numeric or categorical score; ACCEPT / REJECT verdict against BATNA | drift round-to-round — the function is fixed for the negotiation. A utility that "learns" mid-negotiation lets the agent rationalise any deal post hoc. |
-| **BATNA** *(per agent, private)* | the floor below which this agent walks | the offer space → "is this offer worse than my alternative?" | be unset, or set as "I don't know yet". Without a BATNA, the agent has no principled walk-away and the protocol cannot terminate cleanly. |
-| **Bargaining Protocol** | the move set, turn order, and acceptance rule | round number + history → which agent moves and what moves are legal | be left implicit. An unwritten protocol means the agents will improvise rules, and the loop will not terminate cleanly. |
-| **Issue Tracker** | the *package* under negotiation — every issue and its current proposed value | offers → updated package state | collapse multi-issue offers into a single number — that erases Pareto-improving trades. |
-| **Mediator** *(optional, separate session)* | proposing Pareto-improving offers when parties stall; ruling on protocol violations | trajectory + (limited) signals from each party → suggested package, or escalation | reveal one party's private utility to another. A mediator that leaks is worse than no mediator. |
-| **Termination Judge** | the verdict on whether the round produced AGREEMENT, NO-DEAL, or CONTINUE | round outcome + bounds → STOP / CONTINUE | be the same session as any Stakeholder Agent or the Mediator. A judge with a stake has no incentive to declare no-deal. |
-| **Agreement Artefact** | the structured record of the accepted deal (or the no-deal record) | the accepted offer (or breakdown state) → durable, machine- and human-readable record | be a free-text summary; structured fields per issue are what make the agreement enforceable downstream. |
-| **Trajectory Log** *(V14)* | every offer, counter-offer, and concession in order | round events → durable log | be optional. Concession patterns and protocol violations are only visible in the log. |
+| **Stakeholder Agent A / B / ...** | one party's utility function and BATNA; the moves it makes on its turn | offers + counter-offers from others $\to$ its next move (offer, counter, accept, reject, walk) | reveal its full utility function or BATNA to other agents unless the protocol permits; share its private reservation price destroys the bargaining game. |
+| **Utility Function** *(per agent, private)* | how this agent scores any offer | candidate offer $\to$ numeric or categorical score; ACCEPT / REJECT verdict against BATNA | drift round-to-round — the function is fixed for the negotiation. A utility that "learns" mid-negotiation lets the agent rationalise any deal post hoc. |
+| **BATNA** *(per agent, private)* | the floor below which this agent walks | the offer space $\to$ "is this offer worse than my alternative?" | be unset, or set as "I don't know yet". Without a BATNA, the agent has no principled walk-away and the protocol cannot terminate cleanly. |
+| **Bargaining Protocol** | the move set, turn order, and acceptance rule | round number + history $\to$ which agent moves and what moves are legal | be left implicit. An unwritten protocol means the agents will improvise rules, and the loop will not terminate cleanly. |
+| **Issue Tracker** | the *package* under negotiation — every issue and its current proposed value | offers $\to$ updated package state | collapse multi-issue offers into a single number — that erases Pareto-improving trades. |
+| **Mediator** *(optional, separate session)* | proposing Pareto-improving offers when parties stall; ruling on protocol violations | trajectory + (limited) signals from each party $\to$ suggested package, or escalation | reveal one party's private utility to another. A mediator that leaks is worse than no mediator. |
+| **Termination Judge** | the verdict on whether the round produced AGREEMENT, NO-DEAL, or CONTINUE | round outcome + bounds $\to$ STOP / CONTINUE | be the same session as any Stakeholder Agent or the Mediator. A judge with a stake has no incentive to declare no-deal. |
+| **Agreement Artefact** | the structured record of the accepted deal (or the no-deal record) | the accepted offer (or breakdown state) $\to$ durable, machine- and human-readable record | be a free-text summary; structured fields per issue are what make the agreement enforceable downstream. |
+| **Trajectory Log** *(V14)* | every offer, counter-offer, and concession in order | round events $\to$ durable log | be optional. Concession patterns and protocol violations are only visible in the log. |
 
 The Stakeholder Agents are the only participants with private state. The Mediator and Termination Judge are deliberately *outside* the game: they cannot offer, accept, or walk. Conflating any of these roles is the pattern's most common failure.
 
@@ -137,7 +137,7 @@ Setup establishes the agents, their (private) utility functions and BATNAs, the 
 - Concession patterns in the Trajectory Log are auditable — disputes about "who gave what" are decidable post hoc.
 
 **Costs**
-- LLM-call cost scales with rounds × parties × issues; multi-issue 3-party negotiations are expensive.
+- LLM-call cost scales with rounds $\times$ parties $\times$ issues; multi-issue 3-party negotiations are expensive.
 - Each Stakeholder Agent needs a thoughtfully-specified utility function — this is design work that does not exist in O12 or O5.
 - A Mediator (when present) is another full session — model, setup, prompt — and a privileged one (it sees more than any single party).
 - Slow when parties are far apart; the rounds-to-agreement curve has a long tail.
@@ -224,7 +224,7 @@ negotiate(parties, issues, protocol):
 |---|---|---|---|
 | **Stakeholder Agent (per party)** | strong generalist | role (S3) — *"you represent {party}; you negotiate on its behalf"*; the **private** utility function over the issues; the **private** BATNA; the protocol's move set; the output contract (S6 — structured offer JSON, no prose disclosure of utility); the BATNA-floor rule (*"never accept an offer worse than BATNA; never disclose utility or BATNA explicitly"*) | the current issue tracker + offer history + the move it must make this turn |
 | **Mediator** *(optional)* | strong generalist; ideally a *different* model family from the parties | role — *"you mediate between parties without revealing either side's private signals; propose Pareto-improving packages when parties stall"*; the issue set; the protocol; explicit prohibition on cross-party signal disclosure; output contract (proposed package + brief rationale, no party-specific reasoning) | the trajectory log + the current issue tracker |
-| **Termination Judge** | small fast generalist; *different model from parties and mediator* (V15 hygiene) | role — *"you decide whether the protocol has terminated"*; the termination rules (unanimous ACCEPT → AGREEMENT; documented BATNA walk → NO-DEAL; bound hit → NO-DEAL); output contract (verdict + reason) | the latest round outcome + bound state |
+| **Termination Judge** | small fast generalist; *different model from parties and mediator* (V15 hygiene) | role — *"you decide whether the protocol has terminated"*; the termination rules (unanimous ACCEPT $\to$ AGREEMENT; documented BATNA walk $\to$ NO-DEAL; bound hit $\to$ NO-DEAL); output contract (verdict + reason) | the latest round outcome + bound state |
 | **Stagnation Scorer** *(optional, may be code)* | small fast generalist *or* a deterministic delta-on-issues check | role — *"you decide whether the last K rounds show meaningful concession"*; the ε threshold; output contract (STAGNANT / MOVING) | the last K rounds' offers |
 
 For the **Stakeholder Agent** session, concretely: the setup loaded once is *"You represent Party-A in a negotiation over {issues}. Your private utility function is {U_A}. Your BATNA is {BATNA_A} — never accept any offer worse than this. Reply only with a structured offer in the format {schema}; do not state your utility or BATNA in any message. On each turn you may OFFER, COUNTER, ACCEPT, or WALK."* The per-call prompt then carries only *"Round {n}. Current issue tracker: {state}. Offer history: {history}. Your move:"*. The other sessions follow the same setup-once, wrap-data-per-call split.

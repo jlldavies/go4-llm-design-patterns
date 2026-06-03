@@ -32,7 +32,7 @@ The variants differ in *what is being optimised* and *how the search is run*:
 - **Meta Prompting / Recursive Meta Prompting (RMP).** A scaffold-level optimisation: a single example-agnostic meta-prompt guides the LLM to generate task-specific prompts; in the recursive variant, the LLM also refines its own meta-prompt against task feedback. (Zhang et al., 2023.)
 - **AutoPDL.** Pattern-level optimisation: the search space is *combinations of prompting patterns* (ReAct, CoT, ReWOO, etc.) plus their demonstrations, expressed as PDL programs; successive halving navigates the space. Source-to-source: input and output are both runnable PDL programs. (Spiess et al., 2025.)
 
-All four share the same core — propose, evaluate, select, iterate — and differ only in the granularity of the search space (instruction string → module → scaffold → pattern composition). They are one pattern, four points on a granularity axis.
+All four share the same core — propose, evaluate, select, iterate — and differ only in the granularity of the search space (instruction string $\to$ module $\to$ scaffold $\to$ pattern composition). They are one pattern, four points on a granularity axis.
 
 ## Applicability
 
@@ -62,15 +62,15 @@ S8 is right when you have an evaluation signal and a task volume that justifies 
 
 If you cannot produce *any* of these, stop. S8 cannot function — pick the best prompt by hand using S2 / S4 / S6 and revisit when a signal exists.
 
-**2. Cost the optimisation budget.** A typical S8 run is **20–200 candidate prompts × N evaluation cases × evaluator-call cost**. Cap before starting: hours of LLM time, dollar budget, or candidate count. Pair with **V9 Bounded Execution** — an unbounded optimisation loop is the canonical waste. Note that the cost compounds super-linearly: the O(n²) attention computation (mechanism 2) means a candidate prompt of length p evaluated against an input of length q costs O((p+q)²) per call, not O(p+q). Verbose candidates — which the optimiser tends to generate — are penalised geometrically in the evaluation pass. Set a maximum candidate token length as a constraint on the Proposer, not just as a quality concern.
+**2. Cost the optimisation budget.** A typical S8 run is **20–200 candidate prompts $\times$ N evaluation cases $\times$ evaluator-call cost**. Cap before starting: hours of LLM time, dollar budget, or candidate count. Pair with **V9 Bounded Execution** — an unbounded optimisation loop is the canonical waste. Note that the cost compounds super-linearly: the O(n²) attention computation (mechanism 2) means a candidate prompt of length p evaluated against an input of length q costs O((p+q)²) per call, not O(p+q). Verbose candidates — which the optimiser tends to generate — are penalised geometrically in the evaluation pass. Set a maximum candidate token length as a constraint on the Proposer, not just as a quality concern.
 
-**3. Estimate amortisation.** Optimisation cost C, per-call savings or quality gain Δ, expected calls N. Run S8 only if `C ≪ Δ × N` — i.e. the deployed prompt will be used many times. Rule of thumb: N ≥ 10,000 calls of the optimised prompt for the budget to break even on a typical reasoning task.
+**3. Estimate amortisation.** Optimisation cost C, per-call savings or quality gain Δ, expected calls N. Run S8 only if `C ≪ Δ × N` — i.e. the deployed prompt will be used many times. Rule of thumb: N $\geq$ 10,000 calls of the optimised prompt for the budget to break even on a typical reasoning task.
 
 **4. Pick the granularity.**
-- Instruction text only → **APE** (simplest, off-the-shelf).
-- Instructions + few-shot demonstrations in a multi-step program → **DSPy** (production-grade; the default if the system is non-trivial).
-- A reusable scaffold for a family of tasks → **Meta Prompting / RMP**.
-- A combination of prompting patterns (which Reasoning pattern to use, with what demonstrations) → **AutoPDL**.
+- Instruction text only $\to$ **APE** (simplest, off-the-shelf).
+- Instructions + few-shot demonstrations in a multi-step program $\to$ **DSPy** (production-grade; the default if the system is non-trivial).
+- A reusable scaffold for a family of tasks $\to$ **Meta Prompting / RMP**.
+- A combination of prompting patterns (which Reasoning pattern to use, with what demonstrations) $\to$ **AutoPDL**.
 
 **5. Overfit risk.** Hold out an evaluation set the optimiser never sees. Score the final prompt on it. If held-out performance is materially below the optimisation score, the candidate is overfit — discard and either expand the optimisation set or coarsen the search space.
 
@@ -116,14 +116,14 @@ If no evaluation signal exists, stay manual — write the prompt with S2 / S4 / 
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Task spec** | what "good" means | description + graded dataset + scoring function → optimisation problem | be ambiguous — a fuzzy spec produces fuzzy prompts. If the spec cannot be written, S8 should not be run. |
-| **Proposer (LLM)** | generating candidate prompts | spec + (optionally) prior top-k and their failures → new candidates | score its own outputs. The Proposer that also evaluates has no incentive to admit a candidate is bad. |
-| **Evaluator** | scoring each candidate against the dataset | candidate prompt + eval set → numeric score | propose candidates, and must be stable across runs. A drifting evaluator makes optimisation meaningless. |
-| **Selector** | keeping the best, discarding the rest | scored candidates → top-k carried to next round | invent new candidates (that is the Proposer's job); it only ranks and prunes. |
-| **Held-out validator** | guarding against overfit | final candidate + a set the optimiser never saw → pass/fail | be the same data the Evaluator used. Reusing it collapses the validation. |
-| **Optimisation loop** *(code)* | bounding cost and iterations | rounds + budget → terminate signal | run unbounded — pair with V9 Bounded Execution by construction. |
+| **Task spec** | what "good" means | description + graded dataset + scoring function $\to$ optimisation problem | be ambiguous — a fuzzy spec produces fuzzy prompts. If the spec cannot be written, S8 should not be run. |
+| **Proposer (LLM)** | generating candidate prompts | spec + (optionally) prior top-k and their failures $\to$ new candidates | score its own outputs. The Proposer that also evaluates has no incentive to admit a candidate is bad. |
+| **Evaluator** | scoring each candidate against the dataset | candidate prompt + eval set $\to$ numeric score | propose candidates, and must be stable across runs. A drifting evaluator makes optimisation meaningless. |
+| **Selector** | keeping the best, discarding the rest | scored candidates $\to$ top-k carried to next round | invent new candidates (that is the Proposer's job); it only ranks and prunes. |
+| **Held-out validator** | guarding against overfit | final candidate + a set the optimiser never saw $\to$ pass/fail | be the same data the Evaluator used. Reusing it collapses the validation. |
+| **Optimisation loop** *(code)* | bounding cost and iterations | rounds + budget $\to$ terminate signal | run unbounded — pair with V9 Bounded Execution by construction. |
 
 Six narrow responsibilities. The pattern's central reliability move is the *Proposer–Evaluator separation*: the Proposer generates, the Evaluator scores, and neither can do both. Without that separation the loop reduces to "ask the LLM if its own prompt is good", which is the failure mode the pattern was invented to avoid.
 
@@ -140,7 +140,7 @@ A task spec arrives: a description, a graded dataset, and a scoring function. Th
 - The optimised prompt is portable across model versions if re-run on each — keeping pace with model upgrades becomes a process, not an emergency.
 
 **Costs**
-- Optimisation budget: 20–200 candidates × eval-set size × evaluator-call cost per round.
+- Optimisation budget: 20–200 candidates $\times$ eval-set size $\times$ evaluator-call cost per round.
 - Evaluation infrastructure is mandatory — graded data, R17, V15, or a verifier; building this often dominates the project.
 - Generated prompts are typically verbose; readability and brand voice are easily sacrificed to score.
 - Re-optimisation needed on model upgrades, task drift, or evaluation-rubric changes.

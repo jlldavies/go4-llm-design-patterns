@@ -11,7 +11,7 @@ This document is the **audit path**. A pattern is *complete* when it satisfies e
 
 - A pattern lives at `patterns/{ID}-{Name}.md` as a **standalone file** (the canonical entry).
 - The category file `patterns/{CATEGORY}.md` holds:
-  - the section intro (Lead → Usage → Forces → Structure → Examples → See also), and
+  - the section intro (Lead $\to$ Usage $\to$ Forces $\to$ Structure $\to$ Examples $\to$ See also), and
   - one-line stubs for each pattern pointing to its standalone file.
 - Worked exemplars to read before building: **`patterns/K5-Adaptive-RAG.md`** (control pattern with variants and specialist models) and **`patterns/K12-Karpathy-Memory.md`** (newer pattern with two-actor separation). **`patterns/KNOWLEDGE.md`** shows the section intro and stub format.
 
@@ -92,12 +92,12 @@ If any condition fails, choose K1 or one of its refinements. If T is large *and*
 
 A Markdown table with exactly these four columns:
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 
 - 3+ rows; typical pattern has 4–8.
 - Names bolded; *(optional)* marker where applicable.
 - **Owns** = the one responsibility this participant holds.
-- **Input → Output** = what it consumes and what it produces.
+- **Input $\to$ Output** = what it consumes and what it produces.
 - **Must not** = the prohibition that prevents the pattern's most common failure mode. This column is where the page earns its keep — vague *Must nots* are a failure of the audit.
 
 ---

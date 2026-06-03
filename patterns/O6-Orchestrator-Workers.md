@@ -47,9 +47,9 @@ O6 is right when the decomposition genuinely varies per input, the worker count 
 
 **1. Test the decomposition stability.** Sketch ten realistic inputs. For each, write down what the sub-tasks would be. If the lists are essentially the same (same count, same types, same order), the decomposition is *stable* — use **O2 Prompt Chaining** with O4 parallelisation where steps are independent. If the lists differ materially — different sub-task counts, different specialisations, different ordering — the decomposition is *dynamic* and O6 is justified. The honest test: would a developer writing O2 have to leave most of the pipeline as TODOs that the orchestrator fills in?
 
-**2. Bound the worker count.** Count expected workers per run on hard inputs. **N ≤ ~5** — O6 with a single flat pool is fine. **N ≈ 5–10** — O6 works, but the orchestrator's context is filling fast; consider grouping. **N > 10** — promote to **O7 Supervisor Hierarchy**; one orchestrator coordinating dozens of workers loses track. Anthropic's research system reports orchestrators that spawn excessive subagents on simple queries as the most common early failure — bound the count in the orchestrator's prompt and as a hard cap (**V9**).
+**2. Bound the worker count.** Count expected workers per run on hard inputs. **N $\leq$ ~5** — O6 with a single flat pool is fine. **N $\approx$ 5–10** — O6 works, but the orchestrator's context is filling fast; consider grouping. **N > 10** — promote to **O7 Supervisor Hierarchy**; one orchestrator coordinating dozens of workers loses track. Anthropic's research system reports orchestrators that spawn excessive subagents on simple queries as the most common early failure — bound the count in the orchestrator's prompt and as a hard cap (**V9**).
 
-**3. Cost the orchestration overhead.** O6 adds at least: one orchestrator call to plan, N worker chains, and one synthesis call. Per-task token cost is typically 3–10× a single-agent baseline. Pay this when the quality win justifies it. Anthropic measured a 90.2% accuracy gain on multi-step research; whether *your* task earns a 3–10× cost multiplier depends on the per-task value.
+**3. Cost the orchestration overhead.** O6 adds at least: one orchestrator call to plan, N worker chains, and one synthesis call. Per-task token cost is typically 3–10$\times$ a single-agent baseline. Pay this when the quality win justifies it. Anthropic measured a 90.2% accuracy gain on multi-step research; whether *your* task earns a 3–10$\times$ cost multiplier depends on the per-task value.
 
 **4. Pick the worker inner pattern.** Workers almost always run **R4 ReAct** internally — the per-step adaptive loop on the worker's tools. If sub-tasks need control flow over multiple tools, **R13 CodeAct** wins ~20pp accuracy. If a sub-task is a single tool call, no loop needed — an **I2 Function Call** is enough. The orchestrator picks the worker; the worker runs its own loop.
 
@@ -60,8 +60,8 @@ O6 is right when the decomposition genuinely varies per input, the worker count 
 **Quick test — O6 is the right pattern when:**
 
 - the sub-task decomposition varies materially across inputs, *and*
-- the worker count per run is bounded (typically ≤ ~10), *and*
-- the orchestration overhead (3–10× tokens vs single agent) is justified by the quality gain, *and*
+- the worker count per run is bounded (typically $\leq$ ~10), *and*
+- the orchestration overhead (3–10$\times$ tokens vs single agent) is justified by the quality gain, *and*
 - the loop can be hard-bounded with **V9** and traced with **V14**.
 
 If the decomposition is stable, use **O2 Prompt Chaining**. If the task fits one agent with one tool set, use **O1 Single Agent**. If workers are independent and enumerable, **O4 Parallelization** alone suffices. If worker count exceeds ~10, promote to **O7 Supervisor Hierarchy**. If you cannot bound the loop, do not deploy O6 — the unbounded multi-agent loop is **A3** with multipliers.
@@ -99,17 +99,17 @@ The Orchestrator never executes sub-tasks itself — it only decomposes, dispatc
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Orchestrator (LLM)** | the decomposition and dispatch decision | goal + worker catalogue → list of (worker, sub-task brief) | execute sub-tasks itself, or carry a worker's internal trajectory in its own context. An orchestrator that "helps" a worker by also doing its work has collapsed the separation; the gain over **O1** disappears and the context fills with worker-level detail. |
-| **Worker (LLM)** *(one or many; often specialised; usually runs R4 internally)* | executing a single sub-task to completion within its isolated context | sub-task brief + tools → result | see other workers' contexts, the orchestrator's plan, or the original goal beyond what its brief carries. A worker that reasons about *the whole task* is no longer isolated and **O17** is broken. |
-| **Worker catalogue** | the registry of available workers, their specialisations, tools, and contract | — → structured catalogue passed to Orchestrator | grow unbounded — tool / agent selection accuracy collapses above ~10–15 entries (the same Tool Budget arithmetic as **V13** but applied to *workers*). Above that, promote to **O7**. |
-| **Dispatcher** | wiring the orchestrator's decision into actual worker invocations; managing parallel execution and partial failures | (worker, brief) list → worker results | hide failures from synthesis. A silently-dropped worker return is **A10 Silent Failure**; failed sub-tasks must reach synthesis as errors with their briefs intact. |
-| **Synthesis (LLM)** *(often the Orchestrator session reused; sometimes separate)* | integrating worker returns into the final answer | original goal + worker results → final output | re-run sub-tasks. If synthesis finds a gap, it asks the Orchestrator for another worker round; it does not silently execute the missing work itself. |
-| **Bound (V9)** | terminating the loop on max workers / depth / cost / time | run state → continue / halt | be implicit. An O6 system that "trusts the orchestrator to stop" will, on a hard input, spawn workers indefinitely. The Anthropic team identified this as the most common production failure mode in early multi-agent iterations. |
-| **Trajectory logger (V14)** | per-orchestrator and per-worker trace for audit and replay | every LLM call + every dispatch → log | be optional. Untraced O6 is **A15** with N+1 simultaneous undebuggable agents. |
+| **Orchestrator (LLM)** | the decomposition and dispatch decision | goal + worker catalogue $\to$ list of (worker, sub-task brief) | execute sub-tasks itself, or carry a worker's internal trajectory in its own context. An orchestrator that "helps" a worker by also doing its work has collapsed the separation; the gain over **O1** disappears and the context fills with worker-level detail. |
+| **Worker (LLM)** *(one or many; often specialised; usually runs R4 internally)* | executing a single sub-task to completion within its isolated context | sub-task brief + tools $\to$ result | see other workers' contexts, the orchestrator's plan, or the original goal beyond what its brief carries. A worker that reasons about *the whole task* is no longer isolated and **O17** is broken. |
+| **Worker catalogue** | the registry of available workers, their specialisations, tools, and contract | — $\to$ structured catalogue passed to Orchestrator | grow unbounded — tool / agent selection accuracy collapses above ~10–15 entries (the same Tool Budget arithmetic as **V13** but applied to *workers*). Above that, promote to **O7**. |
+| **Dispatcher** | wiring the orchestrator's decision into actual worker invocations; managing parallel execution and partial failures | (worker, brief) list $\to$ worker results | hide failures from synthesis. A silently-dropped worker return is **A10 Silent Failure**; failed sub-tasks must reach synthesis as errors with their briefs intact. |
+| **Synthesis (LLM)** *(often the Orchestrator session reused; sometimes separate)* | integrating worker returns into the final answer | original goal + worker results $\to$ final output | re-run sub-tasks. If synthesis finds a gap, it asks the Orchestrator for another worker round; it does not silently execute the missing work itself. |
+| **Bound (V9)** | terminating the loop on max workers / depth / cost / time | run state $\to$ continue / halt | be implicit. An O6 system that "trusts the orchestrator to stop" will, on a hard input, spawn workers indefinitely. The Anthropic team identified this as the most common production failure mode in early multi-agent iterations. |
+| **Trajectory logger (V14)** | per-orchestrator and per-worker trace for audit and replay | every LLM call + every dispatch $\to$ log | be optional. Untraced O6 is **A15** with N+1 simultaneous undebuggable agents. |
 
-The defining separation is **Orchestrator ↔ Worker**: the Orchestrator chooses *what gets done*; the Worker chooses *how to do it*. When that separation collapses — orchestrator executes, worker reasons about the whole task — O6 degrades to a confused **O1** with extra LLM calls.
+The defining separation is **Orchestrator $\leftrightarrow$ Worker**: the Orchestrator chooses *what gets done*; the Worker chooses *how to do it*. When that separation collapses — orchestrator executes, worker reasons about the whole task — O6 degrades to a confused **O1** with extra LLM calls.
 
 ## Collaborations
 
@@ -130,7 +130,7 @@ Two collaboration patterns sit one level up. When the worker count exceeds what 
 
 **Costs**
 
-- Orchestration overhead: at least one orchestrator call to plan, N worker chains, one synthesis call. Typical 3–10× token cost vs a single-agent baseline. Anthropic estimates multi-agent research consumes ~15× the tokens of an equivalent single-LLM chat.
+- Orchestration overhead: at least one orchestrator call to plan, N worker chains, one synthesis call. Typical 3–10$\times$ token cost vs a single-agent baseline. Anthropic estimates multi-agent research consumes ~15$\times$ the tokens of an equivalent single-LLM chat.
 - Coordination complexity: dispatching, partial-failure handling, synthesis logic — all code the developer must write and test.
 - Context-handoff bugs: the worker brief is the *only* thing the worker sees; if it's under-specified the worker hallucinates assumptions, if it's over-stuffed it carries irrelevant noise. Brief quality is the single largest tuning lever.
 - Debugging complexity: a failed run has N+1 trajectories. Without **V14** end-to-end tracing this is hours of guessing.

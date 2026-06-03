@@ -31,13 +31,13 @@ Use Zero-Shot when:
 
 Do not use it when:
 
-- the output format is non-standard and you cannot describe it cleanly in words → upgrade to **S2 Few-Shot**.
-- domain expertise framing materially helps tone or knowledge activation → add **S3 Persona**.
-- the task has a clear multi-step process the model keeps skipping → add **S4 Instruction Decomposition**.
-- known failure modes need explicit prohibition → add **S5 Constraint Framing**.
-- downstream code parses the output → add **S6 Output Template** (or a structured-output API).
-- reasoning reliability is the constraint and a feedback signal exists → wrap with **R17 Self-Consistency Voting** or **R7 Reflexion**.
-- regulated or safety-critical operation → add **S9 Constitutional Framing**.
+- the output format is non-standard and you cannot describe it cleanly in words $\to$ upgrade to **S2 Few-Shot**.
+- domain expertise framing materially helps tone or knowledge activation $\to$ add **S3 Persona**.
+- the task has a clear multi-step process the model keeps skipping $\to$ add **S4 Instruction Decomposition**.
+- known failure modes need explicit prohibition $\to$ add **S5 Constraint Framing**.
+- downstream code parses the output $\to$ add **S6 Output Template** (or a structured-output API).
+- reasoning reliability is the constraint and a feedback signal exists $\to$ wrap with **R17 Self-Consistency Voting** or **R7 Reflexion**.
+- regulated or safety-critical operation $\to$ add **S9 Constitutional Framing**.
 
 ## Decision Criteria
 
@@ -45,18 +45,18 @@ S1 is right when a capable instruction-tuned model can do the task from the inst
 
 **1. Task-novelty score.** Is the task plausibly inside the model's pre-training distribution? Summarisation, simple classification, translation, factual Q&A, common formats (markdown, JSON, plain prose) — yes, S1. Bespoke domain output, esoteric format, proprietary tone — no, escalate. *Threshold:* if a competent human reader could do the task from the instruction without examples, the model probably can too.
 
-**2. Format-consistency rate.** Run the prompt N=20 times. What fraction returns the expected shape? If **≥ 95%**, S1 holds. **90–95%** is borderline — measure the cost of failures before upgrading. **< 90%** → escalate to **S6 Output Template** (or a structured-output API), or **S2 Few-Shot** if the failure is stylistic rather than structural.
+**2. Format-consistency rate.** Run the prompt N=20 times. What fraction returns the expected shape? If **$\geq$ 95%**, S1 holds. **90–95%** is borderline — measure the cost of failures before upgrading. **< 90%** $\to$ escalate to **S6 Output Template** (or a structured-output API), or **S2 Few-Shot** if the failure is stylistic rather than structural.
 
 **3. Quality-against-upgrade delta.** Compare S1 quality against S2 (few-shot) on the same task. If the lift from 3–5 examples is **< 5 percentage points** on whatever quality metric you care about, S1 wins on cost. If it's **> 10 points**, S2 wins. The middle band is a judgement call about token budget.
 
-**4. Cost / latency budget.** Tokens added by an upgrade are paid on *every* call. At scale, a 200-token persona × 1M calls/month is not free. Mechanically, every token added to the prompt participates in O(n²) pairwise attention computations and adds ~300KB to the KV cache (mechanism 2, 3). At scale a 200-token addition is not 200 tokens of linear cost — it expands the attention matrix over the full prompt length. S1 minimises this. If unit economics are tight, S1 is the right floor and upgrades must clear a measurable bar.
+**4. Cost / latency budget.** Tokens added by an upgrade are paid on *every* call. At scale, a 200-token persona $\times$ 1M calls/month is not free. Mechanically, every token added to the prompt participates in O(n²) pairwise attention computations and adds ~300KB to the KV cache (mechanism 2, 3). At scale a 200-token addition is not 200 tokens of linear cost — it expands the attention matrix over the full prompt length. S1 minimises this. If unit economics are tight, S1 is the right floor and upgrades must clear a measurable bar.
 
 **5. Reliability budget.** Is this safety-critical, regulated, or load-bearing for downstream automation? If yes, S1 is almost never the final answer — pair with **S5 Constraint Framing**, **S9 Constitutional Framing**, or **V9 Bounded Execution** as needed. S1 is for the long tail of well-defined, low-stakes calls.
 
 **Quick test — S1 is the right pattern when:**
 
 - the task sits inside the model's training distribution, *and*
-- format-consistency on a 20-run probe is ≥ 95%, *and*
+- format-consistency on a 20-run probe is $\geq$ 95%, *and*
 - the lift from few-shot is small enough that the token cost does not pay back, *and*
 - the task is not safety-critical.
 
@@ -84,11 +84,11 @@ A single configured session. One call. Nothing on either side of the model excep
 
 Three participants — the minimum any prompted system can have. The discipline of S1 is that the list does *not* grow.
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Task Instruction** | the single natural-language statement of what to do | task spec → instruction string | smuggle in examples, role, template, or constraints — each of those is a different Signal pattern and must be named as the upgrade it is. |
-| **Model** | the un-augmented instruction-following capability | instruction → completion | be silently swapped between calls — S1's reliability is bound to the specific model; a downgrade or model swap invalidates the baseline measurement. |
-| **Caller** | the surrounding code that submits the call and handles the response | instruction → completion → downstream | retry-and-massage the output until it parses — that masks an S1 failure that should be a deliberate upgrade to S6 or S2. |
+| **Task Instruction** | the single natural-language statement of what to do | task spec $\to$ instruction string | smuggle in examples, role, template, or constraints — each of those is a different Signal pattern and must be named as the upgrade it is. |
+| **Model** | the un-augmented instruction-following capability | instruction $\to$ completion | be silently swapped between calls — S1's reliability is bound to the specific model; a downgrade or model swap invalidates the baseline measurement. |
+| **Caller** | the surrounding code that submits the call and handles the response | instruction $\to$ completion $\to$ downstream | retry-and-massage the output until it parses — that masks an S1 failure that should be a deliberate upgrade to S6 or S2. |
 
 The whole point of the page is the *Must not* column. S1's failure mode is not technical; it is the slow accretion of unexamined additions until the prompt is no longer S1 and no one remembers when it changed.
 

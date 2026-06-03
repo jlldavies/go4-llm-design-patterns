@@ -42,23 +42,23 @@ Do not use I5 when:
 I5 is right when more than one agent exists, they may be developed independently, and capability discovery must work without manual orchestrator configuration.
 
 **1. Count the agents and their origins.** How many distinct agents will need to find each other? From how many independently-deployed codebases?
-- 1 agent, or N agents all in one deploy → no I5 yet; revisit if a second team or vendor enters. For intra-deploy handoff use **O15 Agent Handoff**.
-- 2+ agents across 2+ deploys → I5 is the discovery layer; configure-by-URL beats configure-by-YAML.
-- N agents across an open ecosystem → I5 is mandatory, paired with a registry.
+- 1 agent, or N agents all in one deploy $\to$ no I5 yet; revisit if a second team or vendor enters. For intra-deploy handoff use **O15 Agent Handoff**.
+- 2+ agents across 2+ deploys $\to$ I5 is the discovery layer; configure-by-URL beats configure-by-YAML.
+- N agents across an open ecosystem $\to$ I5 is mandatory, paired with a registry.
 
 **2. Map who calls whom.** Is the agent called by other *agents* (machine consumers reading JSON) or by *humans / a UI* (consumers reading a webpage)?
-- Agent-to-agent → I5 (and **I6 A2A Delegation** to actually call).
-- Human-to-agent only → I5 unnecessary; skip.
-- LLM-inside-one-agent calls tools → that is **I2 Function Call** or **I3 MCP Server**, not I5.
+- Agent-to-agent $\to$ I5 (and **I6 A2A Delegation** to actually call).
+- Human-to-agent only $\to$ I5 unnecessary; skip.
+- LLM-inside-one-agent calls tools $\to$ that is **I2 Function Call** or **I3 MCP Server**, not I5.
 
 **3. Cost the maintenance.** The card must stay in sync with the deployed agent or it actively misleads. Is the card generated from the running deployment (live endpoint) or hand-maintained?
-- Generated → safe; the card is a projection of current code.
-- Hand-maintained → expect drift; institute a CI check that the card matches the agent's actual skill registry before merge.
+- Generated $\to$ safe; the card is a projection of current code.
+- Hand-maintained $\to$ expect drift; institute a CI check that the card matches the agent's actual skill registry before merge.
 
 **4. Verify the trust model.** Other agents will read this card and trust its claims. How is the card authenticated?
-- HTTPS only → bare minimum; the certificate proves the *domain*, not the *claims*.
-- Signed card or signed-skills → consider for production; mitigates the *spoofed card* failure mode.
-- Sensitive-action skills → never trust the card alone. The caller verifies, then calls — and the call itself carries authentication.
+- HTTPS only $\to$ bare minimum; the certificate proves the *domain*, not the *claims*.
+- Signed card or signed-skills $\to$ consider for production; mitigates the *spoofed card* failure mode.
+- Sensitive-action skills $\to$ never trust the card alone. The caller verifies, then calls — and the call itself carries authentication.
 
 **5. Pick the path discipline.** The A2A spec mandates `/.well-known/agent-card.json` (the older drafts used `/.well-known/agent.json`; treat that as legacy). Use the current path; serving the legacy path as an alias is harmless.
 
@@ -98,14 +98,14 @@ If only one agent exists, or the consumer is a human UI, skip I5. If the consume
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Agent Card document** | the JSON declaration itself — identity, skills, endpoint, auth, protocol version | (none — it is the artefact) → JSON payload | be a hand-maintained file checked into a repo. The card and the agent must share a single source of truth, or drift is guaranteed. |
-| **Card Publisher** | serving the card at `/.well-known/agent-card.json` | request → AgentCard JSON | serve a *static file* divorced from the running deployment — generate the card from the agent's actual skill registry at request time (or build time, with a CI check that it matches). |
-| **Skill descriptor** | the per-skill entry — `id`, `name`, `description`, `inputModes`, `outputModes`, examples | skill registration → AgentSkill object | omit input/output schemas; without them, the Card Consumer cannot do compatibility checks and falls back to trial-and-error invocation. |
-| **Card Consumer** | fetching, validating, and acting on the card | URL → verified card OR rejection | trust the card's claims as authority for sensitive actions; the card is a *handshake*, not a credential. Sensitive-action authority comes from the auth scheme the card *points to*, not from the card itself. |
-| **Skill Registry** *(optional)* | a directory of known agents and their cards | query (skill, domain, vendor) → set of card URLs | be the only path to discovery — well-known URI must keep working with no registry, or the ecosystem becomes registry-locked. |
-| **Card-update signal** *(optional)* | telling consumers a card has changed | deploy event → cache invalidation | be silent — long TTLs without an invalidation signal mean consumers act on stale capability information. |
+| **Agent Card document** | the JSON declaration itself — identity, skills, endpoint, auth, protocol version | (none — it is the artefact) $\to$ JSON payload | be a hand-maintained file checked into a repo. The card and the agent must share a single source of truth, or drift is guaranteed. |
+| **Card Publisher** | serving the card at `/.well-known/agent-card.json` | request $\to$ AgentCard JSON | serve a *static file* divorced from the running deployment — generate the card from the agent's actual skill registry at request time (or build time, with a CI check that it matches). |
+| **Skill descriptor** | the per-skill entry — `id`, `name`, `description`, `inputModes`, `outputModes`, examples | skill registration $\to$ AgentSkill object | omit input/output schemas; without them, the Card Consumer cannot do compatibility checks and falls back to trial-and-error invocation. |
+| **Card Consumer** | fetching, validating, and acting on the card | URL $\to$ verified card OR rejection | trust the card's claims as authority for sensitive actions; the card is a *handshake*, not a credential. Sensitive-action authority comes from the auth scheme the card *points to*, not from the card itself. |
+| **Skill Registry** *(optional)* | a directory of known agents and their cards | query (skill, domain, vendor) $\to$ set of card URLs | be the only path to discovery — well-known URI must keep working with no registry, or the ecosystem becomes registry-locked. |
+| **Card-update signal** *(optional)* | telling consumers a card has changed | deploy event $\to$ cache invalidation | be silent — long TTLs without an invalidation signal mean consumers act on stale capability information. |
 
 Six participants, only one of which (the card itself) is an artefact; the rest are operational concerns. The pattern's reliability hinges on whether the Publisher is generated from the deployment or copied from a file — the most common failure is a card that documents a capability the agent no longer has, or omits one the agent now offers.
 

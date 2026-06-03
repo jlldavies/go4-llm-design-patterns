@@ -30,7 +30,7 @@ Use Debate / Deliberation when:
 
 - a single agent or a same-direction ensemble produces *confidently wrong* answers on the task — failure mode is over-confidence, not under-confidence;
 - the question admits genuinely contested positions where the right answer depends on weighing evidence (factual claims under uncertainty, strategic decisions, hypothesis evaluation, risk assessment, ambiguous interpretation);
-- you can afford 2 × R × N LLM calls (R debaters × N rounds + synthesis), typically 6–15 calls per question;
+- you can afford 2 $\times$ R $\times$ N LLM calls (R debaters $\times$ N rounds + synthesis), typically 6–15 calls per question;
 - the synthesis step has a meaningful judgment to make — i.e., a coherent synthesiser agent (or human) exists to weigh the exchange;
 - the question is *substantive enough* to support multi-round argument; trivial questions degenerate to "agree" by round 2.
 
@@ -50,19 +50,19 @@ O12 is right when over-confidence is the binding failure mode, the question is c
 
 **1. Test for over-confident wrong answers before reaching for O12.** On a labelled sample, run single-agent (or O9) on the task. Compute the **confident-wrong rate** — answers given with high stated confidence that humans judge wrong. If that rate is **> 15%** *and* the wrong answers cluster around a particular kind of mistaken premise (a missed counter-example, a wrong causal direction, a confused definition), O12 will catch them; the adversarial side is built to find exactly that. If wrong answers are scattered noise rather than systematic over-confidence, O12 will not help — use **R17 Self-Consistency Voting** to marginalise the noise instead.
 
-**2. Confirm the question supports contested positions.** Some questions have a single correct answer no amount of debate will change (10 × 7 = 70). Others have an evidentially-supported answer where the wrong-but-plausible alternative is a real position someone could defend (the medical differential, the strategic call, the historical attribution, the scientific hypothesis). O12 only earns its cost on the second kind. Audit a sample: if the contrarian role keeps trivially capitulating in round 2, the question is not contested enough.
+**2. Confirm the question supports contested positions.** Some questions have a single correct answer no amount of debate will change (10 $\times$ 7 = 70). Others have an evidentially-supported answer where the wrong-but-plausible alternative is a real position someone could defend (the medical differential, the strategic call, the historical attribution, the scientific hypothesis). O12 only earns its cost on the second kind. Audit a sample: if the contrarian role keeps trivially capitulating in round 2, the question is not contested enough.
 
 **3. Pick R debaters and N rounds.** Standard configurations: **R = 2 debaters, N = 2–3 rounds** (the Du et al. setup; minimum viable). **R = 3+ debaters** for multi-position questions (Co-Scientist tournament-style). Beyond **N = 4 rounds** is almost always wasted — debaters either converge or harden into restatement. The judge fires once at the end (or after each round in tournament configurations).
 
 **4. Pick the synthesiser model deliberately.** The synthesiser is doing the load-bearing judgment work. A cheaper model can be a *debater* (the position constrains the role), but the synthesiser must be at least as capable as the strongest debater — typically the system's main frontier model, set up explicitly as a meta-reasoner ("weigh the strongest argument from each side; identify what the debate established and what remains contested; produce the final answer with a stated confidence"). Tournament configurations (Co-Scientist) replace the single synthesiser with Elo-style pairwise comparisons across many hypotheses.
 
-**5. Cost the loop honestly.** Per question: **R × N debater calls + 1 synthesiser call**, typically **6–15 LLM calls** at R = 2, N = 2–3. At frontier-model rates this is 6–15× single-shot cost. Pair with **V9 Bounded Execution** for hard caps on rounds; the synthesiser's stopping signal is *soft*. For tournament configurations, costs multiply by the hypothesis count — Co-Scientist runs hundreds to thousands of pairwise debates per session.
+**5. Cost the loop honestly.** Per question: **R $\times$ N debater calls + 1 synthesiser call**, typically **6–15 LLM calls** at R = 2, N = 2–3. At frontier-model rates this is 6–15$\times$ single-shot cost. Pair with **V9 Bounded Execution** for hard caps on rounds; the synthesiser's stopping signal is *soft*. For tournament configurations, costs multiply by the hypothesis count — Co-Scientist runs hundreds to thousands of pairwise debates per session.
 
 **Quick test — O12 is the right pattern when:**
 
 - the failure mode is confident-wrong answers from systematic premise errors (rate > 15% on labelled sample), *and*
 - the question admits a genuinely defensible contrarian position (the debate doesn't collapse to immediate agreement), *and*
-- 6–15× single-shot cost is affordable for the question's stakes, *and*
+- 6–15$\times$ single-shot cost is affordable for the question's stakes, *and*
 - a capable synthesiser exists to weigh the exchange (human or strong LLM), *and*
 - multi-round latency is acceptable.
 
@@ -104,13 +104,13 @@ If the failure mode is scattered noise rather than confident wrong, use **R17 Se
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Debater agents (A, B, …)** | defending an *assigned position* across rounds; reading the other side's last move and responding to it specifically | question + assigned position + transcript so far → next-round argument | switch positions mid-debate, refuse the assigned position, or ignore the other side's argument. The pattern's claim ("adversarial argument") collapses if debaters capitulate early or talk past each other. Each debater is set up *for its position*, not for the question in general. |
-| **Position assigner** | mapping the question to the set of opposing positions before debate starts (consensus vs contrarian; multiple competing hypotheses; pro vs con) | question → {position_a, position_b, …} | leak its own verdict into the assignment. The assigner sets up the *frame*; it does not pre-judge the outcome. In simple binary debates this can be a deterministic rule; in hypothesis tournaments (Co-Scientist) this is the Generation agent's job. |
-| **Debate moderator** *(optional, code)* | sequencing the rounds, threading transcripts to each debater, enforcing the round cap | round state → next debater's call | rewrite or summarise debater arguments — debaters must read each other's *actual* words. A moderator that paraphrases is editorialising the debate. |
-| **Synthesiser agent (S)** | reading the full exchange and producing the final answer with rationale, stated confidence, and explicit notes on what remains contested | question + full debate transcript → final answer + rationale | be one of the debaters. The synthesiser must be a *separate session* with no assigned position; otherwise it is a debater in judge's clothing and the synthesis collapses to advocacy. |
-| **Iteration log** *(V14)* | the full transcript of (round, debater, argument) across rounds plus the synthesiser's final | sequence of rounds → V14 trajectory record | be hidden or summarised away. The transcript is the pattern's primary audit artefact — operators distinguish genuine adversarial reasoning from staged agreement *only* by reading it. |
+| **Debater agents (A, B, …)** | defending an *assigned position* across rounds; reading the other side's last move and responding to it specifically | question + assigned position + transcript so far $\to$ next-round argument | switch positions mid-debate, refuse the assigned position, or ignore the other side's argument. The pattern's claim ("adversarial argument") collapses if debaters capitulate early or talk past each other. Each debater is set up *for its position*, not for the question in general. |
+| **Position assigner** | mapping the question to the set of opposing positions before debate starts (consensus vs contrarian; multiple competing hypotheses; pro vs con) | question $\to$ {position_a, position_b, …} | leak its own verdict into the assignment. The assigner sets up the *frame*; it does not pre-judge the outcome. In simple binary debates this can be a deterministic rule; in hypothesis tournaments (Co-Scientist) this is the Generation agent's job. |
+| **Debate moderator** *(optional, code)* | sequencing the rounds, threading transcripts to each debater, enforcing the round cap | round state $\to$ next debater's call | rewrite or summarise debater arguments — debaters must read each other's *actual* words. A moderator that paraphrases is editorialising the debate. |
+| **Synthesiser agent (S)** | reading the full exchange and producing the final answer with rationale, stated confidence, and explicit notes on what remains contested | question + full debate transcript $\to$ final answer + rationale | be one of the debaters. The synthesiser must be a *separate session* with no assigned position; otherwise it is a debater in judge's clothing and the synthesis collapses to advocacy. |
+| **Iteration log** *(V14)* | the full transcript of (round, debater, argument) across rounds plus the synthesiser's final | sequence of rounds $\to$ V14 trajectory record | be hidden or summarised away. The transcript is the pattern's primary audit artefact — operators distinguish genuine adversarial reasoning from staged agreement *only* by reading it. |
 
 Three structural invariants make the pattern work:
 
@@ -134,7 +134,7 @@ The Position assigner reads the question and decides the frame: consensus vs con
 
 **Costs**
 
-- **6–15× single-shot cost** at R = 2, N = 2–3; tournaments are an order of magnitude beyond that.
+- **6–15$\times$ single-shot cost** at R = 2, N = 2–3; tournaments are an order of magnitude beyond that.
 - Strictly sequential within a debate — wall-clock latency scales with rounds; parallelism only exists across debates, not within one. Each debater call is a fresh API invocation; the KV cache does not persist across API calls (mechanism 3). Each round therefore pays full prefill on the accumulated transcript. The per-round cost grows with transcript length: by round 3, each debater is prefilling round 1 + round 2 transcript before generating its response. Prefix caching (mechanism 5) helps for the stable system-prompt portion but not for the growing debate transcript. (Mechanisms 3, 5.)
 - Setup complexity: position assignment, per-round transcript threading, synthesiser prompt all need careful design.
 - Debater setup is per-position prompt-engineering work — adding a position is non-trivial.
@@ -173,12 +173,12 @@ The Position assigner reads the question and decides the frame: consensus vs con
 | # | Step | Kind | Draws on |
 |---|---|---|---|
 | 1 | Position assigner maps question to {position_a, position_b, …} | `code` (or `LLM`) | Optional Assigner session |
-| 2 | Each Debater agent produces round-1 opening statement | `LLM` (× R) | Debater A, B, … sessions (S3) |
-| 3 | Moderator threads transcripts; each Debater produces round-r rebuttal engaging the others | `LLM` (× R per round) | Debater sessions |
+| 2 | Each Debater agent produces round-1 opening statement | `LLM` ($\times$ R) | Debater A, B, … sessions (S3) |
+| 3 | Moderator threads transcripts; each Debater produces round-r rebuttal engaging the others | `LLM` ($\times$ R per round) | Debater sessions |
 | 4 | Branch — if round cap, convergence, or no-progress, exit loop | `code` | V9 |
 | 5 | Log full transcript per round | `code` | V14 |
 | 6 | Synthesiser reads full transcript and produces final answer with structured rationale | `LLM` | Synthesiser session (V15, S6) |
-| 7 | *(tournament variant)* Pairwise Elo comparison across N candidate debates | `LLM` (× many) | Comparator session |
+| 7 | *(tournament variant)* Pairwise Elo comparison across N candidate debates | `LLM` ($\times$ many) | Comparator session |
 
 **Skeleton** — the wiring only; each `# LLM` line is a configured session on its own agent:
 

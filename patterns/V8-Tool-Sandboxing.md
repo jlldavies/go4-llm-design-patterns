@@ -62,10 +62,10 @@ V8 is right when the tool surface includes anything an attacker (or a confused m
 **2. Enumerate tool capabilities.** For every tool, list filesystem paths it touches, network endpoints it reaches, processes it spawns, and external resources it consumes. If any tool's enumerated capability set is "broad" (whole filesystem, arbitrary network, arbitrary subprocesses), V8 is mandatory. If every tool is a narrow, schema-validated API call with no side effects on the host, V8 is over-engineering — use **I2 Function Call** validation instead.
 
 **3. Pick the variant by threat model and operational appetite.**
-- Single-tenant prototype with semi-trusted users → **container** (Docker). 80% solution.
-- Multi-tenant production with untrusted code → **gVisor** or **microVM** (Firecracker). Stronger kernel-exploit isolation.
-- Team does not want to operate the sandbox infrastructure → **hosted service** (E2B, Modal, Daytona). Trade per-invocation cost for zero ops.
-- Pure-computation tool, no host I/O needed → **WebAssembly** (Wasmtime). Capability-based by construction.
+- Single-tenant prototype with semi-trusted users $\to$ **container** (Docker). 80% solution.
+- Multi-tenant production with untrusted code $\to$ **gVisor** or **microVM** (Firecracker). Stronger kernel-exploit isolation.
+- Team does not want to operate the sandbox infrastructure $\to$ **hosted service** (E2B, Modal, Daytona). Trade per-invocation cost for zero ops.
+- Pure-computation tool, no host I/O needed $\to$ **WebAssembly** (Wasmtime). Capability-based by construction.
 
 **4. Set the resource caps from data, not intuition.** Per-block CPU seconds, wall-time, memory, and network policy must be calibrated against measured workloads. Defaults to anchor against: 30 s wall-time, 512 MB memory, deny-by-default network with explicit allow-list, no subprocess spawning unless required. Tighten where measured behaviour permits; never loosen without justification logged.
 
@@ -121,16 +121,16 @@ If the agent executes code and V8 cannot be provisioned, the only safe configura
 
 Each participant owns exactly one boundary or enforcement responsibility; the pattern's security comes from that separation.
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Sandbox Manager** | creation and teardown of isolated environments | (capability set, code/tool call) → (configured environment, handle) | reuse environments across distinct agent runs — leaking variables, files, or cached credentials across users is the pattern's most-cited operational failure. |
-| **Capability Set** | the explicit, enumerated permission grant for this invocation | tool requirements → (fs paths, net endpoints, proc rules, caps) | default to permissive — every capability must be *granted explicitly*; the absence of a grant is denial. "Just allow everything for now" is how every sandbox escape post-mortem begins. |
-| **Executor** | running the code or tool inside the enforced environment | (code block, environment) → (stdout, return value, traceback, resource usage) | escape isolation; if it can, the pattern has not been implemented. The executor *is* the V8 implementation — not a `subprocess.run` shortcut around it. |
-| **Resource Monitor** | enforcing the per-block caps in real time | running execution → (terminate-on-trip signal, usage record) | wait for graceful shutdown when a cap is tripped — kill the process; report the trip as the Observation. A monitor that hopes the workload will stop on its own is not a monitor. |
-| **Result Sanitiser** | validating and scrubbing tool output before it enters agent context | raw execution output → cleaned, schema-valid Observation | trust tool output as agent context — sanitise PII, strip injection-shaped strings, enforce schema. Tool output is *untrusted content* (the V6 concern) even when the tool is trusted. |
-| **Audit Logger** *(V14)* | recording every execution, cap trip, error, and capability grant | sandbox events → trace span | omit failed or terminated executions; those are the security-relevant events. The logger feeds V14 Trajectory Logging and V17 Online Eval. |
+| **Sandbox Manager** | creation and teardown of isolated environments | (capability set, code/tool call) $\to$ (configured environment, handle) | reuse environments across distinct agent runs — leaking variables, files, or cached credentials across users is the pattern's most-cited operational failure. |
+| **Capability Set** | the explicit, enumerated permission grant for this invocation | tool requirements $\to$ (fs paths, net endpoints, proc rules, caps) | default to permissive — every capability must be *granted explicitly*; the absence of a grant is denial. "Just allow everything for now" is how every sandbox escape post-mortem begins. |
+| **Executor** | running the code or tool inside the enforced environment | (code block, environment) $\to$ (stdout, return value, traceback, resource usage) | escape isolation; if it can, the pattern has not been implemented. The executor *is* the V8 implementation — not a `subprocess.run` shortcut around it. |
+| **Resource Monitor** | enforcing the per-block caps in real time | running execution $\to$ (terminate-on-trip signal, usage record) | wait for graceful shutdown when a cap is tripped — kill the process; report the trip as the Observation. A monitor that hopes the workload will stop on its own is not a monitor. |
+| **Result Sanitiser** | validating and scrubbing tool output before it enters agent context | raw execution output $\to$ cleaned, schema-valid Observation | trust tool output as agent context — sanitise PII, strip injection-shaped strings, enforce schema. Tool output is *untrusted content* (the V6 concern) even when the tool is trusted. |
+| **Audit Logger** *(V14)* | recording every execution, cap trip, error, and capability grant | sandbox events $\to$ trace span | omit failed or terminated executions; those are the security-relevant events. The logger feeds V14 Trajectory Logging and V17 Online Eval. |
 
-The defining separations are **Capability Set ↔ Executor** (the executor cannot grant itself capabilities; the set is decided outside) and **Executor ↔ Resource Monitor** (the executor is observed by something it cannot turn off). When either separation collapses — the executor decides its own permissions, or the monitor is in-process and killable by the workload — V8 is V8 in name only.
+The defining separations are **Capability Set $\leftrightarrow$ Executor** (the executor cannot grant itself capabilities; the set is decided outside) and **Executor $\leftrightarrow$ Resource Monitor** (the executor is observed by something it cannot turn off). When either separation collapses — the executor decides its own permissions, or the monitor is in-process and killable by the workload — V8 is V8 in name only.
 
 ## Collaborations
 
@@ -252,7 +252,7 @@ execute_in_sandbox(action, agent_id, run_id):
 - **Anthropic Claude code execution tool / OpenAI Code Interpreter** — vendor-hosted Python sandboxes that back the code-execution channels in Claude and ChatGPT; vendor-managed V8 implementations.
 - **HuggingFace smolagents** — `CodeAgent` ships with sandbox backends for E2B, Modal, Blaxel, Docker, and WebAssembly; the docs explicitly warn that the built-in `LocalPythonExecutor` is *not* a security sandbox.
 - **AWS Lambda / Fargate** — Firecracker microVMs as the substrate; not agent-specific but the canonical proof that microVM isolation works at hyperscale.
-- **Modal-hosted agent products** — Modal's gVisor sandbox is the execution substrate for a generation of coding-agent and research-agent products; "agent emits code → Modal runs it → output returns".
+- **Modal-hosted agent products** — Modal's gVisor sandbox is the execution substrate for a generation of coding-agent and research-agent products; "agent emits code $\to$ Modal runs it $\to$ output returns".
 - **E2B-hosted agents** — data-analysis, research, and dataframe-manipulation agents on E2B Code Interpreter, including Jupyter-kernel sessions per agent run.
 
 ## Related Patterns

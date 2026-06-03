@@ -61,7 +61,7 @@ If all three are low, **S9** alone suffices and H5 is overhead.
 If any of these is missing, you do not have H5; you have HA4. Do not deploy.
 
 **3. Bound the active constitution.** Hard caps prevent slow-creep paralysis:
-- **≤ 20 active principles** at any time. Forced retirement before any addition. The cap has a mechanical grounding beyond process simplicity: the active constitution is injected into every Agent session, and each principle adds tokens that cost n² attention computation across the session and across every future turn (mechanism 2). An unbounded constitution inflates the fixed-cost base of every agent call. Forced retirement before any addition is also cost discipline, not only conflict management.
+- **$\leq$ 20 active principles** at any time. Forced retirement before any addition. The cap has a mechanical grounding beyond process simplicity: the active constitution is injected into every Agent session, and each principle adds tokens that cost n² attention computation across the session and across every future turn (mechanism 2). An unbounded constitution inflates the fixed-cost base of every agent call. Forced retirement before any addition is also cost discipline, not only conflict management.
 - **Provisional period** — every newly approved principle is provisional for at least 30 days (or N invocations), tracked separately, and easy to revert.
 - **Conflict check** — every proposal is checked against existing principles for contradiction before reaching the reviewer.
 
@@ -136,15 +136,15 @@ If any condition fails, **stay on S9**. If only deterministic, enumerable rules 
 
 Every participant owns exactly one decision; the *Human Reviewer* is non-optional, and an H5 system without it is not H5.
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Active Constitution** | the principle set the Agent applies right now | versioned numbered list → loaded into S9 sessions | be modified by anything other than a Human-Reviewer-approved merge. Anything that bypasses the reviewer is the failure mode the pattern exists to prevent. |
-| **Gap Detector** | recognising operation evidence that warrants a proposal | trajectory + outcome data → trigger signal (gap / degradation / conflict) | propose principles itself, or modify the constitution. It only *flags*. |
-| **Principle Proposer (LLM)** | drafting a candidate principle with reasoning | trigger signal + context → candidate text + rationale + evidence | merge its own proposal, or judge its own proposal worthy. Even a "high-confidence" proposal must enter the review queue. |
-| **Adversarial Reviewer** | screening proposals before they reach a human | candidate → pass / fail + red-team analysis | be the final approver. Its job is filtering, not approval; it kicks bad proposals out, but a pass is *necessary*, not sufficient. |
-| **Human Reviewer** | the only authority that can change the constitution | screened candidate + evidence → approve / modify / reject | be replaced by an automated process, a different agent, or the same model under a different persona. This is the V1 checkpoint; replacing it is the anti-pattern HA4. |
-| **Outcome Tracker** | the verdict on a principle's real-world performance | per-decision outcomes + principle attribution → degradation signal | retire or revise a principle on its own — it generates a degradation *flag* that re-enters the same Proposer→Adversarial→Human loop. |
-| **Constitution Version Control** | the audit-grade history of every change | proposal + reviewer verdict + rationale + outcome data → versioned record | discard. The history is the artifact regulators, operators, and post-incident reviewers consult. **V14** owns the trace; this owns the structured diff. |
+| **Active Constitution** | the principle set the Agent applies right now | versioned numbered list $\to$ loaded into S9 sessions | be modified by anything other than a Human-Reviewer-approved merge. Anything that bypasses the reviewer is the failure mode the pattern exists to prevent. |
+| **Gap Detector** | recognising operation evidence that warrants a proposal | trajectory + outcome data $\to$ trigger signal (gap / degradation / conflict) | propose principles itself, or modify the constitution. It only *flags*. |
+| **Principle Proposer (LLM)** | drafting a candidate principle with reasoning | trigger signal + context $\to$ candidate text + rationale + evidence | merge its own proposal, or judge its own proposal worthy. Even a "high-confidence" proposal must enter the review queue. |
+| **Adversarial Reviewer** | screening proposals before they reach a human | candidate $\to$ pass / fail + red-team analysis | be the final approver. Its job is filtering, not approval; it kicks bad proposals out, but a pass is *necessary*, not sufficient. |
+| **Human Reviewer** | the only authority that can change the constitution | screened candidate + evidence $\to$ approve / modify / reject | be replaced by an automated process, a different agent, or the same model under a different persona. This is the V1 checkpoint; replacing it is the anti-pattern HA4. |
+| **Outcome Tracker** | the verdict on a principle's real-world performance | per-decision outcomes + principle attribution $\to$ degradation signal | retire or revise a principle on its own — it generates a degradation *flag* that re-enters the same Proposer$\to$Adversarial$\to$Human loop. |
+| **Constitution Version Control** | the audit-grade history of every change | proposal + reviewer verdict + rationale + outcome data $\to$ versioned record | discard. The history is the artifact regulators, operators, and post-incident reviewers consult. **V14** owns the trace; this owns the structured diff. |
 
 The separation matters: a Proposer that can also approve has the same incentive failure as a Critic that can also revise (S9's lip-service-critique trap, escalated). A Reviewer that is "an LLM with a strong red-team prompt" is not a V1 — it is V15, which belongs in the Adversarial Reviewer slot, not the Human Reviewer slot.
 
@@ -252,7 +252,7 @@ proposal_loop(trigger, constitution, immutable_core):        # invoked when Gap 
 | Session | Model | Setup — loaded once, before first call | Per-call prompt wraps |
 |---|---|---|---|
 | **Agent (S9 chain)** | the system's main generalist | role (S3), the active constitution as numbered principles (S9), the critique-and-revise rubric, output contract | the query |
-| **Proposer** | capable generalist — proposal quality caps the value of the whole pattern | role (*"you propose principle changes to a governed constitution; you do not adopt them"*), the immutable core (what cannot be touched), the existing constitution, the rationale schema (situation → recommended principle → evidence → expected effect) | the trigger signal + relevant trajectory excerpts |
+| **Proposer** | capable generalist — proposal quality caps the value of the whole pattern | role (*"you propose principle changes to a governed constitution; you do not adopt them"*), the immutable core (what cannot be touched), the existing constitution, the rationale schema (situation $\to$ recommended principle $\to$ evidence $\to$ expected effect) | the trigger signal + relevant trajectory excerpts |
 | **Adversarial Reviewer** | strong generalist or a fine-tuned safety evaluator | role (*"you red-team proposed principles; assume self-serving drift unless proven otherwise"*), the attack checklist (serves self? contradicts core? conflicts existing? slow loosening of oversight?), output contract (PASS with notes / FAIL with reasoning) | the candidate principle + the existing constitution + the immutable core |
 | **Outcome Attributor** *(optional)* | small fast generalist | role (*"you attribute the outcome of a decision to the principles that produced it"*), the constitution, the outcome rubric | the decision trace + the outcome |
 
@@ -285,7 +285,7 @@ There is no canonical "H5" library at this time. Teams that need this pattern bu
 - **Composes with** V10 Checkpointing — the previous constitution version is checkpointed before any merge, making revert cheap.
 - **Uses** V15 LLM-as-Judge — the Adversarial Reviewer is V15 configured as a red-team.
 - **Pairs with** H2 Episodic Self-Improvement — H2's failure lessons feed the Gap Detector as one of its evidence streams; H5's approved principles feed back as constraints H2 must respect.
-- **Distinct from H8 Meta-Agent Self-Modification** — H8 tunes parameters (prompts, tool order, temperature); H5 evolves *principles*. H8 cannot touch H5's constitutional surface; H5 cannot reach H8's parameter surface. The boundary is absolute. (See CONFLICTS §H8 ↔ H5.)
+- **Distinct from H8 Meta-Agent Self-Modification** — H8 tunes parameters (prompts, tool order, temperature); H5 evolves *principles*. H8 cannot touch H5's constitutional surface; H5 cannot reach H8's parameter surface. The boundary is absolute. (See CONFLICTS §H8 $\leftrightarrow$ H5.)
 - **Anti-pattern HA4 — Autonomous Principle Adoption** — H5 without the V1 checkpoint is not a faster H5; it is the failure mode the pattern exists to prevent. Treat the missing reviewer as a broken dependency, not a tradeoff.
 - **Note on fundamentality** — H5 earns its number on the *governance loop*, not the proposing-of-principles. S9 + a periodic "review your principles" prompt is not H5 — it lacks the Gap Detector, the Adversarial Reviewer, the provisional-quarantine mechanic, and the structural separation of proposer from approver. The pattern's contribution is that explicit governance architecture.
 

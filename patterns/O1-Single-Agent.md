@@ -25,33 +25,33 @@ Every other Category IV pattern decomposes into "O1 plus a specific addition": *
 Use Single Agent when:
 
 - the task is self-contained within one context window — total input + intermediate scratch + tool outputs + final answer fit comfortably;
-- the tool set is small enough that the model can select reliably — typically **≤ 10–15 tools** before selection accuracy degrades, hard-capped by **V13 Tool Budget**;
+- the tool set is small enough that the model can select reliably — typically **$\leq$ 10–15 tools** before selection accuracy degrades, hard-capped by **V13 Tool Budget**;
 - the task does not split into roles that are genuinely *distinct in expertise or context* — a "researcher" and a "writer" persona at the same model and same context is not a real split;
 - iteration speed and debuggability matter — one agent has one failure domain.
 
 Do not use it when:
 
-- the task decomposes into a known, fixed sequence of steps with quality gates between them → use **O2 Prompt Chaining**.
-- distinct input types need genuinely different handling (billing vs. technical vs. cancellation) → use **O3 Routing**.
-- independent sub-tasks can run concurrently and the latency saving matters → use **O4 Parallelization**.
-- output quality requires evaluation that the generator cannot honestly give itself → use **O5 Evaluator-Optimizer** (or **R8 Self-Refine** for the cheap version).
-- the task is open-ended and decomposition is not known upfront → use **O6 Orchestrator-Workers**.
-- the working context exceeds what one window can hold without compression, and compression itself loses too much → use **O17 Agent Isolation** to delegate sub-tasks to fresh contexts.
-- the tool count exceeds the V13 budget and cannot be trimmed → split by domain (**O14 Single Information Environment**) or route (**O3**).
+- the task decomposes into a known, fixed sequence of steps with quality gates between them $\to$ use **O2 Prompt Chaining**.
+- distinct input types need genuinely different handling (billing vs. technical vs. cancellation) $\to$ use **O3 Routing**.
+- independent sub-tasks can run concurrently and the latency saving matters $\to$ use **O4 Parallelization**.
+- output quality requires evaluation that the generator cannot honestly give itself $\to$ use **O5 Evaluator-Optimizer** (or **R8 Self-Refine** for the cheap version).
+- the task is open-ended and decomposition is not known upfront $\to$ use **O6 Orchestrator-Workers**.
+- the working context exceeds what one window can hold without compression, and compression itself loses too much $\to$ use **O17 Agent Isolation** to delegate sub-tasks to fresh contexts.
+- the tool count exceeds the V13 budget and cannot be trimmed $\to$ split by domain (**O14 Single Information Environment**) or route (**O3**).
 
 ## Decision Criteria
 
 O1 is right when one capable model can carry the whole task end-to-end inside one context window, with a tool set it can navigate, and nothing in the failure profile justifies the cost of an upgrade yet.
 
-**1. Context-budget check.** Estimate **C** = system prompt + worst-case user input + cumulative tool outputs + intermediate reasoning + final answer, in tokens. If **C ≤ ~50%** of an affordable context window, O1 is viable. **50–75%** is borderline — measure overflow rate on a probe set. **> 75%** → escalate to **O17 Agent Isolation** for sub-tasks, or **K6 Context Compression** to free space, or **O2** to break the task across calls.
+**1. Context-budget check.** Estimate **C** = system prompt + worst-case user input + cumulative tool outputs + intermediate reasoning + final answer, in tokens. If **C $\leq$ ~50%** of an affordable context window, O1 is viable. **50–75%** is borderline — measure overflow rate on a probe set. **> 75%** $\to$ escalate to **O17 Agent Isolation** for sub-tasks, or **K6 Context Compression** to free space, or **O2** to break the task across calls.
 
-This threshold is mechanically grounded: the KV cache grows as [layers × seq_len × kv_heads × d_head] with every token appended to the trajectory. Each generation step reads the full cache; at 70–75% of the window, attention is distributed over a context where relevant tokens are increasingly diluted by accumulated observations. The n² compute cost also becomes material — every new token added pays pairwise attention against all prior tokens. U-shaped recall (Liu et al. 2024) means mid-trajectory tool outputs are statistically under-attended even when technically in window, making overflow a soft failure before it is a hard one. (Mechanisms 2, 3, 4.)
+This threshold is mechanically grounded: the KV cache grows as [layers $\times$ seq_len $\times$ kv_heads $\times$ d_head] with every token appended to the trajectory. Each generation step reads the full cache; at 70–75% of the window, attention is distributed over a context where relevant tokens are increasingly diluted by accumulated observations. The n² compute cost also becomes material — every new token added pays pairwise attention against all prior tokens. U-shaped recall (Liu et al. 2024) means mid-trajectory tool outputs are statistically under-attended even when technically in window, making overflow a soft failure before it is a hard one. (Mechanisms 2, 3, 4.)
 
-**2. Tool-budget check (V13).** Count distinct tools the agent will be exposed to. **≤ 10 tools** → O1 is safe. **10–15** → measure tool-selection accuracy (Anthropic and others have observed selection accuracy degrading from ~87% to ~54% as tools proliferate). **> 15** → escalate: **O3 Routing** to split by intent, **O14 SIE** to split by data domain, or **I3 MCP** + dynamic discovery. The 4–5 MCP-server / 60k-token threshold from RELIABILITY V13 applies here.
+**2. Tool-budget check (V13).** Count distinct tools the agent will be exposed to. **$\leq$ 10 tools** $\to$ O1 is safe. **10–15** $\to$ measure tool-selection accuracy (Anthropic and others have observed selection accuracy degrading from ~87% to ~54% as tools proliferate). **> 15** $\to$ escalate: **O3 Routing** to split by intent, **O14 SIE** to split by data domain, or **I3 MCP** + dynamic discovery. The 4–5 MCP-server / 60k-token threshold from RELIABILITY V13 applies here.
 
 **3. Decomposition test.** Can you enumerate the task's steps at design time? If **yes**, **O2 Prompt Chaining** is cheaper and more testable than O1's free-form loop. If **no — the path is open-ended and the model must decide** — O1's ReAct loop is the right shape. O1 wins exactly when the work is exploratory.
 
-**4. Role-distinctness test.** Would the proposed sub-agents genuinely differ in *model, system prompt, or context* — or are they the same model with different role labels? Same model + same context with two personas is not a real split; collapse to one O1. Different models, isolated contexts, or genuinely specialised tools → **O6 Orchestrator-Workers**.
+**4. Role-distinctness test.** Would the proposed sub-agents genuinely differ in *model, system prompt, or context* — or are they the same model with different role labels? Same model + same context with two personas is not a real split; collapse to one O1. Different models, isolated contexts, or genuinely specialised tools $\to$ **O6 Orchestrator-Workers**.
 
 **5. Reliability budget.** Is a runaway agent acceptable? Never. O1 must be paired with **V9 Bounded Execution** (cap on tool calls, iterations, cost, wall-clock time) and **V14 Trajectory Logging** (so failures can be diagnosed without re-running). These are not orchestration; they are the cost of running any agent. The pattern's most common production failure is "agent ran for 200 tool calls and burned the budget on a task that should have been bounded at 20."
 
@@ -104,12 +104,12 @@ One model. One system prompt. One context. One inner loop. Tools fan out and obs
 
 Four participants — the minimum any agentic system can have. The discipline of O1 is that the list does *not* grow.
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **System Prompt** | the agent's role, task framing, tool catalogue, stop conditions, and any constraints | task spec → instruction block loaded once into the session | smuggle in a second persona, a hidden evaluator, or a chain of "now do step 2" instructions — those are O2/O5 upgrades and must be named as such, not buried inside the system prompt. |
-| **Agent (LLM)** | the un-augmented reason-act-observe loop over the tools | system prompt + user request + accumulating tool observations → next action or final answer | be silently swapped between calls; spawn or call another agent (that is O6/O17); persist state outside the context (that is K10/K11/K12). |
-| **Tool Set** | the bounded set of actions the Agent can call | tool invocation → tool result | exceed the V13 budget — once tool count drives selection accuracy down, the pattern has failed and the system needs O3, O14, or I3. Tools must not silently mutate (idempotency makes V10 checkpointing work). |
-| **Caller** | the wiring that submits the request, runs the inner loop, executes tool calls, and enforces the V9 bound | user request → final answer (or bounded failure) | hand-massage intermediate outputs to nurse the agent past failures — that masks an O1 failure that should be an honest escalation to O2 or O5. The Caller's only judgement is the V9 stop. |
+| **System Prompt** | the agent's role, task framing, tool catalogue, stop conditions, and any constraints | task spec $\to$ instruction block loaded once into the session | smuggle in a second persona, a hidden evaluator, or a chain of "now do step 2" instructions — those are O2/O5 upgrades and must be named as such, not buried inside the system prompt. |
+| **Agent (LLM)** | the un-augmented reason-act-observe loop over the tools | system prompt + user request + accumulating tool observations $\to$ next action or final answer | be silently swapped between calls; spawn or call another agent (that is O6/O17); persist state outside the context (that is K10/K11/K12). |
+| **Tool Set** | the bounded set of actions the Agent can call | tool invocation $\to$ tool result | exceed the V13 budget — once tool count drives selection accuracy down, the pattern has failed and the system needs O3, O14, or I3. Tools must not silently mutate (idempotency makes V10 checkpointing work). |
+| **Caller** | the wiring that submits the request, runs the inner loop, executes tool calls, and enforces the V9 bound | user request $\to$ final answer (or bounded failure) | hand-massage intermediate outputs to nurse the agent past failures — that masks an O1 failure that should be an honest escalation to O2 or O5. The Caller's only judgement is the V9 stop. |
 
 The whole point of the page is the *Must not* column. O1's failure mode is not technical; it is the slow accretion of unexamined additions — a second persona here, a critique step there, an extra tool every sprint — until the prompt is no longer O1 and the team has built an undocumented O6 by stealth.
 
@@ -147,14 +147,14 @@ The Caller composes the request and submits it to the configured Agent session. 
 
 ## Implementation Notes
 
-- **Pair with V9 Bounded Execution from day one.** Cap tool calls, iterations, cost, and wall-clock. Make the bound visible to the agent in the system prompt — "you have ≤ N tool calls" focuses the loop.
+- **Pair with V9 Bounded Execution from day one.** Cap tool calls, iterations, cost, and wall-clock. Make the bound visible to the agent in the system prompt — "you have $\leq$ N tool calls" focuses the loop.
 - **Pair with V14 Trajectory Logging from day one.** OTel-compliant traces with tool args, tool results, and reasoning tokens. If a failure cannot be diagnosed from the log, the log is incomplete.
 - **R4 ReAct is the standard inner loop.** Most production single agents are O1 with R4 inside; for tool-heavy or computation-heavy tasks, **R13 CodeAct** trades JSON tool-calls for executed Python and often improves accuracy 10–20 pp at similar cost.
-- **Keep the system prompt to ≤ 1–2 pages.** Beyond that, decomposition (O2) or role-splitting (O6) is almost always cheaper than one giant prompt — that drift is **A1 God Prompt**.
+- **Keep the system prompt to $\leq$ 1–2 pages.** Beyond that, decomposition (O2) or role-splitting (O6) is almost always cheaper than one giant prompt — that drift is **A1 God Prompt**.
 - **Cap tools at ~10–15** (V13). Beyond that, group by domain and route (O3) or split by dataset (O14). MCP servers (I3) help with discovery but do not raise the per-agent ceiling.
 - **Idempotent tools** make V10 Checkpointing and retry-on-failure tractable. Mutating tools without idempotency lock you out of recovery patterns.
 - **Stop conditions in the system prompt** matter as much as the V9 bound — "stop and ask the user when X" is a Signal-layer instruction that prevents many runaway loops without needing V1 Human-in-the-Loop wiring.
-- **Measure first, escalate second.** Run the task on O1 with a logged probe set. Only when measured failure modes name a specific upgrade (overflow → O17, selection collapse → O3, sequential latency → O4) does the upgrade pay back.
+- **Measure first, escalate second.** Run the task on O1 with a logged probe set. Only when measured failure modes name a specific upgrade (overflow $\to$ O17, selection collapse $\to$ O3, sequential latency $\to$ O4) does the upgrade pay back.
 
 ## Implementation Sketch
 
@@ -194,7 +194,7 @@ single_agent(user_request, tools, max_steps):                # V9 bound
 
 | Session | Model | Setup — loaded once, before first call | Per-call prompt wraps |
 |---|---|---|---|
-| **Agent** | a capable instruction-tuned generalist with strong tool-use (the system's main model) | role / persona (**S3**); task framing; tool catalogue with schemas (**I2/I3**); constraints and prohibitions (**S5**); output contract for the final answer (**S6**); explicit stop conditions; the V9 bound stated in natural language ("you have ≤ N tool calls") | the accumulating conversation: user request + every prior (action, observation) pair |
+| **Agent** | a capable instruction-tuned generalist with strong tool-use (the system's main model) | role / persona (**S3**); task framing; tool catalogue with schemas (**I2/I3**); constraints and prohibitions (**S5**); output contract for the final answer (**S6**); explicit stop conditions; the V9 bound stated in natural language ("you have $\leq$ N tool calls") | the accumulating conversation: user request + every prior (action, observation) pair |
 
 **Specialist-model note.** None — a capable tool-using generalist is the entire requirement. That is what makes O1 the baseline. The pattern artifact that does the heavy lifting is the *system prompt* together with the *tool schemas*: a well-scoped role, a tight tool catalogue, clear stop conditions, and an explicit bound. Any move that requires a specialist (a fine-tuned router, a separate evaluator model, a long-context model for the orchestrator) is by definition a different pattern — O3, O5, O6, O7. When O1 starts demanding a specialist, the system has outgrown O1.
 

@@ -16,7 +16,7 @@ Make data ownership the primary unit of agent specialisation, so the routing que
 
 Enterprise data is rarely one corpus. It is sales data here, HR data there, finance data behind a different access boundary, support tickets in a fourth system — each with its own schema, vocabulary, freshness, and access rules. Two naive responses both fail:
 
-- **One unified corpus (K1 over everything).** Indexing it all together blurs the vocabularies — "owner" in CRM ≠ "owner" in HR ≠ "owner" in legal — and the retriever returns plausibly-relevant chunks from the wrong domain. Access boundaries are also lost: the index can leak content the requesting user should not see.
+- **One unified corpus (K1 over everything).** Indexing it all together blurs the vocabularies — "owner" in CRM $\neq$ "owner" in HR $\neq$ "owner" in legal — and the retriever returns plausibly-relevant chunks from the wrong domain. Access boundaries are also lost: the index can leak content the requesting user should not see.
 - **One generalist agent over all the tools (O6 with worker = "everything").** The worker's context fills with tool schemas and policy text from every domain. Domain-specific prompting and per-corpus tuning are impossible because there is only one prompt.
 
 The right move is to make **ownership** the architectural primitive. Each agent owns *one* dataset: its schema, its retriever, its tuning, its access rules, its system prompt — all scoped to that domain. A coordinator looks at the query, picks the owner whose dataset holds the answer, and delegates. Cross-domain queries decompose into per-owner sub-queries that the coordinator synthesises. The owners are *specialists by data*, not by task.
@@ -97,13 +97,13 @@ If the partitions are imaginary, use **K1**. If the partitions are real but the 
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Coordinator** | the dataset-selection decision | query → set of owner IDs | answer the query, hold any data, or call any owner's retriever directly. A coordinator that can also retrieve has no incentive to delegate. |
-| **Partition Manifest** | the catalogue of owners, their domains, and access rules | — → routable manifest the Coordinator reads | be inferred at runtime; it must be declared and versioned, or routing decisions become unreproducible. |
-| **Owner Agent** *(one per partition)* | one bounded dataset and its retrieval / answer pipeline | sub-query → answer scoped to its dataset | look outside its partition, even when the query mentions another domain. Crossing the boundary is the Coordinator's call, not the Owner's. |
-| **Synthesiser** *(used for multi-domain queries)* | combining answers from multiple owners into one response | per-owner answers + original query → final answer | re-retrieve, or override an Owner's answer on the Owner's home turf. It composes; it does not adjudicate within a domain. |
-| **Access Policy** | the rule that gates which owners a given user / tenant can reach | (user, owners) → permitted subset | be enforced inside Owner Agents alone — it must gate at the Coordinator, or a misrouted query can leak. |
+| **Coordinator** | the dataset-selection decision | query $\to$ set of owner IDs | answer the query, hold any data, or call any owner's retriever directly. A coordinator that can also retrieve has no incentive to delegate. |
+| **Partition Manifest** | the catalogue of owners, their domains, and access rules | — $\to$ routable manifest the Coordinator reads | be inferred at runtime; it must be declared and versioned, or routing decisions become unreproducible. |
+| **Owner Agent** *(one per partition)* | one bounded dataset and its retrieval / answer pipeline | sub-query $\to$ answer scoped to its dataset | look outside its partition, even when the query mentions another domain. Crossing the boundary is the Coordinator's call, not the Owner's. |
+| **Synthesiser** *(used for multi-domain queries)* | combining answers from multiple owners into one response | per-owner answers + original query $\to$ final answer | re-retrieve, or override an Owner's answer on the Owner's home turf. It composes; it does not adjudicate within a domain. |
+| **Access Policy** | the rule that gates which owners a given user / tenant can reach | (user, owners) $\to$ permitted subset | be enforced inside Owner Agents alone — it must gate at the Coordinator, or a misrouted query can leak. |
 
 Five narrow responsibilities. The pattern's reliability comes from the rule that **no Owner ever sees data it does not own**, even on a cross-domain query — the Coordinator decomposes, the Owners answer independently, the Synthesiser composes.
 
@@ -154,9 +154,9 @@ A query arrives. The Coordinator reads the Partition Manifest, applies the Acces
 |---|---|---|---|
 | 1 | Load Partition Manifest, apply Access Policy for the user | `code` | — |
 | 2 | Coordinator picks one or more Owner IDs | `LLM` | Coordinator session |
-| 3 | Branch — single owner → step 5; multiple owners → step 4 | `code` | — |
+| 3 | Branch — single owner $\to$ step 5; multiple owners $\to$ step 4 | `code` | — |
 | 4 | Decompose into per-owner sub-queries; fan out | `code` | O4 |
-| 5 | Each chosen Owner retrieves + answers within its partition | `LLM` (× N) | Owner session(s); inner K1/K2–K5 |
+| 5 | Each chosen Owner retrieves + answers within its partition | `LLM` ($\times$ N) | Owner session(s); inner K1/K2–K5 |
 | 6 | Synthesise per-owner answers (pass-through if N=1) | `LLM` (or `code`) | Synthesiser session |
 | 7 | Bound any re-route on "no owner could answer" | `code` | V9 |
 
@@ -217,8 +217,8 @@ SIE is an architectural pattern, not a single library — what teams ship is a c
 - **Composes with** O4 Parallelization — cross-domain queries fan out across owners.
 - **Composes with** V9 Bounded Execution — bound the re-route / fan-out loop.
 - **Composes with** V14 Trajectory Logging — routing decisions must be logged; misrouting is the most common failure.
-- **Refined by** O7 Supervisor Hierarchy — when partitions are themselves partitioned (region → product line → dataset), O14 nests into O7's tree structure.
-- **Note on fundamentality** — O14 sits close to O3 + K1 × N. It is kept as a distinct pattern because the Forces it resolves (data sovereignty, per-corpus tuning, partition-as-access-boundary) are not the Forces O3 resolves (task specialisation), and because the "must not" rules differ in kind: O3 handlers can share data; O14 Owners cannot. The same logic that keeps K10 distinct from "K1 + write" keeps O14 distinct from "O3 + K1 × N". See §10 surface in the build report for the borderline call.
+- **Refined by** O7 Supervisor Hierarchy — when partitions are themselves partitioned (region $\to$ product line $\to$ dataset), O14 nests into O7's tree structure.
+- **Note on fundamentality** — O14 sits close to O3 + K1 $\times$ N. It is kept as a distinct pattern because the Forces it resolves (data sovereignty, per-corpus tuning, partition-as-access-boundary) are not the Forces O3 resolves (task specialisation), and because the "must not" rules differ in kind: O3 handlers can share data; O14 Owners cannot. The same logic that keeps K10 distinct from "K1 + write" keeps O14 distinct from "O3 + K1 $\times$ N". See §10 surface in the build report for the borderline call.
 
 ## Sources
 

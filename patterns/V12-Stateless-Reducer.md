@@ -95,14 +95,14 @@ The horizontal split is the discipline: state lives left of the line (framework)
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Agent Function** | the pure transformation `(state, input) → (output, state')` | explicit `state` + explicit `input` → explicit `output` + explicit `state'` | hold mutable state of its own (instance vars, class attrs, module globals, thread-locals, memoised caches). Every "convenience" cache is a V12 violation. |
-| **State Schema** | the explicit, serialisable shape of `state` | — → typed structure (Pydantic, dataclass, TypedDict) | contain live references (open connections, file handles, in-process resources) — those do not survive serialisation; they are hidden state in JSON-shaped clothing. |
-| **External State Store** | durable storage of `state` between invocations | (session_id, state) → ack; session_id → state | be in-process memory in production. An in-memory dict masquerading as a store is hidden state with a method signature. |
-| **State Loader** | hydrating `state_in` from the store before each invocation | session_id → state_in | mutate the store during load. Load is read-only; mutations only happen via Save. |
-| **State Writer** | persisting `state_out` to the store after each invocation | (session_id, state_out) → ack | partially write. Either the whole new state lands atomically, or nothing does — otherwise resumes see torn state. |
-| **Resource Resolver** *(optional)* | re-acquiring opaque resources (DB connections, HTTP clients) per invocation from explicit identifiers in `state` | resource_id from state → live handle | be memoised across invocations in a way the agent can observe. The resolver may pool connections internally; the agent never sees pool state. |
+| **Agent Function** | the pure transformation `(state, input) → (output, state')` | explicit `state` + explicit `input` $\to$ explicit `output` + explicit `state'` | hold mutable state of its own (instance vars, class attrs, module globals, thread-locals, memoised caches). Every "convenience" cache is a V12 violation. |
+| **State Schema** | the explicit, serialisable shape of `state` | — $\to$ typed structure (Pydantic, dataclass, TypedDict) | contain live references (open connections, file handles, in-process resources) — those do not survive serialisation; they are hidden state in JSON-shaped clothing. |
+| **External State Store** | durable storage of `state` between invocations | (session_id, state) $\to$ ack; session_id $\to$ state | be in-process memory in production. An in-memory dict masquerading as a store is hidden state with a method signature. |
+| **State Loader** | hydrating `state_in` from the store before each invocation | session_id $\to$ state_in | mutate the store during load. Load is read-only; mutations only happen via Save. |
+| **State Writer** | persisting `state_out` to the store after each invocation | (session_id, state_out) $\to$ ack | partially write. Either the whole new state lands atomically, or nothing does — otherwise resumes see torn state. |
+| **Resource Resolver** *(optional)* | re-acquiring opaque resources (DB connections, HTTP clients) per invocation from explicit identifiers in `state` | resource_id from state $\to$ live handle | be memoised across invocations in a way the agent can observe. The resolver may pool connections internally; the agent never sees pool state. |
 
 The *Agent Function* is the only participant the application developer writes; everything else is framework. The split between the Function and the Store is the entire pattern. Conflating them — letting the function "just hold onto" anything across calls — is the failure mode V12 exists to prevent.
 

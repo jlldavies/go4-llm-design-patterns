@@ -30,7 +30,7 @@ This is distinct from V14 and V15. V14 produces the data; V17 *consumes* it. V15
 
 Use V17 when:
 
-- the agent is in production with non-trivial traffic (≥ ~1000 requests/day) — below that, sampling produces too few datapoints for drift to be statistically distinguishable from noise;
+- the agent is in production with non-trivial traffic ($\geq$ ~1000 requests/day) — below that, sampling produces too few datapoints for drift to be statistically distinguishable from noise;
 - the answer to *"is it still working?"* needs to be available faster than the next manual review cycle;
 - ground truth at production volume is unavailable or unaffordable, but the team can articulate quality and safety rubrics;
 - regulatory or operational commitments require continuous monitoring (financial services, healthcare, EU AI Act Article 15 — accuracy and robustness monitoring through the lifecycle);
@@ -47,17 +47,17 @@ Do not use when:
 
 V17 is right when the system is live, ground truth is missing, the rubrics are articulable, and someone will respond to alerts.
 
-**1. Production volume sufficient for sampling.** Estimate daily requests N and target sample rate p. The judge call count per day is N·p; rolling-window drift detection wants at least ~100 sampled scores per window. Practical threshold: **N·p ≥ 100/window**, with windows ≥ 1 hour for fast-moving signals and ≥ 24 hours for slow drift. If N is too small, lean on **V16** with an expanded golden set drawn from real traces instead.
+**1. Production volume sufficient for sampling.** Estimate daily requests N and target sample rate p. The judge call count per day is N·p; rolling-window drift detection wants at least ~100 sampled scores per window. Practical threshold: **N·p $\geq$ 100/window**, with windows $\geq$ 1 hour for fast-moving signals and $\geq$ 24 hours for slow drift. If N is too small, lean on **V16** with an expanded golden set drawn from real traces instead.
 
 **2. Rubric definability without ground truth.** Can the team write a faithfulness rubric, a safety rubric, a format rubric — and validate the judge's calibration against a small held-out human-labelled sample? If yes, V17 is viable. If no, V17 produces noise; invest in the rubric (and a V16 baseline) first.
 
-**3. Judge cost budget.** Annualise: N·p · judge_cost_per_call · 365. Compare to (a) the cost of an undetected quality regression reaching users, and (b) the cost of staffing a manual sampling/review process for the same coverage. If the judge cost exceeds the combined alternatives by more than ~3×, lower p (stratified sampling, error-only sampling) or switch the rubric to cheaper trace-derived signals before adopting V17 at full coverage.
+**3. Judge cost budget.** Annualise: N·p · judge_cost_per_call · 365. Compare to (a) the cost of an undetected quality regression reaching users, and (b) the cost of staffing a manual sampling/review process for the same coverage. If the judge cost exceeds the combined alternatives by more than ~3$\times$, lower p (stratified sampling, error-only sampling) or switch the rubric to cheaper trace-derived signals before adopting V17 at full coverage.
 
 **4. Drift-detection method choice.** Pick by signal type:
-- **Threshold alarms** — score < absolute threshold (e.g. safety rate < 99.5%) → simplest, blunt.
-- **Rolling-window comparison** — current window vs trailing baseline (e.g. mean score this hour vs trailing 7-day mean, alert on > 2σ deviation) → standard choice.
-- **Distributional tests** — KS / PSI / Wasserstein on the full score distribution → catches mean-preserving shape drift the rolling-mean misses; needed when the tail matters more than the mean (safety-critical).
-- **Embedding drift on inputs** — sentence-embedding distance from a reference corpus distribution → detects input distributional shift even before output drift appears.
+- **Threshold alarms** — score < absolute threshold (e.g. safety rate < 99.5%) $\to$ simplest, blunt.
+- **Rolling-window comparison** — current window vs trailing baseline (e.g. mean score this hour vs trailing 7-day mean, alert on > 2σ deviation) $\to$ standard choice.
+- **Distributional tests** — KS / PSI / Wasserstein on the full score distribution $\to$ catches mean-preserving shape drift the rolling-mean misses; needed when the tail matters more than the mean (safety-critical).
+- **Embedding drift on inputs** — sentence-embedding distance from a reference corpus distribution $\to$ detects input distributional shift even before output drift appears.
 
 **5. On-call commitment and runbook.** Every alert needs a named owner, a response SLA, and a runbook that says what to do (page humans via **V1 Human-in-the-Loop**, switch traffic via **V19 Fallback**, roll back the deploy, open an incident). An alert with no defined response is a monitoring-theatre red flag; the literature names this directly as V17's primary failure mode.
 
@@ -107,15 +107,15 @@ If the agent is pre-production, choose **V16** and **V18**. If ground truth is p
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Sampler** | choosing which production traces to evaluate | trace stream + sampling policy → sampled subset | sample only the happy path — error, guard-trigger, policy-deny, V9-cap traces must be sampled at 100% or the rare-and-important failure mode never reaches the judge. |
-| **Online Judge** (V15 instance) | reference-free scoring of sampled outputs | sampled trace → scores per rubric dimension | be the same model as the agent under test — judge-similar-to-defendant collapses to self-evaluation and inflates scores. |
-| **Trace-Derived Metric Computer** | turning V14 spans into numeric series without LLM calls | V14 spans → time-series points | invent novel attribute names — read only **OTel GenAI semconv** fields V14 emits, or the metric pipeline breaks when the schema evolves. |
-| **Metrics Store** | durable time-series storage with cohort dimensions | metric stream → queryable history | be a single global counter — drift hides inside segments (task type, user cohort, model version, region); store dimensioned. |
-| **Drift Detector** | turning a metric history into a verdict (drift / no drift) | metric series + detection method → drift signal with confidence | use one method blindly — threshold alarms miss distributional drift; rolling means miss tail shifts; pair methods to the signal class. |
-| **Alert Manager** | routing drift verdicts to a named owner with a runbook | drift signal → page / ticket / incident | fire without a runbook — alerts without prescribed response train the team to ignore them, which is worse than no monitoring. |
-| **Calibration Sample** | the small human-labelled set the judge is validated against | human labels + judge scores → judge calibration verdict | drift into the judge's training data — calibration must be a held-out check, refreshed periodically, or the judge's reliability silently erodes. |
+| **Sampler** | choosing which production traces to evaluate | trace stream + sampling policy $\to$ sampled subset | sample only the happy path — error, guard-trigger, policy-deny, V9-cap traces must be sampled at 100% or the rare-and-important failure mode never reaches the judge. |
+| **Online Judge** (V15 instance) | reference-free scoring of sampled outputs | sampled trace $\to$ scores per rubric dimension | be the same model as the agent under test — judge-similar-to-defendant collapses to self-evaluation and inflates scores. |
+| **Trace-Derived Metric Computer** | turning V14 spans into numeric series without LLM calls | V14 spans $\to$ time-series points | invent novel attribute names — read only **OTel GenAI semconv** fields V14 emits, or the metric pipeline breaks when the schema evolves. |
+| **Metrics Store** | durable time-series storage with cohort dimensions | metric stream $\to$ queryable history | be a single global counter — drift hides inside segments (task type, user cohort, model version, region); store dimensioned. |
+| **Drift Detector** | turning a metric history into a verdict (drift / no drift) | metric series + detection method $\to$ drift signal with confidence | use one method blindly — threshold alarms miss distributional drift; rolling means miss tail shifts; pair methods to the signal class. |
+| **Alert Manager** | routing drift verdicts to a named owner with a runbook | drift signal $\to$ page / ticket / incident | fire without a runbook — alerts without prescribed response train the team to ignore them, which is worse than no monitoring. |
+| **Calibration Sample** | the small human-labelled set the judge is validated against | human labels + judge scores $\to$ judge calibration verdict | drift into the judge's training data — calibration must be a held-out check, refreshed periodically, or the judge's reliability silently erodes. |
 
 The Sampler, Judge, and Drift Detector are the three load-bearing roles. Cutting corners on the Sampler (random-only, missing error stratification) is the most common silent failure; cutting corners on the Drift Detector (single threshold for everything) is the second.
 
@@ -152,9 +152,9 @@ Every production request emits a V14 trace. The Sampler reads the trace stream a
 - **Stratify the sample.** Random-only sampling is the rookie mistake. Sample by task type, by user cohort, by model version, by cost tier — and always sample 100% of errors, guardrail triggers, policy denies, and V9 caps.
 - **Use a stronger judge than the agent.** Same-model judge under-detects same-model failure modes; a stronger or differently-trained judge is the recommended setup.
 - **Validate the judge.** A small held-out human-labelled set, refreshed quarterly, is what tells you whether the judge's scores still correlate with human judgment. Without it, the entire V17 signal is hope.
-- **Match drift method to signal.** Safety and policy-deny rates → threshold alarms. Quality scores → rolling-window deviation. Distributional shifts in score-shape or latency tails → KS / PSI / Wasserstein. Input drift → embedding distance from a reference corpus.
+- **Match drift method to signal.** Safety and policy-deny rates $\to$ threshold alarms. Quality scores $\to$ rolling-window deviation. Distributional shifts in score-shape or latency tails $\to$ KS / PSI / Wasserstein. Input drift $\to$ embedding distance from a reference corpus.
 - **Make the runbook part of the alert.** The alert payload itself should link the runbook; the on-call doesn't have to think about what to do.
-- **Compose with V19 from the start.** Quality-drift detected → automatic switch to the V19 fallback path (cheaper model, cached, rule, human queue) → human review the next business day. Detection without remediation is half a system.
+- **Compose with V19 from the start.** Quality-drift detected $\to$ automatic switch to the V19 fallback path (cheaper model, cached, rule, human queue) $\to$ human review the next business day. Detection without remediation is half a system.
 - **Pair with V14 sampling policy.** V14's own sampling (head-based for routine, 100% on errors) sets the upper bound on V17's reachable traces; mis-aligning them invisibly limits coverage.
 - **Cohort the store.** Dimension every metric by task type, user segment, model version, and region. Global aggregates lie about cohort-level drift.
 

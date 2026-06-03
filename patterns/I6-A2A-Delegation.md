@@ -24,8 +24,8 @@ The inter-agent boundary in A2A is not merely a system boundary — it is a cont
 
 ## Variants
 
-- **A2A (Google → Linux Foundation).** The unified standard as of late 2025. HTTP + JSON-RPC 2.0 transport; SSE for streaming; task-centric lifecycle (`submitted` → `working` → `completed` / `failed` / `canceled`); Agent Card at `/.well-known/agent-card.json` (older drafts used `/.well-known/agent.json` — treat that as legacy); broadest current adoption (150+ supporting organisations, 22,000+ GitHub stars on the core repo by mid-2026). The default choice.
-- **ACP (IBM/Red Hat → merged into A2A).** Historical only. RESTful, message-based, both sync and async. Merged into A2A in Aug/Sep 2025; the BeeAI platform and its tooling now target A2A. Listed for completeness — new deployments should not adopt ACP as a separate protocol.
+- **A2A (Google $\to$ Linux Foundation).** The unified standard as of late 2025. HTTP + JSON-RPC 2.0 transport; SSE for streaming; task-centric lifecycle (`submitted` $\to$ `working` $\to$ `completed` / `failed` / `canceled`); Agent Card at `/.well-known/agent-card.json` (older drafts used `/.well-known/agent.json` — treat that as legacy); broadest current adoption (150+ supporting organisations, 22,000+ GitHub stars on the core repo by mid-2026). The default choice.
+- **ACP (IBM/Red Hat $\to$ merged into A2A).** Historical only. RESTful, message-based, both sync and async. Merged into A2A in Aug/Sep 2025; the BeeAI platform and its tooling now target A2A. Listed for completeness — new deployments should not adopt ACP as a separate protocol.
 - **ANP (Agent Network Protocol).** Decentralised alternative. W3C DID-based identity, end-to-end encryption, no central registry, semantic-web-style (JSON-LD) capability descriptions. Targets open agent networks rather than enterprise cross-system pipelines; appropriate when no central authority should mediate discovery or trust.
 
 A2A is the working assumption in the rest of this page. ANP is a structural alternative for the no-central-trust case; ACP is a historical footnote.
@@ -52,23 +52,23 @@ Do not use when:
 I6 is right when delegation must cross a system, vendor, or trust boundary, and the orchestrator should be portable across executors rather than wired to a specific one.
 
 **1. Boundary test.** Where does the executor live?
-- Same process / codebase / trust domain → **O15 Agent Handoff** (intra-system).
-- Different system, vendor, or organisation → **I6**.
-- Same org but different deployment, with no auth boundary → either works; prefer O15 unless multi-vendor compatibility is on the roadmap.
+- Same process / codebase / trust domain $\to$ **O15 Agent Handoff** (intra-system).
+- Different system, vendor, or organisation $\to$ **I6**.
+- Same org but different deployment, with no auth boundary $\to$ either works; prefer O15 unless multi-vendor compatibility is on the roadmap.
 
 **2. Substitutability test.** Can the orchestrator's choice of executor change at runtime (capability-based selection, marketplace fan-out, A/B between providers)?
-- Yes → **I6** mandatory; the Agent Card (**I5**) is what enables the choice.
-- No, executor is fixed forever → **I1 Direct API** is simpler.
+- Yes $\to$ **I6** mandatory; the Agent Card (**I5**) is what enables the choice.
+- No, executor is fixed forever $\to$ **I1 Direct API** is simpler.
 
 **3. Task duration and observability.** How long does the task run, and does the orchestrator need to see progress?
-- < 1s, fire-and-forget → A2A still works but is overkill; consider I1.
-- 1s–30min with progress updates → **I6** with SSE streaming earns its keep.
-- Multi-hour or human-in-the-loop → **I6** with persistent task IDs and webhooks; pair with **V1 Human-in-the-Loop** for escalation.
+- < 1s, fire-and-forget $\to$ A2A still works but is overkill; consider I1.
+- 1s–30min with progress updates $\to$ **I6** with SSE streaming earns its keep.
+- Multi-hour or human-in-the-loop $\to$ **I6** with persistent task IDs and webhooks; pair with **V1 Human-in-the-Loop** for escalation.
 
 **4. Trust model.** What is the executor allowed to see, and what is its output allowed to do?
-- Trusted partner with a verified Agent Card → standard I6 with bearer auth.
-- Adversarial or unknown → I6 must be wrapped by **V6 Prompt Injection Shield** (executor output is externally-sourced content) and **V8 Tool Sandboxing** if the result is used to take further action. Treat A2A responses with the same suspicion as web content.
-- No central authority acceptable → use the **ANP** variant.
+- Trusted partner with a verified Agent Card $\to$ standard I6 with bearer auth.
+- Adversarial or unknown $\to$ I6 must be wrapped by **V6 Prompt Injection Shield** (executor output is externally-sourced content) and **V8 Tool Sandboxing** if the result is used to take further action. Treat A2A responses with the same suspicion as web content.
+- No central authority acceptable $\to$ use the **ANP** variant.
 
 **5. Operational discipline.** Are the failure-mode controls in place?
 - Mandatory: **I5 Agent Card verification before first call** (cache with TTL), **timeout + cancellation** (executor may never respond), **V9 Bounded Execution** (retry / reroute cap), **V14 Trajectory Logging** (every A2A call carries executor agent ID and version in the trace).
@@ -120,15 +120,15 @@ If the executor is intra-system, use **O15 Agent Handoff**. If the need is tool-
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Delegating Orchestrator** | the decision to delegate and the choice of executor | task description + Agent Card index → submitted task | call an executor it has not verified via I5 Agent Card; the unverified call is the pattern's most common silent failure. |
-| **Agent Card (I5)** | the executor's machine-readable capability declaration | well-known URL → skills, schemas, auth, protocol version | be a static file that drifts from reality; the card must be generated from live deployment config. |
+| **Delegating Orchestrator** | the decision to delegate and the choice of executor | task description + Agent Card index $\to$ submitted task | call an executor it has not verified via I5 Agent Card; the unverified call is the pattern's most common silent failure. |
+| **Agent Card (I5)** | the executor's machine-readable capability declaration | well-known URL $\to$ skills, schemas, auth, protocol version | be a static file that drifts from reality; the card must be generated from live deployment config. |
 | **Task Object** | the structured representation of one delegation | id, skill, input, status, partial result, final result, error | be partially typed — every field is part of the contract; a free-text "result" string defeats the protocol. |
-| **Task Executor Agent** | running the delegated work and reporting status | task input → status stream + final result | trust task input without validation; submitted input is externally-sourced content and must pass **V6 Prompt Injection Shield**. |
-| **Status Stream** | asynchronous progress reporting | executor events → SSE / poll responses to orchestrator | silently terminate without a terminal state; absence of an event is itself an event the orchestrator must time out on. |
-| **Result Handler** | orchestrator-side processing of returned result or failure | task terminal state → next action (use / retry / reroute / escalate) | use the result without **V6** treatment; the executor's output is content from outside the trust boundary. |
-| **Trace Logger (V14)** | inter-system audit record | every protocol event → trace entry with executor id + version | omit executor identity or version; without it, cross-system incidents cannot be reproduced. |
+| **Task Executor Agent** | running the delegated work and reporting status | task input $\to$ status stream + final result | trust task input without validation; submitted input is externally-sourced content and must pass **V6 Prompt Injection Shield**. |
+| **Status Stream** | asynchronous progress reporting | executor events $\to$ SSE / poll responses to orchestrator | silently terminate without a terminal state; absence of an event is itself an event the orchestrator must time out on. |
+| **Result Handler** | orchestrator-side processing of returned result or failure | task terminal state $\to$ next action (use / retry / reroute / escalate) | use the result without **V6** treatment; the executor's output is content from outside the trust boundary. |
+| **Trace Logger (V14)** | inter-system audit record | every protocol event $\to$ trace entry with executor id + version | omit executor identity or version; without it, cross-system incidents cannot be reproduced. |
 
 ## Collaborations
 
@@ -162,7 +162,7 @@ The Orchestrator begins by reading the prospective executor's Agent Card (I5) �
 - **Read the card every time, but cache it with a short TTL** (minutes, not days). Cards are meant to be live; the cache is purely a latency optimisation, not a contract snapshot.
 - **Pin the protocol version.** A2A is versioned (1.0 as of 2026, with 0.3 compatibility mode in the official SDKs). Mismatched versions silently misbehave; check the card's declared version before first call.
 - **Use the official SDKs over hand-rolled clients.** `a2a-python`, `@a2a-js/sdk`, `a2a-java`, and the Go and .NET equivalents handle the lifecycle and streaming correctly; rolling your own JSON-RPC over SSE is a foot-gun.
-- **Timeout everything.** Every task submission has a hard wall-clock budget; every status stream has an idle-timeout (no event for N seconds → cancel and reroute).
+- **Timeout everything.** Every task submission has a hard wall-clock budget; every status stream has an idle-timeout (no event for N seconds $\to$ cancel and reroute).
 - **Treat returned results as externally-sourced content.** Pass them through V6 Prompt Injection Shield before they re-enter the orchestrator's reasoning. The executor is a remote system; its output has the same trust profile as web content.
 - **Log executor agent id, version, and Agent Card hash in V14 traces.** Without these, "what did the third-party agent do on this date?" becomes unanswerable.
 - **Cap delegation depth.** An A2A executor that itself uses A2A can produce unbounded chains. V9 Bounded Execution must apply globally, not per-hop.

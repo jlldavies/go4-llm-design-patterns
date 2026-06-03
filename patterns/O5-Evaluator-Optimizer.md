@@ -53,7 +53,7 @@ O5 is right when output quality is the constraint, self-critique has measurable 
 
 **4. Pick the Judge model deliberately — cross-model is the default.** If the Generator is a frontier model, the Judge can often be a smaller, cheaper one — the judgment task is narrower than generation. If the Generator and Judge are the *same* model, the architectural separation buys less than its cost; verify the separation is doing real work by ablating the Judge to the same model and measuring the quality delta. Same-model O5 collapses toward R8 in practice if the Judge's prompt does not enforce a genuinely different stance.
 
-**5. Cost the loop honestly.** Each round is **Generator call + Judge call + (on fail) Generator refinement call**. At N = 3 with a frontier Generator and a small Judge, expect **~4–6× single-shot cost**, dominated by Generator refinements. If the Generator is small, the loop is cheap; if the Generator is large, the Judge being small is the lever that keeps O5 affordable.
+**5. Cost the loop honestly.** Each round is **Generator call + Judge call + (on fail) Generator refinement call**. At N = 3 with a frontier Generator and a small Judge, expect **~4–6$\times$ single-shot cost**, dominated by Generator refinements. If the Generator is small, the loop is cheap; if the Generator is large, the Judge being small is the lever that keeps O5 affordable.
 
 **Quick test — O5 is the right pattern when:**
 
@@ -92,13 +92,13 @@ If a deterministic check exists, use **R7 Reflexion**. If R8's same-model critic
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Generator agent (G)** | producing the initial draft and each refinement | task (+ prior draft + Judge feedback on iterations ≥ 1) → draft_n | see the Judge's rubric in its setup. If G is trained to satisfy the rubric directly, the Judge becomes a rubber stamp — the independence collapses. G should be set up for the *task*; the rubric is the Judge's possession. |
-| **Judge agent (J)** | scoring drafts against the rubric and emitting an APPROVED sentinel or actionable feedback | task + draft_n → verdict (APPROVED / NEEDS-WORK + feedback) | be the same session as G. The pattern's identity claim ("two agents, not one in two roles") rests here. Different model is preferred; same model with a different session is acceptable; same session is the failure. J must also not rewrite the draft — its output is *verdict + feedback*, not a new draft. |
-| **Refinement controller** | wiring G's next call from the Judge's feedback; enforcing the loop bound | (draft, verdict, iteration count) → next G call or final output | hide a non-terminating loop. The cap N_max is mandatory (**V9 Bounded Execution**). The controller is also responsible for detecting *no-progress* — if draft_{n+1} differs only superficially from draft_n, stop. |
-| **Rubric / criteria artifact** | the standard the Judge applies | written rubric → Judge setup | live in the Generator's setup. The rubric belongs to the Judge alone; if G knows the rubric, G optimises for the rubric and not the task — a classic Goodhart-style failure. |
-| **Iteration log** *(optional)* | the trace of (draft, verdict, feedback) across rounds | sequence of rounds → V14 trajectory record | be hidden. The chain of drafts and verdicts is the pattern's primary audit artefact; suppressing it kills the operator's ability to tell genuine improvement from refinement theatre. |
+| **Generator agent (G)** | producing the initial draft and each refinement | task (+ prior draft + Judge feedback on iterations $\geq$ 1) $\to$ draft_n | see the Judge's rubric in its setup. If G is trained to satisfy the rubric directly, the Judge becomes a rubber stamp — the independence collapses. G should be set up for the *task*; the rubric is the Judge's possession. |
+| **Judge agent (J)** | scoring drafts against the rubric and emitting an APPROVED sentinel or actionable feedback | task + draft_n $\to$ verdict (APPROVED / NEEDS-WORK + feedback) | be the same session as G. The pattern's identity claim ("two agents, not one in two roles") rests here. Different model is preferred; same model with a different session is acceptable; same session is the failure. J must also not rewrite the draft — its output is *verdict + feedback*, not a new draft. |
+| **Refinement controller** | wiring G's next call from the Judge's feedback; enforcing the loop bound | (draft, verdict, iteration count) $\to$ next G call or final output | hide a non-terminating loop. The cap N_max is mandatory (**V9 Bounded Execution**). The controller is also responsible for detecting *no-progress* — if draft_{n+1} differs only superficially from draft_n, stop. |
+| **Rubric / criteria artifact** | the standard the Judge applies | written rubric $\to$ Judge setup | live in the Generator's setup. The rubric belongs to the Judge alone; if G knows the rubric, G optimises for the rubric and not the task — a classic Goodhart-style failure. |
+| **Iteration log** *(optional)* | the trace of (draft, verdict, feedback) across rounds | sequence of rounds $\to$ V14 trajectory record | be hidden. The chain of drafts and verdicts is the pattern's primary audit artefact; suppressing it kills the operator's ability to tell genuine improvement from refinement theatre. |
 
 Three structural invariants make the pattern work:
 
@@ -124,7 +124,7 @@ The Judge runs on its own model and its own setup. The pattern's value depends o
 
 **Costs**
 - **Two agent slots, not one** — separate setup, separate prompts, separate model choice. More wiring than R8.
-- **4–6× single-shot cost** at N = 3 with Generator + Judge + refinement calls per round.
+- **4–6$\times$ single-shot cost** at N = 3 with Generator + Judge + refinement calls per round.
 - Strictly sequential — no parallel speed-up; wall-clock latency scales with N. Each iteration requires a full fresh prefill on the Generator and Judge calls. The KV cache does not persist across API calls (mechanism 3); each round re-pays the prefill cost. For a stable Judge setup, prefix caching (mechanism 5) amortises the Judge's system prompt across iterations, but the draft and feedback tokens re-enter each time. (Mechanisms 3, 5.)
 - Rubric maintenance: the Judge is only as good as its rubric, and rubrics drift as tasks evolve.
 - The Judge can become a bottleneck on cross-model calls (rate limits, provider availability) when the Generator and Judge are on different providers.
@@ -189,7 +189,7 @@ evaluator_optimizer(task, max_rounds=3):
 
 | Session | Model | Setup — loaded once, before first call | Per-call prompt wraps |
 |---|---|---|---|
-| **Generator** | the system's main generalist; chosen for the *task*, not the rubric | role (S3); the *task's* success criteria and output format (S6); domain context; instruction to *address the provided feedback* while preserving correct parts of prior drafts on refinement calls. **The Judge's rubric is not in this setup.** | iteration 0: the task. iteration ≥ 1: the task + the current draft + the Judge's structured feedback. |
+| **Generator** | the system's main generalist; chosen for the *task*, not the rubric | role (S3); the *task's* success criteria and output format (S6); domain context; instruction to *address the provided feedback* while preserving correct parts of prior drafts on refinement calls. **The Judge's rubric is not in this setup.** | iteration 0: the task. iteration $\geq$ 1: the task + the current draft + the Judge's structured feedback. |
 | **Judge** | a *different* model from the Generator (preferred); when same-model, must use a different session with explicitly critical prompting | role: *"you score drafts against this rubric and emit APPROVED only if every criterion passes"*; the **rubric** (concrete criteria with PASS/FAIL definitions); output contract — structured `{ verdict, feedback[] }` (S6); explicit "find faults; do not be lenient" framing. **The task itself is also given so the Judge knows what the work was meant to do.** | the task + the current draft |
 
 Concretely, for a content-quality Judge: setup loaded once is *"You score drafts against the rubric below. APPROVE only if every criterion is PASS. Return `{verdict: APPROVED | NEEDS_WORK, feedback: [{criterion, status, issue, suggestion}]}`. Rubric: (1) factual support — every claim cites the source; (2) completeness — every required section present; (3) tone — matches the brand voice guide below. Do not be lenient; if any criterion is ambiguous, return NEEDS_WORK."* The per-call prompt wraps only *"Task: {task}. Draft: {draft}"*.

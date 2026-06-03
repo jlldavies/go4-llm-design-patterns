@@ -43,13 +43,13 @@ Do not use when:
 
 O15 is right when the live conversation must move between specialised agents in the same system and the receiver needs structured continuity, not a transcript dump.
 
-**1. Conversation continuity test.** Will the user keep talking to "the system" after the transfer, expecting it to remember? **Yes** → O15. **No, the receiving agent runs in the background and reports back** → O17 Agent Isolation or O6 Orchestrator-Workers.
+**1. Conversation continuity test.** Will the user keep talking to "the system" after the transfer, expecting it to remember? **Yes** $\to$ O15. **No, the receiving agent runs in the background and reports back** $\to$ O17 Agent Isolation or O6 Orchestrator-Workers.
 
-**2. Routing dynamism test.** Can the routing decision be made *once* at the front, before any conversation? **Yes** → O3 Routing. **No, the need to switch emerges mid-conversation from extracted state** → O15. If you can decide at turn 1, do; O15 pays its cost when the decision must be made at turn 5.
+**2. Routing dynamism test.** Can the routing decision be made *once* at the front, before any conversation? **Yes** $\to$ O3 Routing. **No, the need to switch emerges mid-conversation from extracted state** $\to$ O15. If you can decide at turn 1, do; O15 pays its cost when the decision must be made at turn 5.
 
-**3. Trust boundary test.** Does the receiving agent live in the same codebase, share the same trace store, run under the same auth? **Yes** → O15. **No, it is across a vendor / network / org boundary** → **I6 A2A Delegation** for the transport. O15 is the orchestration primitive; I6 is the wire protocol.
+**3. Trust boundary test.** Does the receiving agent live in the same codebase, share the same trace store, run under the same auth? **Yes** $\to$ O15. **No, it is across a vendor / network / org boundary** $\to$ **I6 A2A Delegation** for the transport. O15 is the orchestration primitive; I6 is the wire protocol.
 
-**4. Package size discipline.** Measure the handoff payload. Target: **≤ 10% of the sender's working context** and **all structured fields, no raw transcript spans** beyond a 1–2 turn excerpt. If the package is just "the transcript so far," the pattern has collapsed back to the naive option; tighten the schema or accept that O17 Agent Isolation (fresh context with explicit hand-prepared subset) fits better. The 10% target is mechanically grounded. If the sender has a 20k-token context and the receiving agent inherits all of it, the receiver pays O(n²) attention over 20k tokens even if only 2k tokens are relevant to its role — every token in that inherited context adds pairwise attention cost against all subsequent generated tokens (mechanism 2). The relevant tokens — if they arrived in the middle of the prior conversation — are also geometrically under-attended due to U-shaped recall (mechanism 4). A structured handoff package moves the critical state to the boundary positions of the receiver's context window, where attention is strongest. (Mechanisms 2, 4.)
+**4. Package size discipline.** Measure the handoff payload. Target: **$\leq$ 10% of the sender's working context** and **all structured fields, no raw transcript spans** beyond a 1–2 turn excerpt. If the package is just "the transcript so far," the pattern has collapsed back to the naive option; tighten the schema or accept that O17 Agent Isolation (fresh context with explicit hand-prepared subset) fits better. The 10% target is mechanically grounded. If the sender has a 20k-token context and the receiving agent inherits all of it, the receiver pays O(n²) attention over 20k tokens even if only 2k tokens are relevant to its role — every token in that inherited context adds pairwise attention cost against all subsequent generated tokens (mechanism 2). The relevant tokens — if they arrived in the middle of the prior conversation — are also geometrically under-attended due to U-shaped recall (mechanism 4). A structured handoff package moves the critical state to the boundary positions of the receiver's context window, where attention is strongest. (Mechanisms 2, 4.)
 
 **5. Audit and reversibility.** Can you, after the fact, identify *which* agent handled *which* turn and replay from the handoff point? Pair with **V14 Trajectory Logging** so every handoff is a logged event with sender, receiver, package, and trace ID — without this, multi-agent conversations become undebuggable. Pair with **V10 Checkpointing** if the receiver may fail and the sender should be able to resume.
 
@@ -89,14 +89,14 @@ If routing is up-front, use O3. If the switch is to a sub-task that reports back
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Sending Agent** | recognising the handoff condition and invoking the transfer | conversation state → handoff tool call | answer the question itself once it has decided to hand off — partial work creates the "two agents both replying" failure mode. |
-| **Handoff Tool** | the act of switching driver | tool invocation → reference to the receiving agent | carry state itself; it is a control-flow signal, not a payload. |
-| **Handoff Package** | the typed state passed across | session state → structured fields (intent, entities, actions, goal, trace ID) | be the raw transcript. A package that is just "the chat so far" defeats the pattern. |
-| **Package Builder / `on_handoff` hook** | constructing and filtering the package | session state + handoff event → reduced package | leak secrets, untrusted user content, or context the receiver should not see — V6 applies. |
-| **Receiving Agent** | continuing the conversation from the package | package + next user turn → response | re-ask the user for anything already in the package. Re-asking is the user-visible failure of the pattern. |
-| **Trace Logger** *(V14)* | recording the handoff as an audit event | sender, receiver, package, timestamps → trajectory record | be optional — without it, multi-agent conversations are undebuggable. |
+| **Sending Agent** | recognising the handoff condition and invoking the transfer | conversation state $\to$ handoff tool call | answer the question itself once it has decided to hand off — partial work creates the "two agents both replying" failure mode. |
+| **Handoff Tool** | the act of switching driver | tool invocation $\to$ reference to the receiving agent | carry state itself; it is a control-flow signal, not a payload. |
+| **Handoff Package** | the typed state passed across | session state $\to$ structured fields (intent, entities, actions, goal, trace ID) | be the raw transcript. A package that is just "the chat so far" defeats the pattern. |
+| **Package Builder / `on_handoff` hook** | constructing and filtering the package | session state + handoff event $\to$ reduced package | leak secrets, untrusted user content, or context the receiver should not see — V6 applies. |
+| **Receiving Agent** | continuing the conversation from the package | package + next user turn $\to$ response | re-ask the user for anything already in the package. Re-asking is the user-visible failure of the pattern. |
+| **Trace Logger** *(V14)* | recording the handoff as an audit event | sender, receiver, package, timestamps $\to$ trajectory record | be optional — without it, multi-agent conversations are undebuggable. |
 
 The handoff is a single logged event with a clean before/after. Two agents are never both driving.
 
@@ -134,7 +134,7 @@ A user turn arrives at the sending Agent. Mid-reasoning the agent decides the re
 - Bound handoff depth with **V9 Bounded Execution** — cap how many handoffs a single user turn can trigger, and how many handoffs can occur within a session, to prevent ping-pong.
 - For escalation to a human, the receiving "agent" is a queue + UI; the package is the inbox card. The pattern is the same — V1 Human-in-the-Loop names the recipient class.
 - Cross-system handoffs wrap O15 around **I6 A2A Delegation** as transport: the local handoff fires, the receiver happens to live on another system, and I6 carries the package over the wire.
-- Voice→text and text→voice handoffs are O15 with a media-change step in the hook; the package shape is the same.
+- Voice$\to$text and text$\to$voice handoffs are O15 with a media-change step in the hook; the package shape is the same.
 
 ## Implementation Sketch
 
@@ -152,7 +152,7 @@ A user turn arrives at the sending Agent. Mid-reasoning the agent decides the re
 | 4 | Log the handoff event (sender, receiver, package digest, timestamps) | `code` | V14 |
 | 5 | Switch the driver; load Receiving Agent's setup; inject the package as initial context | `code` | |
 | 6 | Receiving Agent continues with the next user turn | `LLM` | Receiver session |
-| 7 | Bound check: handoff depth in this turn ≤ N, else escalate | `code` | V9, V1 |
+| 7 | Bound check: handoff depth in this turn $\leq$ N, else escalate | `code` | V9, V1 |
 
 **Skeleton** — wiring only; `# LLM` marks each configured session:
 

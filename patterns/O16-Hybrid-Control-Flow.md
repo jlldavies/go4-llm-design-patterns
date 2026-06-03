@@ -32,8 +32,8 @@ This is distinct from **O8 Loop Agent** (a fixed cycle of *agents* — same pipe
 
 Production stacks differ by which primitives they layer and in what order. Four common shapes:
 
-- **Explore → Plan → Implement (the SWE-bench stack).** ReAct exploration, then plan-execute, then generate-test-repair for each plan step, wrapped in bounded retry. The dominant production coding-agent shape; observed in SWE-agent, OpenHands, and several closed agents.
-- **Localize → Repair → Validate (the Agentless stack).** A three-phase plan-execute pipeline with no ReAct exploration phase — a deliberately *shallower* stack. Demonstrates that stacking does not always mean more layers; sometimes the win is dropping ReAct entirely (Xia et al., 2024).
+- **Explore $\to$ Plan $\to$ Implement (the SWE-bench stack).** ReAct exploration, then plan-execute, then generate-test-repair for each plan step, wrapped in bounded retry. The dominant production coding-agent shape; observed in SWE-agent, OpenHands, and several closed agents.
+- **Localize $\to$ Repair $\to$ Validate (the Agentless stack).** A three-phase plan-execute pipeline with no ReAct exploration phase — a deliberately *shallower* stack. Demonstrates that stacking does not always mean more layers; sometimes the win is dropping ReAct entirely (Xia et al., 2024).
 - **ReAct + Generate-Test-Repair (the pair-programming stack).** No explicit plan phase; the agent reasons step-by-step (ReAct) and uses the test suite as the oracle. Closer to Aider's shape — lighter than the full four-layer stack, suitable for single-file changes.
 - **Plan + ReAct (the strategic / tactical stack).** Plan-execute at the outer layer setting goals; ReAct at the inner layer executing each goal. Used in enterprise / supervisory agents where the plan is committee-approved and execution is tactical.
 
@@ -62,13 +62,13 @@ O16 is right when one agent must span multiple control regimes within a single c
 
 **1. Count the distinct phases.** List the phases the task actually has (explore, plan, implement, verify, debug). If the count is one, use the matching single primitive (R4 / R3 / generate-test-repair / retry / R10) directly. If the count is two or more, O16 is a candidate. Production coding agents typically have three to four.
 
-**2. Match each phase to its primitive.** For each phase, name the primitive that fits it best — the test is *"what does this phase's loop body do?"*. Reasoning over partial observations → R4 ReAct. Decomposing a goal upfront → R3 Plan-execute. Producing code against tests → generate-test-repair. Recovering from a bad single attempt → multi-attempt retry. Choosing between candidate paths → R10 LATS. If two phases reduce to the same primitive, they are one phase — collapse them.
+**2. Match each phase to its primitive.** For each phase, name the primitive that fits it best — the test is *"what does this phase's loop body do?"*. Reasoning over partial observations $\to$ R4 ReAct. Decomposing a goal upfront $\to$ R3 Plan-execute. Producing code against tests $\to$ generate-test-repair. Recovering from a bad single attempt $\to$ multi-attempt retry. Choosing between candidate paths $\to$ R10 LATS. If two phases reduce to the same primitive, they are one phase — collapse them.
 
 **3. Define every transition explicitly.** Each layer boundary needs a *named transition signal*: a predicate (`exploration_done()`), a judge call (V15: "is the plan complete?"), or a hard event (tests pass). A scaffold whose layers blend ("the agent will know when to plan") is anti-pattern A1 God Prompt at the control-flow level. Document the transitions before writing the scaffold.
 
 **4. Bound every layer.** Each loop primitive in the stack gets its own V9 cap — max ReAct steps, max plan-execute steps, max test-fix iterations, max retry attempts. The bounds are independent: hitting the ReAct cap should not silently restart plan-execute. Without per-layer bounds, the stack runs in O(product of layer depths) — anti-pattern A3 in multiples.
 
-**5. Cost the stack.** Each layer is real LLM calls. A ReAct-explore phase of 20 steps + a plan of 10 steps + a test-fix loop of 5 rounds × 3 attempts is ~50–80 calls before counting retries. Compare against the simpler alternative: if a single-primitive agent + a stronger model would get the same result for fewer calls, prefer the simpler agent. O16 must earn its cost on tasks where no single primitive does the job.
+**5. Cost the stack.** Each layer is real LLM calls. A ReAct-explore phase of 20 steps + a plan of 10 steps + a test-fix loop of 5 rounds $\times$ 3 attempts is ~50–80 calls before counting retries. Compare against the simpler alternative: if a single-primitive agent + a stronger model would get the same result for fewer calls, prefer the simpler agent. O16 must earn its cost on tasks where no single primitive does the job.
 
 **Quick test — O16 is the right pattern when:**
 
@@ -108,22 +108,22 @@ If only one phase exists, choose the single matching primitive — R4, R3, gener
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Scaffold** | the static composition — which primitives are layered, in what order, and the transitions between them | task type → layered control structure | be redesigned mid-run. The stack is fixed at build time; runtime adaptation is the **O6** pattern. |
-| **Layer Primitive** *(one per layer: R4, R3, generate-test-repair, retry, R10, …)* | the control flow for *its* phase | layer-entry state → layer-exit state | be the same primitive as its neighbour. If two layers reduce to the same loop, they are one layer — collapse them. |
-| **Transition Signal** *(one per layer boundary)* | the named predicate / judge / event that ends one layer and starts the next | layer state → ADVANCE / STAY / ABORT | be implicit. "The agent decides when to advance" is **O6** dynamic delegation, not O16. |
-| **Shared Working Memory** | the state that crosses layer boundaries (artefacts, plan, file edits, test results) | layer outputs → next layer's inputs | be reconstructed at each boundary. Continuity is what makes the stack a single agent and not a chain of separate agents. |
-| **Per-Layer Bound** *(V9)* | the hard cap on each layer's loop independently | layer iteration count → CONTINUE / EXIT-LAYER | be shared across layers — one global cap is anti-pattern A3 in multiples; per-layer bounds are the discipline. |
-| **Trajectory Log** *(V14)* | the per-layer event record (entries, exits, attempts, transitions) | layer events → durable log | be optional. Without it, debugging a multi-layer scaffold is intractable; the layer that misbehaved cannot be found. |
+| **Scaffold** | the static composition — which primitives are layered, in what order, and the transitions between them | task type $\to$ layered control structure | be redesigned mid-run. The stack is fixed at build time; runtime adaptation is the **O6** pattern. |
+| **Layer Primitive** *(one per layer: R4, R3, generate-test-repair, retry, R10, …)* | the control flow for *its* phase | layer-entry state $\to$ layer-exit state | be the same primitive as its neighbour. If two layers reduce to the same loop, they are one layer — collapse them. |
+| **Transition Signal** *(one per layer boundary)* | the named predicate / judge / event that ends one layer and starts the next | layer state $\to$ ADVANCE / STAY / ABORT | be implicit. "The agent decides when to advance" is **O6** dynamic delegation, not O16. |
+| **Shared Working Memory** | the state that crosses layer boundaries (artefacts, plan, file edits, test results) | layer outputs $\to$ next layer's inputs | be reconstructed at each boundary. Continuity is what makes the stack a single agent and not a chain of separate agents. |
+| **Per-Layer Bound** *(V9)* | the hard cap on each layer's loop independently | layer iteration count $\to$ CONTINUE / EXIT-LAYER | be shared across layers — one global cap is anti-pattern A3 in multiples; per-layer bounds are the discipline. |
+| **Trajectory Log** *(V14)* | the per-layer event record (entries, exits, attempts, transitions) | layer events $\to$ durable log | be optional. Without it, debugging a multi-layer scaffold is intractable; the layer that misbehaved cannot be found. |
 
 The scaffold is a single agent — one identity, one context, one user-facing presence. What varies inside it is the control regime per phase. The Transition Signal column is where the pattern earns its keep: every boundary must have a named, testable rule, or the stack is not O16, it is a pile.
 
 ## Collaborations
 
-The agent receives the task. Layer 1's primitive begins — typically ReAct, exploring the environment (reading files, listing directories, running queries) under its own V9 cap on steps. The Transition Signal for Layer 1 → Layer 2 is checked on each step's exit (a predicate, a judge call, or an event such as "enough context gathered"). When it fires, Layer 1 exits and Layer 2 begins on the accumulated Shared Working Memory.
+The agent receives the task. Layer 1's primitive begins — typically ReAct, exploring the environment (reading files, listing directories, running queries) under its own V9 cap on steps. The Transition Signal for Layer 1 $\to$ Layer 2 is checked on each step's exit (a predicate, a judge call, or an event such as "enough context gathered"). When it fires, Layer 1 exits and Layer 2 begins on the accumulated Shared Working Memory.
 
-Layer 2 — typically plan-execute — produces a structured plan and walks it. The Transition Signal for Layer 2 → Layer 3 may be "plan ready" (after the plan emits) or step-by-step ("for each plan step, enter Layer 3"). Layer 3's generate-test-repair loop generates code, runs tests, and repairs failures under its own V9 cap on iterations. If Layer 3 exhausts its cap, Layer 4 (the outer retry wrapper) may re-enter Layer 2 with a revised plan, or Layer 1 with broadened context, under *its* own cap.
+Layer 2 — typically plan-execute — produces a structured plan and walks it. The Transition Signal for Layer 2 $\to$ Layer 3 may be "plan ready" (after the plan emits) or step-by-step ("for each plan step, enter Layer 3"). Layer 3's generate-test-repair loop generates code, runs tests, and repairs failures under its own V9 cap on iterations. If Layer 3 exhausts its cap, Layer 4 (the outer retry wrapper) may re-enter Layer 2 with a revised plan, or Layer 1 with broadened context, under *its* own cap.
 
 The Trajectory Log records every entry, exit, and transition. V9 bounds at each layer guarantee that the stack always terminates, even if one transition signal misfires. The final result is the artefact left in Shared Working Memory when the last layer exits — typically a passing patch, a written document, or a solved task.
 
@@ -144,8 +144,8 @@ The Trajectory Log records every entry, exit, and transition. V9 bounds at each 
 **Risks and failure modes**
 - *Layer bleed* — Layer 2's loop continues to run inside Layer 3 because the transition signal was incomplete; the agent plans while it should be implementing.
 - *Stack inflation* — adding layers without measurable benefit. Every extra layer is failure surface; agents with five primitives are not five times better than agents with three.
-- *Bound product explosion* — per-layer caps multiply: a ReAct cap of 20 × plan-execute cap of 10 × generate-test-repair cap of 5 × retry cap of 3 = 3,000 worst-case LLM calls. Set per-layer caps as if the others may saturate. The worst-case call count reflects a compounded context growth as well as a compounded call count. At maximum depth across all layers, the context window may be close to full when the last layer fires. Plan layer bounds so that the combined context fits within 70% of the window, leaving room for the final layer's generation. (Mechanisms 2, 3.)
-- *Transition oscillation* — Layers 2 and 3 ping-pong because the transition predicates are not monotone (a plan-step "completes" → Layer 3 → produces an observation that "re-opens" the plan → Layer 2 → …). Transitions must be monotone or have a higher-level damping rule.
+- *Bound product explosion* — per-layer caps multiply: a ReAct cap of 20 $\times$ plan-execute cap of 10 $\times$ generate-test-repair cap of 5 $\times$ retry cap of 3 = 3,000 worst-case LLM calls. Set per-layer caps as if the others may saturate. The worst-case call count reflects a compounded context growth as well as a compounded call count. At maximum depth across all layers, the context window may be close to full when the last layer fires. Plan layer bounds so that the combined context fits within 70% of the window, leaving room for the final layer's generation. (Mechanisms 2, 3.)
+- *Transition oscillation* — Layers 2 and 3 ping-pong because the transition predicates are not monotone (a plan-step "completes" $\to$ Layer 3 $\to$ produces an observation that "re-opens" the plan $\to$ Layer 2 $\to$ …). Transitions must be monotone or have a higher-level damping rule.
 - *A3 in multiples* — V9 missing on any one layer makes the entire stack a runaway candidate; per-layer bounds are non-negotiable.
 - *Hidden god-prompt* — packing all four layers' instructions into one mega-prompt instead of giving each layer its own session setup; the stack reverts to a single confused loop.
 
@@ -153,10 +153,10 @@ The Trajectory Log records every entry, exit, and transition. V9 bounds at each 
 
 - **Name the phases before naming the primitives.** The right starting question is *"what distinct phases does this task have?"*, not *"which primitives should we use?"*. The phases come first; the primitives follow.
 - **Each layer is its own configured session.** Different setup, different model where useful, different output contract. The ReAct layer's session is not the plan-execute layer's session, even when the same base model serves both. Each session's stable setup (role, output contract, constraints) is a candidate for prefix caching (mechanism 5). A Layer 1 ReAct session that starts with the same system prompt on every task pays prefill once per cache TTL on that prefix, then pays only the variable portion. Since the ReAct layer typically runs many more steps than other layers, this caching benefit compounds. Design each layer's system prompt with a stable prefix and variable suffix to maximize cache hit rate. (Mechanism 5.)
-- **Bound each layer independently.** A single global wall-clock cap is not enough; each loop's iteration count must be capped at its own scale. ReAct → max steps; plan-execute → max plan size; generate-test-repair → max repair iterations; retry → max attempts.
+- **Bound each layer independently.** A single global wall-clock cap is not enough; each loop's iteration count must be capped at its own scale. ReAct $\to$ max steps; plan-execute $\to$ max plan size; generate-test-repair $\to$ max repair iterations; retry $\to$ max attempts.
 - **Make every transition signal a one-line predicate or a named judge call.** If you cannot write the transition in one expression, the transition is not clear enough yet. Document them at the top of the scaffold.
 - **Log per-layer.** V14 Trajectory Logging must record layer entries, exits, transitions taken, and final state per layer — not just per LLM call. Otherwise debugging *which layer misbehaved* is intractable.
-- **Prefer shallower stacks where they suffice.** The Agentless variant (three sequential phases, no ReAct) outperformed many full-stack agents on SWE-bench. More layers ≠ better.
+- **Prefer shallower stacks where they suffice.** The Agentless variant (three sequential phases, no ReAct) outperformed many full-stack agents on SWE-bench. More layers $\neq$ better.
 - **Verify the simpler baseline first.** Before O16, try the single-primitive agent. If R4 alone passes the evaluation, O16 is gold-plating; if it fails in specific phases, that failure is the evidence that justifies the layer you add.
 - **Pair with O17 Agent Isolation for heavy sub-tasks.** Within a layer, expensive sub-work (web research, long-running code analysis) can be delegated to a sub-agent with a fresh context, without breaking the single-agent shape of the parent.
 
@@ -175,7 +175,7 @@ The Trajectory Log records every entry, exit, and transition. V9 bounds at each 
 | 3 | Layer 2 — Plan-execute: emit plan, then iterate plan steps | `LLM` (looped) | R3 session; V9 cap on plan size |
 | 4 | Transition T2: per plan step — enter Layer 3 | `code` | — |
 | 5 | Layer 3 — Generate-test-repair: produce code, run tests, repair failures | `LLM` (looped) + `code` (test runner) | Repair session; V9 cap on iterations |
-| 6 | Transition T3: tests pass → advance plan step; cap hit → escalate to Layer 4 | `code` | — |
+| 6 | Transition T3: tests pass $\to$ advance plan step; cap hit $\to$ escalate to Layer 4 | `code` | — |
 | 7 | Layer 4 — Retry: revise plan or broaden exploration, re-enter Layer 2 or Layer 1 | `code` (+ `LLM` for plan revision) | V9 cap on attempts |
 | 8 | Trajectory log per layer entry, exit, transition | `code` | V14 |
 | 9 | Return final state when terminal transition fires or all bounds exhaust | `code` | — |
@@ -240,14 +240,14 @@ hybrid_agent(task):
 - **SWE-agent** — [`github.com/SWE-agent/SWE-agent`](https://github.com/SWE-agent/SWE-agent) — academic coding agent (Princeton / Stanford) with an Agent-Computer Interface and a scaffold that explicitly stacks ReAct over a structured action language. NeurIPS 2024. The reference implementation of the explore-plan-implement stack.
 - **OpenHands** (formerly OpenDevin) — [`github.com/All-Hands-AI/OpenHands`](https://github.com/All-Hands-AI/OpenHands) — open platform for software-development agents built on the CodeAct paradigm; event-driven execution loop layered with planning and test-fix sub-loops; the leading open-source production-style coding agent.
 - **Aider** — [`github.com/Aider-AI/aider`](https://github.com/Aider-AI/aider) — terminal-based AI pair programmer; lints and runs tests on each change, with a repair loop on failures; a lighter ReAct + generate-test-repair variant (no explicit plan layer).
-- **Agentless** — [`github.com/OpenAutoCoder/Agentless`](https://github.com/OpenAutoCoder/Agentless) — a deliberately *shallower* O16 stack: localization → repair → patch validation, with no ReAct exploration layer. Demonstrates the "shallow O16 beats deep O16" finding on SWE-bench Lite (Xia et al., 2024).
+- **Agentless** — [`github.com/OpenAutoCoder/Agentless`](https://github.com/OpenAutoCoder/Agentless) — a deliberately *shallower* O16 stack: localization $\to$ repair $\to$ patch validation, with no ReAct exploration layer. Demonstrates the "shallow O16 beats deep O16" finding on SWE-bench Lite (Xia et al., 2024).
 - **LangGraph** — [`github.com/langchain-ai/langgraph`](https://github.com/langchain-ai/langgraph) — general-purpose cyclic graph runtime that hosts O16 stacks as composable subgraphs (a ReAct subgraph, a plan-execute subgraph, a test-fix subgraph, wired through transition edges). The closest general-purpose host.
 
 ## Known Uses
 
 - **SWE-agent / SWE-agent 2.0** — academic SOTA on SWE-bench when released; the canonical published example of stacking ReAct + plan-execute + repair under an Agent-Computer Interface.
 - **OpenHands** production deployments — the leading open-source coding agent at scale; CodeAct paradigm with layered planning and test-driven repair loops.
-- **Devin (Cognition AI)** — proprietary autonomous software engineer; widely described as a stacked-primitive scaffold (plan → execute with tool use → test → revise).
+- **Devin (Cognition AI)** — proprietary autonomous software engineer; widely described as a stacked-primitive scaffold (plan $\to$ execute with tool use $\to$ test $\to$ revise).
 - **Claude Code, Cursor agent mode, Aider** — production coding tools whose internal loops, where visible, exhibit the O16 stack: a ReAct-style outer loop, an inline planning step on harder tasks, an inner test-fix loop.
 - **Agentless** — open implementation showing that a *three-phase plan-execute stack with no ReAct* achieves SWE-bench Lite SOTA at low cost (32% with $0.70 per task as published); evidence that the right O16 stack is task-specific, not maximally layered.
 

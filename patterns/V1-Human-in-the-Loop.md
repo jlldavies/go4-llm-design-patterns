@@ -44,7 +44,7 @@ V1 is right when an autonomous error in this specific action type would cost mor
 
 **1. Reversibility test.** Classify the action: can its effect be undone within the same session by another tool call? If **NO**, V1. If **YES** and the undo is cheap, V2 is acceptable. Threshold: an action whose reversal requires another party's cooperation (sending email, posting to public channels, executing a trade) is *not* reversible by the agent and is V1 territory.
 
-**2. Blast-radius test.** Score the maximum harm of a wrong action on a 1–5 scale: (1) ephemeral session-internal, (2) wastes tokens or compute, (3) affects this user's local state, (4) affects external systems or counterparties, (5) regulatory, financial, or reputational damage. **Score ≥ 4 → V1.** Score ≤ 2 → V2 or V7 alone. Score 3 → V2 with V14 + V17.
+**2. Blast-radius test.** Score the maximum harm of a wrong action on a 1–5 scale: (1) ephemeral session-internal, (2) wastes tokens or compute, (3) affects this user's local state, (4) affects external systems or counterparties, (5) regulatory, financial, or reputational damage. **Score $\geq$ 4 $\to$ V1.** Score $\leq$ 2 $\to$ V2 or V7 alone. Score 3 $\to$ V2 with V14 + V17.
 
 **3. Novelty test.** Is the action covered by the V16 offline eval suite and within the V17 online quality envelope? If the action is *outside* the evaluated envelope, V1 is required regardless of reversibility — there is no calibration to trust. Threshold: if the action's parameters were not represented in the most recent eval pass, treat as novel.
 
@@ -55,7 +55,7 @@ V1 is right when an autonomous error in this specific action type would cost mor
 **Quick test — V1 is the right pattern when:**
 
 - the action is irreversible (cannot be undone autonomously by the agent), *and*
-- the blast radius is ≥ 4 or the action is novel (outside V16/V17 envelope), *and*
+- the blast radius is $\geq$ 4 or the action is novel (outside V16/V17 envelope), *and*
 - no V7 deterministic rule already blocks the action, *and*
 - the latency budget tolerates a human response.
 
@@ -96,15 +96,15 @@ If the action is reversible and routine, choose **V2 Human-on-the-Loop**. If the
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Checkpoint Gate** | the decision *whether this action needs V1* | planned action + context → V1 / V2 / pass-through | use model confidence as the sole signal — gate by action class (reversibility, blast radius, novelty), or it will rubber-stamp confident wrong actions. |
-| **Plan Surfacer** | producing a human-readable representation of the planned action | tool-call payload + rationale → review artefact (action, why, expected outcome, alternatives) | surface raw JSON or opaque tool arguments — an unreviewable plan is V1 theatre. |
-| **Blocker** | halting agent execution at the checkpoint | gate verdict (V1) → paused state via V10 | proceed on timeout — the safe default is always ABORT. |
-| **Human Reviewer** | the verdict | review artefact → {APPROVE, REJECT+reason, MODIFY+edits, ESCALATE} | be presented with so many checkpoints they stop reading. The Gate's calibration is the Reviewer's protection. |
-| **Modification Channel** | structured edits to the plan | reviewer edits → revised action a' | allow free-text edits that re-enter the agent unchecked — modifications must re-enter the same gate. |
-| **Escalation Router** | routing to higher authority when first reviewer cannot decide | review artefact + escalation reason → next-level reviewer | be a dead-end — every escalation must terminate in an explicit verdict or a documented abort. |
-| **Audit Recorder** | logging the verdict, prompt, plan, and outcome (delegated to V14) | every checkpoint event → immutable trace | omit the *reason* on REJECT — the reason is the training data for future gate calibration. |
+| **Checkpoint Gate** | the decision *whether this action needs V1* | planned action + context $\to$ V1 / V2 / pass-through | use model confidence as the sole signal — gate by action class (reversibility, blast radius, novelty), or it will rubber-stamp confident wrong actions. |
+| **Plan Surfacer** | producing a human-readable representation of the planned action | tool-call payload + rationale $\to$ review artefact (action, why, expected outcome, alternatives) | surface raw JSON or opaque tool arguments — an unreviewable plan is V1 theatre. |
+| **Blocker** | halting agent execution at the checkpoint | gate verdict (V1) $\to$ paused state via V10 | proceed on timeout — the safe default is always ABORT. |
+| **Human Reviewer** | the verdict | review artefact $\to$ {APPROVE, REJECT+reason, MODIFY+edits, ESCALATE} | be presented with so many checkpoints they stop reading. The Gate's calibration is the Reviewer's protection. |
+| **Modification Channel** | structured edits to the plan | reviewer edits $\to$ revised action a' | allow free-text edits that re-enter the agent unchecked — modifications must re-enter the same gate. |
+| **Escalation Router** | routing to higher authority when first reviewer cannot decide | review artefact + escalation reason $\to$ next-level reviewer | be a dead-end — every escalation must terminate in an explicit verdict or a documented abort. |
+| **Audit Recorder** | logging the verdict, prompt, plan, and outcome (delegated to V14) | every checkpoint event $\to$ immutable trace | omit the *reason* on REJECT — the reason is the training data for future gate calibration. |
 
 Seven narrow responsibilities. The pattern's correctness lives in the Gate (right things get gated), the Surfacer (the human can actually review), and the Blocker (no execution without verdict). The Audit Recorder is the feedback channel that lets the Gate improve over time.
 
@@ -197,7 +197,7 @@ hitl_checkpoint(agent_state, planned_action):
 | Session | Model | Setup — loaded once, before first call | Per-call prompt wraps |
 |---|---|---|---|
 | **Gate** | small fast generalist, or a deterministic rule engine when the action set is enumerable | role (*"you classify whether a planned agent action requires blocking human review"*); the reversibility / blast-radius / novelty rubric; the V7 PROHIBIT list to cross-check; output contract (one of `V1`, `V2`, `PASS`, with a one-sentence reason) | the planned action and the relevant context |
-| **Surfacer** | capable generalist — review quality caps the value of the whole pattern | role (*"you produce a human-readable review artefact for a planned agent action"*); the output template (S6) — fields: action, why, expected outcome, what reversal looks like, alternatives considered; constraints (S5) — no raw JSON; ≤ 200 words; never omit the reversal section | the planned action, the rationale trace from the agent, and the relevant context |
+| **Surfacer** | capable generalist — review quality caps the value of the whole pattern | role (*"you produce a human-readable review artefact for a planned agent action"*); the output template (S6) — fields: action, why, expected outcome, what reversal looks like, alternatives considered; constraints (S5) — no raw JSON; $\leq$ 200 words; never omit the reversal section | the planned action, the rationale trace from the agent, and the relevant context |
 
 **Specialist-model note.** No fine-tuned specialist is required, but two structural choices change everything. First, the **Gate must be deterministic where it can be** — when the action set is small and enumerable, a rule engine (or V7) is strictly better than an LLM Gate, because the Gate's failure mode is the pattern's failure mode. When the Gate is an LLM, it is subject to the same stochastic sampling failure as the agent it gates — this is why V7 AgentSpec (deterministic rule engine) is strictly preferable to an LLM Gate for enumerable action sets (mechanism 7). Second, the **Surfacer benefits from the strongest available model** — reviewability is the bottleneck, and the cost is paid once per checkpoint, not once per turn. For agents handling regulated actions (EU AI Act Article 14 high-risk), pair the Gate with V7 AgentSpec rather than relying on the LLM Gate alone.
 

@@ -28,7 +28,7 @@ These are the conflicts most likely to cause production failures if not understo
 
 ---
 
-### CRITICAL 1: R4 (ReAct) $\oplus$ R5 (ReWOO)
+### Critical 1 — R4 $\oplus$ R5
 **Type:** Mutually Exclusive
 
 ReAct interleaves reasoning and observation — it can adapt mid-task based on what it discovers. ReWOO plans all tool calls upfront and executes them without mid-run observation. These two are **fundamentally incompatible for the same task**:
@@ -45,7 +45,7 @@ ReAct interleaves reasoning and observation — it can adapt mid-task based on w
 
 ---
 
-### CRITICAL 2: V1 (Human-in-the-Loop) $\leftrightarrow$ V2 (Human-on-the-Loop)
+### Critical 2 — V1 $\leftrightarrow$ V2
 **Type:** Direct Tension
 
 V1 blocks: the agent cannot proceed until a human approves. V2 monitors: the agent proceeds while a human watches and can interrupt. These represent fundamentally different trust and risk postures:
@@ -65,7 +65,7 @@ V1 blocks: the agent cannot proceed until a human approves. V2 monitors: the age
 
 ---
 
-### CRITICAL 3: S9 (Constitutional Framing) H/S V7 (AgentSpec)
+### Critical 3 — S9 H/S V7
 **Type:** Hard vs Soft
 
 S9 embeds principles in the prompt. The model applies them through language reasoning — probabilistic, can be overridden by adversarial prompting, cannot be audited with certainty. V7 externalises rules in a policy engine independent of the LLM — deterministic for defined violations, survives prompt manipulation, produces an audit record.
@@ -91,7 +91,7 @@ V7 (AgentSpec / Declarative Governance) — hard, specific, external
 
 ---
 
-### CRITICAL 4: H3 (Entropy-Driven Curiosity) $\oplus$ R17 (Self-Consistency Voting)
+### Critical 4 — H3 $\oplus$ R17
 **Type:** Mutually Exclusive
 
 R17 reduces entropy: it samples multiple outputs and selects the majority answer — the most consistent, lowest-entropy result. H3 increases entropy: it detects low-entropy states and injects novelty by raising temperature or pivoting approach.
@@ -106,7 +106,7 @@ If you apply both to the same task simultaneously, they cancel each other out at
 
 ---
 
-### CRITICAL 5: R13 (CodeAct) $\to$ V8 (Tool Sandboxing)
+### Critical 5 — R13 $\to$ V8
 **Type:** Prerequisite Dependency
 
 R13 (CodeAct) achieves its ~20pp accuracy advantage over JSON tool calls by executing arbitrary Python code. This is only safe inside a constrained execution environment. Without V8:
@@ -122,7 +122,7 @@ R13 (CodeAct) achieves its ~20pp accuracy advantage over JSON tool calls by exec
 
 ---
 
-### CRITICAL 6: I3 (MCP Server) $\leftrightarrow$ V13 (Tool Budget)
+### Critical 6 — I3 $\leftrightarrow$ V13
 **Type:** Direct Tension
 
 MCP makes it easy to add tool servers. Each server contributes its full schema to the context window. The empirical data:
@@ -140,7 +140,7 @@ The tension: MCP's value proposition is ecosystem richness (many tools, standard
 
 ---
 
-### CRITICAL 7: H5 (Constitutional Self-Alignment) $\to$ V1 (Human-in-the-Loop)
+### Critical 7 — H5 $\to$ V1
 **Type:** Prerequisite Dependency
 
 H5 allows the agent to propose modifications to its own operating principles. This is the most dangerous pattern in the collection if implemented without human review. An agent that autonomously adopts its own principles can:
@@ -155,7 +155,7 @@ H5 allows the agent to propose modifications to its own operating principles. Th
 
 ---
 
-### CRITICAL 8: V12 (Stateless Reducer) $\sim$ V10 (Checkpointing)
+### Critical 8 — V12 $\sim$ V10
 **Type:** Composability Tension
 
 At first glance these conflict: V12 says agents should be pure functions with no internal state; V10 says agent state should be saved at each step. The resolution is that they are operating at different layers:
@@ -378,8 +378,8 @@ When patterns are in conflict and the resolution rule doesn't clearly apply, use
 
 ---
 
-### CONNECTION A: K6/K7 invalidates K11 append-only constraint (composability tension ~)
-**Type:** Composability Tension ~
+### Connection A — K6/K7 $\sim$ K11
+**Type:** Composability Tension ($\sim$)
 
 K6 (Context Compression) rewrites earlier context spans; K7 (Context Pruning) deletes them. Both operations reposition subsequent tokens, changing their sequence offsets and invalidating the KV cache states for those positions and all positions after them (mechanism 3, 5). K11 (Observational Memory) requires append-only writes precisely because any edit to a prior position invalidates the KV cache.
 
@@ -389,8 +389,8 @@ K6 (Context Compression) rewrites earlier context spans; K7 (Context Pruning) de
 
 ---
 
-### CONNECTION B: Dynamic S2 destroys the entire upstream stable prefix cache (~)
-**Type:** Composability Tension ~
+### Connection B — S2 $\sim$ prefix cache
+**Type:** Composability Tension ($\sim$)
 
 Dynamic S2 (Retrieval-Augmented Few-Shot variant) changes the token sequence of the few-shot block on every call. This does not only forfeit S2's own cache entry — it invalidates the cache for the entire prefix that precedes it: S3 Persona, S5 Constraint Framing, S6 Output Template, S9 Constitutional Framing. Any stable content placed before the dynamic S2 block cannot be cached if S2 changes.
 
@@ -400,8 +400,8 @@ Dynamic S2 (Retrieval-Augmented Few-Shot variant) changes the token sequence of 
 
 ---
 
-### CONNECTION C: R17 Self-Consistency requires within-TTL fan-out to exploit prefix cache (~)
-**Type:** Composability Tension ~
+### Connection C — R17 $\sim$ prefix cache
+**Type:** Composability Tension ($\sim$)
 
 When R17 (Self-Consistency Voting) wraps R2 (Few-Shot CoT) with a static exemplar block, the exemplar block qualifies as a cacheable prefix (mechanism 5). But if N samples are dispatched sequentially over time exceeding the provider TTL (~5 minutes), later samples lose the cache hit and re-pay full prefill.
 
@@ -409,7 +409,7 @@ When R17 (Self-Consistency Voting) wraps R2 (Few-Shot CoT) with a static exempla
 
 ---
 
-### CONNECTION D: K1 vs K9 decision is query-frequency-dependent, not size-dependent (direct tension $\leftrightarrow$)
+### Connection D — K1 $\leftrightarrow$ K9
 **Type:** Direct Tension $\leftrightarrow$
 
 K1 (Vanilla RAG) pays n² attention cost at retrieval time over a small context (retrieved chunks only). K9 (Long Context) pays n² at prefill time over a large context (entire document set). The received wisdom — "use K1 for large corpora, K9 for small" — is incomplete.
@@ -420,7 +420,7 @@ K1 (Vanilla RAG) pays n² attention cost at retrieval time over a small context 
 
 ---
 
-### CONNECTION E: V4 Dual LLM + V15 LLM-as-Judge + V6 injection creates an unguarded attack surface ($\to$)
+### Connection E — V4/V15/V6
 **Type:** Prerequisite Dependency $\to$
 
 V4 (Dual LLM) routes untrusted content through a quarantined Q-LLM before it reaches the privileged P-LLM. When V15 (LLM-as-Judge) serves as V4's Validation Layer, the judge session receives the Q-LLM's output — which may contain injected instructions from the original untrusted source (mechanism 3, 12: injected content occupies positions in the KV cache where it can influence attention). V6 (Prompt Injection Shield) MUST wrap the V15 judge session in this configuration.
@@ -431,7 +431,7 @@ V4 (Dual LLM) routes untrusted content through a quarantined Q-LLM before it rea
 
 ---
 
-### CONNECTION F: O6+O17 quality win requires O17 as load-bearing component ($\to$)
+### Connection F — O6 $\to$ O17
 **Type:** Prerequisite Dependency $\to$
 
 The O6 (Orchestrator-Workers) quality win — cited as ~90% accuracy improvement — depends mechanically on each worker having a bounded seq_len separate from the orchestrator (mechanism 6). O17 (Agent Isolation) is the pattern that enforces this. Without O17, workers share context with the orchestrator; n² cost grows as if it were a single agent and the lost-in-middle degradation (mechanism 4) applies to the combined context.
@@ -442,8 +442,8 @@ The O6 (Orchestrator-Workers) quality win — cited as ~90% accuracy improvement
 
 ---
 
-### CONNECTION G: H6 Continuous Inner Monologue + H2 Episodic Self-Improvement — Thinker IS the Distiller (~)
-**Type:** Composability Tension ~
+### Connection G — H6 $\sim$ H2
+**Type:** Composability Tension ($\sim$)
 
 H6 (Continuous Inner Monologue) runs internal reflection that produces abstracted summaries of session activity. H2 (Episodic Self-Improvement) uses a Distiller step to compress session experience into persistent improvement artefacts. In a system running both, the H6 Thinker's end-of-session consolidation narrative is structurally equivalent to what the H2 Distiller needs as input — it is already a compressed, reflective summary of the session.
 
@@ -453,8 +453,8 @@ H6 (Continuous Inner Monologue) runs internal reflection that produces abstracte
 
 ---
 
-### CONNECTION H: I3 tool-search subagent and I6 executor are both mechanism 6 instances (~)
-**Type:** Composability Tension ~
+### Connection H — I3 $\sim$ I6
+**Type:** Composability Tension ($\sim$)
 
 I3 (MCP Server) routes the main agent's tool-selection overhead to a search subagent with its own bounded context. I6 (A2A Delegation) routes execution to a separate executor agent with its own bounded context. The underlying mechanism is identical (mechanism 6: subagent decomposition as context bounding); only the scale and the thing being bounded differ.
 
@@ -462,8 +462,8 @@ I3 (MCP Server) routes the main agent's tool-selection overhead to a search suba
 
 ---
 
-### CONNECTION I: R7 Reflexion wrapping R4 ReAct has super-linear retry cost (~)
-**Type:** Composability Tension ~
+### Connection I — R7 $\sim$ R4
+**Type:** Composability Tension ($\sim$)
 
 Each R7 (Reflexion) retry is a full new R4 (ReAct) trajectory. The episodic memory buffer — containing N-1 prior critiques — is appended to each subsequent Actor call. Retry N's Actor call attends over a longer prefix than retry N-1 (mechanism 2: O(n²) attention cost). The retry cost is not N × per-task cost — it is strictly super-linear.
 
@@ -473,8 +473,8 @@ Each R7 (Reflexion) retry is a full new R4 (ReAct) trajectory. The episodic memo
 
 ---
 
-### CONNECTION J: V20 reask loop expansion must be accounted for in V9 token cap (~)
-**Type:** Composability Tension ~
+### Connection J — V20 $\to$ V9
+**Type:** Composability Tension ($\sim$)
 
 Each V20 (Schema Validation) retry re-sends the original prompt + the bad output + an error message. Context grows by approximately twice the bad output length per retry (mechanism 2, 3). V20 with a cap of 3 retries and a 1,000-token original prompt may consume 4–5× the token cost of the first attempt.
 

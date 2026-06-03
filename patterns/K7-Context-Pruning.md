@@ -72,11 +72,11 @@ If consumption cannot be tracked, **K6** is the only option. If the context neve
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
 | **Context window** | the context being managed | — | — |
-| **Consumption Tracker** | recording which spans are spent | span events → consumed set | guess — a span marked spent that is later referenced is the pattern's main failure. |
-| **Pruner** | deleting flagged spans | window + consumed set → smaller window | alter retained content; pruning is lossless on everything it keeps. |
+| **Consumption Tracker** | recording which spans are spent | span events $\to$ consumed set | guess — a span marked spent that is later referenced is the pattern's main failure. |
+| **Pruner** | deleting flagged spans | window + consumed set $\to$ smaller window | alter retained content; pruning is lossless on everything it keeps. |
 
 ## Collaborations
 

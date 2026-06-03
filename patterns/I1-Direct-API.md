@@ -47,25 +47,25 @@ Do not use I1 when:
 I1 is right when the action is fully determined by code — no LLM judgment is needed to decide what to call or with what.
 
 **1. Locate the decision.** Where does the choice of API + parameters actually get made?
-- Made entirely by code logic, or by deterministic extraction from a prior LLM output → **I1**.
-- Made by the LLM at the moment of calling (it reads the user's request and picks the tool) → **I2** (which calls I1 internally).
-- Made by the LLM but among 10+ shared tools across agents → **I3**.
-- The right call is a shell command and a CLI already exists → **I4**.
+- Made entirely by code logic, or by deterministic extraction from a prior LLM output $\to$ **I1**.
+- Made by the LLM at the moment of calling (it reads the user's request and picks the tool) $\to$ **I2** (which calls I1 internally).
+- Made by the LLM but among 10+ shared tools across agents $\to$ **I3**.
+- The right call is a shell command and a CLI already exists $\to$ **I4**.
 
 **2. Latency floor.** What is the target per-call latency?
-- < 10ms (HFT, real-time pricing, sub-second UX) → **I1** mandatory; any LLM routing breaks the budget.
-- 50–500ms → **I1** preferred; I2 acceptable.
-- > 500ms tolerable → I2/I3 fine.
+- < 10ms (HFT, real-time pricing, sub-second UX) $\to$ **I1** mandatory; any LLM routing breaks the budget.
+- 50–500ms $\to$ **I1** preferred; I2 acceptable.
+- > 500ms tolerable $\to$ I2/I3 fine.
 
 **3. Determinism requirement.** Must identical inputs produce byte-identical calls (audit, compliance, financial reconciliation)?
-- Yes → **I1**. LLM routing introduces a small non-zero rate of parameter variance even at temperature 0.
-- No → I2 is fine.
+- Yes $\to$ **I1**. LLM routing introduces a small non-zero rate of parameter variance even at temperature 0.
+- No $\to$ I2 is fine.
 
-**4. Call frequency × LLM cost.** At expected QPS, what would routing-LLM cost run to annually? If it exceeds the engineering cost of writing the deterministic mapping (a few hours to a few days), **I1** wins on raw economics regardless of other factors.
+**4. Call frequency $\times$ LLM cost.** At expected QPS, what would routing-LLM cost run to annually? If it exceeds the engineering cost of writing the deterministic mapping (a few hours to a few days), **I1** wins on raw economics regardless of other factors.
 
 **5. Schema stability.** How often does the API contract change?
-- Stable (versioned, deprecation cycles, OpenAPI spec) → **I1** safe; hard-coded mapping holds.
-- Volatile (internal API in flux, schema-as-code regenerated weekly) → consider **I2** so the schema description carries the change, or invest in code-generation from the spec for I1.
+- Stable (versioned, deprecation cycles, OpenAPI spec) $\to$ **I1** safe; hard-coded mapping holds.
+- Volatile (internal API in flux, schema-as-code regenerated weekly) $\to$ consider **I2** so the schema description carries the change, or invest in code-generation from the spec for I1.
 
 **Quick test — I1 is the right pattern when:**
 
@@ -102,13 +102,13 @@ If the choice of action genuinely requires interpreting natural language, choose
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Parameter Extractor** | turning upstream signal into typed call parameters | LLM output / rule / variables → typed parameter object | re-interpret the upstream intent — it parses; it does not decide. If it has to "figure out what the user meant", that's I2 territory, not I1. |
-| **Validator** | gatekeeping the call before it leaves the process | parameter object → pass / fail | be skipped on the assumption that the upstream code "already validated" — the validator is where compliance and security live, and it must run even on internal callers. |
-| **API Client** | executing the call against the external service | validated parameters → raw response | embed business logic — it is a transport. Auth handling, headers, serialisation: yes. Branching on response content: no, that belongs in the caller or Error Handler. |
-| **Error Handler** | retry, backoff, circuit breaker, and the decision to surface or swallow | raw response / exception → retried result, surfaced error, or open circuit | hide errors from the audit log; every retry and every circuit-open event must be traceable (V14). |
-| **Result Returner** | shaping the response for the caller (and for any LLM downstream) | raw response → typed result | leak transport details (raw headers, full HTTP envelopes) into an LLM's context — that bloats tokens and exposes implementation. |
+| **Parameter Extractor** | turning upstream signal into typed call parameters | LLM output / rule / variables $\to$ typed parameter object | re-interpret the upstream intent — it parses; it does not decide. If it has to "figure out what the user meant", that's I2 territory, not I1. |
+| **Validator** | gatekeeping the call before it leaves the process | parameter object $\to$ pass / fail | be skipped on the assumption that the upstream code "already validated" — the validator is where compliance and security live, and it must run even on internal callers. |
+| **API Client** | executing the call against the external service | validated parameters $\to$ raw response | embed business logic — it is a transport. Auth handling, headers, serialisation: yes. Branching on response content: no, that belongs in the caller or Error Handler. |
+| **Error Handler** | retry, backoff, circuit breaker, and the decision to surface or swallow | raw response / exception $\to$ retried result, surfaced error, or open circuit | hide errors from the audit log; every retry and every circuit-open event must be traceable (V14). |
+| **Result Returner** | shaping the response for the caller (and for any LLM downstream) | raw response $\to$ typed result | leak transport details (raw headers, full HTTP envelopes) into an LLM's context — that bloats tokens and exposes implementation. |
 
 Five narrow responsibilities, all in code, none of them an LLM. The pattern's reliability comes from that absence: the call path is testable end-to-end with unit tests and replay fixtures, not with eval sets.
 

@@ -53,7 +53,7 @@ If all three are low, **S3 Persona** alone is sufficient and H7 is overhead.
 
 **3. Enumerate the style fields explicitly.** H7 is not "the persona adapts." It is "**these specific fields** adapt, **these other fields** never do." Practical style fields: *detail level* (1–5), *technical depth* (1–5), *format preference* (bullets / prose / code / tables), *response length* (short / medium / long), *tone* (formal / casual / collaborative). Identity-core fields that **H7 may not touch**: values, refusal behaviour, safety register, capability claims, domain-truth statements, brand-voice invariants. If the field list cannot be written down before deployment, the partition will not survive operation.
 
-**4. Per-user signal budget.** H7 needs enough per-user data to estimate parameters above noise. Practical floor: **≥ 5–10 interactions per user** before adapting beyond the deployment default. Below that, run S3's static persona and let signal accumulate. Above that, bound adaptation step size so a single unusual exchange does not jump the model. The style overlay is injected into every session context and remains in-context for all turns. It contributes to seq_len for the duration of the session, compounding the O(n²) attention cost on every turn (mechanism 2). Keep the overlay compact — the 5-field schema keeps this contribution to ~20–50 tokens, negligible. Free-form style expansions beyond the schema are a budget risk, not just a governance risk.
+**4. Per-user signal budget.** H7 needs enough per-user data to estimate parameters above noise. Practical floor: **$\geq$ 5–10 interactions per user** before adapting beyond the deployment default. Below that, run S3's static persona and let signal accumulate. Above that, bound adaptation step size so a single unusual exchange does not jump the model. The style overlay is injected into every session context and remains in-context for all turns. It contributes to seq_len for the duration of the session, compounding the O(n²) attention cost on every turn (mechanism 2). Keep the overlay compact — the 5-field schema keeps this contribution to ~20–50 tokens, negligible. Free-form style expansions beyond the schema are a budget risk, not just a governance risk.
 
 **5. Style-reset mechanism.** Users must be able to *explicitly reset* style preferences ("go back to defaults"). Without a reset path, a noisy or mis-inferred adaptation persists and the user has no recourse. Treat the reset as a first-class user-facing operation, not a hidden admin tool.
 
@@ -99,16 +99,16 @@ If any condition fails, **S3 Persona** is the right pattern. If H1 is missing, i
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **User Style Model** | the per-user style parameters (detail, depth, format, length, tone) | — → bounded numeric/categorical record | hold identity-core fields (values, refusal, brand). The model has a fixed schema; freeform additions are how H7 silently becomes H1. |
-| **Style Inferrer** | extracting style signals from user messages and behaviour | recent turns + rewrites + corrections → proposed delta | infer *content* preferences ("user dislikes topic X") — that belongs in H10. H7 reads only *how*, never *what*. |
-| **Style Updater** | applying a bounded delta to the User Style Model at the trigger | proposed delta + current model → updated model | edit mid-session; updates apply between sessions or on explicit feedback, never per turn. Continuous editing destabilises both the model and the cache. |
-| **Boundary Guard** | refusing any write that touches an H1 invariant field | proposed delta → permitted delta (or rejection) | be advisory. The Guard is structural — a field-scope allowlist, not a soft warning. A delta that names an H1 field is dropped, not negotiated. |
-| **Style Applier** | injecting the active style parameters into the generation context | User Style Model + H1 invariant block → composed setup | override H1 fields. The H1 block is read-only at this layer; the Applier composes them with the style overlay, never replaces them. |
-| **Reset Handler** *(user-facing)* | restoring the User Style Model to deployment defaults on explicit request | user reset signal → defaulted model | be hidden. The reset path must be visible and reachable; a hidden reset is operationally absent. |
+| **User Style Model** | the per-user style parameters (detail, depth, format, length, tone) | — $\to$ bounded numeric/categorical record | hold identity-core fields (values, refusal, brand). The model has a fixed schema; freeform additions are how H7 silently becomes H1. |
+| **Style Inferrer** | extracting style signals from user messages and behaviour | recent turns + rewrites + corrections $\to$ proposed delta | infer *content* preferences ("user dislikes topic X") — that belongs in H10. H7 reads only *how*, never *what*. |
+| **Style Updater** | applying a bounded delta to the User Style Model at the trigger | proposed delta + current model $\to$ updated model | edit mid-session; updates apply between sessions or on explicit feedback, never per turn. Continuous editing destabilises both the model and the cache. |
+| **Boundary Guard** | refusing any write that touches an H1 invariant field | proposed delta $\to$ permitted delta (or rejection) | be advisory. The Guard is structural — a field-scope allowlist, not a soft warning. A delta that names an H1 field is dropped, not negotiated. |
+| **Style Applier** | injecting the active style parameters into the generation context | User Style Model + H1 invariant block $\to$ composed setup | override H1 fields. The H1 block is read-only at this layer; the Applier composes them with the style overlay, never replaces them. |
+| **Reset Handler** *(user-facing)* | restoring the User Style Model to deployment defaults on explicit request | user reset signal $\to$ defaulted model | be hidden. The reset path must be visible and reachable; a hidden reset is operationally absent. |
 
-Six narrow responsibilities. The discipline is the **read/write asymmetry across the H1↔H7 boundary**: the Style Applier *reads* H1's invariant block to compose the generation context; the Style Updater *writes only* to the H7 User Style Model, never to H1. The Boundary Guard enforces that asymmetry at the structural level. The same separation discipline K12 enforces between Curator and Agent — and that **H1 enforces between session and Updater** — prevents the H7-rewrites-identity failure mode (**HA3**).
+Six narrow responsibilities. The discipline is the **read/write asymmetry across the H1$\leftrightarrow$H7 boundary**: the Style Applier *reads* H1's invariant block to compose the generation context; the Style Updater *writes only* to the H7 User Style Model, never to H1. The Boundary Guard enforces that asymmetry at the structural level. The same separation discipline K12 enforces between Curator and Agent — and that **H1 enforces between session and Updater** — prevents the H7-rewrites-identity failure mode (**HA3**).
 
 ## Collaborations
 
@@ -124,7 +124,7 @@ A session opens. The Loader (an H1 mechanism) places the H1 invariant Identity B
 
 **Costs**
 - Per-user state — every user adds a small persistent record; storage and privacy concerns scale with user count.
-- Inference and update calls add latency and tokens; the style overlay also costs prompt-cache friendliness if it lives ahead of the cached portion. **Prefix cache architecture:** the H7 style overlay is per-user and therefore variable — it must be positioned *after* the stable cached prefix, not before it. The stable cacheable tier is: H1 Genesis State → fixed tool descriptions → fixed few-shot examples. The per-user variable tier is: H7 style overlay → H10 relational content → session input. Placing the style overlay before the stable tier invalidates the H1 prefix cache for every user, eliminating the session-cost reduction mechanism 5 provides. Providers that support prompt caching (mechanism 5) cache from the beginning of the prompt; any token that varies per user before the cache boundary forces a cache miss.
+- Inference and update calls add latency and tokens; the style overlay also costs prompt-cache friendliness if it lives ahead of the cached portion. **Prefix cache architecture:** the H7 style overlay is per-user and therefore variable — it must be positioned *after* the stable cached prefix, not before it. The stable cacheable tier is: H1 Genesis State $\to$ fixed tool descriptions $\to$ fixed few-shot examples. The per-user variable tier is: H7 style overlay $\to$ H10 relational content $\to$ session input. Placing the style overlay before the stable tier invalidates the H1 prefix cache for every user, eliminating the session-cost reduction mechanism 5 provides. Providers that support prompt caching (mechanism 5) cache from the beginning of the prompt; any token that varies per user before the cache boundary forces a cache miss.
 - A schema must be designed and maintained — adding a sixth field later is non-trivial across already-populated user models.
 
 **Risks and failure modes**
@@ -139,7 +139,7 @@ A session opens. The Loader (an H1 mechanism) places the H1 invariant Identity B
 - **Bootstrap from S3 defaults.** A new user's User Style Model = deployment defaults (the S3 persona's implied style). H7 begins to vary only after the per-user signal budget threshold is reached.
 - **Bound the step size.** Each update may move a numeric field by at most ±1 on a 1–5 scale, change at most one categorical field. Larger jumps require an *explicit* user correction.
 - **Schema is fixed.** No free-form fields. If a sixth style field is genuinely needed, ship a schema migration, do not let the Style Inferrer invent one.
-- **Field-scope allowlist.** The Boundary Guard's allowlist is the canonical artefact of the H1↔H7 partition. Review it whenever H1's invariant fields are amended; never amend it implicitly.
+- **Field-scope allowlist.** The Boundary Guard's allowlist is the canonical artefact of the H1$\leftrightarrow$H7 partition. Review it whenever H1's invariant fields are amended; never amend it implicitly.
 - **Distinguish style from content.** H7 affects *how* the agent communicates. *What* the agent communicates about a particular user — goals, projects, history — belongs in **H10 Relational Memory**. The boundary matters: leakage in either direction creates the wrong pattern under the wrong name.
 - **Make the Reset visible.** "Reset style preferences" is a first-class user operation, surfaced in the UI or as a command.
 - **Decay slowly.** Older signals matter less than recent; apply a gentle exponential decay (half-life ~30 days) rather than a hard cutoff.
@@ -206,14 +206,14 @@ on_reset(user_id, h7_store):
 
 ## Open-Source Implementations
 
-- **Letta** (formerly MemGPT) — [`github.com/letta-ai/letta`](https://github.com/letta-ai/letta) — the canonical implementation. The `human` core memory block is the User Style Model made concrete: a persistent, agent-editable block carrying user facts and preferences alongside Letta's `persona` block (which is H1). The block-level separation is exactly the H1↔H7 partition this pattern requires.
+- **Letta** (formerly MemGPT) — [`github.com/letta-ai/letta`](https://github.com/letta-ai/letta) — the canonical implementation. The `human` core memory block is the User Style Model made concrete: a persistent, agent-editable block carrying user facts and preferences alongside Letta's `persona` block (which is H1). The block-level separation is exactly the H1$\leftrightarrow$H7 partition this pattern requires.
 - **Mem0** — [`github.com/mem0ai/mem0`](https://github.com/mem0ai/mem0) — a universal memory layer for AI agents that stores user preferences, traits, and interaction patterns as a self-improving long-term memory layer. Per-user identifiers partition the model; "adaptive personalization with continuous improvement" is the pattern's value proposition stated in product terms.
 - **LangMem** — [`github.com/langchain-ai/langmem`](https://github.com/langchain-ai/langmem) — LangChain's user-memory primitives for LangGraph agents; explicit *Memory Manager* and *Prompt Optimizer* abstractions for extracting style signals and updating prompts over time.
 - **LaMP Benchmark** — [`github.com/LaMP-Benchmark/LaMP`](https://github.com/LaMP-Benchmark/LaMP) — research codebase for the LaMP paper; not a deployable user-style runtime, but the canonical evaluation harness for personalised-LLM outputs and the cleanest reference for what "style fit" measures.
 
 ## Known Uses
 
-- **Letta-built personal assistants** — `human` core-memory blocks accumulating user preferences across sessions, paired with `persona` blocks for the agent's invariant identity; the H1↔H7 partition realised at the data-model level.
+- **Letta-built personal assistants** — `human` core-memory blocks accumulating user preferences across sessions, paired with `persona` blocks for the agent's invariant identity; the H1$\leftrightarrow$H7 partition realised at the data-model level.
 - **Coding assistants with rules files** (Cursor, Claude Code) — user- or project-level rules files capturing verbosity, formatting, and tone preferences that the agent honours across sessions; H7 in a coding-assistant register.
 - **Customer-service agents with user-tier routing** — adapt formality and detail level to the user's interaction history and self-reported expertise, while holding brand voice (H1) constant.
 - **Educational and tutoring agents** — calibrate explanation depth to the learner's demonstrated level (not assumed level), pulling from recent exercise performance and explicit user feedback.

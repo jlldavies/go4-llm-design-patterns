@@ -52,9 +52,9 @@ Do not use when:
 
 O4 is right when sub-tasks are honestly independent, the decomposition is fixed, and latency or confidence (not raw quality of reasoning) is the lever.
 
-**1. Test independence.** Take a representative request and list the sub-tasks. Ask, for each pair: *could B run without A's output?* If yes for every pair, the work is parallelisable. If any pair fails the test, that edge is a dependency — chain those two with **O2** and parallelise the rest. Practical threshold: ≥ 80% of sub-tasks must be pairwise independent before O4 pays.
+**1. Test independence.** Take a representative request and list the sub-tasks. Ask, for each pair: *could B run without A's output?* If yes for every pair, the work is parallelisable. If any pair fails the test, that edge is a dependency — chain those two with **O2** and parallelise the rest. Practical threshold: $\geq$ 80% of sub-tasks must be pairwise independent before O4 pays.
 
-**2. Quantify the latency win.** Measure serial wall time `T_serial = sum(t_i)` and predicted parallel wall time `T_parallel ≈ max(t_i) + dispatch_overhead`. Speed-up factor `T_serial / T_parallel`. Below ~2× speed-up the wiring overhead is rarely justified; above ~3× it almost always is. For Voting variants, the equivalent test is *confidence gain per dollar* — measure error rate at N=1 vs N=5 vs N=10 and pick the knee.
+**2. Quantify the latency win.** Measure serial wall time `T_serial = sum(t_i)` and predicted parallel wall time `T_parallel ≈ max(t_i) + dispatch_overhead`. Speed-up factor `T_serial / T_parallel`. Below ~2$\times$ speed-up the wiring overhead is rarely justified; above ~3$\times$ it almost always is. For Voting variants, the equivalent test is *confidence gain per dollar* — measure error rate at N=1 vs N=5 vs N=10 and pick the knee.
 
 **3. Confirm the serving stack parallelises.** Concurrent API requests, async dispatch, or batched inference must actually run simultaneously. Single-tenant local inference often serialises under the hood; check before adopting. If the stack does not parallelise, O4 saves nothing — drop back to **O2**.
 
@@ -69,7 +69,7 @@ O4 is right when sub-tasks are honestly independent, the decomposition is fixed,
 - the serving stack actually runs the calls in parallel, *and*
 - expected speed-up or confidence-gain exceeds the wiring and peak-cost overhead.
 
-If any condition fails, choose the right neighbour. Sequential dependencies → **O2 Prompt Chaining**. Decomposition must be dynamic → **O6 Orchestrator-Workers**. Parallel sections of *one agent's* output → **R12 Skeleton-of-Thought**. Voting on the same prompt as a reasoning move → **R17 Self-Consistency Voting** (a special case of O4 Voting). Adversarial debate rather than independent samples → **O12 Debate / Deliberation**.
+If any condition fails, choose the right neighbour. Sequential dependencies $\to$ **O2 Prompt Chaining**. Decomposition must be dynamic $\to$ **O6 Orchestrator-Workers**. Parallel sections of *one agent's* output $\to$ **R12 Skeleton-of-Thought**. Voting on the same prompt as a reasoning move $\to$ **R17 Self-Consistency Voting** (a special case of O4 Voting). Adversarial debate rather than independent samples $\to$ **O12 Debate / Deliberation**.
 
 ## Structure
 
@@ -88,13 +88,13 @@ If any condition fails, choose the right neighbour. Sequential dependencies → 
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Dispatcher** | the fan-out decision and the prepared per-worker inputs | request → list of (worker, context) pairs | reason about the answer itself, or fold the workers' results back into a synthesis — that is the Aggregator's call. A Dispatcher that also synthesises has collapsed into O6. |
-| **Workers** | producing one independent sub-result each | (sub-task, isolated context) → sub-result | look at sibling workers' outputs — that re-introduces dependency and destroys the parallelism. Workers run in **O17 Agent Isolation** by default. |
-| **Aggregator** | combining the workers' outputs into the final result | list of sub-results → final answer | re-do the workers' reasoning. The aggregator concatenates, merges, votes, or selects — it does not re-derive. For open-ended Voting, the aggregator may invoke a Judge, but the Judge is a participant in its own right. |
-| **Judge** *(optional, Voting variant)* | selecting the best candidate when votes are open-ended | request + N candidates → chosen candidate (+ rationale) | regenerate the candidates or silently merge fragments of multiple candidates — it picks one, or returns "no candidate qualifies." |
-| **Bound / Rate Controller** | capping fan-out width and pacing concurrent calls | proposed fan-out → admitted fan-out | swallow errors silently; a worker dropped by rate-limiting must surface as a partial-failure signal to the Aggregator. |
+| **Dispatcher** | the fan-out decision and the prepared per-worker inputs | request $\to$ list of (worker, context) pairs | reason about the answer itself, or fold the workers' results back into a synthesis — that is the Aggregator's call. A Dispatcher that also synthesises has collapsed into O6. |
+| **Workers** | producing one independent sub-result each | (sub-task, isolated context) $\to$ sub-result | look at sibling workers' outputs — that re-introduces dependency and destroys the parallelism. Workers run in **O17 Agent Isolation** by default. |
+| **Aggregator** | combining the workers' outputs into the final result | list of sub-results $\to$ final answer | re-do the workers' reasoning. The aggregator concatenates, merges, votes, or selects — it does not re-derive. For open-ended Voting, the aggregator may invoke a Judge, but the Judge is a participant in its own right. |
+| **Judge** *(optional, Voting variant)* | selecting the best candidate when votes are open-ended | request + N candidates $\to$ chosen candidate (+ rationale) | regenerate the candidates or silently merge fragments of multiple candidates — it picks one, or returns "no candidate qualifies." |
+| **Bound / Rate Controller** | capping fan-out width and pacing concurrent calls | proposed fan-out $\to$ admitted fan-out | swallow errors silently; a worker dropped by rate-limiting must surface as a partial-failure signal to the Aggregator. |
 
 The Dispatcher, the Workers, and the Aggregator are **structurally distinct sessions**, even if the same model serves all of them. Mixing the Aggregator into the Dispatcher (so the dispatcher also synthesises) is the most common failure mode — the pattern collapses into a single complicated call that is no longer parallel.
 
@@ -146,7 +146,7 @@ A request arrives at the Dispatcher. The Dispatcher applies the fixed decomposit
 |---|---|---|---|
 | 1 | Dispatcher — decompose request into independent sub-tasks; prepare per-worker context | `code` (or rule, or `LLM` for inputs that need parsing) | Dispatcher logic; O17 for context preparation |
 | 2 | Bound — cap fan-out width and admit calls | `code` | V9 |
-| 3 | Workers (×N) — run sub-task in parallel, each in an isolated context | `LLM` (parallel) | Worker session(s); O17 |
+| 3 | Workers ($\times$N) — run sub-task in parallel, each in an isolated context | `LLM` (parallel) | Worker session(s); O17 |
 | 4 | Collect — gather results; mark partial failures | `code` | |
 | 5 | Aggregator — concatenate / merge / vote / judge | `code` (or `LLM` for Judge-based selection) | Aggregator logic; V15 for Voting variants |
 

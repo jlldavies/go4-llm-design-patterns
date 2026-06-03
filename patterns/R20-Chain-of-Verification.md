@@ -38,7 +38,7 @@ Use Chain-of-Verification when:
 - the task produces a **fluent factual answer** (biographies, list questions, entity descriptions, summaries with named entities, long-form factual writing) and hallucination of names, dates, or attributes is the dominant failure;
 - there is **no automated pass/fail signal** — if there were, **R7 Reflexion** is stronger and cheaper per round;
 - you cannot or do not want to add retrieval — **K1 Vanilla RAG** or **K5 Adaptive RAG** are usually a better fix when a corpus exists, but they are infrastructure CoVe does not require;
-- the budget tolerates **2–5× the single-shot cost** (one extra plan call, one batch or N independent answer calls, one revision call);
+- the budget tolerates **2–5$\times$ the single-shot cost** (one extra plan call, one batch or N independent answer calls, one revision call);
 - the model is strong enough that its **prior over isolated facts is more reliable than its prior over fluent compositions of facts** — this is the load-bearing assumption.
 
 Do not use it when:
@@ -62,9 +62,9 @@ R20 is right when the failure mode is *fluent-but-fabricated facts*, no external
 - Cost-constrained / latency-critical — **2-Step**: one plan call, one batched answer call; weaker independence but cheaper.
 - Prototype / quickest deploy — **Joint**: one call, weakest variant; useful only to demonstrate the pattern before committing to the stronger forms.
 
-**3. Cost the loop honestly.** Factored at K verification questions = 1 draft + 1 plan + K answer + 1 revise = **K+3 LLM calls**. Long-form with K=8 questions → **11 calls** for what was one. Factor+Revise adds one more cross-check call. The economically defensible move is often Factored on a strong generalist rather than Joint on a cheaper model — *the independence is the lift, not the iteration count*.
+**3. Cost the loop honestly.** Factored at K verification questions = 1 draft + 1 plan + K answer + 1 revise = **K+3 LLM calls**. Long-form with K=8 questions $\to$ **11 calls** for what was one. Factor+Revise adds one more cross-check call. The economically defensible move is often Factored on a strong generalist rather than Joint on a cheaper model — *the independence is the lift, not the iteration count*.
 
-**4. Cap the verification questions.** Set a hard ceiling on questions per draft (typical: **K ≤ 10**) and prompt the planner to focus on load-bearing claims. Without a cap the planner enumerates every minor entity and the loop's cost explodes. Pair with **V9 Bounded Execution** for the overall loop bound.
+**4. Cap the verification questions.** Set a hard ceiling on questions per draft (typical: **K $\leq$ 10**) and prompt the planner to focus on load-bearing claims. Without a cap the planner enumerates every minor entity and the loop's cost explodes. Pair with **V9 Bounded Execution** for the overall loop bound.
 
 **5. Test the independence assumption.** On a labelled sample, compare the **Joint** variant against **Factored** on the same drafts. If Factored does not measurably outperform Joint, the model is not anchoring on the draft when it sees it — and CoVe is doing nothing R8 could not do more cheaply. The independence has to be paying for itself or the pattern is not the right choice.
 
@@ -107,14 +107,14 @@ If the hallucinations are structural or stylistic rather than factual, use **R8 
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Drafter (LLM)** | producing the initial fluent answer | task → draft | be skipped or replaced with retrieval — the pattern interrogates *the draft*; without one there is nothing to verify. |
-| **Planner (LLM)** | surfacing the draft's load-bearing factual claims as verification questions | task + draft → list of atomic factual questions | emit composite or leading questions ("Isn't it true that X was born in Y?"); each question must be **atomic, factual, and neutrally phrased**, or the verifier will reproduce the draft's errors. |
-| **Verifier (LLM)** | answering each verification question independently of the draft | verification question (alone, no draft, no sibling answers in Factored) → answer | see the draft, or see other verification answers (in Factored). The independence boundary is the pattern's only structural defence against shared bias; collapsing it collapses the pattern. |
-| **Cross-checker (LLM)** *(Factor+Revise only)* | comparing each verification answer against the corresponding claim in the draft and listing inconsistencies | draft + {(Qi, Ai)} → inconsistencies | rewrite the draft itself; that is the Reviser's job. The cross-checker only *flags*. |
-| **Reviser (LLM)** | rewriting the draft using the verification answers (and the cross-check, if present) | draft + {(Qi, Ai)} (+ inconsistencies) → revised answer | invent new claims not supported by either the draft or the verification answers; revision must be a reconciliation, not a regeneration. |
-| **Loop controller** | enforcing the question cap and overall bound | question count, iteration count → continue / stop | run unbounded — a planner that enumerates every entity needs a hard cap (**V9 Bounded Execution**). |
+| **Drafter (LLM)** | producing the initial fluent answer | task $\to$ draft | be skipped or replaced with retrieval — the pattern interrogates *the draft*; without one there is nothing to verify. |
+| **Planner (LLM)** | surfacing the draft's load-bearing factual claims as verification questions | task + draft $\to$ list of atomic factual questions | emit composite or leading questions ("Isn't it true that X was born in Y?"); each question must be **atomic, factual, and neutrally phrased**, or the verifier will reproduce the draft's errors. |
+| **Verifier (LLM)** | answering each verification question independently of the draft | verification question (alone, no draft, no sibling answers in Factored) $\to$ answer | see the draft, or see other verification answers (in Factored). The independence boundary is the pattern's only structural defence against shared bias; collapsing it collapses the pattern. |
+| **Cross-checker (LLM)** *(Factor+Revise only)* | comparing each verification answer against the corresponding claim in the draft and listing inconsistencies | draft + {(Qi, Ai)} $\to$ inconsistencies | rewrite the draft itself; that is the Reviser's job. The cross-checker only *flags*. |
+| **Reviser (LLM)** | rewriting the draft using the verification answers (and the cross-check, if present) | draft + {(Qi, Ai)} (+ inconsistencies) $\to$ revised answer | invent new claims not supported by either the draft or the verification answers; revision must be a reconciliation, not a regeneration. |
+| **Loop controller** | enforcing the question cap and overall bound | question count, iteration count $\to$ continue / stop | run unbounded — a planner that enumerates every entity needs a hard cap (**V9 Bounded Execution**). |
 
 Six narrow responsibilities, of which one is variant-conditional. The four roles **Drafter / Planner / Verifier / Reviser** are present in every variant; the **Cross-checker** is the structural addition that defines Factor+Revise. The same model can fill every LLM role — what matters is that the Verifier's *session* receives no draft in its context. **Different sessions, same model** is the canonical configuration.
 
@@ -132,8 +132,8 @@ The Drafter answers the task and emits a draft. The Planner reads the task and t
 - Composes cleanly with **S6 Output Template** (question-and-answer format contracts) and **K1 Vanilla RAG** (verification questions can also be sent to a retriever, turning CoVe into a retrieval-augmented self-check).
 
 **Costs**
-- **K+3 LLM calls** in Factored at K questions; **K+4** in Factor+Revise. At K=8 that is **~3–5× the single-shot cost** for one revision.
-- Sequential dependencies on the critical path (draft → plan → verify → revise) mean wall-clock latency adds up; verifier calls can parallelise within a round but the rounds themselves are serial.
+- **K+3 LLM calls** in Factored at K questions; **K+4** in Factor+Revise. At K=8 that is **~3–5$\times$ the single-shot cost** for one revision.
+- Sequential dependencies on the critical path (draft $\to$ plan $\to$ verify $\to$ revise) mean wall-clock latency adds up; verifier calls can parallelise within a round but the rounds themselves are serial.
 - Planner quality caps the pattern's value. A planner that asks the wrong questions verifies the wrong things.
 
 **Risks and failure modes**
@@ -169,7 +169,7 @@ The Drafter answers the task and emits a draft. The Planner reads the task and t
 | 1 | Drafter writes the initial answer | `LLM` | Drafter session |
 | 2 | Planner generates K verification questions | `LLM` | Planner session (S2, S6) |
 | 3 | Cap K and dispatch | `code` | V9 |
-| 4 | For each Qi, Verifier answers independently (no draft) | `LLM` (×K) | Verifier session |
+| 4 | For each Qi, Verifier answers independently (no draft) | `LLM` ($\times$K) | Verifier session |
 | 5 | Cross-checker compares answers to draft, lists inconsistencies | `LLM` | Cross-checker session *(Factor+Revise only)* |
 | 6 | Reviser rewrites draft from {(Qi, Ai)} and inconsistencies | `LLM` | Reviser session |
 | 7 | Return revised answer | `code` | |

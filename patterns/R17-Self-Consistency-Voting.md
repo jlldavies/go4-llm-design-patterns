@@ -36,7 +36,7 @@ Use Self-Consistency Voting when:
 
 - the task has an objectively correct or strongly preferred answer (math, multiple-choice, classification, code with tests, structured extraction);
 - the model's accuracy is below its capability ceiling — single-shot is noisy but often nearly right;
-- you can afford N× the cost and latency of a single call;
+- you can afford N$\times$ the cost and latency of a single call;
 - you need a confidence signal alongside the answer (agreement rate is one).
 
 Do not use it when:
@@ -49,23 +49,23 @@ Do not use it when:
 
 ## Decision Criteria
 
-R17 is right when single-shot output is noisy but often nearly right, the answer space is comparable across samples, and you can spend N× to buy a measurable reliability gain.
+R17 is right when single-shot output is noisy but often nearly right, the answer space is comparable across samples, and you can spend N$\times$ to buy a measurable reliability gain.
 
 **1. Pick N — the primary tuning lever.** N controls the cost / reliability curve directly. Wang et al. measured diminishing returns: most of the achievable gain is captured by **N = 5–10**; gains beyond N = 20 are small. Start at N = 10 and tune down if the agreement rate is high (the task is easy), tune up only if disagreement is split between two close candidates.
 
-**2. Set temperature for diversity.** Sampling must be diverse or the N samples collapse to the same trace. Use **temperature 0.7–0.9** (Wang et al.'s working range); top-p ≈ 0.95 is a reasonable default. Temperature 0 degenerates the pattern — N copies of the greedy decode.
+**2. Set temperature for diversity.** Sampling must be diverse or the N samples collapse to the same trace. Use **temperature 0.7–0.9** (Wang et al.'s working range); top-p $\approx$ 0.95 is a reasonable default. Temperature 0 degenerates the pattern — N copies of the greedy decode.
 
 **3. Choose the vote function.** If answers are discrete and literally comparable (numbers, labels, option letters, JSON keys), use **literal majority** — code, no LLM. If answers are free-form, use **Universal Self-Consistency** (an LLM cluster-judge) or define an equivalence classifier. Picking the wrong vote function destroys the pattern: literal voting on free text returns "no majority" even when nine of ten samples agree in meaning.
 
 **4. Test for systematic bias before deploying.** Voting amplifies the model's *modal* answer. If the modal answer is systematically wrong (a known model blind spot, a prompt-induced bias, a misleading framing), voting will return it with high confidence. Run a labelled sample: if errors cluster on the same kind of question rather than spreading randomly, the bias is systematic — Self-Consistency will not save you. Use **R7 Reflexion** with an external evaluator, or **O5 Evaluator-Optimizer** with a separate judge model.
 
-**5. Cost the parallel fan-out.** Self-Consistency is *cheap* only relative to its quality gain. The headline cost is **N × the cost of one sample** — at N = 10 you pay 10× (mechanism 2 applies within each sample's own decoding; the N fan-out multiplies the total but each call's attention cost is bounded by its own seq_len). The economically defensible move is often *N samples on a small / cheap model* rather than 1 sample on the expensive one: small model at N is typically cheaper than large model at 1 because a 7B model at temperature 0.8 costs a fraction of a 70B model per call (mechanism 8 — model size directly determines per-token compute cost). At N=10, a small model is often cost-competitive with a single large-model call while providing voting robustness. Measure on your task before committing.
+**5. Cost the parallel fan-out.** Self-Consistency is *cheap* only relative to its quality gain. The headline cost is **N $\times$ the cost of one sample** — at N = 10 you pay 10$\times$ (mechanism 2 applies within each sample's own decoding; the N fan-out multiplies the total but each call's attention cost is bounded by its own seq_len). The economically defensible move is often *N samples on a small / cheap model* rather than 1 sample on the expensive one: small model at N is typically cheaper than large model at 1 because a 7B model at temperature 0.8 costs a fraction of a 70B model per call (mechanism 8 — model size directly determines per-token compute cost). At N=10, a small model is often cost-competitive with a single large-model call while providing voting robustness. Measure on your task before committing.
 
 **Quick test — R17 is the right pattern when:**
 
 - the task has an objectively right answer (or a literal mode), *and*
 - the model is not systematically biased on this task (errors are scattered, not clustered), *and*
-- the budget tolerates N × the per-call cost at N ≥ 5, *and*
+- the budget tolerates N $\times$ the per-call cost at N $\geq$ 5, *and*
 - temperature > 0 sampling is available and the answer space is comparable across samples.
 
 If errors cluster systematically, voting will not help — use **R7 Reflexion** with external feedback or **O5 Evaluator-Optimizer** with a separate judge. If the answer is free-form and equivalence is hard to define, use the **Universal Self-Consistency** variant. If the task needs search through a structured space rather than agreement across complete attempts, use **R9 Tree of Thoughts** or **R10 LATS**.
@@ -86,13 +86,13 @@ If errors cluster systematically, voting will not help — use **R7 Reflexion** 
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Prompt builder** | composing the single prompt P that will be sampled N times | task + (optional) CoT trigger / exemplars → finished prompt string | vary the prompt across the N rolls — that destroys the marginalisation argument; diversity must come from sampling, not from prompt edits. |
-| **Sampler** | drawing N independent completions at temperature > 0 | prompt P → N completions | sample at temperature 0 or share a seed — N degenerate copies provide no signal. |
-| **Answer extractor** | pulling the comparable answer object out of each chain-of-thought | one completion → one answer token / value / class | bias toward any particular chain — must be a pure deterministic function, applied uniformly. |
-| **Aggregator** | counting agreement and selecting the winner | N answers → winning answer + confidence | hide ties or partial agreement; if the top-2 are close, surface that — the agreement rate *is* the confidence signal. |
-| **Cluster judge (LLM)** *(optional)* | grouping semantically-equivalent free-form answers when literal match fails | N candidate answers → equivalence classes (or direct winner) | rewrite or merge the candidates; it only *clusters*. (Used in the Universal Self-Consistency variant.) |
+| **Prompt builder** | composing the single prompt P that will be sampled N times | task + (optional) CoT trigger / exemplars $\to$ finished prompt string | vary the prompt across the N rolls — that destroys the marginalisation argument; diversity must come from sampling, not from prompt edits. |
+| **Sampler** | drawing N independent completions at temperature > 0 | prompt P $\to$ N completions | sample at temperature 0 or share a seed — N degenerate copies provide no signal. |
+| **Answer extractor** | pulling the comparable answer object out of each chain-of-thought | one completion $\to$ one answer token / value / class | bias toward any particular chain — must be a pure deterministic function, applied uniformly. |
+| **Aggregator** | counting agreement and selecting the winner | N answers $\to$ winning answer + confidence | hide ties or partial agreement; if the top-2 are close, surface that — the agreement rate *is* the confidence signal. |
+| **Cluster judge (LLM)** *(optional)* | grouping semantically-equivalent free-form answers when literal match fails | N candidate answers $\to$ equivalence classes (or direct winner) | rewrite or merge the candidates; it only *clusters*. (Used in the Universal Self-Consistency variant.) |
 
 Five narrow responsibilities. The pattern's reliability depends on the *independence* of the N samples — a leaky Sampler (shared seed, deterministic decode) or a contaminated Prompt builder (varying the prompt) collapses the whole structure into "one call, repeated".
 
@@ -105,11 +105,11 @@ The Prompt builder constructs P once (most often composing **R1 Zero-Shot CoT** 
 **Benefits**
 - Substantial accuracy gains on reasoning tasks against single-shot CoT, especially as model capability approaches its ceiling.
 - Provides a calibrated confidence signal for free — the agreement rate over N samples.
-- Embarrassingly parallel: latency is one sample plus aggregation, not N × one sample, given parallel capacity.
-- Composes cleanly with **R1 / R2 CoT** — Self-Consistency = CoT × N + vote is the canonical composition.
+- Embarrassingly parallel: latency is one sample plus aggregation, not N $\times$ one sample, given parallel capacity.
+- Composes cleanly with **R1 / R2 CoT** — Self-Consistency = CoT $\times$ N + vote is the canonical composition.
 
 **Costs**
-- **N × token cost** is the headline price. Even with parallel latency, the dollar / FLOPS cost scales linearly in N.
+- **N $\times$ token cost** is the headline price. Even with parallel latency, the dollar / FLOPS cost scales linearly in N.
 - Aggregation logic adds engineering surface — vote functions, equivalence checking, cluster judging.
 - Memory and rate-limit pressure: N concurrent calls hit provider quotas.
 
@@ -121,13 +121,13 @@ The Prompt builder constructs P once (most often composing **R1 Zero-Shot CoT** 
 
 ## Implementation Notes
 
-- The single most useful composition is **R1 (or R2) CoT × N + vote** — Wang et al.'s canonical setup. The explicit chain-of-thought is what makes the samples diverse enough for voting to work; without CoT, sampling collapses to local token-level noise.
-- Temperature 0.7–0.9 is the working range; tune within that, not outside. top-p ≈ 0.95 is a reasonable secondary lever.
+- The single most useful composition is **R1 (or R2) CoT $\times$ N + vote** — Wang et al.'s canonical setup. The explicit chain-of-thought is what makes the samples diverse enough for voting to work; without CoT, sampling collapses to local token-level noise.
+- Temperature 0.7–0.9 is the working range; tune within that, not outside. top-p $\approx$ 0.95 is a reasonable secondary lever.
 - For multiple-choice, math, classification: literal majority over an extracted answer field. Use a strict extractor (regex, JSON field) — fuzzy extraction is a frequent silent bug.
 - For free-form: pick a clustering rule *before* deployment. The Universal Self-Consistency variant (LLM cluster-judge) is the most general option but introduces a judgement call.
-- Run N in parallel where the provider supports it; sequential N gives the same answer at N× the wall-clock.
+- Run N in parallel where the provider supports it; sequential N gives the same answer at N$\times$ the wall-clock.
 - The **small-model-with-N** vs **large-model-with-1** trade-off is real and often favours the former. Measure on your task before committing to model size.
-- Pair with **V9 Bounded Execution** if Self-Consistency is invoked inside a larger loop — N × loop-rounds escalates fast.
+- Pair with **V9 Bounded Execution** if Self-Consistency is invoked inside a larger loop — N $\times$ loop-rounds escalates fast.
 - The agreement rate is a usable signal for **abstention**: if agreement falls below a threshold, return "uncertain" rather than the top vote.
 
 ## Implementation Sketch
@@ -166,10 +166,10 @@ self_consistency(task, N=10, temperature=0.8):
 
 | Session | Model | Setup — loaded once, before first call | Per-call prompt wraps |
 |---|---|---|---|
-| **Sample** | any capable generalist that supports temperature > 0; often a *cheap / small* model run at high N (the economic case for R17) | role (S3); reasoning instruction — "think step by step before answering" (R1) or worked exemplars (R2); output contract (S6) specifying *where* the final answer goes so the extractor can find it; **sampling parameters: temperature 0.7–0.9, top-p ≈ 0.95** | the task instance |
+| **Sample** | any capable generalist that supports temperature > 0; often a *cheap / small* model run at high N (the economic case for R17) | role (S3); reasoning instruction — "think step by step before answering" (R1) or worked exemplars (R2); output contract (S6) specifying *where* the final answer goes so the extractor can find it; **sampling parameters: temperature 0.7–0.9, top-p $\approx$ 0.95** | the task instance |
 | **Cluster-judge** *(USC variant only)* | capable generalist (must be strong enough to recognise semantic equivalence) | role: *"you are given N candidate answers to the same question; identify the response most consistent with the others"*; output contract: a single chosen index or a list of equivalence groups | the task + the N candidate completions |
 
-**Specialist-model note.** None required — Self-Consistency works with any model that supports temperature > 0 sampling. There is no fine-tune, no classifier, no long-context dependency. The structurally important choice is *economic*, not architectural: the headline cost is N × per-sample, so the right model is often a small one run at high N rather than a frontier model run at N = 1. Test both on the same task; the small-model-with-N configuration frequently wins on cost-adjusted accuracy. The output contract (S6) doing the heavy lifting is the extractor-friendly answer field — making `extract_answer` deterministic is what keeps the aggregator honest.
+**Specialist-model note.** None required — Self-Consistency works with any model that supports temperature > 0 sampling. There is no fine-tune, no classifier, no long-context dependency. The structurally important choice is *economic*, not architectural: the headline cost is N $\times$ per-sample, so the right model is often a small one run at high N rather than a frontier model run at N = 1. Test both on the same task; the small-model-with-N configuration frequently wins on cost-adjusted accuracy. The output contract (S6) doing the heavy lifting is the extractor-friendly answer field — making `extract_answer` deterministic is what keeps the aggregator honest.
 
 ## Open-Source Implementations
 
@@ -194,7 +194,7 @@ Self-Consistency is typically **implemented inline** rather than imported — th
 
 - **Sibling of R7 Reflexion** — same goal (reliability through repetition), opposite axis: R7 is *sequential-with-memory* (each attempt informed by the last); R17 is *parallel-with-voting* (each attempt independent). R7 requires an external evaluator; R17 needs only temperature > 0.
 - **Sibling of R8 Self-Refine** — same band, different mechanism: R8 is *sequential generate-critique-refine* with the same model; R17 is *parallel-then-vote* with no critique step. R8 fits open-ended tasks; R17 fits tasks with a comparable answer.
-- **Composes with R1 Zero-Shot CoT and R2 Few-Shot CoT** — the canonical composition. *Self-Consistency = CoT × N + vote* (Wang et al.); without explicit CoT the samples lack the diversity that makes voting informative.
+- **Composes with R1 Zero-Shot CoT and R2 Few-Shot CoT** — the canonical composition. *Self-Consistency = CoT $\times$ N + vote* (Wang et al.); without explicit CoT the samples lack the diversity that makes voting informative.
 - **Distinct from R9 Tree of Thoughts and R10 LATS** — those are *search* algorithms (expand, evaluate, prune partial thoughts); R17 is *marginalisation* over fully-independent completed samples. ToT picks a path; R17 integrates over many.
 - **Distinct from O5 Evaluator-Optimizer** — O5 uses a *separate* evaluator model to score outputs; R17 has no evaluator, just a tally. O5 catches systematic bias the generating model cannot see in itself; R17 amplifies it.
 - **Required by S8 Meta-Prompt** — S8 needs an evaluation signal to rank candidate prompts; Self-Consistency *agreement rate* is one of the two canonical signals (the other being **V15 LLM-as-Judge**). Without R17 or V15, S8 has no objective to optimise.

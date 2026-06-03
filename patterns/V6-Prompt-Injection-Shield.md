@@ -118,14 +118,14 @@ If the Lethal Trifecta applies, choose **V4 Dual LLM** as the architectural prim
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Input Detector** | flagging suspicious untrusted text before it enters context | untrusted span → pass / sanitise / refuse | be the only line of defence — every detector has false negatives; rely on it alone and a single novel attack succeeds. Must never *modify* the span and pass it on silently — sanitisation must be visible to the trace. |
-| **Provenance Marker** | making untrusted spans syntactically distinguishable from instructions | untrusted span → marked / delimited / encoded span | invent its own markers per call — markers must be stable and known to the prompt that consumes them, or the model cannot use the signal. |
-| **Action-Space Restrictor** | limiting which tools the agent can invoke for the current turn | task context → allowed tool set | grant blanket access "just in case" — dynamic minimal scope is the point; a static union of all tools defeats the pattern. |
-| **Instruction Re-Anchor** | re-asserting the developer's original instructions after the agent processes untrusted text | last untrusted read → re-anchored prompt | be skipped on "trusted-looking" content — the threat is exactly that untrusted text can look trusted. |
-| **Output Detector** | catching evidence of successful injection in agent output and tool calls | agent output + tool calls → alarm / pass | rely solely on output text — canary-token leak detection works on tool-call arguments and side-effect targets too. |
-| **Trajectory Logger** *(V14 dependency)* | recording every detector trigger and sanitisation event | detector event → durable trace | log only blocks — *passes* must be recorded too, because attack patterns are reconstructed from the corpus of detector behaviour over time. |
+| **Input Detector** | flagging suspicious untrusted text before it enters context | untrusted span $\to$ pass / sanitise / refuse | be the only line of defence — every detector has false negatives; rely on it alone and a single novel attack succeeds. Must never *modify* the span and pass it on silently — sanitisation must be visible to the trace. |
+| **Provenance Marker** | making untrusted spans syntactically distinguishable from instructions | untrusted span $\to$ marked / delimited / encoded span | invent its own markers per call — markers must be stable and known to the prompt that consumes them, or the model cannot use the signal. |
+| **Action-Space Restrictor** | limiting which tools the agent can invoke for the current turn | task context $\to$ allowed tool set | grant blanket access "just in case" — dynamic minimal scope is the point; a static union of all tools defeats the pattern. |
+| **Instruction Re-Anchor** | re-asserting the developer's original instructions after the agent processes untrusted text | last untrusted read $\to$ re-anchored prompt | be skipped on "trusted-looking" content — the threat is exactly that untrusted text can look trusted. |
+| **Output Detector** | catching evidence of successful injection in agent output and tool calls | agent output + tool calls $\to$ alarm / pass | rely solely on output text — canary-token leak detection works on tool-call arguments and side-effect targets too. |
+| **Trajectory Logger** *(V14 dependency)* | recording every detector trigger and sanitisation event | detector event $\to$ durable trace | log only blocks — *passes* must be recorded too, because attack patterns are reconstructed from the corpus of detector behaviour over time. |
 
 Six narrow responsibilities. The pattern's reliability is in the **independence** of the layers: a signature scan, a classifier, a provenance transform, an action-space restriction, and a canary check fail in different ways, so the attacker must defeat all of them simultaneously.
 
@@ -139,7 +139,7 @@ A user request arrives; alongside it, untrusted content has been fetched from a 
 - Raises the attacker's cost: a successful attack must defeat multiple independent layers, not one.
 - Catches the long tail of known injections cheaply via signatures.
 - Catches novel injections via classifier scoring at modest latency cost.
-- Makes the trust boundary *legible* to the model — spotlighting alone reduced attack success >50% → <2% in Microsoft's experiments.
+- Makes the trust boundary *legible* to the model — spotlighting alone reduced attack success >50% $\to$ <2% in Microsoft's experiments.
 - Generates the telemetry needed to evolve the defence as attacks evolve.
 
 **Costs**
@@ -173,7 +173,7 @@ A user request arrives; alongside it, untrusted content has been fetched from a 
 
 > `LLM` = configured session (model + setup + per-call prompt); `code` = wiring.
 
-**Composition:** V6 sits at the data boundary. It composes with **V4 Dual LLM** (V6 is the validation layer between Quarantined and Privileged LLMs), with **V5 Guardrail Layering** (V6 is the injection-specific guard at the input and tool-response points), with **V8 Tool Sandboxing** (V6 reduces the injection rate; V8 contains the blast radius of the ones that slip through), with **V14 Trajectory Logging** (detector events → durable trace), and with **V17 Online Eval** (trigger rates as a quality signal). The Action-Space Restrictor is a runtime dial on **V13 Tool Budget**.
+**Composition:** V6 sits at the data boundary. It composes with **V4 Dual LLM** (V6 is the validation layer between Quarantined and Privileged LLMs), with **V5 Guardrail Layering** (V6 is the injection-specific guard at the input and tool-response points), with **V8 Tool Sandboxing** (V6 reduces the injection rate; V8 contains the blast radius of the ones that slip through), with **V14 Trajectory Logging** (detector events $\to$ durable trace), and with **V17 Online Eval** (trigger rates as a quality signal). The Action-Space Restrictor is a runtime dial on **V13 Tool Budget**.
 
 **The chain:**
 
@@ -182,7 +182,7 @@ A user request arrives; alongside it, untrusted content has been fetched from a 
 | 1 | Receive user request + untrusted span (URL fetch, email body, RAG chunk) | `code` | |
 | 2 | Signature scan: regex / keyword match against known injection patterns | `code` | LLM Guard / Rebuff heuristics |
 | 3 | Classifier scan: score the untrusted span for injection likelihood | `LLM` (small classifier) | Detector session |
-| 4 | Branch: high score → refuse + log; medium → sanitise + log; low → pass | `code` | |
+| 4 | Branch: high score $\to$ refuse + log; medium $\to$ sanitise + log; low $\to$ pass | `code` | |
 | 5 | Provenance-mark the surviving span (delimit / tag-prefix / encode) | `code` | Spotlighting transform |
 | 6 | Restrict tool set to what this turn requires | `code` | V13 dynamic injection |
 | 7 | Re-anchor instructions: system prompt + marker convention + marked span + task | `code` | S5 Constraint Framing |

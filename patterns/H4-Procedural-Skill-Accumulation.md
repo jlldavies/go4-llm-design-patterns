@@ -53,19 +53,19 @@ Do not use when:
 
 H4 is right when the same shape of task recurs, success is detectable, and the distillation cost amortises across reuses.
 
-**1. Estimate the recurrence rate.** Across the agent's task stream, count the share of tasks that are structurally similar to a prior task. Practical threshold: if **≥ 20%** of tasks have a structural twin in history, H4 starts paying. Below 10%, the skill library will rarely match — stay with **R3 Plan-and-Solve** per task.
+**1. Estimate the recurrence rate.** Across the agent's task stream, count the share of tasks that are structurally similar to a prior task. Practical threshold: if **$\geq$ 20%** of tasks have a structural twin in history, H4 starts paying. Below 10%, the skill library will rarely match — stay with **R3 Plan-and-Solve** per task.
 
-**2. Compute the amortisation.** Distillation costs ~1–3 LLM calls per successful task (Extractor + Parameteriser + Validator). Reuse saves the original task's reasoning tokens. If average reuse per stored skill is ≥ 3, distillation has paid; below 2, the library is bloating with rarely-touched skills and the Retriever's noise floor grows.
+**2. Compute the amortisation.** Distillation costs ~1–3 LLM calls per successful task (Extractor + Parameteriser + Validator). Reuse saves the original task's reasoning tokens. If average reuse per stored skill is $\geq$ 3, distillation has paid; below 2, the library is bloating with rarely-touched skills and the Retriever's noise floor grows.
 
 **3. Verify the success signal.** Can you tell, automatically or with high reliability, that a task succeeded? Options: deterministic oracle (tests pass, file written, API 200), **V15 LLM-as-Judge**, explicit user confirmation. If the success signal is weak or absent, H4 stores trajectories that *looked* successful and degrades over time; build the signal first or do not deploy H4.
 
 **4. Validate the parameterisation surface.** Pick three recent successes. Can you, by inspection, name the 2–5 parameters that would let the same procedure handle the *next* instance? If yes, the parameterisation surface exists. If not, the task is procedurally singular — either accept skills that overfit to one instance, or rebuild the task with more structure (**S4 Instruction Decomposition** at the input layer).
 
-**5. Bound the library, plan the deprecation.** A skill library grows monotonically unless governed. Set: a size cap, a freshness window (skills not retrieved or re-validated within N days are demoted), a stale-skill detector (skills whose recent invocations failed → quarantine). Pair with **V9 Bounded Execution** on the retrieve-instantiate-execute path so a bad skill cannot loop. Without governance the library becomes a graveyard of obsolete procedures.
+**5. Bound the library, plan the deprecation.** A skill library grows monotonically unless governed. Set: a size cap, a freshness window (skills not retrieved or re-validated within N days are demoted), a stale-skill detector (skills whose recent invocations failed $\to$ quarantine). Pair with **V9 Bounded Execution** on the retrieve-instantiate-execute path so a bad skill cannot loop. Without governance the library becomes a graveyard of obsolete procedures.
 
 **Quick test — H4 is the right pattern when:**
 
-- task recurrence ≥ ~20% with parameterisable structure, *and*
+- task recurrence $\geq$ ~20% with parameterisable structure, *and*
 - a reliable success signal exists to gate which trajectories become skills, *and*
 - K10's procedural variant (or an equivalent store) is wired in as the substrate, *and*
 - library deprecation/governance is in place from day one.
@@ -103,17 +103,17 @@ If recurrence is low, choose **R3** per task. If success cannot be detected, bui
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Success Detector** | the verdict on whether a finished task succeeded | task + final state → SUCCESS / FAIL / UNKNOWN | distil on UNKNOWN. A skill built from a maybe-success poisons the library; absence of a verdict must abort distillation. |
-| **Trajectory Extractor** | isolating the minimal successful path | full session log → ordered list of load-bearing steps | keep the failed attempts and dead ends — they belong in H2's lesson library, not in a skill. The skill is what *worked*, not what was tried. |
-| **Parameteriser** | abstracting task-specific values into named parameters | minimal trajectory → parameterised procedure with parameter schema | over-parameterise. Too many parameters means the skill matches everything and applies to nothing. The Parameteriser's job is to find the *right* abstraction axis, not the maximal one. |
-| **Validator** | the verdict on whether the candidate skill generalises | parameterised procedure → ACCEPT / REJECT / REVISE | pass a skill that has not been *re-stated* in general form. A trajectory that still references the original task's specifics is not yet a skill. |
-| **Skill Library** | persistent storage of accepted skills with name, parameter schema, exemplars, invocation log | skill writes / queries → matched skills | be unbounded or unaudited. Skills must carry provenance, an invocation log, and a freshness signal — without them, deprecation is impossible. |
-| **Skill Retriever** | finding candidate skills for a new task | task description + library index → ranked candidates | return a single answer with no confidence. The Adaptor needs to know whether to trust the match or fall back. |
-| **Adaptor** | instantiating the matched skill's parameters for the current task | candidate skill + current task → instantiated procedure | rewrite the skill's structure. Adaptation is parameter substitution; structural edits belong to a new distillation cycle, not to inline mutation. |
-| **Executor** | running the instantiated procedure, with bounded recovery and fallback | instantiated procedure → outcome | continue past **V9** bounds; on bound exhaustion or repeated step failure, the Executor must surrender to a fresh **R3** plan and flag the skill for quarantine. |
-| **Skill Governor** | deprecation, quarantine, freshness, library hygiene | invocation log + age → keep / demote / retire | rely solely on age. A skill is stale because it *fails*, not because it's old; failure rate is the primary signal, age is the secondary. |
+| **Success Detector** | the verdict on whether a finished task succeeded | task + final state $\to$ SUCCESS / FAIL / UNKNOWN | distil on UNKNOWN. A skill built from a maybe-success poisons the library; absence of a verdict must abort distillation. |
+| **Trajectory Extractor** | isolating the minimal successful path | full session log $\to$ ordered list of load-bearing steps | keep the failed attempts and dead ends — they belong in H2's lesson library, not in a skill. The skill is what *worked*, not what was tried. |
+| **Parameteriser** | abstracting task-specific values into named parameters | minimal trajectory $\to$ parameterised procedure with parameter schema | over-parameterise. Too many parameters means the skill matches everything and applies to nothing. The Parameteriser's job is to find the *right* abstraction axis, not the maximal one. |
+| **Validator** | the verdict on whether the candidate skill generalises | parameterised procedure $\to$ ACCEPT / REJECT / REVISE | pass a skill that has not been *re-stated* in general form. A trajectory that still references the original task's specifics is not yet a skill. |
+| **Skill Library** | persistent storage of accepted skills with name, parameter schema, exemplars, invocation log | skill writes / queries $\to$ matched skills | be unbounded or unaudited. Skills must carry provenance, an invocation log, and a freshness signal — without them, deprecation is impossible. |
+| **Skill Retriever** | finding candidate skills for a new task | task description + library index $\to$ ranked candidates | return a single answer with no confidence. The Adaptor needs to know whether to trust the match or fall back. |
+| **Adaptor** | instantiating the matched skill's parameters for the current task | candidate skill + current task $\to$ instantiated procedure | rewrite the skill's structure. Adaptation is parameter substitution; structural edits belong to a new distillation cycle, not to inline mutation. |
+| **Executor** | running the instantiated procedure, with bounded recovery and fallback | instantiated procedure $\to$ outcome | continue past **V9** bounds; on bound exhaustion or repeated step failure, the Executor must surrender to a fresh **R3** plan and flag the skill for quarantine. |
+| **Skill Governor** | deprecation, quarantine, freshness, library hygiene | invocation log + age $\to$ keep / demote / retire | rely solely on age. A skill is stale because it *fails*, not because it's old; failure rate is the primary signal, age is the secondary. |
 
 The Extractor / Parameteriser / Validator triad is the **write path** (distillation, post-success). The Retriever / Adaptor / Executor triad is the **read path** (instantiation, at next-task start). The Skill Library and Skill Governor are the shared store and its caretaker. This write/read separation is the same discipline K12 Karpathy Memory enforces between Curator and Agent — and for the same reason: an agent that edits skills mid-task destabilises the library and the in-flight reasoning at once.
 
@@ -181,7 +181,7 @@ The Skill Governor runs periodically (or on every failure signal): it demotes sk
 | # | Step | Kind | Draws on |
 |---|---|---|---|
 | I1 | Skill Retriever — similarity search over the library | `code` | K10 retrieval |
-| I2 | Branch — confident match? on miss → fresh **R3 Plan-and-Solve** | `code` | R3 |
+| I2 | Branch — confident match? on miss $\to$ fresh **R3 Plan-and-Solve** | `code` | R3 |
 | I3 | Adaptor — instantiate parameters from current task | `LLM` | Adaptor session |
 | I4 | Executor — run the instantiated procedure, V9-bounded | `code` and `LLM` per step | V9 |
 | I5 | On success: log invocation, reinforce. On failure: fallback to R3, flag skill | `code` | R3 / Skill Governor |
@@ -264,8 +264,8 @@ In multi-agent (LEGOMem-style) deployments the additional structural choice is *
 - **Pairs with** **O6 Orchestrator-Workers** — in multi-agent systems (LEGOMem variant) skills are allocated by role; orchestrators carry task-shaped skills, workers carry sub-task-shaped skills.
 - **Distinct from** **R11 Buffer of Thoughts** — R11 reuses solution templates *within* a context window; H4 persists procedures across sessions and instances. Different time-scales, same instinct.
 - **Distinct from** **S8 Meta-Prompt** — S8 produces better prompts under human supervision; H4 produces reusable procedures from the agent's own successful work.
-- **Distinct from** **K10 procedural variant** — K10 (procedural) is the *store and the bare distiller*; H4 is the surrounding *learning loop* (Success Detector → Extractor → Parameteriser → Validator → Library → Retriever → Adaptor → Executor → Governor) that fills, governs, and uses that store. K10 (procedural) without H4 is an empty file system; H4 without K10 has nowhere to write.
-- **Cognitive grounding** — Anderson's ACT-R distinction between declarative and procedural memory; Fitts & Posner (1967) on skill-acquisition stages (cognitive → associative → autonomous). H4 implements the cognitive→autonomous transition for agents.
+- **Distinct from** **K10 procedural variant** — K10 (procedural) is the *store and the bare distiller*; H4 is the surrounding *learning loop* (Success Detector $\to$ Extractor $\to$ Parameteriser $\to$ Validator $\to$ Library $\to$ Retriever $\to$ Adaptor $\to$ Executor $\to$ Governor) that fills, governs, and uses that store. K10 (procedural) without H4 is an empty file system; H4 without K10 has nowhere to write.
+- **Cognitive grounding** — Anderson's ACT-R distinction between declarative and procedural memory; Fitts & Posner (1967) on skill-acquisition stages (cognitive $\to$ associative $\to$ autonomous). H4 implements the cognitive$\to$autonomous transition for agents.
 
 ## Sources
 
@@ -274,5 +274,5 @@ In multi-agent (LEGOMem-style) deployments the additional structural choice is *
 - Wang, Z., Mao, J., Fried, D., Neubig, G. (2024) — "Agent Workflow Memory." arXiv 2409.07429. Workflow induction for browser/web agents.
 - Microsoft Research et al. (2025) — "LEGOMem: Modular Procedural Memory for Multi-agent LLM Systems for Workflow Automation." arXiv 2510.04851. The multi-agent allocation variant.
 - Anderson, J. R. (1983) — "The Architecture of Cognition." Declarative vs procedural memory; the cognitive grounding for the skill-acquisition split.
-- Fitts, P. M., & Posner, M. I. (1967) — "Human Performance." Skill-acquisition stages (cognitive → associative → autonomous).
+- Fitts, P. M., & Posner, M. I. (1967) — "Human Performance." Skill-acquisition stages (cognitive $\to$ associative $\to$ autonomous).
 - Shinn et al. (2023) — "Reflexion." arXiv 2303.11366. Within-session self-improvement; the failure-side counterpart H2 builds on.

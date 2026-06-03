@@ -20,7 +20,7 @@ Two strategies fail on opposite ends. **Pure chain-of-thought** (R1/R2) reasons 
 
 Yao et al. (2022) identified the missing primitive. Have the model emit, in sequence, three things: a *Thought* (free-text reasoning about what to do next), an *Action* (a structured tool call), and then receive an *Observation* (the tool's actual return value) — and feed that observation back into the next iteration. Thought conditions on Observation; Action is chosen by Thought; Observation is produced by the world. Round and round until the model emits an Action of type *Finish*. The reasoning is no longer a monologue divorced from action, and the action is no longer chosen in ignorance of what the world says back. The loop is the simplest structure that closes the loop between language and environment.
 
-What makes R4 fundamental — and not a special case of something else — is that no other pattern provides this specific coupling. ReWOO has the Action but no Observation feedback. Chain-of-thought has the Thought but no Action. Plan-and-Solve has Plan and Execute as *phases*, not a per-step loop. Self-Ask decomposes a question but does not necessarily touch tools. The single-step Thought → Action → Observation triplet, repeated until termination, is the agent-loop primitive of which most production agents are an instance.
+What makes R4 fundamental — and not a special case of something else — is that no other pattern provides this specific coupling. ReWOO has the Action but no Observation feedback. Chain-of-thought has the Thought but no Action. Plan-and-Solve has Plan and Execute as *phases*, not a per-step loop. Self-Ask decomposes a question but does not necessarily touch tools. The single-step Thought $\to$ Action $\to$ Observation triplet, repeated until termination, is the agent-loop primitive of which most production agents are an instance.
 
 ## Applicability
 
@@ -33,7 +33,7 @@ Use ReAct when:
 
 Do not use it when:
 
-- the full tool-call sequence is independent and can be planned up front — prefer **R5 ReWOO** for 5× token efficiency;
+- the full tool-call sequence is independent and can be planned up front — prefer **R5 ReWOO** for 5$\times$ token efficiency;
 - the task is a single tool call wrapped in reasoning — a plain function-call (I2) is sufficient, no loop needed;
 - multi-tool coordination needs control flow (loops, conditionals, intermediate variables) — prefer **R13 CodeAct**, which uses Python as the action language and gains ~20pp accuracy on multi-tool benchmarks;
 - the task is pure reasoning with no tools — prefer **R1/R2 Chain-of-Thought**, possibly with **R17 Self-Consistency** for reliability;
@@ -43,13 +43,13 @@ Do not use it when:
 
 R4 is right when the next action genuinely depends on what the last action returned, and a bound on the loop is acceptable.
 
-**1. Test for dependency between tool calls.** Sketch the task. If you can write down all tool calls before running any of them — *and the order doesn't matter, or the order is fixed and known* — the calls are independent and **R5 ReWOO** is 5× cheaper. If at least one call's input depends on a previous call's *content* (not just its existence), the calls are dependent and R4 is justified. The honest test: can you describe step 3 without first imagining the result of step 2? If no, you need R4.
+**1. Test for dependency between tool calls.** Sketch the task. If you can write down all tool calls before running any of them — *and the order doesn't matter, or the order is fixed and known* — the calls are independent and **R5 ReWOO** is 5$\times$ cheaper. If at least one call's input depends on a previous call's *content* (not just its existence), the calls are dependent and R4 is justified. The honest test: can you describe step 3 without first imagining the result of step 2? If no, you need R4.
 
 **2. Pick the action language.** R4 uses *structured JSON / function-call* actions — one tool per step, model picks tool and arguments. **R13 CodeAct** uses *Python code* as the action — one block can call many tools with control flow. Wang et al. (2024) measured ~20pp accuracy advantage for CodeAct on multi-tool benchmarks (M3 ToolEval). Use R4 when actions are atomic; use **R13** when a single step naturally chains tools or needs `if`/`for`. Both are the same loop shape; only the action language differs.
 
 **3. Bound the loop hard.** R4 with no termination cap is anti-pattern **A3 Uncontrolled Recursion**. Set, before deploying: max steps (typical 8–20 for hard tasks; rarely > 30), max wall-time, max cost, max tool-call count. Pair with **V9 Bounded Execution** as a mandatory dependency, not a nice-to-have. Production R4 agents that stall almost always stalled because of a missing bound.
 
-**4. Cost the per-step LLM call.** Each Thought → Action → Observation triplet costs *at least* one LLM call, often a second one to parse Observation into the next Thought. A 10-step task is 10–20× the cost of a single call. If the trajectory length is known to be short (≤ 3 steps), R4 is cheap; if it is open-ended, budget accordingly. The Observation tokens accumulate in context too — long Observations (search results, file dumps) saturate the window fast. Compose with **K6 Context Compression** or **K7 Context Pruning** for sessions where Observations are large.
+**4. Cost the per-step LLM call.** Each Thought $\to$ Action $\to$ Observation triplet costs *at least* one LLM call, often a second one to parse Observation into the next Thought. A 10-step task is 10–20$\times$ the cost of a single call. If the trajectory length is known to be short ($\leq$ 3 steps), R4 is cheap; if it is open-ended, budget accordingly. The Observation tokens accumulate in context too — long Observations (search results, file dumps) saturate the window fast. Compose with **K6 Context Compression** or **K7 Context Pruning** for sessions where Observations are large.
 
 **5. Decide on reasoning visibility.** R4's Thought is *visible* — it sits in the trace. This is a feature (inspectability, **V14 Trajectory Logging**, debugging) but also a cost (tokens, latency). Native function-calling on modern models (post-Sonnet 4 / GPT-4 generation) often produces ReAct behaviour with the Thought hidden inside the model's "thinking" channel. Decide whether you want the trace as user-facing reasoning or as internal scratch. The pattern is the same loop either way.
 
@@ -81,16 +81,16 @@ Each loop iteration is a single LLM call that conditions on the running trajecto
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Agent (LLM)** | producing the next *Thought* and *Action* given the trajectory so far | trajectory → (Thought, Action) | execute the Action itself, or fabricate an Observation. If it produces both Action and Observation in the same turn, the loop has collapsed and the agent is now hallucinating tool results. |
-| **Tool set** | actually performing actions in the world | structured Action → Observation | reason, plan, or decide what tool to call next. A tool that interprets the agent's intent destroys the separation; tools must do exactly what their Action says and return what they returned. |
-| **Trajectory** | the append-only record `[(Thought, Action, Observation), …]` fed back into each LLM call | each completed triple → updated history | be edited or reordered mid-run — that is rewriting history. Compression is allowed; mutation is not (use **K6 / K7** for compression, not in-place edits). |
-| **Termination check** | deciding when the loop ends | trajectory + step count + cost → continue / halt | be implicit. Every R4 agent must have an explicit step cap, cost cap, and a recognised `Finish` action. Implicit termination ("the model will know when to stop") is the canonical R4 failure mode and is anti-pattern **A3**. |
-| **Output parser** | extracting the structured Action from the model's free-text emission | LLM output → (Thought, Action) or parse error | silently coerce malformed Actions into valid ones. A parse error is a signal — return it as an Observation to the next Thought and let the agent recover. |
-| **Trajectory logger** *(V14)* | persistent record of every triple for audit and debugging | each triple → log | be optional. Untraced R4 is **A15 Untraced Agent**; debugging an R4 stall without a trace is hours of guessing. |
+| **Agent (LLM)** | producing the next *Thought* and *Action* given the trajectory so far | trajectory $\to$ (Thought, Action) | execute the Action itself, or fabricate an Observation. If it produces both Action and Observation in the same turn, the loop has collapsed and the agent is now hallucinating tool results. |
+| **Tool set** | actually performing actions in the world | structured Action $\to$ Observation | reason, plan, or decide what tool to call next. A tool that interprets the agent's intent destroys the separation; tools must do exactly what their Action says and return what they returned. |
+| **Trajectory** | the append-only record `[(Thought, Action, Observation), …]` fed back into each LLM call | each completed triple $\to$ updated history | be edited or reordered mid-run — that is rewriting history. Compression is allowed; mutation is not (use **K6 / K7** for compression, not in-place edits). |
+| **Termination check** | deciding when the loop ends | trajectory + step count + cost $\to$ continue / halt | be implicit. Every R4 agent must have an explicit step cap, cost cap, and a recognised `Finish` action. Implicit termination ("the model will know when to stop") is the canonical R4 failure mode and is anti-pattern **A3**. |
+| **Output parser** | extracting the structured Action from the model's free-text emission | LLM output $\to$ (Thought, Action) or parse error | silently coerce malformed Actions into valid ones. A parse error is a signal — return it as an Observation to the next Thought and let the agent recover. |
+| **Trajectory logger** *(V14)* | persistent record of every triple for audit and debugging | each triple $\to$ log | be optional. Untraced R4 is **A15 Untraced Agent**; debugging an R4 stall without a trace is hours of guessing. |
 
-The defining separation is **Agent ↔ Tool**: the Agent reasons and chooses; the Tool acts and reports. When that separation collapses — the model imagines a tool result instead of actually calling the tool — R4 degenerates into chain-of-thought-with-citation-roleplay, which is much worse than either pure CoT or pure R4 because it *looks* grounded.
+The defining separation is **Agent $\leftrightarrow$ Tool**: the Agent reasons and chooses; the Tool acts and reports. When that separation collapses — the model imagines a tool result instead of actually calling the tool — R4 degenerates into chain-of-thought-with-citation-roleplay, which is much worse than either pure CoT or pure R4 because it *looks* grounded.
 
 ## Collaborations
 
@@ -105,15 +105,15 @@ Two collaboration patterns sit one level up. **O6 Orchestrator-Workers** typical
 - Mid-trajectory adaptation: each step conditions on the prior Observation, so the agent recovers from surprising tool returns instead of executing a stale plan.
 - Inspectable reasoning: the Thought is in the trace, so debugging is reading the log, not re-deriving model behaviour.
 - Tool calls are deterministic (mechanism 7): the same Action with the same inputs returns the same Observation, introducing no sampling variance; intermediate results live in the tool environment rather than in the LLM context, keeping context compact.
-- The simplest tool-using primitive that closes the language ↔ environment loop. Most production agents are R4 or a refinement of it.
+- The simplest tool-using primitive that closes the language $\leftrightarrow$ environment loop. Most production agents are R4 or a refinement of it.
 - Composes cleanly: works inside **O6** workers, under **V9** bounds, with **V14** logging, with **K8** as its own scratchpad.
 
 **Costs**
 
-- One LLM call per step (often two: one to emit, one to parse) — a 10-step task is 10–20× a single call.
-- Observation tokens accumulate in context; long Observations (search results, file contents) saturate the window. Mandatory pairing with **K6 / K7** for sessions where Observations are large. Mechanistically, each ReAct step appends new K vectors to the KV cache (mechanism 3); each subsequent LLM call must attend over the entire accumulated trajectory at O(seq_len²) cost (mechanism 2). A 20-step trajectory is not 20× a single call — it is materially more expensive per step because each step's attention computation scales with the growing prefix. Observations should be compressed (K6) or pruned (K7) specifically because every token added compounds subsequent step costs.
+- One LLM call per step (often two: one to emit, one to parse) — a 10-step task is 10–20$\times$ a single call.
+- Observation tokens accumulate in context; long Observations (search results, file contents) saturate the window. Mandatory pairing with **K6 / K7** for sessions where Observations are large. Mechanistically, each ReAct step appends new K vectors to the KV cache (mechanism 3); each subsequent LLM call must attend over the entire accumulated trajectory at O(seq_len²) cost (mechanism 2). A 20-step trajectory is not 20$\times$ a single call — it is materially more expensive per step because each step's attention computation scales with the growing prefix. Observations should be compressed (K6) or pruned (K7) specifically because every token added compounds subsequent step costs.
 - Latency is sequential by construction — the next step cannot start until the last Observation returns. R4 cannot parallelise the way **R5 ReWOO** can.
-- Token-inefficient on tasks where the tool-call sequence *could* have been planned up front — ~5× more tokens than **R5 ReWOO** on independent multi-hop lookups.
+- Token-inefficient on tasks where the tool-call sequence *could* have been planned up front — ~5$\times$ more tokens than **R5 ReWOO** on independent multi-hop lookups.
 
 **Risks and failure modes**
 
@@ -202,7 +202,7 @@ Beyond these, every major agent framework (CrewAI, AutoGen, Smolagents, Letta, P
 
 ## Related Patterns
 
-- **Sibling of** **R5 ReWOO** — same problem (multi-step tool use), opposite trade-off. R4 adapts mid-run; R5 plans up front for 5× token efficiency. Mutually exclusive for the same task (see CONFLICTS.md CRITICAL 1).
+- **Sibling of** **R5 ReWOO** — same problem (multi-step tool use), opposite trade-off. R4 adapts mid-run; R5 plans up front for 5$\times$ token efficiency. Mutually exclusive for the same task (see CONFLICTS.md CRITICAL 1).
 - **Sibling of** **R13 CodeAct** — same loop shape, different action language. R4 uses structured JSON / function-call actions (one tool per step); R13 uses Python code (many tools + control flow per step). R13 wins ~20pp accuracy and ~30% fewer steps on multi-tool benchmarks but requires **V8 Tool Sandboxing**.
 - **Required by** **V9 Bounded Execution** — never run R4 unbounded; unbounded R4 is anti-pattern **A3**.
 - **Pairs with** **V14 Trajectory Logging** — R4 without a trace is undebuggable (**A15**).

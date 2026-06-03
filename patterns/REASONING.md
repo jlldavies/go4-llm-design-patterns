@@ -52,7 +52,7 @@ Patterns differ in *what the deliberation does* — write a linear chain, branch
 - **R5 ReWOO** — plan every tool call with placeholders, execute without an LLM in the loop, synthesise once.
 
 **III-C — Tool-Use loops.** Interleave reasoning with actions against the world.
-- **R4 ReAct** — Thought → Action → Observation, repeat; each next step conditioned on what came back.
+- **R4 ReAct** — Thought $\to$ Action $\to$ Observation, repeat; each next step conditioned on what came back.
 - **R13 CodeAct** — emit executable Python as the action language, with stdout / errors returning as the Observation.
 - **R14 Program of Thoughts** — delegate the *computation* (not the orchestration) to a deterministic interpreter.
 
@@ -93,9 +93,9 @@ Patterns differ in *what the deliberation does* — write a linear chain, branch
 | R2 | **Few-Shot CoT** | Exemplar CoT | 1 | Consistent reasoning format with examples |
 | R3 | **Plan-and-Solve** | Explicit Planning | 2 | Well-defined multi-step workflows |
 | R4 | **ReAct** | Reason+Act Loop | N per step | Exploratory; adaptive; unpredictable paths |
-| R5 | **ReWOO** | Reasoning Without Observation | 2 total | Independent tool calls; 5× cheaper than R4 |
+| R5 | **ReWOO** | Reasoning Without Observation | 2 total | Independent tool calls; 5$\times$ cheaper than R4 |
 | R6 | **Self-Ask** | Decomposition | 1 + N follow-ups | Multi-hop factual questions |
-| R7 | **Reflexion** | Verbal Reinforcement | N × retries | Clear pass/fail criteria; retries acceptable |
+| R7 | **Reflexion** | Verbal Reinforcement | N $\times$ retries | Clear pass/fail criteria; retries acceptable |
 | R8 | **Self-Refine** | Generate-Critique-Refine | N iterations | General quality improvement; no separate judge |
 | R9 | **Tree of Thoughts** | ToT | N (branching) | Hard open-ended; path unknown |
 | R10 | **LATS** | Language Agent Tree Search | N (tree search) | Highest quality; highest cost |
@@ -145,7 +145,7 @@ Interleave a free-text *Thought*, a structured *Action* (tool call), and the ret
 
 ## R5 — ReWOO
 
-Plan every tool call upfront in a single LLM pass, execute the plan without any LLM in the loop, then synthesise the answer from the collected evidence — trading mid-run adaptability for roughly 5× token efficiency over R4.
+Plan every tool call upfront in a single LLM pass, execute the plan without any LLM in the loop, then synthesise the answer from the collected evidence — trading mid-run adaptability for roughly 5$\times$ token efficiency over R4.
 
 **Full entry:** [`R5-ReWOO.md`](R5-ReWOO.md)
 

@@ -45,18 +45,18 @@ V3 is mandatory the moment an agent could plausibly hold two of the three condit
 
 If the inventory is unclear, the audit has not been done.
 
-**2. Score the matrix.** Map the agent against a 2×2×2 risk matrix:
-- 0 legs present → no constraint.
-- 1 leg present → standard operation; **V5 Guardrail Layering** and **V14 Trajectory Logging** suffice.
-- 2 legs present → elevated monitoring; **V14 Trajectory Logging** is mandatory, and the third leg must be designed against (no MCP servers that would add it; no tool discovery that would acquire it). Add **V13 Tool Budget** to cap the dynamic acquisition surface.
-- 3 legs present → **TRIFECTA**. The agent must not ship without at least one of **V4 Dual LLM**, **V6 Prompt Injection Shield**, or **V8 Tool Sandboxing**, *and* runtime monitoring (V14 + V17) to detect the combination if it is acquired dynamically.
+**2. Score the matrix.** Map the agent against a 2$\times$2$\times$2 risk matrix:
+- 0 legs present $\to$ no constraint.
+- 1 leg present $\to$ standard operation; **V5 Guardrail Layering** and **V14 Trajectory Logging** suffice.
+- 2 legs present $\to$ elevated monitoring; **V14 Trajectory Logging** is mandatory, and the third leg must be designed against (no MCP servers that would add it; no tool discovery that would acquire it). Add **V13 Tool Budget** to cap the dynamic acquisition surface.
+- 3 legs present $\to$ **TRIFECTA**. The agent must not ship without at least one of **V4 Dual LLM**, **V6 Prompt Injection Shield**, or **V8 Tool Sandboxing**, *and* runtime monitoring (V14 + V17) to detect the combination if it is acquired dynamically.
 
 **3. Test dynamic acquisition.** Inspect each integration that can expand capability at runtime — MCP servers (I3), tool discovery, sub-agent handoff (A14 Trust Handoff), retrieved tools (RAG-MCP), plugin systems. For each, ask: *can loading this introduce a leg the agent did not have at design time?* If yes, that integration triggers a re-audit. Score on the *post-load* capability set, not the start-up one.
 
 **4. Pick the mitigation by which leg is cheapest to break.** Once the trifecta is confirmed:
-- *Cannot remove private data* (it is the product) → break leg 2 with **V4 Dual LLM** (route untrusted content to a Quarantined LLM) or **V6 Prompt Injection Shield** (treat untrusted content as tainted; gate downstream actions).
-- *Cannot remove untrusted content* (it is the input) → break leg 3 with **V8 Tool Sandboxing** (no outbound network from the agent that touches untrusted content) or with policy enforcement (**V7 AgentSpec**: PROHIBIT external comms while tainted).
-- *Cannot remove external comms* (it is the deliverable, e.g. an email assistant) → break leg 2 hard with **V4 Dual LLM**; the Privileged side composes the message, the Quarantined side never sees outbound channels.
+- *Cannot remove private data* (it is the product) $\to$ break leg 2 with **V4 Dual LLM** (route untrusted content to a Quarantined LLM) or **V6 Prompt Injection Shield** (treat untrusted content as tainted; gate downstream actions).
+- *Cannot remove untrusted content* (it is the input) $\to$ break leg 3 with **V8 Tool Sandboxing** (no outbound network from the agent that touches untrusted content) or with policy enforcement (**V7 AgentSpec**: PROHIBIT external comms while tainted).
+- *Cannot remove external comms* (it is the deliverable, e.g. an email assistant) $\to$ break leg 2 hard with **V4 Dual LLM**; the Privileged side composes the message, the Quarantined side never sees outbound channels.
 
 **5. Re-audit on every capability change.** A clean V3 audit ages. Every new tool, new MCP server, new sub-agent, new data source, new model swap, every prompt change that broadens scope — re-run V3. The most common V3 failure is "the audit was done once" (see Failure modes).
 
@@ -115,13 +115,13 @@ If the agent has *zero* legs and structurally never will, V3 is unneeded — app
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Capability Inventory** | the authoritative list of data sources, untrusted inputs, and outbound channels for the agent | agent spec + integration manifest → three explicit lists | be implicit. An inventory inferred from code-reading rather than declared in writing is the single most common audit failure — the leg that gets missed is always the one no one wrote down. |
-| **Trifecta Auditor** | the leg-count and the verdict | three lists → score (0/1/2/3) + required mitigation | sign off on a 3-leg agent without naming a specific V4/V6/V8 application. "We'll add safety later" is the failure mode. |
-| **Risk Matrix** | the rule mapping leg-count to required pattern | leg count → required reliability patterns | drift. The matrix is policy; if it loosens informally ("two legs but the third is unlikely") it stops protecting anything. |
-| **Mitigation Linker** | the named, traceable reference from the audit verdict to the mitigation pattern actually deployed | verdict + mitigation spec → audit record | declare mitigation generically ("we use V4 somewhere") — the link must name *which* boundary V4 sits on, *which* LLM is Privileged and which is Quarantined, *what* content type is treated as untrusted. |
-| **Runtime Monitor** | detection of *dynamic* acquisition of a third leg after deployment | runtime trace (V14) → alert when leg-count transitions from 2 to 3 | rely on the design-time audit alone. MCP server loading, tool discovery, and sub-agent handoff can compose the trifecta without any code change. |
+| **Capability Inventory** | the authoritative list of data sources, untrusted inputs, and outbound channels for the agent | agent spec + integration manifest $\to$ three explicit lists | be implicit. An inventory inferred from code-reading rather than declared in writing is the single most common audit failure — the leg that gets missed is always the one no one wrote down. |
+| **Trifecta Auditor** | the leg-count and the verdict | three lists $\to$ score (0/1/2/3) + required mitigation | sign off on a 3-leg agent without naming a specific V4/V6/V8 application. "We'll add safety later" is the failure mode. |
+| **Risk Matrix** | the rule mapping leg-count to required pattern | leg count $\to$ required reliability patterns | drift. The matrix is policy; if it loosens informally ("two legs but the third is unlikely") it stops protecting anything. |
+| **Mitigation Linker** | the named, traceable reference from the audit verdict to the mitigation pattern actually deployed | verdict + mitigation spec $\to$ audit record | declare mitigation generically ("we use V4 somewhere") — the link must name *which* boundary V4 sits on, *which* LLM is Privileged and which is Quarantined, *what* content type is treated as untrusted. |
+| **Runtime Monitor** | detection of *dynamic* acquisition of a third leg after deployment | runtime trace (V14) $\to$ alert when leg-count transitions from 2 to 3 | rely on the design-time audit alone. MCP server loading, tool discovery, and sub-agent handoff can compose the trifecta without any code change. |
 
 The five responsibilities are deliberately separated so the audit produces a *paper trail*, not a vibe. The Inventory and the Auditor are independent so the auditor cannot quietly redefine what counts as private data; the Risk Matrix is fixed policy, not advisory; the Mitigation Linker forces the audit to name a real mechanism; the Runtime Monitor closes the loop on the fact that capability is now a runtime variable, not just a build-time one.
 
@@ -178,7 +178,7 @@ The pattern composes upward: it is the audit that **V4**, **V6**, **V7**, and **
 | 1 | Pull the agent's spec, tool list, MCP manifest, and data-source list | `code` | |
 | 2 | Generate / refresh the three-leg Capability Inventory (private data, untrusted inputs, outbound channels) | `LLM` *(or human-led table)* | Auditor session |
 | 3 | Score the leg-count against the Risk Matrix | `code` | Risk Matrix policy |
-| 4 | Branch: 0–1 legs → standard ops; 2 legs → enforce V14 + V13; 3 legs → block until mitigation linked | `code` | |
+| 4 | Branch: 0–1 legs $\to$ standard ops; 2 legs $\to$ enforce V14 + V13; 3 legs $\to$ block until mitigation linked | `code` | |
 | 5 | (if 3 legs) Verify a specific V4 / V6 / V8 application is named, with boundary and content type | `code` | V4 / V6 / V8 |
 | 6 | Emit the audit record into the agent spec / policy store (V7 if used) | `code` | V7 AgentSpec |
 
@@ -187,7 +187,7 @@ The pattern composes upward: it is the audit that **V4**, **V6**, **V7**, and **
 | # | Step | Kind | Draws on |
 |---|---|---|---|
 | R1 | Tap V14 trace stream (tool calls, data reads, outbound actions) | `code` | V14 Trajectory Logging |
-| R2 | Map each event to a leg (data-read → leg 1; untrusted-source read → leg 2; outbound action → leg 3) | `code` | |
+| R2 | Map each event to a leg (data-read $\to$ leg 1; untrusted-source read $\to$ leg 2; outbound action $\to$ leg 3) | `code` | |
 | R3 | Detect transition from 2-leg to 3-leg state for the current session / agent | `code` | |
 | R4 | On transition: alert (V17) + apply policy (V7 — block / require approval) + surface to V1 if configured | `code` | V7, V17, V1 |
 
@@ -227,7 +227,7 @@ monitor(trace_stream):                                   # runtime
 
 V3 is an *architecture / governance pattern*, not a library — there is no canonical project that ships "the Trifecta Auditor". The relevant references are:
 
-- **CaMeL — `google-research/camel-prompt-injection`** — [`github.com/google-research/camel-prompt-injection`](https://github.com/google-research/camel-prompt-injection) — Google / DeepMind / ETH Zürich research artifact for the paper "Defeating Prompt Injections by Design" (arXiv 2503.18813). Implements capability-based information-flow control that operationalises the V3 → V4 path: data origin is tracked, untrusted data is structurally prevented from influencing control flow. Closest thing to a runtime enforcement of the leg-count.
+- **CaMeL — `google-research/camel-prompt-injection`** — [`github.com/google-research/camel-prompt-injection`](https://github.com/google-research/camel-prompt-injection) — Google / DeepMind / ETH Zürich research artifact for the paper "Defeating Prompt Injections by Design" (arXiv 2503.18813). Implements capability-based information-flow control that operationalises the V3 $\to$ V4 path: data origin is tracked, untrusted data is structurally prevented from influencing control flow. Closest thing to a runtime enforcement of the leg-count.
 - **Microsoft Dromedary** — [`github.com/microsoft/dromedary`](https://github.com/microsoft/dromedary) — an AI-agent runtime described as "prompt-injection resistant by design", in the lineage of CaMeL and the Dual LLM pattern.
 - **Reversec Labs — design-patterns-for-securing-llm-agents code samples** — [`github.com/ReversecLabs/design-patterns-for-securing-llm-agents-code-samples`](https://github.com/ReversecLabs/design-patterns-for-securing-llm-agents-code-samples) — runnable code samples accompanying the Beurer-Kellner et al. (2025) survey paper, including Action-Selector, Plan-Then-Execute, LLM Map-Reduce, Dual LLM, Code-Then-Execute, and Context-Minimisation patterns.
 - **Promptfoo Lethal Trifecta tests** — [`promptfoo.dev/blog/lethal-trifecta-testing/`](https://www.promptfoo.dev/blog/lethal-trifecta-testing/) — eval harness for verifying that an agent does not silently hold all three legs under realistic adversarial inputs. Useful as the V18 (Agent Simulation) component that tests a V3 audit was honest.
@@ -246,7 +246,7 @@ V3 is an *architecture / governance pattern*, not a library — there is no cano
 
 - **Required by** V4 Dual LLM, V6 Prompt Injection Shield, V8 Tool Sandboxing — each mitigation only knows where to apply itself because V3 has identified the trifecta. Deploying V4/V6/V8 without a V3 audit is guessing at where the boundary should be.
 - **Composes with** V7 AgentSpec — the leg-count and mandatory mitigation can be encoded as deontic policy (PROHIBIT outbound while tainted, OBLIGATE V4 routing for agents with three legs) so enforcement is runtime, not honour-system.
-- **Composes with** V14 Trajectory Logging + V17 Online Eval — V14 supplies the stream the Runtime Monitor watches; V17 raises the alert when a 2→3 transition is detected.
+- **Composes with** V14 Trajectory Logging + V17 Online Eval — V14 supplies the stream the Runtime Monitor watches; V17 raises the alert when a 2$\to$3 transition is detected.
 - **Composes with** V13 Tool Budget — capping the dynamic tool surface reduces the chance of dynamic acquisition of a third leg.
 - **Distinct from** V4 / V6 / V8 — V3 is the audit; V4/V6/V8 are the mitigations. V3 alone does not protect anything; V4/V6/V8 alone, applied without an audit, may protect the wrong boundary.
 - **Distinct from** V5 Guardrail Layering — V5 is the general input/output safety layer (all four checkpoints). V3 is specifically about the *capability-combination* risk that V5 cannot see, because V5 inspects content, not architecture.
@@ -260,7 +260,7 @@ V3 is an *architecture / governance pattern*, not a library — there is no cano
 - Willison, S. (2023) — "The Dual LLM pattern for building AI assistants that can resist prompt injection" — [`simonwillison.net/2023/Apr/25/dual-llm-pattern/`](https://simonwillison.net/2023/Apr/25/dual-llm-pattern/). The architectural origin of the privileged/quarantined split.
 - Willison, S. (2025) — "The lethal trifecta for AI agents" — [`simonw.substack.com/p/the-lethal-trifecta-for-ai-agents`](https://simonw.substack.com/p/the-lethal-trifecta-for-ai-agents). The naming and clearest statement of the three-leg condition.
 - Willison, S. (2025) — "CaMeL offers a promising new direction for mitigating prompt injection attacks" — [`simonwillison.net/2025/Apr/11/camel/`](https://simonwillison.net/2025/Apr/11/camel/). Commentary on the CaMeL paper and its place in the trifecta-defence landscape.
-- Debenedetti, E. et al. (2025) — "Defeating Prompt Injections by Design" (CaMeL), arXiv 2503.18813 — [`arxiv.org/abs/2503.18813`](https://arxiv.org/abs/2503.18813). The first formal capability-based defence; an architectural realisation of V3 → V4.
+- Debenedetti, E. et al. (2025) — "Defeating Prompt Injections by Design" (CaMeL), arXiv 2503.18813 — [`arxiv.org/abs/2503.18813`](https://arxiv.org/abs/2503.18813). The first formal capability-based defence; an architectural realisation of V3 $\to$ V4.
 - Beurer-Kellner, L. et al. (2025) — "Design Patterns for Securing LLM Agents against Prompt Injections", arXiv 2506.08837 — [`arxiv.org/abs/2506.08837`](https://arxiv.org/abs/2506.08837). Six design patterns (Action-Selector, Plan-Then-Execute, LLM Map-Reduce, Dual LLM, Code-Then-Execute, Context-Minimisation) — each breaks at least one leg.
 - NCC Group — "Exploring Prompt Injection Attacks" and "Non-Deterministic Nature of Prompt Injection" — [`nccgroup.com/us/research-blog/exploring-prompt-injection-attacks/`](https://www.nccgroup.com/us/research-blog/exploring-prompt-injection-attacks/) and [`nccgroup.com/research/non-deterministic-nature-of-prompt-injection/`](https://www.nccgroup.com/research/non-deterministic-nature-of-prompt-injection/). Practitioner threat-model framing for prompt injection in agent systems.
 - OWASP — LLM Top 10 for LLM Applications (2025) — LLM01 (Prompt Injection) and LLM06 (Excessive Agency) describe the trifecta condition as a structural risk.

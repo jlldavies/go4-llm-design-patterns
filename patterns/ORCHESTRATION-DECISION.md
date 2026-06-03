@@ -45,7 +45,7 @@ Most production systems are: `O6 + O4 + R4 (per worker) + O17 + O18`
 | O1 Single Agent | Baseline | Default; increase complexity only when this fails |
 | O2 Prompt Chaining | Low | Fixed decomposition; fully testable |
 | O3 Routing | Low + classifier | Distinct specialised inputs |
-| O4 Parallelization | N× but parallel | Independent sub-tasks; latency matters |
-| O5 Evaluator-Optimizer | 2× + loop | Objective quality criterion exists |
+| O4 Parallelization | N$\times$ but parallel | Independent sub-tasks; latency matters |
+| O5 Evaluator-Optimizer | 2$\times$ + loop | Objective quality criterion exists |
 | O6 Orchestrator-Workers | High | Dynamic decomposition required |
 | O7 Supervisor Hierarchy | Very high | O6 applied recursively; most complex tasks |

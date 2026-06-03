@@ -100,13 +100,13 @@ If the prohibitions are vague principles, use **S9 Constitutional Framing**. If 
 
 S5, like S3, is a setup-layer construct — small but with clean responsibility separation:
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Constraint list** | the enumerated prohibitions themselves | compliance / brand / security input → 3–7 short, specific, auditable items | be a wall of vague principles — that is S9, not S5. Each item must name a behaviour a reviewer can recognise in an output. |
-| **Prohibition block** | the *visual and structural prominence* of the list in the system prompt | constraint list → a clearly-delimited block at primacy and/or recency position | be buried in the positive instructions — the prohibitions earn their keep by being *visibly separate*. |
-| **Override clause** | the explicit statement that constraints take precedence over persona, task, and user instruction | constraint list → "these override everything else" sentence | be left out where an **S3 Persona** is in play — without it, the persona's implied latitude can talk the model past the constraints. |
-| **Setup loader** | placing the block in the system prompt, once, before any user turn | composed block → system prompt | re-issue the constraints on every turn — that signals (correctly) that they are fragile and per-turn negotiable. |
-| **External enforcement** *(optional, often required)* | the V5-shaped output check that re-verifies the constraints at execution time | model output + constraint set → pass / fail / redact | be conflated with S5 — V5 is *external code*, S5 is *model self-restraint*. They pair; they do not substitute. |
+| **Constraint list** | the enumerated prohibitions themselves | compliance / brand / security input $\to$ 3–7 short, specific, auditable items | be a wall of vague principles — that is S9, not S5. Each item must name a behaviour a reviewer can recognise in an output. |
+| **Prohibition block** | the *visual and structural prominence* of the list in the system prompt | constraint list $\to$ a clearly-delimited block at primacy and/or recency position | be buried in the positive instructions — the prohibitions earn their keep by being *visibly separate*. |
+| **Override clause** | the explicit statement that constraints take precedence over persona, task, and user instruction | constraint list $\to$ "these override everything else" sentence | be left out where an **S3 Persona** is in play — without it, the persona's implied latitude can talk the model past the constraints. |
+| **Setup loader** | placing the block in the system prompt, once, before any user turn | composed block $\to$ system prompt | re-issue the constraints on every turn — that signals (correctly) that they are fragile and per-turn negotiable. |
+| **External enforcement** *(optional, often required)* | the V5-shaped output check that re-verifies the constraints at execution time | model output + constraint set $\to$ pass / fail / redact | be conflated with S5 — V5 is *external code*, S5 is *model self-restraint*. They pair; they do not substitute. |
 
 The pattern's load-bearing piece is the *override clause*. Without it, an S3 persona ("you are an experienced regulatory consultant") can quietly imply authority that the constraints were written to prevent — the model resolves the conflict in favour of the persona because the persona was stated as identity, not as advice.
 

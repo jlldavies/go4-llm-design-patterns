@@ -17,7 +17,7 @@ Key inflection points:
 - **June 2025**: Tobi Lütke + Karpathy endorse "context engineering"; Gartner: "context engineering is in, prompt engineering is out"
 - **Late 2025**: Karpathy coins "agentic engineering" as successor to "vibe coding"
 - **December 2025**: Karpathy's inflection point — "can't remember the last time I corrected the model"
-- **April 2026**: Karpathy's AutoResearch — 1 markdown prompt + 630 lines of training code → 700 experiments in 2 days, 20 improvements found
+- **April 2026**: Karpathy's AutoResearch — 1 markdown prompt + 630 lines of training code $\to$ 700 experiments in 2 days, 20 improvements found
 
 ---
 
@@ -42,7 +42,7 @@ Three component categories:
 **Tool Use:**
 - MRKL (Modular Reasoning Knowledge and Language) — routes to neural or symbolic expert modules
 - TALM / Toolformer — fine-tuned to learn API usage
-- HuggingGPT — Task planning → Model selection → Execution → Response
+- HuggingGPT — Task planning $\to$ Model selection $\to$ Execution $\to$ Response
 - API-Bank — three capability levels: call, retrieve, plan
 
 Critical identified limitations: context window constraints, long-horizon planning brittleness, natural language interface reliability
@@ -65,7 +65,7 @@ These four are the most widely cited canonical set.
 Source: anthropic.com/engineering/building-effective-agents
 
 1. **Prompt Chaining** — fixed sequential pipeline; output feeds next input
-2. **Routing** — classify input → specialised handler
+2. **Routing** — classify input $\to$ specialised handler
 3. **Parallelization** — simultaneous LLM calls; two sub-types: Sectioning (independent tasks) and Voting (consensus)
 4. **Orchestrator-Workers** — central LLM dynamically delegates to worker LLMs
 5. **Evaluator-Optimizer** — separate generator and judge agents
@@ -99,7 +99,7 @@ Authors: Jules White, Quchen Fu, Sam Hays, Michael Sandborn, Carlos Olea, Henry 
 ---
 
 ### 2.5 Harness Architecture (Fowler/Böckeler, 2026)
-2×2 classification matrix:
+2$\times$2 classification matrix:
 
 |  | Feedforward | Feedback |
 |---|---|---|
@@ -124,7 +124,7 @@ Inspired by Heroku's 12-Factor App. Core premise: most successful production age
 9. Compact Errors into Context Window
 10. Small, Focused Agents
 11. Trigger from Anywhere, Meet Users Where They Are
-12. Stateless Reducer (agents as pure functions of input → output, no hidden state)
+12. Stateless Reducer (agents as pure functions of input $\to$ output, no hidden state)
 
 Community insight (HN): "most 'AI Agents' that make it to production aren't actually that agentic — they're engineered systems with LLMs strategically positioned." 99% accuracy still fails critical operations requiring higher assurance.
 
@@ -208,14 +208,14 @@ Source: [theaiengineer.substack.com](https://theaiengineer.substack.com/p/the-4-
 |---|---|---|---|---|
 | **ReAct** | N (per-step) | Baseline | High | Exploratory, unpredictable |
 | **Plan-and-Execute** | 1-2 + replans | Good | Medium (replan only) | Well-defined multi-step |
-| **ReWOO** | 2 total | **5× better than ReAct** | None | Multiple independent lookups |
-| **Reflexion** | N × retries | Poor | Meta-level only | Clear pass/fail criteria |
+| **ReWOO** | 2 total | **5$\times$ better than ReAct** | None | Multiple independent lookups |
+| **Reflexion** | N $\times$ retries | Poor | Meta-level only | Clear pass/fail criteria |
 
 ### 3.2 ReWOO — Reasoning Without Observation
 Source: [arxiv.org/abs/2305.18323](https://arxiv.org/abs/2305.18323)
 
 Mechanism: Single planning phase with placeholder variables (#E1, #E2). All tools execute in parallel. Final synthesis phase. Only 2 LLM calls total.
-- **5× token efficiency** over ReAct
+- **5$\times$ token efficiency** over ReAct
 - **4% accuracy improvement** on HotpotQA
 - Fatal flaw: breaks if any tool returns unexpected results; zero mid-execution adaptation
 
@@ -240,7 +240,7 @@ Replaces JSON tool calls with executable Python code blocks. Agent writes code t
 ### 3.6 Skeleton-of-Thought (ICLR 2024)
 Source: [arxiv.org/abs/2307.15337](https://arxiv.org/abs/2307.15337)
 
-Generate skeleton/outline → parallel expansion of each skeleton point → aggregate. Exploits parallelism to reduce latency. Speed improvements across 12 LLMs tested. Less about accuracy; more about structured parallel generation.
+Generate skeleton/outline $\to$ parallel expansion of each skeleton point $\to$ aggregate. Exploits parallelism to reduce latency. Speed improvements across 12 LLMs tested. Less about accuracy; more about structured parallel generation.
 
 ### 3.7 Buffer of Thoughts (2024)
 Source: [arxiv.org/abs/2406.04271](https://arxiv.org/abs/2406.04271)
@@ -307,9 +307,9 @@ Research finding: Software engineering agents lean heavily on procedural memory;
 
 | Approach | When to Use | Key Tradeoff |
 |---|---|---|
-| **Long Context** | Affordable cost; accuracy-critical; corpus fits context | 2-3× more expensive; "lost in the middle" degradation |
+| **Long Context** | Affordable cost; accuracy-critical; corpus fits context | 2-3$\times$ more expensive; "lost in the middle" degradation |
 | **RAG** | Large corpus; cost-sensitive; retrieval latency acceptable | Lossy; retrieval can miss relevant chunks |
-| **Observational Memory** | Agentic sessions; what agent has *seen* matters most | Newer pattern; stable context enables aggressive caching (10× cost reduction) |
+| **Observational Memory** | Agentic sessions; what agent has *seen* matters most | Newer pattern; stable context enables aggressive caching (10$\times$ cost reduction) |
 
 Multi-agent consistency risk: per-agent memory stores cause divergent "memories" across agents. Enterprise architectures need a shared context substrate.
 
@@ -319,14 +319,14 @@ Multi-agent consistency risk: per-agent memory stores cause divergent "memories"
 
 | Variant | Mechanism | Best For |
 |---|---|---|
-| **Vanilla RAG** | Query → embed → retrieve → inject | Simple Q&A, static corpora |
-| **HyDE** | Generate hypothetical document → embed that → retrieve | Improved semantic matching |
+| **Vanilla RAG** | Query $\to$ embed $\to$ retrieve $\to$ inject | Simple Q&A, static corpora |
+| **HyDE** | Generate hypothetical document $\to$ embed that $\to$ retrieve | Improved semantic matching |
 | **RAPTOR** | Multi-level hierarchical summary tree | Query diversity, theme-level answers |
 | **GraphRAG** (Microsoft) | Entity-relationship graph over corpus | Complex multi-hop, global structure |
 | **Self-RAG** | Model decides when to retrieve; critiques own outputs | Factuality-critical tasks |
 | **Corrective RAG (CRAG)** | Evaluate retrieval quality; trigger web search if poor | Dynamic, uncertain knowledge bases |
 | **Agentic RAG** | Agent plans multiple retrieval steps, adapts mid-task | Complex, open-ended research |
-| **Hierarchical RAG** | Corpus selection → chunk-level search | Large heterogeneous knowledge bases |
+| **Hierarchical RAG** | Corpus selection $\to$ chunk-level search | Large heterogeneous knowledge bases |
 
 ---
 
@@ -399,8 +399,8 @@ Creates traceable accountability chains across all agents and human participants
 
 ### 8.1 Tool Overload Problem (quantified)
 Critical finding: performance degrades significantly with too many tools.
-- Selection accuracy collapses: 43% → under 14% (3× degradation) at high tool counts
-- AI accuracy drop: 87% → 54% with context overload
+- Selection accuracy collapses: 43% $\to$ under 14% (3$\times$ degradation) at high tool counts
+- AI accuracy drop: 87% $\to$ 54% with context overload
 - Cursor enforces hard limit of 40 tools
 - 4-5 MCP servers together can burn 60,000+ tokens on schema alone (30-50% of budget for frontier models)
 - Mitigation: dynamic tool discovery, RAG-MCP (retrieve tool schemas), grouped tools, specialised agents with focused toolsets
@@ -412,7 +412,7 @@ Key reliability-specific factors:
 - Factor 12 (Stateless Reducer): pure function architecture; no hidden state
 
 ### 8.3 Speculative Execution in Agent Context
-Draft-then-verify paradigm being extended to agent actions. Sherlock (arXiv 2511.00330) holistically explores cost/accuracy/latency tradeoffs by exploiting speculative execution with intelligent verifier selection. 2-3× speedup without accuracy loss on inference; agent-level benefits more limited (end-to-end latency dominated by tool execution time).
+Draft-then-verify paradigm being extended to agent actions. Sherlock (arXiv 2511.00330) holistically explores cost/accuracy/latency tradeoffs by exploiting speculative execution with intelligent verifier selection. 2-3$\times$ speedup without accuracy loss on inference; agent-level benefits more limited (end-to-end latency dominated by tool execution time).
 
 ---
 
@@ -422,8 +422,8 @@ Four agent communication protocols now competing/converging (2025-26):
 
 | Protocol | Source | Role |
 |---|---|---|
-| **MCP** (Model Context Protocol) | Anthropic | Agent ↔ tools/services/data (97M+ downloads) |
-| **A2A** (Agent-to-Agent) | Google Cloud | Agent ↔ agent delegation and coordination |
+| **MCP** (Model Context Protocol) | Anthropic | Agent $\leftrightarrow$ tools/services/data (97M+ downloads) |
+| **A2A** (Agent-to-Agent) | Google Cloud | Agent $\leftrightarrow$ agent delegation and coordination |
 | **ACP** (Agent Communication Protocol) | IBM | Agent-to-agent via REST |
 | **ANP** (Agent Network Protocol) | Community | Decentralised agent discovery/marketplaces |
 
@@ -446,12 +446,12 @@ Policy-driven approach (AgentSpec, PoAct) enables: auditing, guaranteed constrai
 ## 11. Cognitive Science Foundations
 
 AI agent architectures increasingly grounded in cognitive science theories:
-- **Global Workspace Theory** (Baars) → GWA, Theater of Mind architectures
-- **Society of Mind** (Minsky) → Multi-agent specialisation patterns
-- **Dual-Process Theory** (Kahneman) → Talker/Thinker (MIRROR), System 1/System 2 agent designs
-- **Predictive Processing** (Friston) → anticipatory agent architectures
-- **Baddeley's Working Memory Model** → working memory + episodic buffer + long-term stores mapping
-- **Extended Mind Thesis** (Clark) → external tool use as cognitive extension
+- **Global Workspace Theory** (Baars) $\to$ GWA, Theater of Mind architectures
+- **Society of Mind** (Minsky) $\to$ Multi-agent specialisation patterns
+- **Dual-Process Theory** (Kahneman) $\to$ Talker/Thinker (MIRROR), System 1/System 2 agent designs
+- **Predictive Processing** (Friston) $\to$ anticipatory agent architectures
+- **Baddeley's Working Memory Model** $\to$ working memory + episodic buffer + long-term stores mapping
+- **Extended Mind Thesis** (Clark) $\to$ external tool use as cognitive extension
 
 "Agentic Flow" framework explicitly maps five modules to these theories in a repeatable cognitive loop.
 
@@ -495,7 +495,7 @@ Threads surfaced (relevance-ranked):
 | Wei et al. — Chain-of-Thought | 2022 | Step-by-step reasoning elicitation |
 | Press et al. — Self-Ask | 2022 | Decomposition via follow-up questions |
 | Shinn et al. — Reflexion | 2023 | Verbal reinforcement via self-reflection |
-| Xu et al. — ReWOO | 2023 | 5× token efficiency via decoupled reasoning |
+| Xu et al. — ReWOO | 2023 | 5$\times$ token efficiency via decoupled reasoning |
 | Zhou et al. — LATS | 2023/ICML 2024 | MCTS + ReAct + Reflexion unified |
 | Wang et al. — CodeAct | 2024/ICML 2024 | Executable code as agent actions |
 | Ning et al. — Skeleton-of-Thought | ICLR 2024 | Parallel generation via outline |
@@ -549,7 +549,7 @@ Does LLM reasoning determine the action?
 ### MCP Context Overhead (critical production data)
 - GitHub MCP alone: 40,000–55,000 tokens per request
 - 4–5 MCP servers together: 60,000+ tokens on schemas (30–50% of frontier model budget)
-- Tool selection accuracy collapses at high tool counts: 43% → under 14% (3×)
+- Tool selection accuracy collapses at high tool counts: 43% $\to$ under 14% (3$\times$)
 - AWS Lambda cold start for MCP servers: ~5 seconds
 - Best production system uses **all three patterns simultaneously**: direct API for determinism, function calling for app-specific routing, MCP for shared reusable integrations, CLIs for developer tools
 
@@ -557,7 +557,7 @@ Does LLM reasoning determine the action?
 
 **MCP advantages:** Dynamic runtime tool discovery; write-once multi-client compatibility; credential isolation; stateful connections; audit trail support; OAuth now in spec
 
-**MCP disadvantages:** Non-determinism (same input → different tool call); cascading failure modes (5+ failure points vs 1 for direct API); context window consumption; cold start latency; version management for tool schemas; testing automation harder; operational infrastructure (gateways, registries, credential management)
+**MCP disadvantages:** Non-determinism (same input $\to$ different tool call); cascading failure modes (5+ failure points vs 1 for direct API); context window consumption; cold start latency; version management for tool schemas; testing automation harder; operational infrastructure (gateways, registries, credential management)
 
 ### Developer Community Position on MCP
 "MCP is a fad" HN debate (HN 46552254):
@@ -600,7 +600,7 @@ Gaining traction in 2026: prefer CLIs over MCP for tools the model already knows
 
 ---
 
-## 18. Vibe Coding → Agentic Engineering Shift (Developer Experience)
+## 18. Vibe Coding $\to$ Agentic Engineering Shift (Developer Experience)
 
 What practically changed:
 1. **From code generation to agent orchestration**: not writing code 99% of the time — directing agents and acting as oversight
@@ -628,7 +628,7 @@ Failures cluster around **three areas** (not the model itself):
 2. **Integration complexity** — 70% of cancellations trace to tool/API failures
 3. **Governance gaps** — no documentation, escalation paths, monitoring
 
-### The Pilot → Production Gap
+### The Pilot $\to$ Production Gap
 Why pilots succeed: clean curated data, bounded sandbox, tightly scoped, simplified integrations.
 Why production fails: messy unstructured data, concurrent users, unanticipated edge cases, strict compliance, real failure consequences.
 
@@ -680,7 +680,7 @@ Attributes: token usage, model identity, agent metadata
 Supported by: Datadog, Honeycomb, New Relic, and natively emitted by LangChain, CrewAI, AutoGen
 
 ### Multi-Agent Tracing Pattern
-Each agent invocation = a span. Trace context passed whenever agent calls another agent. Root agent span → child spans for routing, planning, specialist agents, tool usage. Full execution trace navigable in one view.
+Each agent invocation = a span. Trace context passed whenever agent calls another agent. Root agent span $\to$ child spans for routing, planning, specialist agents, tool usage. Full execution trace navigable in one view.
 
 ### What to Trace
 Full execution traces including: prompts, tool invocations, decision paths, context relevance, token usage, cost per step. Production agent failures diagnosable in minutes from trace instead of hours from log archaeology.
@@ -719,9 +719,9 @@ The Agent Card is the "digital business card" enabling agent discovery. Task obj
 
 | Protocol | Source | Layer | Status |
 |---|---|---|---|
-| MCP | Anthropic | Agent ↔ tools/services | 97M+ downloads; AAIF |
-| A2A | Google Cloud | Agent ↔ agent | v1.0 early 2026; AAIF |
-| ACP | IBM | Agent ↔ agent via REST | Emerging |
+| MCP | Anthropic | Agent $\leftrightarrow$ tools/services | 97M+ downloads; AAIF |
+| A2A | Google Cloud | Agent $\leftrightarrow$ agent | v1.0 early 2026; AAIF |
+| ACP | IBM | Agent $\leftrightarrow$ agent via REST | Emerging |
 | ANP | Community | Decentralised discovery | Experimental |
 
 Linux Foundation AAIF (Dec 2025): OpenAI, Anthropic, Google, Microsoft, AWS, Block as co-founders.
@@ -732,13 +732,13 @@ Linux Foundation AAIF (Dec 2025): OpenAI, Anthropic, Google, Microsoft, AWS, Blo
 
 ### Self-Refine
 Source: [github.com/madaan/self-refine](https://github.com/madaan/self-refine)
-LLM generates output → generates feedback on its own output → refines based on feedback → repeats. Different from Reflexion (which uses explicit episodes) and O6 Evaluator-Optimizer (which uses separate judge). Self-Refine uses the same model instance throughout. Favoured over one-step generation across 7 diverse tasks.
+LLM generates output $\to$ generates feedback on its own output $\to$ refines based on feedback $\to$ repeats. Different from Reflexion (which uses explicit episodes) and O6 Evaluator-Optimizer (which uses separate judge). Self-Refine uses the same model instance throughout. Favoured over one-step generation across 7 diverse tasks.
 
 ### Chain of Density (CoD)
-Iterative summarisation: identify 1-3 entities missing from previous summary → rewrite at same length incorporating them. Produces progressively denser, more information-rich summaries. Useful for context compression while preserving entity coverage.
+Iterative summarisation: identify 1-3 entities missing from previous summary $\to$ rewrite at same length incorporating them. Produces progressively denser, more information-rich summaries. Useful for context compression while preserving entity coverage.
 
 ### Constitutional AI (CAI, Anthropic 2022)
-Training pattern: model generates responses → critiques them against an explicit "constitution" (set of principles) → revises. Generates preference pairs without human annotators. Result: simultaneously more helpful AND less harmful than RLHF baseline on Pareto frontier. Now used as an agent runtime pattern (not just training): agent carries a constitution it applies to self-critique at inference time.
+Training pattern: model generates responses $\to$ critiques them against an explicit "constitution" (set of principles) $\to$ revises. Generates preference pairs without human annotators. Result: simultaneously more helpful AND less harmful than RLHF baseline on Pareto frontier. Now used as an agent runtime pattern (not just training): agent carries a constitution it applies to self-critique at inference time.
 
 ### Agent Handoff Pattern
 Structured state transfer between agents mid-interaction. Key challenge: context loss. Best practice:
@@ -752,7 +752,7 @@ Structured state transfer between agents mid-interaction. Key challenge: context
 - Pre-execution budget checks before expensive operations
 - Auto-compaction of conversation history before context fills
 - Rate limits (requests/min, tokens/min) separate from budget limits (dollars/period)
-- Weekly token volume: OpenRouter went from 0.4T → 27T tokens/week Dec 2024 → Mar 2026 (68× in 15 months)
+- Weekly token volume: OpenRouter went from 0.4T $\to$ 27T tokens/week Dec 2024 $\to$ Mar 2026 (68$\times$ in 15 months)
 - Context window is a "rival, excludable resource" contested by: system prompts, tool schemas, conversation history, retrieved docs, reasoning scratchpads
 
 ---
@@ -777,7 +777,7 @@ Structured state transfer between agents mid-interaction. Key challenge: context
 - Code review, test generation, documentation
 
 **Finance:**
-- Supply chain agents → compliance agents → financial forecasting agents (fully autonomous chain)
+- Supply chain agents $\to$ compliance agents $\to$ financial forecasting agents (fully autonomous chain)
 - Claims automation, fraud detection, risk assessment
 
 **Research:**
@@ -786,9 +786,9 @@ Structured state transfer between agents mid-interaction. Key challenge: context
 
 ### Vertical Industry Patterns from arXiv Survey (2510.25445)
 90 studies (2018-2025): healthcare, finance, robotics. Core finding: "application constraints dictate paradigm selection." The same architectural patterns appear across verticals but with domain-specific constraints driving choices:
-- Healthcare: explainability + privacy → H-in-the-L + Dual LLM + Audit Trail
-- Finance: consistency + compliance → Plan-and-Execute + AgentSpec + Audit Trail
-- Education: adaptability → Reflexion + Episodic Memory + Persona
+- Healthcare: explainability + privacy $\to$ H-in-the-L + Dual LLM + Audit Trail
+- Finance: consistency + compliance $\to$ Plan-and-Execute + AgentSpec + Audit Trail
+- Education: adaptability $\to$ Reflexion + Episodic Memory + Persona
 
 ---
 

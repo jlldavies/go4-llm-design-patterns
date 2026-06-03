@@ -46,11 +46,11 @@ Do not bother for short tasks that never approach the window.
 
 K6 is right when sessions reach the context-window threshold and you cannot afford to drop content losslessly.
 
-**1. Measure session token growth.** Profile real sessions for tokens-per-turn (T_avg) and max-turns (N_max). Estimated peak ≈ T_avg × N_max + tool outputs. If peak > ~50% of usable window, K6 is in play. If peak < 30%, you do not need it yet.
+**1. Measure session token growth.** Profile real sessions for tokens-per-turn (T_avg) and max-turns (N_max). Estimated peak $\approx$ T_avg $\times$ N_max + tool outputs. If peak > ~50% of usable window, K6 is in play. If peak < 30%, you do not need it yet.
 
 **2. Set the trigger.** Compression should fire *before* quality degrades, not when the window is full. A common setting: trigger at ~70% of nominal window.
 
-**3. Try K7 first.** Before compressing (lossy), check whether content is *prunable* (lossless). Tool outputs that have been read, finished sub-task context, redundant intermediates → **K7 Context Pruning**. Always K7 first; K6 only on what cannot be pruned.
+**3. Try K7 first.** Before compressing (lossy), check whether content is *prunable* (lossless). Tool outputs that have been read, finished sub-task context, redundant intermediates $\to$ **K7 Context Pruning**. Always K7 first; K6 only on what cannot be pruned.
 
 **4. Compressibility check.** Can older content be summarised without losing what later turns will need? Conversational sessions usually yes — decisions, facts, entities are extractable. Highly technical step-by-step work is harder — small details may matter later. Sample-test the Compactor prompt before relying on it.
 
@@ -82,12 +82,12 @@ If sessions do not approach the window, K6 is overhead. If everything in context
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
 | **Context window** | the accumulating context being managed | — | — |
-| **Trigger** | firing when token usage crosses a threshold | token count → fire / idle | fire so late that the summarisation call itself no longer fits. |
-| **Selector** | choosing which span to compress | window → span | select the system prompt or the active task — only old, settled content. |
-| **Summariser (LLM)** | condensing the selected span | span → dense summary | silently drop decisions or entities — it must preserve specifics, not just gist. |
+| **Trigger** | firing when token usage crosses a threshold | token count $\to$ fire / idle | fire so late that the summarisation call itself no longer fits. |
+| **Selector** | choosing which span to compress | window $\to$ span | select the system prompt or the active task — only old, settled content. |
+| **Summariser (LLM)** | condensing the selected span | span $\to$ dense summary | silently drop decisions or entities — it must preserve specifics, not just gist. |
 
 ## Collaborations
 
@@ -132,9 +132,9 @@ The Trigger monitors token usage. When it crosses the threshold, the Selector pi
 | # | Step | Kind | Draws on |
 |---|---|---|---|
 | 1 | After each turn: check token usage vs threshold | `code` | trigger |
-| 2 | Under threshold → return; over → continue | `code` | |
+| 2 | Under threshold $\to$ return; over $\to$ continue | `code` | |
 | 3 | Select the span to compress (oldest; never the system prompt or active task) | `code` | |
-| 4 | Is the span prunable (spent tool output, finished sub-task)? → call K7 and return | `code` | K7 (lossless first) |
+| 4 | Is the span prunable (spent tool output, finished sub-task)? $\to$ call K7 and return | `code` | K7 (lossless first) |
 | 5 | Otherwise: compress the span | `LLM` | Compactor session |
 | 6 | Splice the summary back in place of the original span | `code` | |
 

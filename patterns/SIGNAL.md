@@ -49,7 +49,7 @@ The loaded-once vs. per-call distinction is also a caching boundary (mechanism 5
 - **S1 Zero-Shot** — instruction only; no examples, no role, no template, no constraints.
 
 **I-B — Demonstration.** Teaching the task by showing rather than telling.
-- **S2 Few-Shot** — put `k` worked input→output examples into the prompt so the model infers the task from demonstrations.
+- **S2 Few-Shot** — put `k` worked input$\to$output examples into the prompt so the model infers the task from demonstrations.
 
 **I-C — Setup framing.** Loaded once at session setup; configures *who, what-not, how, and why* for every turn that follows.
 - **S3 Persona** — assign the model an explicit identity (role, profession, character) framing knowledge and tone.
@@ -102,7 +102,7 @@ Ask the model to do the task with nothing but the instruction itself — no exam
 
 ## S2 — Few-Shot
 
-Put `k` worked input→output examples into the prompt so the model infers the task — its format, style, and decision boundary — from the demonstrations rather than from instruction alone. Dynamic / Retrieval-Augmented Few-Shot is a variant.
+Put `k` worked input$\to$output examples into the prompt so the model infers the task — its format, style, and decision boundary — from the demonstrations rather than from instruction alone. Dynamic / Retrieval-Augmented Few-Shot is a variant.
 
 **Full entry:** [`S2-Few-Shot.md`](S2-Few-Shot.md)
 

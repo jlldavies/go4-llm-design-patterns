@@ -45,11 +45,11 @@ Do not use it when:
 
 O9 is right when several distinct lenses must be applied to one output and no single judge can hold all of them well.
 
-**1. Count the lenses.** List the *distinct, non-overlapping* review criteria the output must clear. Practical threshold: **N ≥ 3 lenses with materially different rubrics**. If two of the lenses produce the same critique 80%+ of the time, they are one lens — merge or drop. Fewer than three real lenses → **O5** is enough.
+**1. Count the lenses.** List the *distinct, non-overlapping* review criteria the output must clear. Practical threshold: **N $\geq$ 3 lenses with materially different rubrics**. If two of the lenses produce the same critique 80%+ of the time, they are one lens — merge or drop. Fewer than three real lenses $\to$ **O5** is enough.
 
 **2. Measure the single-judge miss rate.** On a labelled sample, run O5 with a unified rubric and count defects the judge missed that an independent specialist would catch. **Miss rate > 10% on any single lens** is the empirical signal that the unified judge is diluted. Below that, O5 suffices.
 
-**3. Cost the fan-out.** Each round = N critic calls + 1 synthesis call + 1 generator call. With N = 4 critics, that is ~6× the cost of single-shot. Verify the marginal quality lift over O5 justifies the marginal cost. If only one critic is "load-bearing" and the others rarely fire, pull that critic out as O5.
+**3. Cost the fan-out.** Each round = N critic calls + 1 synthesis call + 1 generator call. With N = 4 critics, that is ~6$\times$ the cost of single-shot. Verify the marginal quality lift over O5 justifies the marginal cost. If only one critic is "load-bearing" and the others rarely fire, pull that critic out as O5.
 
 **4. Independence audit.** Critics must be genuinely independent — separate sessions, ideally separate models. If all critics share the generator's model and persona conditioning is the only difference, fan-out gains are smaller than expected; budget for cross-model or cross-vendor critics where the lens matters most (security, factual grounding). Empirically, same-model critics with different persona prompts produce more correlated critiques than cross-model critics (Du et al. 2023). The mechanism is that token generation is stochastic sampling from a model-specific distribution (mechanism 7); same model + different prompt = different sample from the same distribution; cross-model = different distribution. The fan-out gains are bounded by how different the distributions are. (Mechanisms 1, 7.)
 
@@ -57,7 +57,7 @@ O9 is right when several distinct lenses must be applied to one output and no si
 
 **Quick test — O9 is the right pattern when:**
 
-- ≥ 3 distinct lenses with materially different rubrics must be applied to the same output, *and*
+- $\geq$ 3 distinct lenses with materially different rubrics must be applied to the same output, *and*
 - O5's single-judge miss rate on at least one lens exceeds your reliability budget, *and*
 - the budget tolerates N critic calls plus synthesis per round, *and*
 - the generator can act on multi-dimensional feedback without regressing.
@@ -82,14 +82,14 @@ If only one lens dominates, choose **O5**. If the lenses collapse to one rubric,
 
 Each critic owns exactly one lens. The Synthesis Agent owns reconciliation. The Generator owns the work. Mixing any of these is the pattern's most common failure.
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Generator** | producing the output and revising it on synthesised feedback | task + (optionally) prior synthesis → output | self-critique inline or pre-empt the critics — that erodes the independence the pattern is paying for. |
-| **Fan-out Coordinator** | dispatching the output to all critics in parallel | output → N critic invocations | wait for critics sequentially, share state between critics mid-call, or let one critic's verdict reach another before synthesis. |
-| **Critic A … Critic N** | one lens each, applied independently | output + that critic's rubric → structured critique (issues, severity, suggestions) | see other critics' outputs, see the generator's reasoning, or stray outside its assigned lens. A "security reviewer" that also flags style noise dilutes the pattern. |
-| **Synthesis Agent** | consolidating N critiques into one actionable verdict | N critiques → ranked issues + revision brief + pass/fail | re-critique the output itself (it grades critiques, not work), or silently drop a critic's input. Conflicts must be surfaced, not smoothed. |
-| **Bound** *(V9 Bounded Execution)* | capping rounds | round counter + max rounds → continue/stop | be absent — without a cap, contradictory critics hold the loop open indefinitely. |
-| **Trace** *(V14 Trajectory Logging)* | recording every critique and synthesis decision | round events → durable log | be sampled — the log is how contradictory critics are diagnosed after the fact. |
+| **Generator** | producing the output and revising it on synthesised feedback | task + (optionally) prior synthesis $\to$ output | self-critique inline or pre-empt the critics — that erodes the independence the pattern is paying for. |
+| **Fan-out Coordinator** | dispatching the output to all critics in parallel | output $\to$ N critic invocations | wait for critics sequentially, share state between critics mid-call, or let one critic's verdict reach another before synthesis. |
+| **Critic A … Critic N** | one lens each, applied independently | output + that critic's rubric $\to$ structured critique (issues, severity, suggestions) | see other critics' outputs, see the generator's reasoning, or stray outside its assigned lens. A "security reviewer" that also flags style noise dilutes the pattern. |
+| **Synthesis Agent** | consolidating N critiques into one actionable verdict | N critiques $\to$ ranked issues + revision brief + pass/fail | re-critique the output itself (it grades critiques, not work), or silently drop a critic's input. Conflicts must be surfaced, not smoothed. |
+| **Bound** *(V9 Bounded Execution)* | capping rounds | round counter + max rounds $\to$ continue/stop | be absent — without a cap, contradictory critics hold the loop open indefinitely. |
+| **Trace** *(V14 Trajectory Logging)* | recording every critique and synthesis decision | round events $\to$ durable log | be sampled — the log is how contradictory critics are diagnosed after the fact. |
 
 N typically sits at 3–5 critics. Below 3, O5 is enough; above 5, synthesis quality usually degrades faster than coverage improves. Critics must be wired as independent sessions; same model is acceptable for cheap deployments, but a *mixed-model ensemble* (e.g. one critic from a different vendor) is where the pattern earns its full keep on adversarial lenses like security and factuality.
 
@@ -106,7 +106,7 @@ The Generator produces an output and hands it to the Fan-out Coordinator. The Co
 - Inspectable: per-critic critiques in the trace let operators see *which* lens caught a defect.
 
 **Costs**
-- N critic calls + 1 synthesis call + 1 generator call per round — typically 5–7× the cost of single-shot.
+- N critic calls + 1 synthesis call + 1 generator call per round — typically 5–7$\times$ the cost of single-shot.
 - Latency is the slowest critic, not the average; a slow vendor critic dominates wall-clock time.
 - Synthesis is itself an LLM judgment — its quality caps the pattern's value, and a weak synthesiser collapses the fan-out's benefit.
 - Critic-persona maintenance: N stable rubrics must be authored and versioned.
@@ -140,9 +140,9 @@ The Generator produces an output and hands it to the Fan-out Coordinator. The Co
 |---|---|---|---|
 | 1 | Generator produces (or revises) the output | `LLM` | Generator session |
 | 2 | Fan-out: dispatch the output to N critic sessions in parallel | `code` | O4 |
-| 3 | Critic A … N each produce a structured critique under its lens | `LLM` (×N, parallel) | Critic sessions (S3, S5, S6) |
+| 3 | Critic A … N each produce a structured critique under its lens | `LLM` ($\times$N, parallel) | Critic sessions (S3, S5, S6) |
 | 4 | Collect all N critiques | `code` | |
-| 5 | Synthesis Agent consolidates critiques → ranked issues + revision brief + verdict | `LLM` | Synthesis session |
+| 5 | Synthesis Agent consolidates critiques $\to$ ranked issues + revision brief + verdict | `LLM` | Synthesis session |
 | 6 | Branch — on PASS return; on FAIL loop to step 1 with the revision brief | `code` | V9 (bound), V14 (trace) |
 
 **Skeleton** — the wiring only; each `# LLM` line is a configured session (specified below):

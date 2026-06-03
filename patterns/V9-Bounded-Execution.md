@@ -49,7 +49,7 @@ If the answer to *any* dimension is "no cap currently," that dimension is the ga
 
 The token cap is mechanically load-bearing beyond cost: as context grows, prior loop steps move toward mid-context where attention recall is u-shaped and weakest (mechanism 4), degrading the model's ability to reason over its own earlier work — bounded iteration is also a reasoning-quality intervention, not only a cost control.
 
-**2. Pick caps from measured data, not intuition.** Run the agent on a representative test set; record p50 and p99 of each dimension. Set the cap at **p99 × 1.5–2×**. Caps below p99 truncate legitimate work; caps above 5× p99 fail to catch runaways until they are already expensive. If you have no measured data, you cannot calibrate V9 — collect first, cap second.
+**2. Pick caps from measured data, not intuition.** Run the agent on a representative test set; record p50 and p99 of each dimension. Set the cap at **p99 $\times$ 1.5–2$\times$**. Caps below p99 truncate legitimate work; caps above 5$\times$ p99 fail to catch runaways until they are already expensive. If you have no measured data, you cannot calibrate V9 — collect first, cap second.
 
 **3. Soft warning before hard stop.** At 80% of any cap, emit a warning event (V14 trajectory log) and optionally surface to a human (V1 escape valve). A hard stop with no prior warning is hostile; a warning gives operations time to extend the budget or intervene before work is lost.
 
@@ -102,14 +102,14 @@ If there is no loop, V9 is unnecessary — use the model's native `max_tokens` a
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Execution Budget** | the numeric envelope on every dimension (iter, tools, tokens, wall, $) | task profile → initialised counters | be a prompt-level instruction. The budget lives in wiring code; an LLM that can read or override its own budget defeats the pattern. |
-| **Budget Checker** | the test, run *before every step*, of whether any dimension is exhausted | counters → continue / warn / trip | be the LLM. The Checker is deterministic code; if its decision depends on the model under test, the failure mode the pattern defends against re-enters here. |
-| **Graceful Terminator** | the trip path — checkpoint, log, return partial, optionally escalate | trip event + current state → terminated result | crash the process or drop state silently. A bound that loses work is worse than no bound on a recoverable task. |
-| **Warning Threshold** *(optional)* | the soft alert at ~80% of any cap | counters → warning event | block execution. Warnings inform the operator and optionally **V1**; the hard stop belongs to the Checker. |
-| **Task Profile** | the *per-task-type* set of cap values (e.g. `quick_qa`, `research`, `coding`) | task type → cap values | be a single global cap. One envelope cannot serve both a 1s Q&A and a 6h research run. |
-| **State Saver (→ V10)** | invoking checkpointing before the trip returns | current state → durable snapshot | be skipped. Without it, V9 is a circuit breaker that destroys the device it protects. |
+| **Execution Budget** | the numeric envelope on every dimension (iter, tools, tokens, wall, cost) | task profile $\to$ initialised counters | be a prompt-level instruction. The budget lives in wiring code; an LLM that can read or override its own budget defeats the pattern. |
+| **Budget Checker** | the test, run *before every step*, of whether any dimension is exhausted | counters $\to$ continue / warn / trip | be the LLM. The Checker is deterministic code; if its decision depends on the model under test, the failure mode the pattern defends against re-enters here. |
+| **Graceful Terminator** | the trip path — checkpoint, log, return partial, optionally escalate | trip event + current state $\to$ terminated result | crash the process or drop state silently. A bound that loses work is worse than no bound on a recoverable task. |
+| **Warning Threshold** *(optional)* | the soft alert at ~80% of any cap | counters $\to$ warning event | block execution. Warnings inform the operator and optionally **V1**; the hard stop belongs to the Checker. |
+| **Task Profile** | the *per-task-type* set of cap values (e.g. `quick_qa`, `research`, `coding`) | task type $\to$ cap values | be a single global cap. One envelope cannot serve both a 1s Q&A and a 6h research run. |
+| **State Saver ($\to$ V10)** | invoking checkpointing before the trip returns | current state $\to$ durable snapshot | be skipped. Without it, V9 is a circuit breaker that destroys the device it protects. |
 
 The pattern's reliability rests on two prohibitions: the Checker is not an LLM, and the Terminator does not return without checkpointing. Violate either and V9 becomes ornamental.
 
@@ -146,7 +146,7 @@ A task invocation selects its **Task Profile** and initialises the **Execution B
 
 - Build the budget object as a small, plain data structure (dict or struct) carrying all five dimensions, plus elapsed counters. Decrement in the same code that issues the LLM/tool call — never in the LLM itself.
 - Token and cost dimensions are estimated from per-call usage metadata most providers expose; tool-call and iteration counts are exact; wall-clock is the simplest. Always cap on the dimensions you can measure exactly *and* the dimensions where the failure mode lives.
-- Set caps from p99 of measured runs × 1.5–2×. If you have no data, instrument first; do not deploy with intuited caps.
+- Set caps from p99 of measured runs $\times$ 1.5–2$\times$. If you have no data, instrument first; do not deploy with intuited caps.
 - Warning at 80% is a reasonable default; in cost-sensitive environments, tighten to 50–60% with V1 surfacing.
 - Different per-task profiles for `quick_qa`, `research`, `coding_agent`, `recovery_loop` — never one global cap. Profile selection happens at task entry.
 - LATS (R10) and ToT (R9) need especially generous iteration caps; calibrate against measured search depth on representative problems. **Conflict with R10** noted in CONFLICTS.md — set bounds at p95 of measured LATS completion, not p50.
@@ -166,11 +166,11 @@ A task invocation selects its **Task Profile** and initialises the **Execution B
 |---|---|---|---|
 | 1 | Select task profile; initialise budget | `code` | Task Profile registry |
 | 2 | Before each loop step — check every dimension | `code` | Budget Checker |
-| 3 | If any dim ≥ 80%: emit warning event; optionally surface to V1 | `code` | V14, V1 |
-| 4 | If any dim ≥ 100%: trip → step 7 | `code` | |
+| 3 | If any dim $\geq$ 80%: emit warning event; optionally surface to V1 | `code` | V14, V1 |
+| 4 | If any dim $\geq$ 100%: trip $\to$ step 7 | `code` | |
 | 5 | Execute the wrapped step (LLM call or tool call) | `LLM` *(or `code`)* | the wrapped pattern |
 | 6 | Decrement counters with measured usage; loop to step 2 | `code` | |
-| 7 | On trip: V10 checkpoint → V14 termination event → return partial with reason | `code` | V10, V14, optional V1 |
+| 7 | On trip: V10 checkpoint $\to$ V14 termination event $\to$ return partial with reason | `code` | V10, V14, optional V1 |
 
 **Skeleton** — wiring only; no LLM session is added by V9 itself:
 

@@ -76,7 +76,7 @@ Most real agents need more than one shape. This is not a failure — it is the c
 
 A bundle with unspecified authority and freshness produces context rot. Specifying per-field makes the agent's behavior deterministic when sources disagree or are unavailable.
 
-**5. Cost the assembly.** Pre-assembled bundles have a write cost (assembly call at task start or periodic refresh). Dynamic RAG has a per-run discovery cost. Compare: assembly_cost × assembly_frequency vs. rediscovery_cost × run_frequency. At high run frequency over stable data, pre-assembly wins materially.
+**5. Cost the assembly.** Pre-assembled bundles have a write cost (assembly call at task start or periodic refresh). Dynamic RAG has a per-run discovery cost. Compare: assembly_cost $\times$ assembly_frequency vs. rediscovery_cost $\times$ run_frequency. At high run frequency over stable data, pre-assembly wins materially.
 
 ## Structure
 
@@ -132,13 +132,13 @@ The structural invariant: the agent's context contains the bundle (assembled onc
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
 | **Bundle specification** (a design artifact, not code) | the exact definition of what this workflow type always needs: fields, sources, shapes, freshness, auth, missing behavior | — | be implicit. An unspecified bundle is indistinguishable from "let the agent figure it out," which is the rediscovery pattern. |
-| **Bundle assembler** (code) | assembling the bundle from its constituent sources at task start | task entity ID + bundle spec → assembled bundle | retrieve more than the spec requires. Every token added to context costs O(n²) attention compute (mechanism 2). The assembler's job is to be complete and precise, not comprehensive. |
-| **Shape-appropriate retrieval primitives** (one or more, chosen per field type) | delivering each field in the right shape | field spec → field value | substitute a different shape. Retrieving a governed metric via vector search, or a contract section via raw text grep, are shape mismatches that produce wrong or unreliable answers regardless of retrieval quality. |
-| **Authority and freshness enforcer** (code) | validating each retrieved field against its spec before injecting into context | raw retrieval results → validated, labeled bundle fields | pass unlabeled content. The agent must know which fields are authoritative (the governed table, the current policy) vs. contextual (prior tickets, historical examples). Mixing them unlabeled produces context rot. |
-| **Missing-field handler** (code or policy) | deciding what to do when a required field cannot be retrieved | retrieval failure → halt / substitute / flag | silently omit. A missing required field should be an explicit signal (halt for authorization failures, substitute for optional fields, flag for degraded mode). Silent omission produces a partially-assembled bundle the agent treats as complete. |
+| **Bundle assembler** (code) | assembling the bundle from its constituent sources at task start | task entity ID + bundle spec $\to$ assembled bundle | retrieve more than the spec requires. Every token added to context costs O(n²) attention compute (mechanism 2). The assembler's job is to be complete and precise, not comprehensive. |
+| **Shape-appropriate retrieval primitives** (one or more, chosen per field type) | delivering each field in the right shape | field spec $\to$ field value | substitute a different shape. Retrieving a governed metric via vector search, or a contract section via raw text grep, are shape mismatches that produce wrong or unreliable answers regardless of retrieval quality. |
+| **Authority and freshness enforcer** (code) | validating each retrieved field against its spec before injecting into context | raw retrieval results $\to$ validated, labeled bundle fields | pass unlabeled content. The agent must know which fields are authoritative (the governed table, the current policy) vs. contextual (prior tickets, historical examples). Mixing them unlabeled produces context rot. |
+| **Missing-field handler** (code or policy) | deciding what to do when a required field cannot be retrieved | retrieval failure $\to$ halt / substitute / flag | silently omit. A missing required field should be an explicit signal (halt for authorization failures, substitute for optional fields, flag for degraded mode). Silent omission produces a partially-assembled bundle the agent treats as complete. |
 
 ## Collaborations
 

@@ -42,9 +42,9 @@ Quick reasoning improvement with no examples?
 | R2 Few-Shot CoT | 1 | Low + example tokens | Static examples cache cleanly |
 | R3 Plan-and-Solve | 2 | Low | Plan + execute; two clean calls |
 | R4 ReAct | N per step | Medium–High | Scales with task complexity |
-| R5 ReWOO | 2 total | **5× cheaper than R4** | All tool calls must be independent |
+| R5 ReWOO | 2 total | **5$\times$ cheaper than R4** | All tool calls must be independent |
 | R6 Self-Ask | 1 + N follow-ups | Medium | Sub-question depth drives cost |
-| R7 Reflexion | N × retries | High | Needs measurable success criterion |
+| R7 Reflexion | N $\times$ retries | High | Needs measurable success criterion |
 | R8 Self-Refine | N iterations | Medium | In-session; no separate judge |
 | R9 ToT | N (branching) | Very High | Use when path genuinely unknown |
 | R10 LATS | N (tree search) | Highest | Highest quality; highest cost |

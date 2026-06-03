@@ -18,7 +18,7 @@ When agents replaced chatbots, the memory question changed. A chatbot answering 
 
 Observational Memory takes the opposite stance: **the agent's own observations are the primary memory.** The session keeps a running, compressed record of what the agent has perceived and done, and that record — not an external corpus — is what the agent reasons over. External retrieval (K1) becomes a secondary source, consulted only when the in-session record is insufficient.
 
-There is a second, structural payoff. A memory built from a stable, append-mostly record of observations changes slowly and predictably. A stable context prefix is a *cacheable* context prefix: KV-cache reuse across the session's many model calls is reported to cut cost by roughly an order of magnitude. The mechanism (mechanism 5 and 3): the provider computes and stores the KV states — a 4D tensor [layers × seq_len × kv_heads × d_head] — for any stable token prefix. On re-submission of the same token sequence, those states are injected directly, bypassing the O(seq_len²) prefill computation (mechanism 2). At Anthropic: minimum 1024 tokens, ~5-minute TTL, reads at ~10% of normal input cost. Any edit to a prior position in the prefix produces a different token ID → different K vector → cached state invalid for that position and all subsequent ones. K1-style retrieval, which rewrites the context with different chunks every turn, forfeits that. Observational Memory is partly a pattern *for* cache-friendliness.
+There is a second, structural payoff. A memory built from a stable, append-mostly record of observations changes slowly and predictably. A stable context prefix is a *cacheable* context prefix: KV-cache reuse across the session's many model calls is reported to cut cost by roughly an order of magnitude. The mechanism (mechanism 5 and 3): the provider computes and stores the KV states — a 4D tensor [layers $\times$ seq_len $\times$ kv_heads $\times$ d_head] — for any stable token prefix. On re-submission of the same token sequence, those states are injected directly, bypassing the O(seq_len²) prefill computation (mechanism 2). At Anthropic: minimum 1024 tokens, ~5-minute TTL, reads at ~10% of normal input cost. Any edit to a prior position in the prefix produces a different token ID $\to$ different K vector $\to$ cached state invalid for that position and all subsequent ones. K1-style retrieval, which rewrites the context with different chunks every turn, forfeits that. Observational Memory is partly a pattern *for* cache-friendliness.
 
 This is distinct from K10 Long-Term Memory, which persists across sessions and is corpus-like; K11 is scoped to the current session and is observation-like. It is distinct from K8 Working Memory, which is a scratchpad the model deliberately writes; K11 is the accumulated record of everything the agent has observed, written deliberately or not. And it is distinct from K12 Karpathy Memory, which takes the same observation stream as input but has the LLM digest it into structured curated notes — K11 keeps the raw log cheap and cache-friendly; K12 pays curation cost to make later reads dense and navigable. The two are the **raw-log** and **curated-notes** branches of the same Karpathy framing of agent memory; they are often paired.
 
@@ -37,19 +37,19 @@ It is irrelevant to short tasks and single-turn question answering.
 
 K11 is the right memory pattern when the agent's own activity *is* the memory and prompt caching makes the cost work.
 
-**1. Session length.** How long does a typical session run? If sessions are short (a handful of turns), the cache amortisation that justifies K11 does not accrue. Threshold of interest: roughly **≥ 20–30 turns**, or hour-scale sessions.
+**1. Session length.** How long does a typical session run? If sessions are short (a handful of turns), the cache amortisation that justifies K11 does not accrue. Threshold of interest: roughly **$\geq$ 20–30 turns**, or hour-scale sessions.
 
 **2. Provider and model caching.** Does the chosen model and provider expose prompt caching at usable granularity? Without it, K11 is just "keep appending tokens" — costs scale linearly per turn with no offset, and the pattern's main economic argument disappears. Additionally, sessions that pause between agent steps for longer than the TTL (~5 minutes on Anthropic) will re-prefill at full cost on the next step — the cache benefit accrues only within an active session (mechanism 5). For long-idle agents, the economics shift back toward K10 or K12.
 
-**3. Cache hit rate target.** Measure expected and actual cache hit rate. Below ~70% the pattern is misconfigured — something is rewriting prior entries, or the recorder is not truly append-only. Above ~90% is where the reported ~10× cost reduction lands.
+**3. Cache hit rate target.** Measure expected and actual cache hit rate. Below ~70% the pattern is misconfigured — something is rewriting prior entries, or the recorder is not truly append-only. Above ~90% is where the reported ~10$\times$ cost reduction lands.
 
-**4. Read pattern.** Is the agent reading the whole record (which K11 makes cheap via cache) or only specific entries (which K12 makes cheap via structure)? *Whole record matters* → K11. *Specific entries matter* → K12.
+**4. Read pattern.** Is the agent reading the whole record (which K11 makes cheap via cache) or only specific entries (which K12 makes cheap via structure)? *Whole record matters* $\to$ K11. *Specific entries matter* $\to$ K12.
 
 **5. Cross-session continuity.** K11 is session-scoped. If continuity is needed beyond the session, pair with **K10** (facts in a vector store) or **K12** (curated notes) — usually both.
 
 **Quick test — K11 is the right pattern when:**
 
-- session length supports cache amortisation (≥ ~20 turns, or hour-scale), *and*
+- session length supports cache amortisation ($\geq$ ~20 turns, or hour-scale), *and*
 - the provider supports prompt caching at appropriate granularity, *and*
 - cost — not only quality — is the lever you are optimising, *and*
 - the agent benefits from reading the *whole record* rather than specific entries.
@@ -73,13 +73,13 @@ If sessions are short, drop K11 — it has no benefit. If you need structured, n
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Observation record** | the running log of what the agent has seen and done | observations → reasoning substrate | be rewritten each turn — a stable, append-mostly prefix is what enables caching. |
-| **Recorder** | appending each observation or action | event → record entry | reorder or edit prior entries — that breaks the cacheable prefix. Mechanically: the provider's cache key is the exact token sequence of the prefix. A rewritten token at position i produces a different K vector for that position, invalidating the cached KV state for position i and all subsequent positions (mechanism 3 and 5). The append-only constraint is not a style rule — it is a cache correctness requirement. |
-| **Agent (LLM)** | reasoning over the record | record → next action | reach for external retrieval first — the record is the primary memory. |
-| **KV-cache** | serving the stable prefix cheaply | stable prefix → cached compute | — |
-| **External retrieval** | the secondary fallback source | query → external facts | be the default — it is consulted only when the record is insufficient. |
+| **Observation record** | the running log of what the agent has seen and done | observations $\to$ reasoning substrate | be rewritten each turn — a stable, append-mostly prefix is what enables caching. |
+| **Recorder** | appending each observation or action | event $\to$ record entry | reorder or edit prior entries — that breaks the cacheable prefix. Mechanically: the provider's cache key is the exact token sequence of the prefix. A rewritten token at position i produces a different K vector for that position, invalidating the cached KV state for position i and all subsequent positions (mechanism 3 and 5). The append-only constraint is not a style rule — it is a cache correctness requirement. |
+| **Agent (LLM)** | reasoning over the record | record $\to$ next action | reach for external retrieval first — the record is the primary memory. |
+| **KV-cache** | serving the stable prefix cheaply | stable prefix $\to$ cached compute | — |
+| **External retrieval** | the secondary fallback source | query $\to$ external facts | be the default — it is consulted only when the record is insufficient. |
 
 ## Collaborations
 
@@ -89,7 +89,7 @@ At each step the Recorder appends the latest observation or action to the runnin
 
 **Benefits**
 - Coherent behaviour across long sessions — the agent reliably recalls its own history.
-- Large cost reduction through KV-cache reuse (reported around 10×).
+- Large cost reduction through KV-cache reuse (reported around 10$\times$).
 - Simpler than operating an external retrieval layer for in-session recall.
 - The record doubles as a natural execution trace.
 
@@ -144,7 +144,7 @@ agent_step(query, mem):
 |---|---|---|---|
 | **Agent** | the system's main generalist, **on a provider that supports prompt caching** | role and operating instructions; rule: *"reason over your observation record below; if you need external facts not present in it, request retrieval explicitly"*; the **observation record itself** is the (growing) cacheable prefix that follows — appended to, never rewritten | the new query |
 
-**Specialist-model note.** The hard dependency is **prompt caching** at the model and provider layer — the reported ~10× cost reduction comes from KV-cache reuse of the stable record prefix. Without caching, the pattern still works but loses its main economic advantage. Measure cache hit rate as a first-class metric, alongside answer quality.
+**Specialist-model note.** The hard dependency is **prompt caching** at the model and provider layer — the reported ~10$\times$ cost reduction comes from KV-cache reuse of the stable record prefix. Without caching, the pattern still works but loses its main economic advantage. Measure cache hit rate as a first-class metric, alongside answer quality.
 
 ## Open-Source Implementations
 

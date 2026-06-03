@@ -54,16 +54,16 @@ K1 is right when the task needs grounded answers from an external corpus and nei
 **1. Score the deficits.** Does the task hit any of the three weights-only deficits — staleness, generic-not-proprietary knowledge, no citations? If none, you do not need K1. If any, retrieval-augmented architecture is the right frame.
 
 **2. Size the corpus against the window.** Tokenize the working set (or estimate). Call it **C**.
-- C ≤ ~50% of an affordable usable window → consider **K9 Long Context** instead; simpler architecture if you can afford the per-call cost.
-- C >> any affordable window → K1 (or K3 / K4) is the only viable option.
-- C in between → benchmark both K1 and K9 on your actual query workload.
+- C $\leq$ ~50% of an affordable usable window $\to$ consider **K9 Long Context** instead; simpler architecture if you can afford the per-call cost.
+- C >> any affordable window $\to$ K1 (or K3 / K4) is the only viable option.
+- C in between $\to$ benchmark both K1 and K9 on your actual query workload.
 
-**3. Check the query shape.** Are queries local and fact-style, answerable from a small slice of the corpus? K1 fits. Multi-hop or whole-corpus synthesis → **K3 GraphRAG**. Varying abstraction levels (precise facts *and* thematic summaries from the same corpus) → **K4 RAPTOR**.
+**3. Check the query shape.** Are queries local and fact-style, answerable from a small slice of the corpus? K1 fits. Multi-hop or whole-corpus synthesis $\to$ **K3 GraphRAG**. Varying abstraction levels (precise facts *and* thematic summaries from the same corpus) $\to$ **K4 RAPTOR**.
 
 **4. Corpus update frequency.** How often does the corpus change?
-- Frequently → K1's rebuild-the-index cycle is cheap and natural; fine-tuning would be wrong.
-- Stable but you still need citations → K1's auditability still wins over weights-only or fine-tuning.
-- Never changes and citations do not matter → fine-tuning is at least a candidate.
+- Frequently $\to$ K1's rebuild-the-index cycle is cheap and natural; fine-tuning would be wrong.
+- Stable but you still need citations $\to$ K1's auditability still wins over weights-only or fine-tuning.
+- Never changes and citations do not matter $\to$ fine-tuning is at least a candidate.
 
 **5. Citation requirement.** If answers must be traceable to specific sources (regulated domains, customer support, research), K1 is mandatory — weights-only and fine-tuning cannot deliver citations.
 
@@ -103,16 +103,16 @@ ONLINE — retrieval and generation (every query)
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Corpus** | the source of truth | — → documents | be assumed clean — every downstream quality ceiling inherits from it. |
-| **Chunker** | splitting documents into retrievable units | document → chunks | split carelessly across semantic boundaries; a fact straddling two chunks is retrievable by neither. |
-| **Embedding model** | mapping text to vectors | text → vector | differ between indexing and querying — the same model and vector space must serve both. |
-| **Vector index** | storing vectors and answering similarity search | vectors + query vector → top-k chunks | be the sole retrieval signal; pair with keyword search for exact terms, names, and codes. |
-| **Retriever** | turning a query into candidate chunks | query → top-k chunks | judge sufficiency of what it returns — that is K5's job, not K1's. |
-| **Reranker** *(optional)* | precision over a wide candidate set | candidates → narrowed set | fetch anything; it refines an existing set, it does not retrieve. |
-| **Prompt assembler** | composing system prompt + chunks + query | parts → prompt | drop source metadata — the Generator needs it to cite. |
-| **Generator (LLM)** | producing the grounded, cited answer | prompt → answer | answer from weights when the context is silent — it should say the context does not cover it. |
+| **Corpus** | the source of truth | — $\to$ documents | be assumed clean — every downstream quality ceiling inherits from it. |
+| **Chunker** | splitting documents into retrievable units | document $\to$ chunks | split carelessly across semantic boundaries; a fact straddling two chunks is retrievable by neither. |
+| **Embedding model** | mapping text to vectors | text $\to$ vector | differ between indexing and querying — the same model and vector space must serve both. |
+| **Vector index** | storing vectors and answering similarity search | vectors + query vector $\to$ top-k chunks | be the sole retrieval signal; pair with keyword search for exact terms, names, and codes. |
+| **Retriever** | turning a query into candidate chunks | query $\to$ top-k chunks | judge sufficiency of what it returns — that is K5's job, not K1's. |
+| **Reranker** *(optional)* | precision over a wide candidate set | candidates $\to$ narrowed set | fetch anything; it refines an existing set, it does not retrieve. |
+| **Prompt assembler** | composing system prompt + chunks + query | parts $\to$ prompt | drop source metadata — the Generator needs it to cite. |
+| **Generator (LLM)** | producing the grounded, cited answer | prompt $\to$ answer | answer from weights when the context is silent — it should say the context does not cover it. |
 
 ## Collaborations
 
@@ -167,7 +167,7 @@ ONLINE — retrieval and generation (every query)
 | 2 | Offline: embed each chunk | `LLM` | Embedder session |
 | 3 | Offline: store (vector, text, source metadata) | `code` | |
 | 4 | Online: embed the query — *same* embedder | `LLM` | Embedder session |
-| 5 | Online: similarity search → top-k chunks | `code` | |
+| 5 | Online: similarity search $\to$ top-k chunks | `code` | |
 | 6 | Online: compose prompt (system + chunks + query) | `code` | S6 output template |
 | 7 | Online: generate the grounded, cited answer | `LLM` | Generator session |
 

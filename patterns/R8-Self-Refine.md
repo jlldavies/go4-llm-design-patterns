@@ -27,7 +27,7 @@ Use Self-Refine when:
 - single-shot output is *close* but consistently misses a constraint, a polish step, or a structural improvement the model would recognise if asked;
 - there is **no automated pass/fail signal** (no tests, no schema, no executor) — if there were, **R7 Reflexion** is stronger and cheaper per round;
 - the task is open-ended enough that voting across samples (R17) does not apply — there is no "modal answer" to converge on (creative writing, structured drafting, summarisation, code review);
-- the budget tolerates 2–5× the single-shot cost for a measurable quality lift;
+- the budget tolerates 2–5$\times$ the single-shot cost for a measurable quality lift;
 - the model is strong enough to *both* generate the output and critique it — small models often generate fine but critique poorly.
 
 Do not use it when:
@@ -42,7 +42,7 @@ Do not use it when:
 
 R8 is right when single-shot is close, there is no external signal to use, and the model is strong enough to critique its own work.
 
-**1. Measure the lift on one round of refinement.** Run a labelled sample at N=1 (single-shot) and N=2 (one critique-refine round). If the **preference rate** of N=2 over N=1 is **≥ 60%**, R8 buys real quality. Below 55%, the critic is not actually catching anything — stop and reach for **O5** (separate judge) or accept single-shot.
+**1. Measure the lift on one round of refinement.** Run a labelled sample at N=1 (single-shot) and N=2 (one critique-refine round). If the **preference rate** of N=2 over N=1 is **$\geq$ 60%**, R8 buys real quality. Below 55%, the critic is not actually catching anything — stop and reach for **O5** (separate judge) or accept single-shot.
 
 **2. Cap iterations — N=2 to N=4 is the working range.** Madaan et al. showed diminishing returns after the second or third refinement; many tasks plateau at N=2. Start at **N=3** and tune down if early stopping fires often, up only if the critique consistently identifies remaining issues. Beyond N=5 is almost always wasted compute.
 
@@ -88,12 +88,12 @@ If an automated criterion exists, use **R7 Reflexion**. If you can afford a seco
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Generator (LLM)** | producing the initial output and each refined version | task (+ prior output + feedback on iterations ≥ 1) → output_n | be a different model on different iterations — the pattern's identity claim ("same model") is what distinguishes R8 from O5. |
-| **Critic (LLM, same model)** | written feedback on the current output, with an explicit "done" sentinel | task + output_n → feedback_n (or DONE) | fabricate a positive verdict to end the loop early; the critic must *try* to find faults, and it must be prompted to do so. A critic that defaults to "looks good" silently collapses the pattern to single-shot. |
-| **Refiner (LLM, same model)** | revising the output using the critique | task + output_n + feedback_n → output_{n+1} | rewrite the output from scratch ignoring the critique — that is a second generation, not a refinement, and breaks the iterative quality argument. |
-| **Loop controller** | enforcing the stopping condition (max iterations / DONE sentinel / threshold) | iteration count + last critique → continue / stop | run unbounded — without a hard cap (**V9 Bounded Execution**), a critic that never says DONE will loop forever. |
+| **Generator (LLM)** | producing the initial output and each refined version | task (+ prior output + feedback on iterations $\geq$ 1) $\to$ output_n | be a different model on different iterations — the pattern's identity claim ("same model") is what distinguishes R8 from O5. |
+| **Critic (LLM, same model)** | written feedback on the current output, with an explicit "done" sentinel | task + output_n $\to$ feedback_n (or DONE) | fabricate a positive verdict to end the loop early; the critic must *try* to find faults, and it must be prompted to do so. A critic that defaults to "looks good" silently collapses the pattern to single-shot. |
+| **Refiner (LLM, same model)** | revising the output using the critique | task + output_n + feedback_n $\to$ output_{n+1} | rewrite the output from scratch ignoring the critique — that is a second generation, not a refinement, and breaks the iterative quality argument. |
+| **Loop controller** | enforcing the stopping condition (max iterations / DONE sentinel / threshold) | iteration count + last critique $\to$ continue / stop | run unbounded — without a hard cap (**V9 Bounded Execution**), a critic that never says DONE will loop forever. |
 
 Four narrow responsibilities. Two structural invariants make the pattern work:
 
@@ -114,7 +114,7 @@ The Generator produces output_0 from the task. The Critic — same model, differ
 - Composes cleanly with **S6 Output Template** (constraint the critic checks against) and **R1 / R2 CoT** (explicit reasoning in both generation and critique).
 
 **Costs**
-- **2–5× the single-shot cost** at typical N=2 to N=4. Each round is roughly three LLM calls.
+- **2–5$\times$ the single-shot cost** at typical N=2 to N=4. Each round is roughly three LLM calls.
 - Strictly sequential — no parallel speed-up like R17 — so wall-clock latency scales with N.
 - Critique quality caps the lift. A weak critic spends compute without improving the output.
 
@@ -179,7 +179,7 @@ self_refine(task, max_rounds=3):
 
 - **Self-Refine (official)** — [`github.com/madaan/self-refine`](https://github.com/madaan/self-refine) — the canonical implementation from the paper's authors. Task-specific FEEDBACK and REFINE modules across the 7 benchmarked tasks; reference prompts for critique and refinement.
 - **DSPy `Refine`** — [`github.com/stanfordnlp/dspy`](https://github.com/stanfordnlp/dspy) — Refine module ([`dspy/predict/refine.py`](https://github.com/stanfordnlp/dspy/blob/main/dspy/predict/refine.py)) extending BestOfN with an automatic feedback loop: after each failed attempt, generates feedback and uses it as a hint for the next run. The closest thing to a framework primitive.
-- **LangGraph reflection tutorials** — [`github.com/langchain-ai/langgraph`](https://github.com/langchain-ai/langgraph) — runnable reference graphs for the draft → critique → improve loop; LangGraph's stateful-graph model maps directly onto the R8 cycle.
+- **LangGraph reflection tutorials** — [`github.com/langchain-ai/langgraph`](https://github.com/langchain-ai/langgraph) — runnable reference graphs for the draft $\to$ critique $\to$ improve loop; LangGraph's stateful-graph model maps directly onto the R8 cycle.
 - **Project website** — [selfrefine.info](https://selfrefine.info/) — paper authors' demo and per-task results.
 
 ## Known Uses
@@ -203,7 +203,7 @@ self_refine(task, max_rounds=3):
 
 ## Sources
 
-- Madaan et al. (2023) — "Self-Refine: Iterative Refinement with Self-Feedback" (arXiv [2303.17651](https://arxiv.org/abs/2303.17651)). The canonical reference; the FEEDBACK → REFINE loop, the 7-task evaluation, and the ~20% preference lift over one-shot generation.
+- Madaan et al. (2023) — "Self-Refine: Iterative Refinement with Self-Feedback" (arXiv [2303.17651](https://arxiv.org/abs/2303.17651)). The canonical reference; the FEEDBACK $\to$ REFINE loop, the 7-task evaluation, and the ~20% preference lift over one-shot generation.
 - Project website — [selfrefine.info](https://selfrefine.info/) — per-task results and reference prompts from the authors.
 - DSPy documentation — `dspy.Refine` and `dspy.BestOfN` as framework primitives ([source](https://github.com/stanfordnlp/dspy/blob/main/dspy/predict/refine.py)).
 - LangGraph reflection tutorials — runnable reference graphs for the draft-critique-improve loop.

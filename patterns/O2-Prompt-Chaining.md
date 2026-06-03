@@ -14,7 +14,7 @@ Decompose a task into a known, ordered sequence of LLM calls with deterministic 
 
 ## Motivation
 
-Many real tasks decompose naturally into a fixed order of operations: *extract entities → validate them → look them up → format the response*; *outline → draft → edit → format*; *parse intent → resolve references → generate answer → polish*. The naive way to solve such a task is one big prompt that asks the model to do all four moves at once — anti-pattern **A1 God Prompt**. The model collapses the moves, produces a soft best-effort, and silently drops requirements. **S4 Instruction Decomposition** is the prompt-level fix: number the steps inside one call. S4 works until you need any of *inspection between steps*, *different models per step*, *a quality gate that can abort the chain*, or *logging of intermediate state*. The moment you need a boundary, S4 cannot reach it: every step lives inside one model turn.
+Many real tasks decompose naturally into a fixed order of operations: *extract entities $\to$ validate them $\to$ look them up $\to$ format the response*; *outline $\to$ draft $\to$ edit $\to$ format*; *parse intent $\to$ resolve references $\to$ generate answer $\to$ polish*. The naive way to solve such a task is one big prompt that asks the model to do all four moves at once — anti-pattern **A1 God Prompt**. The model collapses the moves, produces a soft best-effort, and silently drops requirements. **S4 Instruction Decomposition** is the prompt-level fix: number the steps inside one call. S4 works until you need any of *inspection between steps*, *different models per step*, *a quality gate that can abort the chain*, or *logging of intermediate state*. The moment you need a boundary, S4 cannot reach it: every step lives inside one model turn.
 
 Prompt Chaining is the next rung. Each step is its own LLM call with its own setup; the deterministic code between calls is a first-class participant — it transforms, validates, gates, branches, or logs the state that flows from step to step. The chain is **fixed at design time**: the developer writes the sequence; the model does not choose it. That fixedness is the source of all of O2's virtues — predictability, testability, isolated debugging, cheap caching — and all of its limits. When the right sequence of steps depends on the input and cannot be enumerated in advance, the right pattern is no longer O2; it is **O6 Orchestrator-Workers**, where a planner LLM picks the steps at runtime.
 
@@ -53,7 +53,7 @@ Do not use Prompt Chaining when:
 
 O2 is right when the chain is fixed, short, and at least one boundary between steps needs deterministic code.
 
-**1. Enumerate the steps at design time.** Can you list every step the chain will run without seeing the input? If yes — O2. If the step list depends on the input — **O6 Orchestrator-Workers**. The boundary test: would a different input produce a different sequence of steps? Different *values* in the same steps → still O2; different *steps entirely* → O6.
+**1. Enumerate the steps at design time.** Can you list every step the chain will run without seeing the input? If yes — O2. If the step list depends on the input — **O6 Orchestrator-Workers**. The boundary test: would a different input produce a different sequence of steps? Different *values* in the same steps $\to$ still O2; different *steps entirely* $\to$ O6.
 
 **2. Count the steps.** O2 scales cleanly to ~2–7 LLM calls. Below 2, the chain is just S4 or O1. Above 7, the chain becomes a maintenance burden and should split into sub-chains, hierarchise into **O7 Supervisor Hierarchy**, or be rebuilt as O6. A chain of 3–5 steps is the sweet spot.
 
@@ -109,15 +109,15 @@ Each `Step` box is its own LLM session — distinct setup, possibly distinct mod
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Chain Definition** | the fixed ordered list of steps and the wiring between them | task analysis → declarative chain (steps + gates + branches) | be data-dependent — if the chain depends on the input, this is **O6**, not O2. The chain is committed at design time. |
-| **Step Session** *(one per LLM step)* | producing this step's output to its declared contract | step's input → step's structured output | reach across steps — a Step Session sees only its declared input, never the chain's whole state or another step's internals. |
-| **State Carrier** | passing the typed payload between steps | step N's output → step N+1's input (often a typed dict or object) | be a free-form blob — vague state is the most common O2 failure. A schema per inter-step boundary is mandatory. |
-| **Inter-step Gate** *(per boundary that needs one)* | the verdict on whether step N's output is fit to be step N+1's input | output_N → pass / fail / retry / abort | be silent on failure — a failed gate must surface the failure with the offending payload, not paper over it. |
-| **Validator / Transformer** *(per boundary)* | schema parse, type coerce, field rename | raw step output → typed payload for next step | mutate the *meaning* of the data — coercion is structural; semantic changes belong inside a Step. |
-| **Branch / Fan-out** *(optional)* | choosing the next step or splitting the chain | gate verdict or output_N → next-step selector or per-item subchain | be a deep decision tree — anything beyond ~2 forks should be **O3 Routing** or **O6**. |
-| **Orchestrator (code)** | running the chain — invoke step, pass state, run gates, branch | chain definition + input → final output | be an LLM. The whole point of O2 is that the *orchestration* is code; an LLM picking the next step makes this O6. |
+| **Chain Definition** | the fixed ordered list of steps and the wiring between them | task analysis $\to$ declarative chain (steps + gates + branches) | be data-dependent — if the chain depends on the input, this is **O6**, not O2. The chain is committed at design time. |
+| **Step Session** *(one per LLM step)* | producing this step's output to its declared contract | step's input $\to$ step's structured output | reach across steps — a Step Session sees only its declared input, never the chain's whole state or another step's internals. |
+| **State Carrier** | passing the typed payload between steps | step N's output $\to$ step N+1's input (often a typed dict or object) | be a free-form blob — vague state is the most common O2 failure. A schema per inter-step boundary is mandatory. |
+| **Inter-step Gate** *(per boundary that needs one)* | the verdict on whether step N's output is fit to be step N+1's input | output_N $\to$ pass / fail / retry / abort | be silent on failure — a failed gate must surface the failure with the offending payload, not paper over it. |
+| **Validator / Transformer** *(per boundary)* | schema parse, type coerce, field rename | raw step output $\to$ typed payload for next step | mutate the *meaning* of the data — coercion is structural; semantic changes belong inside a Step. |
+| **Branch / Fan-out** *(optional)* | choosing the next step or splitting the chain | gate verdict or output_N $\to$ next-step selector or per-item subchain | be a deep decision tree — anything beyond ~2 forks should be **O3 Routing** or **O6**. |
+| **Orchestrator (code)** | running the chain — invoke step, pass state, run gates, branch | chain definition + input $\to$ final output | be an LLM. The whole point of O2 is that the *orchestration* is code; an LLM picking the next step makes this O6. |
 
 Seven roles, but most chains in practice use four: Chain Definition, Step Sessions, State Carrier, and a code Orchestrator. Gates, Validators, and Branches are the per-boundary participants that earn O2 its reliability margin over S4.
 
@@ -170,14 +170,14 @@ The Orchestrator (plain code) reads the Chain Definition and runs the steps in o
 
 **Composition:** O2 chains 2–7 Step Sessions with deterministic code between them. It commonly composes with **O4 Parallelization** (fan-out sections inside the chain), **O3 Routing** (a conditional branch mid-chain), **V15 LLM-as-Judge** or **R20 Chain-of-Verification** (the inter-step gate), **V9 Bounded Execution** (retry caps), **V14 Trajectory Logging** (the per-step trace), and **S6 Output Template** (each step's output contract). Where one step is itself a small ordered procedure, that step is internally **S4 Instruction Decomposition**.
 
-**The chain — illustrative 4-step example (extract → validate → enrich → format):**
+**The chain — illustrative 4-step example (extract $\to$ validate $\to$ enrich $\to$ format):**
 
 | # | Step | Kind | Draws on |
 |---|---|---|---|
 | 1 | Extract entities from raw input | `LLM` | Extractor session |
 | 2 | Parse to typed payload; abort if malformed | `code` | S6 schema |
 | 3 | Validate entities against business rules (gate) | `LLM (or rule)` | Validator session, V15 |
-| 4 | Branch — invalid → abort with reason; valid → continue | `code` | |
+| 4 | Branch — invalid $\to$ abort with reason; valid $\to$ continue | `code` | |
 | 5 | Enrich each entity in parallel via lookup | `LLM` | Enricher session (O4 fan-out) |
 | 6 | Aggregate enriched entities | `code` | |
 | 7 | Format final response to user-facing contract | `LLM` | Formatter session |
@@ -232,17 +232,17 @@ Concretely, the **Extractor** session's setup loaded once is *"You extract entit
 
 ## Known Uses
 
-- **Document-processing pipelines** (extract → validate → format) — the canonical production O2 deployment; ubiquitous in legal, financial, and back-office automation.
+- **Document-processing pipelines** (extract $\to$ validate $\to$ format) — the canonical production O2 deployment; ubiquitous in legal, financial, and back-office automation.
 - **Customer-support intake** — classify-then-extract-then-route chains running before any human or specialist agent sees the ticket.
-- **Marketing and content workflows** (outline → draft → critique → edit → format) — the Anthropic cookbook's own demonstration shape.
-- **Coding assistants' edit pipelines** — many production coding agents implement file-edit flows as O2 chains (locate → propose edit → validate → apply) before falling back to **R4 ReAct** loops only when the chain cannot complete.
-- **RAG question-answering** — retrieve → re-rank → answer → cite is a prompt chain (often with a gate before the final answer step) wrapping inner **K1**–**K5** retrieval patterns.
+- **Marketing and content workflows** (outline $\to$ draft $\to$ critique $\to$ edit $\to$ format) — the Anthropic cookbook's own demonstration shape.
+- **Coding assistants' edit pipelines** — many production coding agents implement file-edit flows as O2 chains (locate $\to$ propose edit $\to$ validate $\to$ apply) before falling back to **R4 ReAct** loops only when the chain cannot complete.
+- **RAG question-answering** — retrieve $\to$ re-rank $\to$ answer $\to$ cite is a prompt chain (often with a gate before the final answer step) wrapping inner **K1**–**K5** retrieval patterns.
 - **Compliance / KYC workflows** — multi-step verification chains where each step is independently auditable; the gate-able boundary structure is the regulatory selling point.
 
 ## Related Patterns
 
-- **Upgrades from** **S4 Instruction Decomposition** — S4 puts an ordered step list inside *one* LLM call; O2 distributes the same step list across *multiple* calls so each step gets its own setup, model, and gate. The S4↔O2 boundary is the prompt-vs-agent scope question made explicit: pick S4 when boundaries are not needed; pick O2 when at least one boundary does real work.
-- **Upgrades to** **O6 Orchestrator-Workers** — O2 is fixed at design time; O6 is dynamic at runtime. Use O2 when the step sequence is enumerable up front; use O6 when a planner LLM must pick the steps based on the input. The decision boundary: *"can I enumerate all steps without seeing the input?"* — yes → O2; no → O6.
+- **Upgrades from** **S4 Instruction Decomposition** — S4 puts an ordered step list inside *one* LLM call; O2 distributes the same step list across *multiple* calls so each step gets its own setup, model, and gate. The S4$\leftrightarrow$O2 boundary is the prompt-vs-agent scope question made explicit: pick S4 when boundaries are not needed; pick O2 when at least one boundary does real work.
+- **Upgrades to** **O6 Orchestrator-Workers** — O2 is fixed at design time; O6 is dynamic at runtime. Use O2 when the step sequence is enumerable up front; use O6 when a planner LLM must pick the steps based on the input. The decision boundary: *"can I enumerate all steps without seeing the input?"* — yes $\to$ O2; no $\to$ O6.
 - **Cousin at agent scope of** **R3 Plan-and-Solve** — R3 is the *planning-then-execution* shape: a Planner LLM produces the step list, an Executor (or chain) runs it. R3's *execution* phase, when the produced plan is followed verbatim, is mechanically an O2 chain. The two patterns diverge at where the chain comes from: R3 generates it; O2 authors it.
 - **Composes with** **O4 Parallelization** — almost every non-trivial O2 chain has at least one fan-out section where a step runs in parallel over a list. O4 inside O2 is the default production shape.
 - **Composes with** **O3 Routing** — a conditional branch mid-chain is a degenerate O3 step; for more than ~2 forks, lift the routing out to a proper O3 stage.
@@ -251,7 +251,7 @@ Concretely, the **Extractor** session's setup loaded once is *"You extract entit
 - **Pairs with** **V14 Trajectory Logging** — the per-step trace is the chain's debugging substrate; V14 is mandatory infrastructure in production O2.
 - **Pairs with** **S6 Output Template** — every step's output is the next step's input; each boundary needs a schema, and S6 is how the prompt enforces it.
 - **Distinct from** **R4 ReAct** — R4 interleaves reason / act / observe inside one agent's control loop; O2 is a fixed external sequence of LLM calls. R4 chooses what to do next; O2 does not.
-- **Distinct from** **O5 Evaluator-Optimizer** — O5 is a *loop* (generator ↔ evaluator until pass); O2 is a *line* (step 1 → step 2 → … → step N). An O5 loop may sit inside one stage of an O2 chain.
+- **Distinct from** **O5 Evaluator-Optimizer** — O5 is a *loop* (generator $\leftrightarrow$ evaluator until pass); O2 is a *line* (step 1 $\to$ step 2 $\to$ … $\to$ step N). An O5 loop may sit inside one stage of an O2 chain.
 
 ## Sources
 

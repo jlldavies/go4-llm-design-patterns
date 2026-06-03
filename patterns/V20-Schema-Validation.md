@@ -104,15 +104,15 @@ If schema-constrained decoding *fully* covers the call and the schema has no sem
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Schema** | the canonical declaration of shape and invariants | — → schema object | live in two places — the prompt skeleton (S6) and the validator must be rendered from the same source. Drift between them is the pattern's most common failure. |
-| **Generator (LLM)** | producing the candidate output | prompt → string | be trusted to self-check; that is the validator's job. A generator that "knows" its output is valid still produces invalid output on a non-trivial slice of inputs. |
-| **Parser** | string → structured object (JSON / YAML / tagged blocks) | raw output → parsed value or parse error | swallow parse errors silently; a parse error is a validation event and must enter the retry loop with its message intact. |
-| **Schema Validator** | enforcing structural and semantic conformance | parsed value + schema → typed object or validation error | be lenient about "minor" deviations; lenient validators hide drift and let malformed payloads reach downstream code. |
-| **Reask Step (LLM)** | one targeted retry per failure, carrying the error | original prompt + bad output + error → corrected string | be a different conversation — the reask must reference the original prompt and the validator's exact error, not a paraphrase. |
-| **Retry Budget** | the hard cap on reask rounds | round count → continue or fall back | be unbounded; an unbounded reask loop is a production incident waiting to happen (compose with **V9**). |
-| **Fallback** | the defined exit when retries are exhausted | last bad output + error → exception / human escalation / sentinel | be implicit — every V20 deployment must declare what happens on terminal failure. |
+| **Schema** | the canonical declaration of shape and invariants | — $\to$ schema object | live in two places — the prompt skeleton (S6) and the validator must be rendered from the same source. Drift between them is the pattern's most common failure. |
+| **Generator (LLM)** | producing the candidate output | prompt $\to$ string | be trusted to self-check; that is the validator's job. A generator that "knows" its output is valid still produces invalid output on a non-trivial slice of inputs. |
+| **Parser** | string $\to$ structured object (JSON / YAML / tagged blocks) | raw output $\to$ parsed value or parse error | swallow parse errors silently; a parse error is a validation event and must enter the retry loop with its message intact. |
+| **Schema Validator** | enforcing structural and semantic conformance | parsed value + schema $\to$ typed object or validation error | be lenient about "minor" deviations; lenient validators hide drift and let malformed payloads reach downstream code. |
+| **Reask Step (LLM)** | one targeted retry per failure, carrying the error | original prompt + bad output + error $\to$ corrected string | be a different conversation — the reask must reference the original prompt and the validator's exact error, not a paraphrase. |
+| **Retry Budget** | the hard cap on reask rounds | round count $\to$ continue or fall back | be unbounded; an unbounded reask loop is a production incident waiting to happen (compose with **V9**). |
+| **Fallback** | the defined exit when retries are exhausted | last bad output + error $\to$ exception / human escalation / sentinel | be implicit — every V20 deployment must declare what happens on terminal failure. |
 
 The Schema and the Parser-plus-Validator are the read and write sides of the same artefact. The Reask Step and the Generator share a model but are *different sessions* — the reask carries different setup (its role is *correct this output*, not *answer the task*).
 
@@ -171,7 +171,7 @@ The Generator produces a candidate string. The Parser converts it into a structu
 | 3 | Generate candidate output | `LLM` | Generator session |
 | 4 | Parse the string into a structured value | `code` | |
 | 5 | Validate (schema + custom invariants) | `code` (or `LLM` for semantic invariants) | |
-| 6 | Branch — valid → return; invalid + budget left → step 7; invalid + budget exhausted → step 9 | `code` | V9 cap |
+| 6 | Branch — valid $\to$ return; invalid + budget left $\to$ step 7; invalid + budget exhausted $\to$ step 9 | `code` | V9 cap |
 | 7 | Compose reask prompt (original prompt + bad output + validator error) | `code` | |
 | 8 | Re-generate; loop to step 4 | `LLM` | Reask session |
 | 9 | Fallback — raise typed error / escalate to V1 / emit sentinel | `code` | V1, V14 |

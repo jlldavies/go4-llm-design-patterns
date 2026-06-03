@@ -51,7 +51,7 @@ S3 is right when domain register or voice consistency materially changes output 
 
 **1. Domain-register lift.** On 20 representative queries, compare zero-shot output to output with a domain-specific persona prepended. If the persona version is noticeably better on vocabulary, caution, and structure, S3 has a real effect. If outputs are indistinguishable, persona is decoration — drop it. Threshold: > 20% of outputs improved on a blinded comparison.
 
-**2. Voice-consistency need.** Over a 10-turn session, does the assistant drift in register or tone without a persona? If yes, S3 stabilises voice. If the task is short or stateless, skip. Threshold: session length ≥ ~5 turns.
+**2. Voice-consistency need.** Over a 10-turn session, does the assistant drift in register or tone without a persona? If yes, S3 stabilises voice. If the task is short or stateless, skip. Threshold: session length $\geq$ ~5 turns.
 
 **3. False-expertise risk.** Does the persona imply credentials the model lacks ("as a licensed attorney")? If yes, S3 alone is insufficient — pair with **S5 Constraint Framing** ("do not claim licensure; recommend consulting a professional") or refuse the persona. In regulated domains (medical, legal, financial advice) this is mandatory.
 
@@ -92,13 +92,13 @@ If the system maintains identity across sessions, use **H1**; S3 is then subsume
 
 S3 is small — it is a setup-layer construct — but the responsibilities still separate cleanly:
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Identity statement** | the persona's name and one-line framing ("you are a senior security engineer reviewing a pull request") | author intent → one sentence at setup position | bloat into a backstory; the lift comes from the role label, not the narrative. |
-| **Key characteristics** *(optional)* | 1–3 sentences naming the dimensions the role implies (caution profile, register, audience) | author intent → terse traits | restate things the role label already implies — that is decoration. |
-| **Setup loader** | placing the identity at the top of the system prompt, once, before any user turn | identity statement + characteristics → composed system prompt | re-issue the persona on every turn; that signals (correctly, to the model) that the framing is *not* stable. |
-| **Persona-aware downstream patterns** | every other pattern's "setup loaded once" — K5's Generator, K12's Curator, R4's ReAct agent, etc. | identity → role-conditioned response distribution | own the persona definition themselves; the persona is set once, reused everywhere. |
-| **Constraint pairing** *(optional, often required)* | the prohibitions that prevent the persona from implying authority it does not have | persona + risk profile → S5 block in same setup | be left out for regulated-domain personas — that is the false-expertise failure mode. |
+| **Identity statement** | the persona's name and one-line framing ("you are a senior security engineer reviewing a pull request") | author intent $\to$ one sentence at setup position | bloat into a backstory; the lift comes from the role label, not the narrative. |
+| **Key characteristics** *(optional)* | 1–3 sentences naming the dimensions the role implies (caution profile, register, audience) | author intent $\to$ terse traits | restate things the role label already implies — that is decoration. |
+| **Setup loader** | placing the identity at the top of the system prompt, once, before any user turn | identity statement + characteristics $\to$ composed system prompt | re-issue the persona on every turn; that signals (correctly, to the model) that the framing is *not* stable. |
+| **Persona-aware downstream patterns** | every other pattern's "setup loaded once" — K5's Generator, K12's Curator, R4's ReAct agent, etc. | identity $\to$ role-conditioned response distribution | own the persona definition themselves; the persona is set once, reused everywhere. |
+| **Constraint pairing** *(optional, often required)* | the prohibitions that prevent the persona from implying authority it does not have | persona + risk profile $\to$ S5 block in same setup | be left out for regulated-domain personas — that is the false-expertise failure mode. |
 
 The pattern is small because identity *is* small — a label and a short framing. Bloat is the most common failure: backstories, biographies, and elaborate worldbuilding add tokens and add nothing.
 

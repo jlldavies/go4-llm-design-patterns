@@ -46,7 +46,7 @@ R16 is right when interactivity is non-negotiable and quality requires deliberat
 
 **2. Estimate the deliberation share.** On a labelled sample of turns: what fraction need real reasoning (planning, multi-tool, multi-hop)? **5–40%** is the sweet spot for R16. <5% means a fast Talker alone suffices. >40% means the Reasoner is hot all the time and you should consider **R4** with a fast model instead.
 
-**3. Cost concurrent inference.** R16 typically holds *two* sessions warm. Annualise: (Talker QPS × Talker cost) + (Reasoner triggers/day × Reasoner cost). If concurrent inference is unaffordable, fall back to **R4** with **V9** caps.
+**3. Cost concurrent inference.** R16 typically holds *two* sessions warm. Annualise: (Talker QPS $\times$ Talker cost) + (Reasoner triggers/day $\times$ Reasoner cost). If concurrent inference is unaffordable, fall back to **R4** with **V9** caps.
 
 **4. Pick the sync rule.** How does Reasoner output reach the user? Options: *fire-and-forget* (Reasoner result lands in memory; next Talker turn picks it up), *interrupt* (Reasoner pushes a follow-up message into the stream), *pull* (Talker checks for a result before each response). The wrong choice produces either stale advice or jarring interjections.
 
@@ -59,7 +59,7 @@ R16 is right when interactivity is non-negotiable and quality requires deliberat
 - per-turn latency budget is hard (sub-2s typical, sub-second for voice), *and*
 - 5–40% of turns benefit from deliberation that exceeds that budget, *and*
 - concurrent inference is affordable, *and*
-- a clear shared-memory channel exists for Reasoner→Talker handoff, *and*
+- a clear shared-memory channel exists for Reasoner$\to$Talker handoff, *and*
 - a sync rule (fire-and-forget / interrupt / pull) fits the UX.
 
 If the budget is loose, **R4 ReAct** is simpler. If every turn needs deep reasoning, **R3 Plan-and-Solve** keeps planning visible and is cheaper. If you need background reflection within one agent rather than a parallel architecture, **H6 Continuous Inner Monologue**.
@@ -92,13 +92,13 @@ If the budget is loose, **R4 ReAct** is simpler. If every turn needs deep reason
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Talker (System 1)** | producing the user-facing response on every turn within the latency budget | user turn + current shared memory → reply | block on the Reasoner; plan; call slow tools. The moment the Talker waits on System 2 the pattern degrades to R4 with extra steps. |
-| **Reasoner (System 2)** | deep deliberation — multi-step planning, tool use, verification — running in the background | shared memory + (optionally) the triggering turn → updated plan / belief / recommendation written back to memory | speak to the user directly, hold the response path, or run on every turn. It runs when triggered and writes back when done. |
-| **Shared Memory** | the single source of truth both sessions read and write | reads/writes from both → coherent state | be edited by ad-hoc tool outputs; only the two agents (and their explicit writers) touch it. Drift here breaks everything else. |
-| **Trigger / Router** | deciding when to wake the Reasoner | Talker turn or memory event → spawn-Reasoner or not | wake the Reasoner on every turn (defeats the point) or never (defeats the point). The trigger heuristic is the main tuning lever. |
-| **Sync Rule** *(policy, not a process)* | how Reasoner output reaches the user — fire-and-forget, interrupt, or pull | Reasoner result + UX context → delivery method | smuggle stale conclusions into the response; the sync rule must reject results that arrive after their context has expired. |
+| **Talker (System 1)** | producing the user-facing response on every turn within the latency budget | user turn + current shared memory $\to$ reply | block on the Reasoner; plan; call slow tools. The moment the Talker waits on System 2 the pattern degrades to R4 with extra steps. |
+| **Reasoner (System 2)** | deep deliberation — multi-step planning, tool use, verification — running in the background | shared memory + (optionally) the triggering turn $\to$ updated plan / belief / recommendation written back to memory | speak to the user directly, hold the response path, or run on every turn. It runs when triggered and writes back when done. |
+| **Shared Memory** | the single source of truth both sessions read and write | reads/writes from both $\to$ coherent state | be edited by ad-hoc tool outputs; only the two agents (and their explicit writers) touch it. Drift here breaks everything else. |
+| **Trigger / Router** | deciding when to wake the Reasoner | Talker turn or memory event $\to$ spawn-Reasoner or not | wake the Reasoner on every turn (defeats the point) or never (defeats the point). The trigger heuristic is the main tuning lever. |
+| **Sync Rule** *(policy, not a process)* | how Reasoner output reaches the user — fire-and-forget, interrupt, or pull | Reasoner result + UX context $\to$ delivery method | smuggle stale conclusions into the response; the sync rule must reject results that arrive after their context has expired. |
 
 The Talker and Reasoner are kept as **distinct configured sessions**, even when the same model serves both — different roles, different setups, different tool budgets. Mixing them is the pattern's most common failure: a Talker that can also "think harder" stalls; a Reasoner that can also reply jumps the rails.
 

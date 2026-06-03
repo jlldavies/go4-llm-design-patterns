@@ -43,11 +43,11 @@ Do not use when:
 
 R18 is right when the natural structure of the problem includes *merging* sibling sub-results, and a tree-only search demonstrably leaves quality on the table.
 
-**1. Test for an aggregation gain.** Run R9 ToT on a small set of problems and inspect the discarded siblings: are there cases where two partial solutions, *combined*, would beat the winner? If yes for **≥ 20%** of cases, aggregation is paying. If almost never, stay on R9.
+**1. Test for an aggregation gain.** Run R9 ToT on a small set of problems and inspect the discarded siblings: are there cases where two partial solutions, *combined*, would beat the winner? If yes for **$\geq$ 20%** of cases, aggregation is paying. If almost never, stay on R9.
 
 **2. Quantify the structure.** Sketch the ideal solution shape. Count the operators it needs: *generate* (G), *refine* (R), *aggregate* (A). If A = 0, it is a tree — use R9. If A is small but central (e.g. sort-merge, fuse-summaries), R18 is the right fit. If A dominates and the topology is fixed, consider hand-coding a deterministic Graph of Operations and only calling the LLM at the vertices.
 
-**3. Cost the graph.** Per-problem LLM calls scale roughly as `|V| + |E_LLM|`, where `|E_LLM|` counts aggregate and refine edges (each one LLM call). Aggregator calls are typically the most expensive (long context). Budget upper-bound: **5–15× a single R1 call** is normal; **>30×** without a clear quality win means the graph is over-engineered.
+**3. Cost the graph.** Per-problem LLM calls scale roughly as `|V| + |E_LLM|`, where `|E_LLM|` counts aggregate and refine edges (each one LLM call). Aggregator calls are typically the most expensive (long context). Budget upper-bound: **5–15$\times$ a single R1 call** is normal; **>30$\times$** without a clear quality win means the graph is over-engineered.
 
 **4. Pick a controller.** The Graph of Operations can be (a) **author-written** — a deterministic recipe like "split, sort, merge" — or (b) **LLM-planned** — an upstream planning step emits the graph. Author-written is more reliable and the published Besta GoT framework defaults to it; LLM-planned is more flexible but adds a planning failure mode. Default to author-written until you have evidence the topology must vary per input.
 
@@ -58,9 +58,9 @@ R18 is right when the natural structure of the problem includes *merging* siblin
 **Quick test — R18 is the right pattern when:**
 
 - the problem decomposes into sub-problems whose **sub-results must be merged**, not chosen between, *and*
-- a tree-shaped search (R9) measurably loses to a graph by ≥ 20% on quality or cost, *and*
+- a tree-shaped search (R9) measurably loses to a graph by $\geq$ 20% on quality or cost, *and*
 - aggregated thoughts can be validated, *and*
-- the per-problem LLM budget tolerates a roughly 5–15× multiplier over single-shot reasoning.
+- the per-problem LLM budget tolerates a roughly 5–15$\times$ multiplier over single-shot reasoning.
 
 If sub-results never need to merge, R9 ToT (or R10 LATS for the hardest tree searches) is simpler and cheaper. If the reasoning topology recurs across problems, **R11 Buffer of Thoughts** retrieves a template at ~12% of GoT cost. If you only want robustness over a single CoT step, **R17 Self-Consistency Voting** is the right tool. If the problem is parallel outline-and-expand long-form generation, **R12 Skeleton-of-Thought** is more direct.
 
@@ -100,21 +100,21 @@ If sub-results never need to merge, R9 ToT (or R10 LATS for the hardest tree sea
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Graph of Operations (Controller)** | the topology and the schedule | problem + recipe → DAG of vertices to execute, in dependency order | mix scheduling with thinking — it is deterministic plumbing, never an LLM call itself. |
-| **Thought (Vertex)** | one unit of LLM-generated content | parents' content → this vertex's content | be the controller — it does not decide what comes next; the Graph does. |
-| **Generate operator** | producing fresh thoughts from a parent (1 → k children) | parent thought + instruction → k new thoughts | aggregate — that is a different edge type. |
-| **Refine operator** | improving a thought in place (1 → 1, self-loop) | thought → improved thought | merge two siblings — that is Aggregate. |
-| **Aggregate operator** | merging multiple parents into one child (m → 1) | parent thoughts → one synthesised thought | be invoked without a validator — a bad merge poisons every downstream vertex. |
-| **Scorer / Validator** | judging each thought and gating merges | thought (+ context) → score / pass-fail | rewrite the thought — its job is verdict, not generation. |
-| **Budget Guard (V9)** | hard caps on vertices, depth, aggregator calls, total cost | running graph state → continue / halt | be optional — without it an LLM-planned graph can expand without limit. |
+| **Graph of Operations (Controller)** | the topology and the schedule | problem + recipe $\to$ DAG of vertices to execute, in dependency order | mix scheduling with thinking — it is deterministic plumbing, never an LLM call itself. |
+| **Thought (Vertex)** | one unit of LLM-generated content | parents' content $\to$ this vertex's content | be the controller — it does not decide what comes next; the Graph does. |
+| **Generate operator** | producing fresh thoughts from a parent (1 $\to$ k children) | parent thought + instruction $\to$ k new thoughts | aggregate — that is a different edge type. |
+| **Refine operator** | improving a thought in place (1 $\to$ 1, self-loop) | thought $\to$ improved thought | merge two siblings — that is Aggregate. |
+| **Aggregate operator** | merging multiple parents into one child (m $\to$ 1) | parent thoughts $\to$ one synthesised thought | be invoked without a validator — a bad merge poisons every downstream vertex. |
+| **Scorer / Validator** | judging each thought and gating merges | thought (+ context) $\to$ score / pass-fail | rewrite the thought — its job is verdict, not generation. |
+| **Budget Guard (V9)** | hard caps on vertices, depth, aggregator calls, total cost | running graph state $\to$ continue / halt | be optional — without it an LLM-planned graph can expand without limit. |
 
 The single feature that distinguishes R18 from every other reasoning pattern is the **Aggregate operator**. Take it out and you have ToT.
 
 ## Collaborations
 
-A problem arrives. The Controller instantiates the Graph of Operations — either an author-written recipe (sort: split → sort chunks → merge pairs → final merge) or one emitted by an upstream planner. It walks the graph in dependency order. For each vertex it dispatches the right operator: *Generate* expands a parent into k candidate children with k LLM calls; *Refine* runs one LLM call against a single parent; *Aggregate* gathers the contents of multiple parent vertices into one LLM call that emits a single synthesised child. After every LLM call the Scorer / Validator runs — a deterministic check, an LLM-judge, or an R17 vote — and the Controller marks vertices passed, pruned, or pending re-execution. The Budget Guard counts vertices, aggregator calls, and cost; when any cap trips, the Controller stops expansion and returns the best terminal vertex. The final answer is the content of the graph's sink vertex (or the best-scoring terminal if the topology has multiple sinks).
+A problem arrives. The Controller instantiates the Graph of Operations — either an author-written recipe (sort: split $\to$ sort chunks $\to$ merge pairs $\to$ final merge) or one emitted by an upstream planner. It walks the graph in dependency order. For each vertex it dispatches the right operator: *Generate* expands a parent into k candidate children with k LLM calls; *Refine* runs one LLM call against a single parent; *Aggregate* gathers the contents of multiple parent vertices into one LLM call that emits a single synthesised child. After every LLM call the Scorer / Validator runs — a deterministic check, an LLM-judge, or an R17 vote — and the Controller marks vertices passed, pruned, or pending re-execution. The Budget Guard counts vertices, aggregator calls, and cost; when any cap trips, the Controller stops expansion and returns the best terminal vertex. The final answer is the content of the graph's sink vertex (or the best-scoring terminal if the topology has multiple sinks).
 
 ## Consequences
 
@@ -127,7 +127,7 @@ A problem arrives. The Controller instantiates the Graph of Operations — eithe
 
 **Costs**
 
-- More LLM calls than a tree, often substantially more — aggregator vertices are typically long-context. Aggregator calls are expensive because their input context is m parent thoughts concatenated — if each parent is P tokens, the aggregator's prompt is O(m × P) tokens, and its internal attention computes over O(m × P)² pairs (mechanism 2). Aggregating 5 thoughts of 200 tokens each means a 1000-token context with O(1M) attention pairs, compared to O(40K) for a 200-token single-parent call. Use the strongest available model for aggregation (mechanism 8) but compress parent thoughts before aggregation.
+- More LLM calls than a tree, often substantially more — aggregator vertices are typically long-context. Aggregator calls are expensive because their input context is m parent thoughts concatenated — if each parent is P tokens, the aggregator's prompt is O(m $\times$ P) tokens, and its internal attention computes over O(m $\times$ P)² pairs (mechanism 2). Aggregating 5 thoughts of 200 tokens each means a 1000-token context with O(1M) attention pairs, compared to O(40K) for a 200-token single-parent call. Use the strongest available model for aggregation (mechanism 8) but compress parent thoughts before aggregation.
 - Designing or planning a good Graph of Operations is harder than designing a tree-search heuristic.
 - Aggregator outputs can hide errors that propagate downstream; validation overhead is real.
 - Less cache-friendly than linear or fixed-fan-out patterns — graph branches diverge. Graph branching destroys prefix caching (mechanism 5): two thoughts at the same depth that branched from a common ancestor share the ancestor's prefix but diverge thereafter. Provider caches key on exact prefix match; a diverged prefix is a cache miss. Author-written GoT topologies can preserve a shared stable system prompt prefix above all variable content, capturing partial caching on the stable portion.
@@ -137,7 +137,7 @@ A problem arrives. The Controller instantiates the Graph of Operations — eithe
 - *Bad merge cascade* — an unvalidated aggregator silently corrupts every downstream vertex. The dominant failure mode.
 - *Topology drift* — an LLM-planned graph expands into shapes the validator and budget were not sized for.
 - *Cost runaway* — without V9 budgets, large aggregators chained late in the graph blow the per-problem cost.
-- *Over-engineering* — R18 deployed on problems where R9, R11, or R17 would have been adequate, paying many-× cost for a small win.
+- *Over-engineering* — R18 deployed on problems where R9, R11, or R17 would have been adequate, paying many-$\times$ cost for a small win.
 - *Validator gap* — no deterministic check exists and the LLM-judge is itself the bottleneck.
 
 ## Implementation Notes
@@ -164,7 +164,7 @@ A problem arrives. The Controller instantiates the Graph of Operations — eithe
 | 1 | Build (or plan) the Graph of Operations | `code` (or `LLM` if planned) | Planner session (optional) |
 | 2 | Topological walk: pick next ready vertex | `code` | |
 | 3 | Dispatch by operator type | `code` | |
-| 3a | Generate — expand a parent into k children | `LLM` (× k) | Generate session |
+| 3a | Generate — expand a parent into k children | `LLM` ($\times$ k) | Generate session |
 | 3b | Refine — improve a single thought | `LLM` | Refine session |
 | 3c | Aggregate — merge multiple parents into one child | `LLM` | Aggregate session |
 | 4 | Score / validate the new thought | `LLM` (or rule) | Score session, V15 |
@@ -224,7 +224,7 @@ solve(problem):
 - **Sibling of** R9 Tree of Thoughts — the tree-restricted member of the same search family; R18 generalises R9 by adding aggregation edges.
 - **Sibling of** R10 LATS — both are search patterns; LATS adds MCTS + value estimation over a tree, R18 adds aggregation over a graph. Pick R10 when value estimation pays; pick R18 when sibling sub-results need merging.
 - **Sibling of** R11 Buffer of Thoughts — BoT retrieves a *reusable template* of the reasoning structure (often itself a small graph) at ~12% of GoT cost; R18 builds the graph from scratch per problem. Use BoT when topology recurs.
-- **Sibling of** R12 Skeleton-of-Thought — SoT is a fixed two-layer fan-out/fan-in graph (outline → parallel expansions); R18 is the general DAG.
+- **Sibling of** R12 Skeleton-of-Thought — SoT is a fixed two-layer fan-out/fan-in graph (outline $\to$ parallel expansions); R18 is the general DAG.
 - **Distinct from** R17 Self-Consistency Voting — R17 votes over independent end-to-end samples; R18 constructs partial thoughts and *merges* them. The merge is the difference.
 - **Pairs with** V9 Bounded Execution — required, not optional; without budgets an LLM-planned graph can expand without limit.
 - **Pairs with** V15 LLM-as-Judge — the natural validator for aggregator outputs.

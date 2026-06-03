@@ -17,7 +17,7 @@ Replace re-deriving a reasoning structure on every hard problem with retrieving 
 R9 Tree of Thoughts and R10 LATS pay for quality with breadth-first or Monte-Carlo search: every new problem incurs a full multi-branch exploration, even when the *shape* of its solution is one the system has solved before. Two failures follow:
 
 - **Reasoning structure is re-derived, not reused.** A problem like "find the value that makes this expression equal to 24" has a recognisable shape — enumerate, combine, check. ToT will re-discover that shape on every instance, branching and pruning from scratch. The *abstract* reasoning skeleton is identical across instances, but ToT has no place to put it.
-- **Cost scales with problem count, not problem-family count.** A production system that sees 10,000 Game-of-24 problems pays 10,000 × ToT cost. There is no amortisation: each problem is independent in compute terms.
+- **Cost scales with problem count, not problem-family count.** A production system that sees 10,000 Game-of-24 problems pays 10,000 $\times$ ToT cost. There is no amortisation: each problem is independent in compute terms.
 
 The mechanistic basis of the cost reduction is storage-type hierarchy (mechanism 9): ToT re-derives structure at inference time, paying O(n²) attention cost over a growing in-context search tree (mechanism 2) on every problem. BoT externalises the structure to a vector store; retrieval is a single lookup that injects a compact template into context (mechanism 10 — the model's weights do not update, so all structural knowledge must be re-injected as tokens), bounding the input token count to the template size rather than a full search tree.
 
@@ -45,19 +45,19 @@ Do not use it when:
 
 R11 is right when problem-shape recurs, ToT-level quality is needed, and template curation is affordable.
 
-**1. Measure structural recurrence.** On a sample of solved problems, can you (or a clustering LLM) identify ≥ 5 recurring reasoning shapes that cover ≥ 50% of traffic? Below that, the meta-buffer is too sparse to amortise — use **R9** or **R10** per problem.
+**1. Measure structural recurrence.** On a sample of solved problems, can you (or a clustering LLM) identify $\geq$ 5 recurring reasoning shapes that cover $\geq$ 50% of traffic? Below that, the meta-buffer is too sparse to amortise — use **R9** or **R10** per problem.
 
-**2. Compare per-problem cost.** Estimate cost(ToT or LATS per problem) × expected problem count vs cost(distillation + template storage + per-problem retrieval + instantiated reasoning). Threshold: BoT pays back when **traffic ≥ ~10× the number of distinct templates** at reported ~12% ToT cost. Below that, R9/R10 directly is simpler.
+**2. Compare per-problem cost.** Estimate cost(ToT or LATS per problem) $\times$ expected problem count vs cost(distillation + template storage + per-problem retrieval + instantiated reasoning). Threshold: BoT pays back when **traffic $\geq$ ~10$\times$ the number of distinct templates** at reported ~12% ToT cost. Below that, R9/R10 directly is simpler.
 
 **3. Score template quality risk.** Templates compress reasoning structure — a bad template silently degrades every downstream problem that matches it. Build a sample-and-grade loop (Reflexion-style — see **R7**) over the buffer or expect quality drift.
 
-**4. Cost the buffer-manager.** The buffer is not static. New problem shapes appear; old ones generalise or split. Annualise: buffer-manager calls per cycle × cost. If you cannot afford a periodic manager pass, the buffer ossifies and R11 becomes a stale template store — use **K10** procedural memory instead, which has lower curation expectations.
+**4. Cost the buffer-manager.** The buffer is not static. New problem shapes appear; old ones generalise or split. Annualise: buffer-manager calls per cycle $\times$ cost. If you cannot afford a periodic manager pass, the buffer ossifies and R11 becomes a stale template store — use **K10** procedural memory instead, which has lower curation expectations.
 
 **5. Distinguish from procedural memory.** R11 templates are *non-executable reasoning skeletons* that require binding by an Instantiator before they can be reasoned over. K10 procedural stores *executable procedures* retrieved by query similarity. If your "templates" are actually parameterised procedures the agent can run directly, you want **K10 procedural variant**, not R11.
 
 **Quick test — R11 is the right pattern when:**
 
-- ≥ 5 recurring problem-shapes cover ≥ 50% of traffic, *and*
+- $\geq$ 5 recurring problem-shapes cover $\geq$ 50% of traffic, *and*
 - per-problem cost of R9 / R10 is unacceptable but their quality is required, *and*
 - buffer-manager budget exists to curate templates against drift, *and*
 - the system can extract abstract problem structure reliably enough to retrieve the right template.
@@ -91,14 +91,14 @@ If shapes do not recur, use **R9 Tree of Thoughts** or **R10 LATS** directly. If
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Problem Distiller** | extracting the abstract reasoning structure from a concrete problem | raw problem → structure descriptor | solve the problem, or fetch templates — it produces only the descriptor used as the retrieval key. A Distiller that also reasons collapses the abstraction layer the pattern depends on. |
-| **Meta-Buffer** | the store of thought-templates | structure descriptor → template | hold *executable procedures* (that is K10) or *raw solved problems* (that is K11) — templates are *non-executable reasoning skeletons*, intentionally abstract. |
-| **Template Retriever** | similarity search over the meta-buffer | structure descriptor → top-k templates | retrieve by surface-level query similarity. The descriptor space is the retrieval space, not the raw-problem space. |
-| **Instantiator (LLM)** | binding a retrieved template to the concrete problem | template + problem → instantiated reasoning plan | freelance — if no template matches well, it must signal *no match* and surrender to fallback, not improvise a template silently. |
-| **Reasoner (LLM)** | executing the instantiated reasoning plan | instantiated plan + problem → answer | edit the template; that is the Buffer-Manager's job at curation time. |
-| **Buffer-Manager (LLM)** | distilling new templates, generalising, merging, retiring | recent solved problems + current buffer → updated buffer | run on every problem — manager calls are triggered (batch, milestone, periodic). Per-problem manager calls thrash the buffer and erase the cost advantage. |
+| **Problem Distiller** | extracting the abstract reasoning structure from a concrete problem | raw problem $\to$ structure descriptor | solve the problem, or fetch templates — it produces only the descriptor used as the retrieval key. A Distiller that also reasons collapses the abstraction layer the pattern depends on. |
+| **Meta-Buffer** | the store of thought-templates | structure descriptor $\to$ template | hold *executable procedures* (that is K10) or *raw solved problems* (that is K11) — templates are *non-executable reasoning skeletons*, intentionally abstract. |
+| **Template Retriever** | similarity search over the meta-buffer | structure descriptor $\to$ top-k templates | retrieve by surface-level query similarity. The descriptor space is the retrieval space, not the raw-problem space. |
+| **Instantiator (LLM)** | binding a retrieved template to the concrete problem | template + problem $\to$ instantiated reasoning plan | freelance — if no template matches well, it must signal *no match* and surrender to fallback, not improvise a template silently. |
+| **Reasoner (LLM)** | executing the instantiated reasoning plan | instantiated plan + problem $\to$ answer | edit the template; that is the Buffer-Manager's job at curation time. |
+| **Buffer-Manager (LLM)** | distilling new templates, generalising, merging, retiring | recent solved problems + current buffer $\to$ updated buffer | run on every problem — manager calls are triggered (batch, milestone, periodic). Per-problem manager calls thrash the buffer and erase the cost advantage. |
 
 Six narrow responsibilities. The **Instantiator and Buffer-Manager are kept as separate sessions even when the same model serves both** — the Instantiator binds *once* per problem, the Manager curates *across* problems, and mixing them is the pattern's most common failure mode (mid-solve template edits).
 
@@ -149,7 +149,7 @@ A problem arrives. The Problem Distiller produces an abstract structure descript
 |---|---|---|---|
 | 1 | Distil problem to abstract structure descriptor | `LLM` | Distiller session |
 | 2 | Retrieve top-k templates by descriptor similarity | `code` | K1 retrieval |
-| 3 | Branch — match found → 4; no match → R9 / R10 fallback (bounded by V9) | `code` | R9, R10, V9 |
+| 3 | Branch — match found $\to$ 4; no match $\to$ R9 / R10 fallback (bounded by V9) | `code` | R9, R10, V9 |
 | 4 | Instantiate template against the concrete problem | `LLM` | Instantiator session |
 | 5 | Reason through the instantiated plan | `LLM` | Reasoner session |
 | 6 | Emit answer; log trajectory for the Manager | `code` | V14 logging |
@@ -203,7 +203,7 @@ Beyond the official repo, BoT is an emerging research pattern rather than a prod
 
 - **Research benchmarks** — Game-of-24, Geometric Shapes, Checkmate-in-One, Word Sorting, BIG-Bench Hard tasks reported in Yang et al. (2024).
 - **Template-based reasoning systems** in early production at organisations running large volumes of mathematical puzzle or game-solving workloads where ToT cost is intolerable but ToT quality is the target.
-- The *"Something-of-Thought" family* (CoT → ToT → GoT → BoT → SoT, per the Towards Data Science taxonomy) positions BoT as the cost-reduction step in the search-structured reasoning lineage.
+- The *"Something-of-Thought" family* (CoT $\to$ ToT $\to$ GoT $\to$ BoT $\to$ SoT, per the Towards Data Science taxonomy) positions BoT as the cost-reduction step in the search-structured reasoning lineage.
 
 ## Related Patterns
 
@@ -223,5 +223,5 @@ Beyond the official repo, BoT is an emerging research pattern rather than a prod
 
 - Yang et al. (2024) — "Buffer of Thoughts: Thought-Augmented Reasoning with Large Language Models" (arXiv 2406.04271, NeurIPS 2024 Spotlight).
 - Official implementation: [`github.com/YangLing0818/buffer-of-thought-llm`](https://github.com/YangLing0818/buffer-of-thought-llm).
-- Towards Data Science — "Understanding Buffer of Thoughts (BoT) — Reasoning with Large Language Models" (Something-of-Thought taxonomy: CoT → ToT → GoT → BoT → SoT).
+- Towards Data Science — "Understanding Buffer of Thoughts (BoT) — Reasoning with Large Language Models" (Something-of-Thought taxonomy: CoT $\to$ ToT $\to$ GoT $\to$ BoT $\to$ SoT).
 - emergentmind.com — paper summary and component breakdown for arXiv 2406.04271.

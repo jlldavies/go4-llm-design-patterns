@@ -47,13 +47,13 @@ Do not use it when:
 
 O11 fits when coordination cannot be planned in advance and the next action genuinely depends on what has accumulated.
 
-**1. Count the specialists.** How many distinct agents would a planner need to know about? **≤ 5–10** → an O6 Orchestrator can hold the catalogue; an LLM planner is simpler. **> 10**, heterogeneous, or open-ended → an orchestrator's expertise model collapses; O11's volunteer / control-unit selection scales better.
+**1. Count the specialists.** How many distinct agents would a planner need to know about? **$\leq$ 5–10** $\to$ an O6 Orchestrator can hold the catalogue; an LLM planner is simpler. **> 10**, heterogeneous, or open-ended $\to$ an orchestrator's expertise model collapses; O11's volunteer / control-unit selection scales better.
 
-**2. Test plan-ability.** Can you write the sub-task list before seeing the input? Yes → **O2 Prompt Chaining** or **O4 Parallelization**. No, but a smart LLM could plan it once given the input → **O6 Orchestrator-Workers**. No, and the plan must keep changing as evidence accumulates → O11.
+**2. Test plan-ability.** Can you write the sub-task list before seeing the input? Yes $\to$ **O2 Prompt Chaining** or **O4 Parallelization**. No, but a smart LLM could plan it once given the input $\to$ **O6 Orchestrator-Workers**. No, and the plan must keep changing as evidence accumulates $\to$ O11.
 
-**3. Score the inter-agent dependency.** Does specialist B's contribution depend on what specialist A *wrote*? Yes → O11 (the board is the medium). No, contributions are independent → O4 Parallelization. If only the synthesiser needs to see everyone's work, O6 is sufficient.
+**3. Score the inter-agent dependency.** Does specialist B's contribution depend on what specialist A *wrote*? Yes $\to$ O11 (the board is the medium). No, contributions are independent $\to$ O4 Parallelization. If only the synthesiser needs to see everyone's work, O6 is sufficient.
 
-**4. Cost the control loop.** O11 adds a Control-Unit decision per cycle (typically one small LLM call or rule-based scan). Cycles per problem × cost per scan must be cheaper than the alternative. If the control LLM is mid-tier and 5–20 cycles resolve most problems, the budget is usually favourable; the bMAS paper reports lower total token cost than master-slave baselines on its benchmarks.
+**4. Cost the control loop.** O11 adds a Control-Unit decision per cycle (typically one small LLM call or rule-based scan). Cycles per problem $\times$ cost per scan must be cheaper than the alternative. If the control LLM is mid-tier and 5–20 cycles resolve most problems, the budget is usually favourable; the bMAS paper reports lower total token cost than master-slave baselines on its benchmarks.
 
 **5. Termination discipline.** Pair with **V9 Bounded Execution** — set a hard cap on cycles. An emergent loop without a cap can ping-pong specialists indefinitely. Pair with **V14 Trajectory Logging** — the board *is* the trajectory; persist it.
 
@@ -97,14 +97,14 @@ Agents do not call each other. Every contribution lands on the board; every acti
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Blackboard** | the shared state — public entries, per-agent private scratchpads, an append-only log | reads/writes from any agent → updated state | be edited in place without leaving an audit entry; conflate public broadcast with private working notes. |
-| **Board schema** | the structure of an entry (kind, author, references, timestamp) | — → editable shape | be unenforced — schema-free entries make the Control Unit's job impossible. |
-| **Control Unit** | the *activate-which-agent-next* decision | current board state + agent catalogue → next agent to fire (or HALT) | execute the task itself, or plan multiple steps ahead. A planning Control Unit is just an O6 Orchestrator with extra steps. |
-| **Specialist Agents** | one bounded competence each (planner, retriever, critic, domain expert, synthesiser) | board slice they subscribe to → new entries | call each other directly; they communicate only via the board. They also must not write outside their declared competence. |
-| **Subscription / trigger rules** | the mapping from board states to eligible agents | board state → subset of agents that can fire | be hard-wired as a fixed sequence — that collapses O11 back into O2 Prompt Chaining. |
-| **Termination predicate** | the *we are done* test (and the *we are stuck* test) | board state → halt / continue / fail | be missing. Without it, the loop runs until V9's cap fires every time. |
+| **Blackboard** | the shared state — public entries, per-agent private scratchpads, an append-only log | reads/writes from any agent $\to$ updated state | be edited in place without leaving an audit entry; conflate public broadcast with private working notes. |
+| **Board schema** | the structure of an entry (kind, author, references, timestamp) | — $\to$ editable shape | be unenforced — schema-free entries make the Control Unit's job impossible. |
+| **Control Unit** | the *activate-which-agent-next* decision | current board state + agent catalogue $\to$ next agent to fire (or HALT) | execute the task itself, or plan multiple steps ahead. A planning Control Unit is just an O6 Orchestrator with extra steps. |
+| **Specialist Agents** | one bounded competence each (planner, retriever, critic, domain expert, synthesiser) | board slice they subscribe to $\to$ new entries | call each other directly; they communicate only via the board. They also must not write outside their declared competence. |
+| **Subscription / trigger rules** | the mapping from board states to eligible agents | board state $\to$ subset of agents that can fire | be hard-wired as a fixed sequence — that collapses O11 back into O2 Prompt Chaining. |
+| **Termination predicate** | the *we are done* test (and the *we are stuck* test) | board state $\to$ halt / continue / fail | be missing. Without it, the loop runs until V9's cap fires every time. |
 
 The Control Unit and the Specialists are kept as separate sessions. **The Control Unit reads; the Specialists write.** Mixing them — a Specialist that also picks the next agent — is the pattern's most common failure mode: contribution and coordination authority bleed together, and the board becomes whatever the loudest agent decided to make it.
 
@@ -149,7 +149,7 @@ A problem arrives and is posted as the first public entry on the Blackboard. The
 
 > `LLM` = configured session (model + setup + per-call prompt); `code` = wiring.
 
-**Composition:** O11 chains a **Control Unit** session that reads the board with a population of **Specialist** sessions that write to it, against a structured Blackboard store. It composes with **V9 Bounded Execution** (cap the cycles), **V14 Trajectory Logging** (the board *is* the log), **K10 Long-Term Memory** (distil board → store at end of run), and **O17 Agent Isolation** when untrusted content reaches the board.
+**Composition:** O11 chains a **Control Unit** session that reads the board with a population of **Specialist** sessions that write to it, against a structured Blackboard store. It composes with **V9 Bounded Execution** (cap the cycles), **V14 Trajectory Logging** (the board *is* the log), **K10 Long-Term Memory** (distil board $\to$ store at end of run), and **O17 Agent Isolation** when untrusted content reaches the board.
 
 **The chain — one cycle:**
 
@@ -157,7 +157,7 @@ A problem arrives and is posted as the first public entry on the Blackboard. The
 |---|---|---|---|
 | 1 | Read board + agent catalogue; produce list of eligible agents | `code` | subscription rules |
 | 2 | Control Unit picks the next agent (or HALT) | `LLM` (or rule) | Control session |
-| 3 | Branch — HALT → return; otherwise fire the chosen Specialist | `code` | V9 cap |
+| 3 | Branch — HALT $\to$ return; otherwise fire the chosen Specialist | `code` | V9 cap |
 | 4 | Specialist reads its board slice and contributes | `LLM` | the chosen Specialist's session |
 | 5 | Append new entries to the board with schema validation | `code` | schema |
 | 6 | Termination check — done? stuck? cycle limit? | `code` (or small `LLM`) | V9 |
@@ -208,7 +208,7 @@ blackboard_run(problem, agents, board):
 
 ## Related Patterns
 
-- **Distinct from** O6 Orchestrator-Workers — O6 has a planner LLM that *decides* the decomposition; O11 has a Control Unit that *reacts to* the board state. O6 is top-down; O11 is state-driven. For ≤ 5–10 specialists with a planable decomposition, prefer O6.
+- **Distinct from** O6 Orchestrator-Workers — O6 has a planner LLM that *decides* the decomposition; O11 has a Control Unit that *reacts to* the board state. O6 is top-down; O11 is state-driven. For $\leq$ 5–10 specialists with a planable decomposition, prefer O6.
 - **Distinct from** K10 Long-Term Memory — K10 is a passive store retrieved by similarity; O11 adds the Control Unit that *triggers* agents on board state. K10 + a control loop = O11; K10 alone is just storage.
 - **Distinct from** O2 Prompt Chaining — O2 hard-wires the sequence; O11's sequence is emergent from subscription rules and board state.
 - **Pairs with** K10 — distil end-of-run board contents into K10 entries so learnings persist across problems; the board is per-problem, K10 is cross-problem.

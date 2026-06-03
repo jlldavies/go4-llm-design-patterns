@@ -98,14 +98,14 @@ If retrieval is always needed and the corpus is always sufficient, K1 alone suff
 
 Each participant owns exactly one decision and nothing else — the pattern's reliability comes from that separation of responsibility.
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Retrieval Gate** | the retrieve-or-not decision | raw query → boolean | answer the query, or look at documents — it sees none. A gate that can also generate has no incentive to ever say "no". |
-| **Retriever** | fetching candidate context | query → chunk set | judge its own sufficiency. It is an inner pattern (K1, or K2–K4), invoked unchanged. |
-| **Quality Evaluator** | the verdict on retrieved context | query + chunks → pass/fail | see the final answer (it grades *inputs*), or fetch anything itself. |
-| **Fallback Retriever** | recovery when quality fails | query + failure signal → fresh context | be trusted more than the primary — its output re-enters the same Quality gate. |
-| **Support Evaluator** | the verdict on the answer's grounding | answer + context → supported/not | re-judge relevance (that was Quality's call); it asks only "does the answer rest on this context". |
-| **Generator** | producing the answer | query + approved context → answer | retrieve, or decide whether its own answer is grounded. |
+| **Retrieval Gate** | the retrieve-or-not decision | raw query $\to$ boolean | answer the query, or look at documents — it sees none. A gate that can also generate has no incentive to ever say "no". |
+| **Retriever** | fetching candidate context | query $\to$ chunk set | judge its own sufficiency. It is an inner pattern (K1, or K2–K4), invoked unchanged. |
+| **Quality Evaluator** | the verdict on retrieved context | query + chunks $\to$ pass/fail | see the final answer (it grades *inputs*), or fetch anything itself. |
+| **Fallback Retriever** | recovery when quality fails | query + failure signal $\to$ fresh context | be trusted more than the primary — its output re-enters the same Quality gate. |
+| **Support Evaluator** | the verdict on the answer's grounding | answer + context $\to$ supported/not | re-judge relevance (that was Quality's call); it asks only "does the answer rest on this context". |
+| **Generator** | producing the answer | query + approved context $\to$ answer | retrieve, or decide whether its own answer is grounded. |
 
 Six narrow responsibilities, each independently testable and swappable. The Self-RAG variant collapses the Gate and both Evaluators *into the model* via trained reflection tokens; the CRAG variant keeps the Quality Evaluator as an external component. Either way the six responsibilities are the same — only their packaging differs.
 
@@ -153,7 +153,7 @@ A query arrives. The Retrieval Gate decides whether retrieval is warranted; if n
 | 2 | Branch — if not, skip to step 6 | `code` | |
 | 3 | Retrieve candidate context | `code` | K1 / K2–K4 |
 | 4 | Quality — is the context good enough? | `LLM` | Quality session |
-| 5 | Branch — pass → 6; fail → recover (reformulate via K2, then web search), loop to 3 | `code` | K2, V9 |
+| 5 | Branch — pass $\to$ 6; fail $\to$ recover (reformulate via K2, then web search), loop to 3 | `code` | K2, V9 |
 | 6 | Generate the answer | `LLM` | Generator session |
 | 7 | Support — is the answer grounded? | `LLM` | Support session |
 | 8 | Branch — revise once if not grounded | `code` | |

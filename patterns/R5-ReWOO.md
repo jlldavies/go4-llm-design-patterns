@@ -1,6 +1,6 @@
 # R5 — ReWOO
 
-> Plan every tool call upfront in a single LLM pass, execute the plan without any LLM in the loop, then synthesise the answer from the collected evidence — trading mid-run adaptability for ~5× token efficiency.
+> Plan every tool call upfront in a single LLM pass, execute the plan without any LLM in the loop, then synthesise the answer from the collected evidence — trading mid-run adaptability for ~5$\times$ token efficiency.
 
 **Also Known As:** Reasoning Without Observation, Decoupled Reasoning, Plan-Execute-Solve, Foreseeable Reasoning.
 
@@ -18,7 +18,7 @@ R4 ReAct calls the LLM once per Thought-Action-Observation step. For an N-step t
 
 Xu et al. (2023) observed that a large class of tool-augmented tasks does not need mid-run adaptation. When a question decomposes into independent lookups — "find X, find Y, combine them" — the model can foresee the full plan at step zero. The observations would not have changed what comes next; ReAct's per-step re-planning was paying for adaptability the task never asked for. Each step re-reads the trace — O(n²) attention cost in the transformer (mechanism 2): context of length n at step k means the k-th LLM call pays O(k²) attention, making total cost scale super-linearly in N.
 
-ReWOO removes the loop. A Planner emits the *whole* plan in one LLM call, written as a DAG of tool calls with placeholder variables (`#E1`, `#E2`, …) where later steps reference earlier results without knowing their values. A Worker executes the plan deterministically — no LLM in this phase. The Worker phase is deterministic code execution (mechanism 7): same inputs produce the same tool outputs with no stochastic variance and no LLM calls, so it contributes nothing to the O(n²) attention budget. A Solver makes one final LLM call that reads the original question and the populated evidence and produces the answer. Two LLM calls total, regardless of plan length. Result on the paper's HotpotQA evaluation: 5× token efficiency over ReAct *and* 4% accuracy improvement, because the Planner sees the whole task and chooses tools coherently.
+ReWOO removes the loop. A Planner emits the *whole* plan in one LLM call, written as a DAG of tool calls with placeholder variables (`#E1`, `#E2`, …) where later steps reference earlier results without knowing their values. A Worker executes the plan deterministically — no LLM in this phase. The Worker phase is deterministic code execution (mechanism 7): same inputs produce the same tool outputs with no stochastic variance and no LLM calls, so it contributes nothing to the O(n²) attention budget. A Solver makes one final LLM call that reads the original question and the populated evidence and produces the answer. Two LLM calls total, regardless of plan length. Result on the paper's HotpotQA evaluation: 5$\times$ token efficiency over ReAct *and* 4% accuracy improvement, because the Planner sees the whole task and chooses tools coherently.
 
 The defining claim of the pattern is asymmetric: when sub-tasks are independent, one expensive plan buys many cheap executions. The bet fails when sub-tasks are *not* independent — when step 2's tool choice depends on what step 1 actually returned. That is R4's territory, and the two patterns are mutually exclusive for the same task (see Related Patterns).
 
@@ -44,11 +44,11 @@ R5 is right when the tool-call sequence is foreseeable, tool calls are independe
 
 **1. Dependency analysis.** Sketch the tool call DAG for a representative task. Classify each edge:
 - *Value substitution* — step 2's argument is step 1's literal output (a city name, a number, an ID). R5 handles this via `#E1` placeholders.
-- *Branching decision* — step 2's tool *choice* depends on the *content* of step 1's output. R5 cannot handle this. If any edge is branching → use **R4 ReAct**.
+- *Branching decision* — step 2's tool *choice* depends on the *content* of step 1's output. R5 cannot handle this. If any edge is branching $\to$ use **R4 ReAct**.
 
-**2. Measure ReAct's overhead.** On a labelled task set, compute steps per task (N) and average input tokens per step. ReAct's token cost grows ~O(N²) because each step re-reads the trace. If N ≥ 5 and the answer is mostly retrieved facts → R5 saves significant cost. If N ≤ 2, the loop overhead is negligible — stay with R4.
+**2. Measure ReAct's overhead.** On a labelled task set, compute steps per task (N) and average input tokens per step. ReAct's token cost grows ~O(N²) because each step re-reads the trace. If N $\geq$ 5 and the answer is mostly retrieved facts $\to$ R5 saves significant cost. If N $\leq$ 2, the loop overhead is negligible — stay with R4.
 
-**3. Tool catalogue stability.** R5's Planner must see the full tool catalogue in one prompt. If the catalogue is small (≤ ~15 tools) and stable across tasks → R5. If the catalogue is large and the relevant subset is task-dependent, R5's prompt bloats — prefer **R4 ReAct** with dynamic tool selection.
+**3. Tool catalogue stability.** R5's Planner must see the full tool catalogue in one prompt. If the catalogue is small ($\leq$ ~15 tools) and stable across tasks $\to$ R5. If the catalogue is large and the relevant subset is task-dependent, R5's prompt bloats — prefer **R4 ReAct** with dynamic tool selection.
 
 **4. Failure mode tolerance.** When a tool call inside R5's plan fails or returns unexpected content, the Solver receives partial evidence and must either answer with what it has or trigger a replan. If silent failure on partial evidence is unacceptable, wrap R5 in **V9 Bounded Execution** with a replan trigger, or switch to **R4 ReAct** for those task classes.
 
@@ -58,7 +58,7 @@ R5 is right when the tool-call sequence is foreseeable, tool calls are independe
 
 - every edge in the tool DAG is value-substitution, not branching-decision, *and*
 - the working tool catalogue is small and stable, *and*
-- the task is large enough (N ≥ 5 hops) for the loop overhead to matter, *and*
+- the task is large enough (N $\geq$ 5 hops) for the loop overhead to matter, *and*
 - partial-evidence failure is tolerable or handled by an explicit replan gate.
 
 If any edge is a branching decision, use **R4 ReAct** — adaptability is worth the cost. If the solution space itself is unknown, use **R9 Tree of Thoughts** or **R10 LATS**. If the failure mode is "agent should learn from a wrong answer", use **R7 Reflexion**. For deterministic, single-tool workflows, plain **R3 Plan-and-Solve** is simpler than R5.
@@ -90,13 +90,13 @@ If any edge is a branching decision, use **R4 ReAct** — adaptability is worth 
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Planner (LLM)** | the full plan, emitted in one pass | question + tool catalogue → ordered list of `#En = Tool[args]` steps with placeholder references | hedge with branching ("if X then Y") — branching is R4's job; ReWOO assumes the plan is determined by the question alone. |
-| **Plan (artefact)** | the DAG of steps with placeholder variables | — → executable plan | contain free text the Worker cannot parse; a malformed plan kills the whole task because there is no LLM in the loop to recover. |
-| **Worker** | deterministic execution of the plan | plan + tools → evidence map `{#En → result}` | call the LLM, judge results, or alter the plan — its only job is substitute, dispatch, collect. |
-| **Tool registry** | the bound set of callable tools | tool name + args → tool result | be open-ended at runtime — the Planner saw a fixed catalogue; tools appearing afterwards cannot be in any plan. |
-| **Solver (LLM)** | the final synthesis | question + populated evidence map → answer | replan, re-fetch, or critique the plan; if evidence is insufficient, it should say so and let an outer loop (V9, or a replan trigger) decide. |
+| **Planner (LLM)** | the full plan, emitted in one pass | question + tool catalogue $\to$ ordered list of `#En = Tool[args]` steps with placeholder references | hedge with branching ("if X then Y") — branching is R4's job; ReWOO assumes the plan is determined by the question alone. |
+| **Plan (artefact)** | the DAG of steps with placeholder variables | — $\to$ executable plan | contain free text the Worker cannot parse; a malformed plan kills the whole task because there is no LLM in the loop to recover. |
+| **Worker** | deterministic execution of the plan | plan + tools $\to$ evidence map `{#En → result}` | call the LLM, judge results, or alter the plan — its only job is substitute, dispatch, collect. |
+| **Tool registry** | the bound set of callable tools | tool name + args $\to$ tool result | be open-ended at runtime — the Planner saw a fixed catalogue; tools appearing afterwards cannot be in any plan. |
+| **Solver (LLM)** | the final synthesis | question + populated evidence map $\to$ answer | replan, re-fetch, or critique the plan; if evidence is insufficient, it should say so and let an outer loop (V9, or a replan trigger) decide. |
 
 The strict separation of Planner from Solver — same model, *different sessions, different setups* — is what keeps R5 honest. A Planner that can also see the Solver's job is tempted to leave gaps "for later"; a Solver that can replan is tempted to ignore the plan. Two narrow responsibilities.
 
@@ -108,7 +108,7 @@ A question arrives. The Planner runs once, with the question and the tool catalo
 
 **Benefits**
 
-- ~5× token efficiency vs R4 ReAct on multi-hop benchmarks; gap widens with N.
+- ~5$\times$ token efficiency vs R4 ReAct on multi-hop benchmarks; gap widens with N.
 - Two LLM calls regardless of plan length — predictable cost and latency.
 - Parallel tool execution falls out of the DAG structure for free (composes with O4).
 - The plan is a single inspectable artefact — easier to audit, log (V14), and test than a ReAct trace.
@@ -189,7 +189,7 @@ Concretely, the **Planner** setup includes the tool catalogue rendered as a stab
 ## Open-Source Implementations
 
 - **ReWOO (original)** — [`github.com/billxbf/ReWOO`](https://github.com/billxbf/ReWOO) — Xu et al.'s reference implementation; Planner, Worker, Solver with placeholder variable substitution, evaluation scripts for HotpotQA and TriviaQA.
-- **LangGraph ReWOO tutorial** — [`github.com/langchain-ai/langgraph`](https://github.com/langchain-ai/langgraph) (tutorial at `docs/docs/tutorials/rewoo/rewoo.ipynb`) — runnable graph implementation of Planner → Worker → Solver with variable substitution; the closest match to the structure shown above.
+- **LangGraph ReWOO tutorial** — [`github.com/langchain-ai/langgraph`](https://github.com/langchain-ai/langgraph) (tutorial at `docs/docs/tutorials/rewoo/rewoo.ipynb`) — runnable graph implementation of Planner $\to$ Worker $\to$ Solver with variable substitution; the closest match to the structure shown above.
 - **LangGraph.js ReWOO tutorial** — [`github.com/langchain-ai/langgraphjs`](https://github.com/langchain-ai/langgraphjs) — the TypeScript port of the same tutorial.
 
 ## Known Uses
@@ -201,7 +201,7 @@ Concretely, the **Planner** setup includes the tool catalogue rendered as a stab
 
 ## Related Patterns
 
-- **Distinct from** R4 ReAct — *the defining boundary*. R4 interleaves Thought-Action-Observation and adapts mid-task; R5 plans every tool call upfront and never re-enters the loop until execution is done. **Mutually exclusive for the same task**: R5 on a branching task gives a confident wrong answer; R4 on independent lookups burns ~5× the tokens for no quality gain. See CONFLICTS §CRITICAL 1.
+- **Distinct from** R4 ReAct — *the defining boundary*. R4 interleaves Thought-Action-Observation and adapts mid-task; R5 plans every tool call upfront and never re-enters the loop until execution is done. **Mutually exclusive for the same task**: R5 on a branching task gives a confident wrong answer; R4 on independent lookups burns ~5$\times$ the tokens for no quality gain. See CONFLICTS §CRITICAL 1.
 - **Refines** R3 Plan-and-Solve — R3 plans, then executes step-by-step with possible mid-run replans; R5 hardens R3 into a single-pass plan + deterministic execution + single synthesis, trading R3's adaptability for token efficiency and parallelism.
 - **Composes with** O4 Parallelization — independent nodes in R5's DAG are the natural fan-out point; without O4, R5 captures only the token saving, not the latency saving.
 - **Composes with** V9 Bounded Execution — caps replan attempts when validation or Solver flags insufficient evidence.

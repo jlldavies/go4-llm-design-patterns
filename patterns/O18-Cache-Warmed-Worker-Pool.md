@@ -20,7 +20,7 @@ Design the shared context given to all parallel workers as a single stable, cach
 
 **The gap.** O4 tells you to run in parallel. O6 tells you how to structure the orchestration. Neither tells you how to design your prompt prefixes so that the shared content is cached rather than re-computed for every worker. Cache-Warmed Worker Pool fills this gap: it is the cache-engineering discipline that makes parallel fan-out economical at scale.
 
-**When the economics are compelling.** Consider a system prompt of 2,000 tokens (system instructions + persona + tools) shared across 20 parallel workers. Without cache warming, each worker pays full input token cost for 2,000 tokens = 40,000 token-equivalents of prefill. With cache warming (one write + 19 cache reads at 10%): 2,000 (write at ~125%) + 19 × 200 (reads at ~10%) = 2,500 + 3,800 = 6,300 token-equivalents. The saving is approximately 85% on the shared prefix portion — pure infrastructure cost, no quality tradeoff.
+**When the economics are compelling.** Consider a system prompt of 2,000 tokens (system instructions + persona + tools) shared across 20 parallel workers. Without cache warming, each worker pays full input token cost for 2,000 tokens = 40,000 token-equivalents of prefill. With cache warming (one write + 19 cache reads at 10%): 2,000 (write at ~125%) + 19 $\times$ 200 (reads at ~10%) = 2,500 + 3,800 = 6,300 token-equivalents. The saving is approximately 85% on the shared prefix portion — pure infrastructure cost, no quality tradeoff.
 
 ## Applicability
 
@@ -40,7 +40,7 @@ Do not use it when:
 
 ## Decision Criteria
 
-**1. Measure the shared prefix size.** Count the tokens in the content that is identical across all workers: system prompt, persona, tool schemas, domain context, any shared preamble. If this is < 1,024 tokens: skip this pattern, the cache minimum is not met. If this is 1,024–5,000 tokens: moderate benefit; worth applying when N > 3 workers. If this is > 5,000 tokens: significant benefit; apply whenever N ≥ 2.
+**1. Measure the shared prefix size.** Count the tokens in the content that is identical across all workers: system prompt, persona, tool schemas, domain context, any shared preamble. If this is < 1,024 tokens: skip this pattern, the cache minimum is not met. If this is 1,024–5,000 tokens: moderate benefit; worth applying when N > 3 workers. If this is > 5,000 tokens: significant benefit; apply whenever N $\geq$ 2.
 
 **2. Confirm the TTL budget.** All workers must fire within ~5 minutes (Anthropic TTL) of the warm-up call. If the fan-out takes longer — because workers are rate-limited, queued, or dispatched sequentially — the later workers will miss the cache. Either batch workers within the TTL window or design the system to re-warm the cache periodically.
 
@@ -84,12 +84,12 @@ The structural invariant: the cache boundary is an explicit design constraint, n
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
 | **Shared prefix** (a prompt artefact, not an LLM) | the stable content given to all workers: system prompt, persona, tool schemas, domain context, any fixed preamble | — | vary across workers or between warm-up and worker calls. A single token difference invalidates the cache. |
-| **Warm-up call** (one LLM call, optional) | establishing the KV cache for the shared prefix before the worker fan-out | shared prefix + minimal task → cached KV state at provider | perform substantive work that delays the worker fan-out. It should be fast — a routing check, an acknowledgement, or a null call. |
-| **Worker pool** (N parallel LLM calls, via O4) | executing per-task sub-tasks with the cached shared prefix | shared prefix (cache HIT) + per-worker task delta → per-task result | modify the shared prefix content — even one word change in the shared section invalidates the cache for all subsequent workers. Per-worker variation goes in the delta, never in the shared prefix. |
-| **Fan-out coordinator** (code) | dispatching all workers within the TTL window, verifying timing, collecting results | warm-up completion → simultaneous worker dispatch | spread the worker dispatch over more time than the provider TTL. Late workers re-pay full prefill cost for the shared prefix. |
+| **Warm-up call** (one LLM call, optional) | establishing the KV cache for the shared prefix before the worker fan-out | shared prefix + minimal task $\to$ cached KV state at provider | perform substantive work that delays the worker fan-out. It should be fast — a routing check, an acknowledgement, or a null call. |
+| **Worker pool** (N parallel LLM calls, via O4) | executing per-task sub-tasks with the cached shared prefix | shared prefix (cache HIT) + per-worker task delta $\to$ per-task result | modify the shared prefix content — even one word change in the shared section invalidates the cache for all subsequent workers. Per-worker variation goes in the delta, never in the shared prefix. |
+| **Fan-out coordinator** (code) | dispatching all workers within the TTL window, verifying timing, collecting results | warm-up completion $\to$ simultaneous worker dispatch | spread the worker dispatch over more time than the provider TTL. Late workers re-pay full prefill cost for the shared prefix. |
 | **Cache boundary marker** (a prompt design decision, not code) | the exact token position where the stable shared prefix ends and per-worker variable content begins | — | be implicit. The boundary must be explicit — either via provider API cache control markers or by discipline in prompt construction. An implicit boundary is no boundary. |
 
 ## Collaborations
@@ -111,7 +111,7 @@ Composition with **H1 Identity Persistence**: the Genesis State and any stable h
 
 **Costs**
 
-- One warm-up call: a small fixed overhead (one API call, minimal task). Amortized across N workers, negligible for N ≥ 3.
+- One warm-up call: a small fixed overhead (one API call, minimal task). Amortized across N workers, negligible for N $\geq$ 3.
 - TTL constraint: the entire fan-out must complete within ~5 minutes. Systems with slow or rate-limited dispatch may miss the window for later workers.
 - Prompt discipline: the shared prefix must be managed as a first-class artifact — versioned, tested for stability, and guarded against inadvertent variation.
 - Cache boundary complexity: the boundary between stable and variable content must be explicit and enforced. Systems that dynamically assemble prompts must ensure the stable portion is generated before the variable portion, every time.
@@ -146,7 +146,7 @@ Composition with **H1 Identity Persistence**: the Genesis State and any stable h
 | 3 | Fire warm-up call: `[shared_prefix + minimal_task]` | `LLM` | Establishes KV cache. Use smallest viable model. |
 | 4 | Record warm-up completion timestamp | `code` | TTL clock starts here. |
 | 5 | Dispatch all N workers simultaneously: `[shared_prefix + delta_i]` for each i | `LLM × N` (O4) | Fire within TTL window. All share cached prefix. |
-| 6 | Assert all dispatches within TTL | `code` | Alert if any worker fires > 0.8 × TTL after warm-up. |
+| 6 | Assert all dispatches within TTL | `code` | Alert if any worker fires > 0.8 $\times$ TTL after warm-up. |
 | 7 | Collect results; handle partial failures | `code` | |
 | 8 | Synthesise or pass to Orchestrator | `LLM` or `code` | |
 

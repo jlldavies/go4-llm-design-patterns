@@ -53,7 +53,7 @@ K3 is right when queries need relationship-tracing or whole-corpus synthesis *an
 
 - a meaningful share of real queries demand multi-hop or global synthesis K1 cannot serve, *and*
 - the corpus is rich in entities and relationships, *and*
-- the build cost (extractions × chunks + community summaries) is affordable on the corpus's update cycle, *and*
+- the build cost (extractions $\times$ chunks + community summaries) is affordable on the corpus's update cycle, *and*
 - you accept running K1 alongside K3, not just replacing K1.
 
 If queries vary in *abstraction level* rather than relationship complexity, use **K4 RAPTOR**. If the corpus is small enough to load, **K9 Long Context** can give synthesis without the graph build, at higher per-call cost. If only a few outlier queries fail, add **K2 Query Transformation** first — it is cheaper than a full graph build.
@@ -77,17 +77,17 @@ ONLINE — query
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Corpus** | the source documents | — → documents | — |
-| **Entity Extractor** | identifying entities | chunk → entities | invent entities — extraction error is the pattern's dominant failure mode. |
-| **Relationship Extractor** | identifying relationships | entities + chunk → edges | assert relationships the text does not support. |
-| **Graph store** | holding the entity-relationship graph | entities + edges → queryable graph | — |
-| **Community Detector** | clustering densely-connected entities | graph → communities | be an LLM step — it is a deterministic graph algorithm (e.g. Leiden). |
-| **Community Summariser** | summarising each community | community → summary | summarise across community boundaries; one summary covers one community. |
-| **Query Router** | classifying local vs global | query → route | send a thematic query down the local path or vice versa — the route picks the whole retrieval strategy. |
-| **Traverser / Synthesiser** | executing the chosen route | query + graph → evidence | mix routes; local walks neighbourhoods, global map-reduces summaries. |
-| **Generator (LLM)** | producing the final answer | evidence → answer | — |
+| **Corpus** | the source documents | — $\to$ documents | — |
+| **Entity Extractor** | identifying entities | chunk $\to$ entities | invent entities — extraction error is the pattern's dominant failure mode. |
+| **Relationship Extractor** | identifying relationships | entities + chunk $\to$ edges | assert relationships the text does not support. |
+| **Graph store** | holding the entity-relationship graph | entities + edges $\to$ queryable graph | — |
+| **Community Detector** | clustering densely-connected entities | graph $\to$ communities | be an LLM step — it is a deterministic graph algorithm (e.g. Leiden). |
+| **Community Summariser** | summarising each community | community $\to$ summary | summarise across community boundaries; one summary covers one community. |
+| **Query Router** | classifying local vs global | query $\to$ route | send a thematic query down the local path or vice versa — the route picks the whole retrieval strategy. |
+| **Traverser / Synthesiser** | executing the chosen route | query + graph $\to$ evidence | mix routes; local walks neighbourhoods, global map-reduces summaries. |
+| **Generator (LLM)** | producing the final answer | evidence $\to$ answer | — |
 
 ## Collaborations
 
@@ -126,7 +126,7 @@ ONLINE — query
 
 > `LLM` = configured session (model + setup + per-call prompt); `code` = wiring.
 
-**Composition:** K3 has a heavy offline chain (extract → graph → communities → community summaries) and a routed online chain (local traversal *or* global map-reduce). Chains an Extractor, a Summariser, a Router, per-community generators, a Reducer, and a final Generator.
+**Composition:** K3 has a heavy offline chain (extract $\to$ graph $\to$ communities $\to$ community summaries) and a routed online chain (local traversal *or* global map-reduce). Chains an Extractor, a Summariser, a Router, per-community generators, a Reducer, and a final Generator.
 
 **The chain:**
 
@@ -138,7 +138,7 @@ ONLINE — query
 | 4 | Offline: summarise each community | `LLM` | Summariser session |
 | 5 | Online: classify query as local vs global | `LLM` (or rule) | Router session |
 | 6 | Online (local): walk entity neighbourhood, gather evidence | `code` | |
-| 7 | Online (global): per-community partial answer — this is a subagent decomposition by context bounding (mechanism 6): each community summary is processed in its own bounded context; only the compact partial answer enters the Reducer. The pattern is mechanically optimal for whole-corpus synthesis because it avoids placing all community summaries into one n²-expensive context. | `LLM` × N | Per-community generator |
+| 7 | Online (global): per-community partial answer — this is a subagent decomposition by context bounding (mechanism 6): each community summary is processed in its own bounded context; only the compact partial answer enters the Reducer. The pattern is mechanically optimal for whole-corpus synthesis because it avoids placing all community summaries into one n²-expensive context. | `LLM` $\times$ N | Per-community generator |
 | 8 | Online (global): reduce partials to one answer | `LLM` | Reducer session |
 | 9 | Online: produce the final cited answer | `LLM` | Generator session |
 

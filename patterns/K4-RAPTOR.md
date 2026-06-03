@@ -86,14 +86,14 @@ ONLINE — query
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Corpus / leaf chunks** | the original document chunks | — → chunks | be discarded — the leaves stay in the retrievable pool alongside the summaries. |
-| **Clusterer** | grouping nodes at each level | nodes → clusters | use hard clustering only — soft clusters let content relevant to several themes appear under each. |
-| **Summariser** | writing a summary node per cluster | cluster → summary node | lose specific facts to gist; each summarisation level compounds the loss above it. |
-| **Summary tree** | the multi-level index | leaves + summary levels → queryable tree | — |
-| **Retriever** | searching across tree levels | query → nodes at the matching level | confine search to one level — a query's altitude is not known in advance. |
-| **Generator (LLM)** | answering from the retrieved nodes | query + nodes → answer | — |
+| **Corpus / leaf chunks** | the original document chunks | — $\to$ chunks | be discarded — the leaves stay in the retrievable pool alongside the summaries. |
+| **Clusterer** | grouping nodes at each level | nodes $\to$ clusters | use hard clustering only — soft clusters let content relevant to several themes appear under each. |
+| **Summariser** | writing a summary node per cluster | cluster $\to$ summary node | lose specific facts to gist; each summarisation level compounds the loss above it. |
+| **Summary tree** | the multi-level index | leaves + summary levels $\to$ queryable tree | — |
+| **Retriever** | searching across tree levels | query $\to$ nodes at the matching level | confine search to one level — a query's altitude is not known in advance. |
+| **Generator (LLM)** | answering from the retrieved nodes | query + nodes $\to$ answer | — |
 
 ## Collaborations
 
@@ -137,7 +137,7 @@ ONLINE — query
 |---|---|---|---|
 | 1 | Offline: embed leaf chunks | `LLM` | K1 Embedder |
 | 2 | Offline: soft-cluster the current level | `code` | |
-| 3 | Offline: summarise each cluster → new summary nodes | `LLM` | Summariser session |
+| 3 | Offline: summarise each cluster $\to$ new summary nodes | `LLM` | Summariser session |
 | 4 | Offline: embed the new summary nodes | `LLM` | K1 Embedder |
 | 5 | Offline: recurse to step 2 until one root remains | `code` | |
 | 6 | Online: embed the query | `LLM` | K1 Embedder |

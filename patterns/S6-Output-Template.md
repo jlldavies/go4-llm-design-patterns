@@ -93,14 +93,14 @@ When the JSON-mode variant is used, the "skeleton" is a JSON Schema submitted al
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Skeleton** | the shape of the output — fields, labels, order, types | — → format specification | be ambiguous about which fields are required; an under-specified skeleton invites the model to invent fields, and silently breaks the parser. |
-| **Prompt** | binding task input to the skeleton | task input + skeleton → model prompt | leave the model guessing whether placeholders are literal or to be replaced; spell the rule out. |
-| **Model** | filling content into the shape | prompt → completed structure | invent new fields, reorder them, or "improve" the format; the skeleton is the contract. |
-| **Decoder constraint** *(JSON-mode variant)* | enforcing the schema at token-decode time | schema + logits → constrained tokens | be confused with prompt-side instruction; this is a runtime guarantee, not a hint. |
-| **Parser** | converting the completed shape into a typed object | model output → typed record (or shape error) | be lenient about silent shape changes — a brittle parser surfaces drift early, a lenient one hides it. |
-| **Repair step** *(optional)* | recovering from shape failure | failed output + schema → corrected output | be the primary defence; if it fires often, fix the skeleton. |
+| **Skeleton** | the shape of the output — fields, labels, order, types | — $\to$ format specification | be ambiguous about which fields are required; an under-specified skeleton invites the model to invent fields, and silently breaks the parser. |
+| **Prompt** | binding task input to the skeleton | task input + skeleton $\to$ model prompt | leave the model guessing whether placeholders are literal or to be replaced; spell the rule out. |
+| **Model** | filling content into the shape | prompt $\to$ completed structure | invent new fields, reorder them, or "improve" the format; the skeleton is the contract. |
+| **Decoder constraint** *(JSON-mode variant)* | enforcing the schema at token-decode time | schema + logits $\to$ constrained tokens | be confused with prompt-side instruction; this is a runtime guarantee, not a hint. |
+| **Parser** | converting the completed shape into a typed object | model output $\to$ typed record (or shape error) | be lenient about silent shape changes — a brittle parser surfaces drift early, a lenient one hides it. |
+| **Repair step** *(optional)* | recovering from shape failure | failed output + schema $\to$ corrected output | be the primary defence; if it fires often, fix the skeleton. |
 
 The Skeleton and the Parser are the same artefact viewed from two ends: one defines the shape the model must produce, the other reads it. Keeping them in sync (ideally generated from one schema) is the pattern's main maintenance discipline.
 

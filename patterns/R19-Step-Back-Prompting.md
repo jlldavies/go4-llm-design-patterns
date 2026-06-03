@@ -45,13 +45,13 @@ R19 is right when CoT keeps producing fluent-but-wrong reasoning that elides the
 
 **1. Diagnose the failure mode.** On a labelled set, take the model's CoT trace on each failed case. Ask: did the model *know* the relevant principle, or *not know* it? If the principle is *missing* — the trace never names it, but the model would name it instantly when asked the general question — R19 fits. If the principle *is* named in the trace but applied wrongly, the failure is computational; use **R14 Program of Thoughts** or step the model up.
 
-**2. Test the abstract-answer hit rate.** Manually rewrite 20 failing queries into their step-back form and measure: can the model answer the abstract version correctly? If yes for ≥70% of them, R19 will lift the specific-case accuracy too. If the abstract version also fails, the model lacks the underlying knowledge and **K1 Vanilla RAG** or **K5 Adaptive RAG** is the better intervention.
+**2. Test the abstract-answer hit rate.** Manually rewrite 20 failing queries into their step-back form and measure: can the model answer the abstract version correctly? If yes for $\geq$70% of them, R19 will lift the specific-case accuracy too. If the abstract version also fails, the model lacks the underlying knowledge and **K1 Vanilla RAG** or **K5 Adaptive RAG** is the better intervention.
 
 **3. Cost the second call.** R19 doubles the LLM call count per question (the Abstractor + the Specialiser). Confirm the latency budget tolerates it; confirm the per-query cost increase is acceptable. If only some queries need it, **O3 Routing** (route by question type) keeps R19 off the path for the rest.
 
 **4. Pick where the abstraction lives.** Reasoning-chain (R19) or retrieval-key (K2 Step-Back variant)? Use R19 when the model already has the principle in its weights and you need it surfaced explicitly. Use the K2 variant when the principle lives in a *corpus* and you need to retrieve the right passage. Both, when the principle lives in the corpus *and* the reasoning step is non-trivial.
 
-**5. Few-shot the Abstractor.** The single largest tuning lever is the prompt that generates the step-back question. Without 3–5 worked examples ("specific: … → step-back: …"), the Abstractor under-abstracts or over-abstracts. Treat the Abstractor's few-shot bank as the pattern's main artefact.
+**5. Few-shot the Abstractor.** The single largest tuning lever is the prompt that generates the step-back question. Without 3–5 worked examples ("specific: … $\to$ step-back: …"), the Abstractor under-abstracts or over-abstracts. Treat the Abstractor's few-shot bank as the pattern's main artefact.
 
 **Quick test — R19 is the right pattern when:**
 
@@ -84,20 +84,20 @@ The shape is an inverted pyramid: lift, derive, descend. Two LLM calls minimum (
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Specific question** | the case to be answered | — → the user's question | be skipped or paraphrased mid-flow — the Specialiser must answer the *original* question, not a paraphrase of it. |
-| **Abstractor (LLM)** | producing the step-back question | specific question → more-abstract question | answer the question. Its only job is to name the underlying concept / law / class. An Abstractor that also answers degenerates the pattern into CoT. |
-| **Step-back question** | the lifted version | — → general question | be so abstract that the answer cannot be specialised back, or so close to the specific that no abstraction has happened. The few-shot examples are what calibrate this. |
-| **Principle Reasoner (LLM)** | answering the abstract question | step-back question (+ optional retrieved context) → principle | apply the principle to the specific — that is the Specialiser's job. Keep this answer general; specifics here cause confusion. |
-| **Specialiser (LLM)** | applying the principle to the specific | original question + principle → specific answer | re-derive the principle, or ignore it. Both are common failure modes: the model can re-justify a wrong specific answer despite the principle being in context. |
-| **Few-shot examples** | calibrating the Abstractor | — → 3–5 (specific, step-back) pairs | be generic — the examples must come from the same domain as the queries. Cross-domain examples teach the wrong level of abstraction. |
+| **Specific question** | the case to be answered | — $\to$ the user's question | be skipped or paraphrased mid-flow — the Specialiser must answer the *original* question, not a paraphrase of it. |
+| **Abstractor (LLM)** | producing the step-back question | specific question $\to$ more-abstract question | answer the question. Its only job is to name the underlying concept / law / class. An Abstractor that also answers degenerates the pattern into CoT. |
+| **Step-back question** | the lifted version | — $\to$ general question | be so abstract that the answer cannot be specialised back, or so close to the specific that no abstraction has happened. The few-shot examples are what calibrate this. |
+| **Principle Reasoner (LLM)** | answering the abstract question | step-back question (+ optional retrieved context) $\to$ principle | apply the principle to the specific — that is the Specialiser's job. Keep this answer general; specifics here cause confusion. |
+| **Specialiser (LLM)** | applying the principle to the specific | original question + principle $\to$ specific answer | re-derive the principle, or ignore it. Both are common failure modes: the model can re-justify a wrong specific answer despite the principle being in context. |
+| **Few-shot examples** | calibrating the Abstractor | — $\to$ 3–5 (specific, step-back) pairs | be generic — the examples must come from the same domain as the queries. Cross-domain examples teach the wrong level of abstraction. |
 
 Five participants with one prompt artefact. The Abstractor / Reasoner / Specialiser are typically the *same model* in three different configured sessions — what differs is the role and the prompt, not the weights.
 
 ## Collaborations
 
-A specific question arrives. The Abstractor — primed with 3–5 worked (specific → step-back) examples from the task domain — produces one more-abstract question that names the underlying concept, law, or class the specific case belongs to. The Principle Reasoner answers that step-back question, optionally with retrieved context if the system has a retrieval layer. The Specialiser then receives the original question *and* the principle as context, and produces the specific answer by applying the principle to the case. In retrieval-augmented systems the principle is often retrieved (K1) rather than reasoned out, and the Specialiser becomes a grounded-generation step over both retrieval pools (original question + step-back question). Bounded recovery is rarely needed because the pattern is two-shot, not iterative — if either the abstract answer or the specialisation is wrong, R19 fails clean.
+A specific question arrives. The Abstractor — primed with 3–5 worked (specific $\to$ step-back) examples from the task domain — produces one more-abstract question that names the underlying concept, law, or class the specific case belongs to. The Principle Reasoner answers that step-back question, optionally with retrieved context if the system has a retrieval layer. The Specialiser then receives the original question *and* the principle as context, and produces the specific answer by applying the principle to the case. In retrieval-augmented systems the principle is often retrieved (K1) rather than reasoned out, and the Specialiser becomes a grounded-generation step over both retrieval pools (original question + step-back question). Bounded recovery is rarely needed because the pattern is two-shot, not iterative — if either the abstract answer or the specialisation is wrong, R19 fails clean.
 
 ## Consequences
 
@@ -108,7 +108,7 @@ A specific question arrives. The Abstractor — primed with 3–5 worked (specif
 - Inspectable: the principle is a separate intermediate output the operator can audit.
 
 **Costs**
-- Doubles per-query LLM calls. On a typical reasoning task, +1 latency unit and ~2× token cost vs Zero-Shot CoT.
+- Doubles per-query LLM calls. On a typical reasoning task, +1 latency unit and ~2$\times$ token cost vs Zero-Shot CoT.
 - Demands a few-shot bank per domain. Without it the Abstractor either under-abstracts (rephrasing) or over-abstracts (uselessly general).
 - The Specialiser is non-trivial: the model must apply a principle, not just recite it. Some failures persist after the principle is in context.
 
@@ -124,7 +124,7 @@ A specific question arrives. The Abstractor — primed with 3–5 worked (specif
 - The few-shot examples are the pattern's centre of gravity. Treat them as a Signal-layer artefact: version them, evaluate them, regenerate them when the task domain shifts. The Abstractor's few-shot bank is static across all calls for a given domain — a cacheable prefix (mechanism 5 — provider caches key on stable prefixes; a 1024+ token stable setup qualifies for a ~5-min TTL cache read at ~10% of normal input cost). Place the domain-specific few-shot examples in the Abstractor's setup; under Anthropic caching rules a 1024+ token stable setup reads at ~10% of normal input token cost on a cache hit.
 - Pair with retrieval (K1 or K2's Step-Back variant) on knowledge-intensive tasks: retrieve once on the original query, once on the step-back query, concatenate, generate. The paper does exactly this for TimeQA and MuSiQue; the +27 / +7 gains are with retrieval, not weights alone.
 - The Specialiser prompt should explicitly say *"apply the principle from the context; do not re-derive it from the original question"*. Without that instruction the model often duplicates work and reaches different conclusions.
-- A degenerate failure to watch for: the Abstractor asks a step-back question whose answer is *already* the specific answer ("What was X's height in 1995?" → "What was X's height history?"). The lift must move to a *concept*, not a *broader fact*.
+- A degenerate failure to watch for: the Abstractor asks a step-back question whose answer is *already* the specific answer ("What was X's height in 1995?" $\to$ "What was X's height history?"). The lift must move to a *concept*, not a *broader fact*.
 - For systems already running CoT, R19 is a one-prompt upgrade — frame it as "the model's first call generates a step-back question; the second call answers the original with that question's answer in context."
 
 ## Implementation Sketch

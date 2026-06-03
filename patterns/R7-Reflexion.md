@@ -50,7 +50,7 @@ R7 is right when the task has an automated pass/fail signal, single-shot is nois
 
 **3. Check for systematic-bias risk.** The Self-Reflection step is *the same model* that produced the failed attempt. On a task where the model is reliably wrong in the same way, the reflection will rationalise the same wrongness — *refinement theatre*. Test on a labelled set: do failures cluster on the same error type after N reflections, or do they spread? Clustered failures after N rounds means R7 is not breaking through the blind spot — switch to **O5 Evaluator-Optimizer** (different judge model) or **R10 LATS** (search rather than retry).
 
-**4. Cost the retry budget.** Each retry is a *full task execution* — actor call(s), tool calls, evaluator call, plus the reflection call. Total cost is roughly **N × (per-task cost) + N × (reflection cost)**. At N = 3 you are paying ~3–4× one-shot. Compare to **R17 Self-Consistency** at the same N: R17 parallelises (lower wall-clock latency but same dollar cost), R7 does not. If your bottleneck is latency rather than dollars, prefer R17; if it is *quality* on a task with an automated check, R7 wins.
+**4. Cost the retry budget.** Each retry is a *full task execution* — actor call(s), tool calls, evaluator call, plus the reflection call. Total cost is roughly **N $\times$ (per-task cost) + N $\times$ (reflection cost)**. At N = 3 you are paying ~3–4$\times$ one-shot. Compare to **R17 Self-Consistency** at the same N: R17 parallelises (lower wall-clock latency but same dollar cost), R7 does not. If your bottleneck is latency rather than dollars, prefer R17; if it is *quality* on a task with an automated check, R7 wins.
 
 **5. Decide what persists.** Reflexion stores critiques in an *episodic memory buffer* across retries within a task. If you want the critiques to outlive the task — to inform the *next* user's similar task, or the same user's next session — promote the buffer to durable storage. That is the **H2 Episodic Self-Improvement** pattern in Humanizers; R7 is its in-task engine. Without H2, the lessons die at task end.
 
@@ -84,30 +84,30 @@ If there is no automated signal, use **R8 Self-Refine**. If failures are scatter
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Actor** | attempting the task end-to-end, possibly via an inner reasoning pattern (R4 ReAct, R1 CoT, R13 CodeAct) | task + episodic memory of past critiques → completed trajectory + candidate answer | judge its own attempt — that is the Evaluator's job; an Actor that grades itself loses the external signal that distinguishes R7 from R8. |
-| **Evaluator** | producing the pass/fail (or scalar) feedback signal that drives the loop | trajectory + candidate answer → pass / fail (+ failure description) | be the same model session as the Actor; the signal must be external — a test runner, a schema validator, a judge model, an environment, or an LLM-as-Judge (V15) with a separate prompt and ideally a different model. |
-| **Self-Reflection (LLM)** | writing the verbal critique that converts the failure signal into actionable text | failed trajectory + failure signal → short verbal critique ("what went wrong, what to do differently") | rewrite the answer or attempt the task itself — its only output is *diagnosis*. A reflector that solves the task collapses into the Actor. |
-| **Episodic memory** | accumulating critiques across retries within the task | sequence of critiques → text buffer prepended to the Actor's next prompt | grow without bound — keep only the last K critiques (typically 1–3); stale critiques drown out current signal. (Promote to durable storage via **H2** if cross-task persistence is wanted.) |
-| **Loop controller** | counting retries, terminating on pass or N_max | (attempt result, retry count) → continue / stop | hide a non-terminating loop; the cap N_max is mandatory (V9). |
+| **Actor** | attempting the task end-to-end, possibly via an inner reasoning pattern (R4 ReAct, R1 CoT, R13 CodeAct) | task + episodic memory of past critiques $\to$ completed trajectory + candidate answer | judge its own attempt — that is the Evaluator's job; an Actor that grades itself loses the external signal that distinguishes R7 from R8. |
+| **Evaluator** | producing the pass/fail (or scalar) feedback signal that drives the loop | trajectory + candidate answer $\to$ pass / fail (+ failure description) | be the same model session as the Actor; the signal must be external — a test runner, a schema validator, a judge model, an environment, or an LLM-as-Judge (V15) with a separate prompt and ideally a different model. |
+| **Self-Reflection (LLM)** | writing the verbal critique that converts the failure signal into actionable text | failed trajectory + failure signal $\to$ short verbal critique ("what went wrong, what to do differently") | rewrite the answer or attempt the task itself — its only output is *diagnosis*. A reflector that solves the task collapses into the Actor. |
+| **Episodic memory** | accumulating critiques across retries within the task | sequence of critiques $\to$ text buffer prepended to the Actor's next prompt | grow without bound — keep only the last K critiques (typically 1–3); stale critiques drown out current signal. (Promote to durable storage via **H2** if cross-task persistence is wanted.) |
+| **Loop controller** | counting retries, terminating on pass or N_max | (attempt result, retry count) $\to$ continue / stop | hide a non-terminating loop; the cap N_max is mandatory (V9). |
 
 Five narrow responsibilities. The pattern's reliability depends on the Evaluator being *genuinely external* to the Actor — same model is acceptable, but the *signal* must come from outside the Actor's own judgment. Collapse the Evaluator into the Actor and R7 degenerates into R8 with extra steps.
 
 ## Collaborations
 
-The Actor attempts the task — composing whatever inner reasoning pattern fits (most often **R4 ReAct** for tool-using agents, **R1 / R2 CoT** for reasoning tasks, **R13 CodeAct** for code-generation tasks). Its trajectory and candidate answer go to the Evaluator, which runs the automated check — executing unit tests, validating a schema, asserting a goal state, scoring with a judge. On *pass*, the loop terminates and the answer is returned. On *fail*, the Evaluator hands the trajectory and the failure description (error trace, failing test, judge critique) to the Self-Reflection session. The reflector reads the failure and writes a short verbal critique aimed at the *next* attempt. The critique is appended to the episodic memory buffer. The Loop controller increments the retry counter; if N < N_max, the Actor runs again with the memory buffer prepended to its prompt; if N ≥ N_max, the loop terminates with the best-effort attempt and (optionally) escalates. The episodic memory persists across the loop's iterations but, in vanilla R7, dies at task end; promoting it to durable storage is the **H2 Episodic Self-Improvement** move.
+The Actor attempts the task — composing whatever inner reasoning pattern fits (most often **R4 ReAct** for tool-using agents, **R1 / R2 CoT** for reasoning tasks, **R13 CodeAct** for code-generation tasks). Its trajectory and candidate answer go to the Evaluator, which runs the automated check — executing unit tests, validating a schema, asserting a goal state, scoring with a judge. On *pass*, the loop terminates and the answer is returned. On *fail*, the Evaluator hands the trajectory and the failure description (error trace, failing test, judge critique) to the Self-Reflection session. The reflector reads the failure and writes a short verbal critique aimed at the *next* attempt. The critique is appended to the episodic memory buffer. The Loop controller increments the retry counter; if N < N_max, the Actor runs again with the memory buffer prepended to its prompt; if N $\geq$ N_max, the loop terminates with the best-effort attempt and (optionally) escalates. The episodic memory persists across the loop's iterations but, in vanilla R7, dies at task end; promoting it to durable storage is the **H2 Episodic Self-Improvement** move.
 
 ## Consequences
 
 **Benefits**
-- Substantial accuracy gains on tasks with automated checks — Shinn et al. report GPT-4 HumanEval 80% → 91%, AlfWorld 73% → 97% with a few rounds of reflection; the gain comes essentially free of fine-tuning.
+- Substantial accuracy gains on tasks with automated checks — Shinn et al. report GPT-4 HumanEval 80% $\to$ 91%, AlfWorld 73% $\to$ 97% with a few rounds of reflection; the gain comes essentially free of fine-tuning.
 - The verbal critiques are *inspectable* — operators can read why the agent thought it failed, which is valuable for debugging, evaluation, and trust calibration. Compare to an opaque scalar reward.
 - Provides a natural log of *what the agent learned* — directly promotable into **H2 Episodic Self-Improvement** for cross-session learning.
 - Works with any capable model that supports long-enough context to carry critiques; no fine-tune required.
 
 **Costs**
-- **N × full-task cost** plus N × reflection cost — the headline price. At N = 3, expect ~3–4× one-shot cost.
+- **N $\times$ full-task cost** plus N $\times$ reflection cost — the headline price. At N = 3, expect ~3–4$\times$ one-shot cost.
 - Latency scales linearly in N: retries are sequential by construction (the next attempt depends on the previous critique). Cannot be parallelised the way R17 can.
 - Engineering surface: an external Evaluator is required; without it the pattern collapses. Building a reliable Evaluator is often the hardest part.
 - Episodic memory inflates context with each round — for very long actor trajectories, the buffer is non-trivial. The episodic memory buffer is in-context storage (mechanism 9) — the most expensive tier. Each appended critique increases the Actor's prompt length; every subsequent Actor LLM call then pays O(seq_len²) attention cost (mechanism 2) over the entire prefix including all prior critiques. At K=3 critiques with average 100 tokens each, a 300-token buffer prefix imposes ~10% overhead on a 1000-token context but grows super-linearly as context grows. Trim aggressively (last 1–3 critiques) to bound this.
@@ -143,7 +143,7 @@ The Actor attempts the task — composing whatever inner reasoning pattern fits 
 |---|---|---|---|
 | 1 | Actor attempts the task, prepending episodic memory | `LLM` | Actor session (composes R4 / R13 / R1) |
 | 2 | Evaluator runs the automated check | `code` (or `LLM` if V15) | Evaluator (V15 if LLM) |
-| 3 | Branch — pass → return; fail → continue | `code` | |
+| 3 | Branch — pass $\to$ return; fail $\to$ continue | `code` | |
 | 4 | Self-Reflection writes a verbal critique of the failure | `LLM` | Reflection session |
 | 5 | Append critique to episodic memory (trim to last K) | `code` | |
 | 6 | Increment retry counter; if N < N_max loop to 1 | `code` | V9 |
@@ -181,16 +181,16 @@ reflexion(task, N_max=3):
 ## Open-Source Implementations
 
 - **Reflexion (official)** — [`github.com/noahshinn/reflexion`](https://github.com/noahshinn/reflexion) — Noah Shinn et al.'s reference implementation for the NeurIPS 2023 paper. Includes runnable experiments on HotPotQA (reasoning), AlfWorld (decision-making), and LeetcodeHardGym (programming), with the full set of agent / reflexion-strategy combinations evaluated in the paper. MIT licensed.
-- **LangGraph Reflexion example** — [`github.com/langchain-ai/langgraph`](https://github.com/langchain-ai/langgraph) — the framework's canonical tutorial implementation of the Reflexion graph (actor → evaluator → reflector → loop) is one of the most-cited reference graphs; the closest match to the chain shown above for production reuse.
+- **LangGraph Reflexion example** — [`github.com/langchain-ai/langgraph`](https://github.com/langchain-ai/langgraph) — the framework's canonical tutorial implementation of the Reflexion graph (actor $\to$ evaluator $\to$ reflector $\to$ loop) is one of the most-cited reference graphs; the closest match to the chain shown above for production reuse.
 - **langgraph-reflection** — [`github.com/langchain-ai/langgraph-reflection`](https://github.com/langchain-ai/langgraph-reflection) — a prebuilt LangGraph package wrapping the reflection-style architecture (main agent + critique agent + loop) for direct reuse.
 - **DSPy** — [`github.com/stanfordnlp/dspy`](https://github.com/stanfordnlp/dspy) — reflection / refine modules can be composed to build Reflexion-shaped programs; the framework treats the loop as a compilable structure rather than a primitive.
 
 ## Known Uses
 
-- **Code-generation agents with test-driven loops** — Reflexion's HumanEval setup (generate → run tests → reflect on failures → regenerate) is now a standard architecture in coding-agent stacks. Variants appear in Claude Code, Devin-style systems, and other test-driven agent frameworks where unit tests are the Evaluator.
+- **Code-generation agents with test-driven loops** — Reflexion's HumanEval setup (generate $\to$ run tests $\to$ reflect on failures $\to$ regenerate) is now a standard architecture in coding-agent stacks. Variants appear in Claude Code, Devin-style systems, and other test-driven agent frameworks where unit tests are the Evaluator.
 - **Environment-based agent benchmarks** — AlfWorld, WebArena, and similar agentic benchmarks have Reflexion-shaped baselines where the environment provides the pass/fail signal and the agent reflects between episodes.
 - **LangGraph production agents** — Reflexion-style graphs (actor + critic + retry loop) are a common LangGraph deployment shape, especially for tool-using agents with downstream validators.
-- **Research-agent reflection loops** — agents that draft → critique → revise with an external citation-checker or fact-checker as the Evaluator follow the R7 shape.
+- **Research-agent reflection loops** — agents that draft $\to$ critique $\to$ revise with an external citation-checker or fact-checker as the Evaluator follow the R7 shape.
 - **Episodic-memory agents (H2 promotion)** — long-running personal-assistant and process-automation agents that persist Reflexion critiques across sessions to learn from recurring failure modes.
 
 ## Related Patterns
@@ -210,7 +210,7 @@ reflexion(task, N_max=3):
 
 ## Sources
 
-- Shinn et al. (2023) — "Reflexion: Language Agents with Verbal Reinforcement Learning" (arXiv [2303.11366](https://arxiv.org/abs/2303.11366); NeurIPS 2023). The canonical reference. Key results: GPT-4 HumanEval 80% → 91%, AlfWorld 73% → 97%, HotPotQA gains over ReAct.
+- Shinn et al. (2023) — "Reflexion: Language Agents with Verbal Reinforcement Learning" (arXiv [2303.11366](https://arxiv.org/abs/2303.11366); NeurIPS 2023). The canonical reference. Key results: GPT-4 HumanEval 80% $\to$ 91%, AlfWorld 73% $\to$ 97%, HotPotQA gains over ReAct.
 - Yao et al. (2022) — "ReAct: Synergizing Reasoning and Acting in Language Models" (arXiv [2210.03629](https://arxiv.org/abs/2210.03629)). The Actor's most common inner pattern.
 - Madaan et al. (2023) — "Self-Refine: Iterative Refinement with Self-Feedback" (arXiv [2303.17651](https://arxiv.org/abs/2303.17651)). The sibling sequential-refinement pattern without an external signal.
 - Wang et al. (2022) — "Self-Consistency Improves Chain of Thought Reasoning" (arXiv [2203.11171](https://arxiv.org/abs/2203.11171)). The sibling parallel-sampling pattern.

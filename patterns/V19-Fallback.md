@@ -58,7 +58,7 @@ If you cannot list at least three with measured rates, you do not yet know enoug
 
 Every failure mode in §1 must name one of these. An unhandled failure mode is a gap.
 
-**3. Cost the degraded path.** The fallback must be cheaper *and* faster than the primary on the failing path. A "fallback" that costs more is not a fallback — it is an upgrade tier and belongs in front of the primary, not behind it. Measure: p50/p95 latency and unit cost of the fallback vs the primary; the fallback should be at least 2× cheaper or 2× faster (typically both) or the design is wrong.
+**3. Cost the degraded path.** The fallback must be cheaper *and* faster than the primary on the failing path. A "fallback" that costs more is not a fallback — it is an upgrade tier and belongs in front of the primary, not behind it. Measure: p50/p95 latency and unit cost of the fallback vs the primary; the fallback should be at least 2$\times$ cheaper or 2$\times$ faster (typically both) or the design is wrong.
 
 **4. Wire the degraded-state signal.** The user must know the answer is degraded; the operator must know the primary failed. Two outputs, never one. If the system returns a fallback indistinguishable from a primary answer, you have built a *silent failure factory*: V14 must log the fallback invocation, the response must carry a degraded-state marker (header, field, prefix line), and **V17 Online Eval** must alarm when fallback rate crosses a threshold (5% sustained is a common operating bound; tune from data).
 
@@ -111,14 +111,14 @@ If the primary path is reliable enough that fallback rate would be < 1%, V19 is 
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Primary Path** | the normal, full-capability execution | request → answer or typed failure | swallow its own failures — every failure mode must surface as a typed signal the Classifier can read. |
-| **Failure Classifier** | mapping a typed failure to a fallback class | typed failure → fallback selector | guess at unknown failure types — unknown failure must default to *templated reply + alarm*, never to "try the primary again". |
-| **Fallback Path** *(one per class)* | a structurally simpler / cheaper / cached / deterministic execution | request + failure context → degraded answer | call back into the Primary Path — that is a retry, not a fallback, and creates a cascade. |
-| **Degraded-State Marker** | making the degradation visible to the caller | answer → answer + `degraded: true` field / header / prefix | be omitted because "the user might be confused" — silent fallback is the most common V19 failure mode. |
-| **Cascade Guard** | preventing fallback-of-fallback | fallback-failure → escalate-to-V1 / templated reply | invoke another fallback class — depth-2 maximum; deeper means the design is wrong. |
-| **Audit & Alarm** *(V14 + V17)* | recording every invocation and alarming on rate | invocation event → trace + rolling metric | be optional — a fallback whose rate is not monitored will silently grow until it *is* the primary. |
+| **Primary Path** | the normal, full-capability execution | request $\to$ answer or typed failure | swallow its own failures — every failure mode must surface as a typed signal the Classifier can read. |
+| **Failure Classifier** | mapping a typed failure to a fallback class | typed failure $\to$ fallback selector | guess at unknown failure types — unknown failure must default to *templated reply + alarm*, never to "try the primary again". |
+| **Fallback Path** *(one per class)* | a structurally simpler / cheaper / cached / deterministic execution | request + failure context $\to$ degraded answer | call back into the Primary Path — that is a retry, not a fallback, and creates a cascade. |
+| **Degraded-State Marker** | making the degradation visible to the caller | answer $\to$ answer + `degraded: true` field / header / prefix | be omitted because "the user might be confused" — silent fallback is the most common V19 failure mode. |
+| **Cascade Guard** | preventing fallback-of-fallback | fallback-failure $\to$ escalate-to-V1 / templated reply | invoke another fallback class — depth-2 maximum; deeper means the design is wrong. |
+| **Audit & Alarm** *(V14 + V17)* | recording every invocation and alarming on rate | invocation event $\to$ trace + rolling metric | be optional — a fallback whose rate is not monitored will silently grow until it *is* the primary. |
 
 Six narrow responsibilities. The reliability of V19 comes from the discipline of *one* Classifier (single dispatch), *bounded* fallback depth (no cascade), and *non-optional* state-marking and alarming — without those three, the pattern degrades into "swallow errors silently", which is worse than no fallback at all.
 
@@ -147,7 +147,7 @@ A request enters the Primary Path. On success, the answer returns and V14 record
 
 ## Implementation Notes
 
-- **Start with the gateway layer.** LiteLLM, Portkey, and OpenRouter all ship router-level fallbacks — primary model → secondary model → tertiary model — that handle provider-side failures (rate limits, 5xx, content policy) without any custom code. This is the cheapest possible V19 and the right first install. Only build agent-level fallbacks for failures the gateway cannot see (V9 caps, V15 rejects, K5 chain exhaustion).
+- **Start with the gateway layer.** LiteLLM, Portkey, and OpenRouter all ship router-level fallbacks — primary model $\to$ secondary model $\to$ tertiary model — that handle provider-side failures (rate limits, 5xx, content policy) without any custom code. This is the cheapest possible V19 and the right first install. Only build agent-level fallbacks for failures the gateway cannot see (V9 caps, V15 rejects, K5 chain exhaustion).
 - **Classify failures at the boundary, not in the agent.** The Failure Classifier should be a thin wrapper around the primary call site — typed exceptions in, fallback selector out. Putting the classifier inside the agent prompt means the same broken model decides what to do about its own brokenness.
 - **Cache fallbacks need a freshness policy.** Either a TTL or a "best-before invalidation event" trigger. A cached answer with no freshness check is a wrong-answer factory waiting for the world to change.
 - **Deterministic fallbacks must be honest.** A rule-based path that only handles 20% of inputs adequately should fall through to the templated reply on the other 80%, not pretend to answer.
@@ -174,7 +174,7 @@ A request enters the Primary Path. On success, the answer returns and V14 record
 | 5c | Human-escalation fallback: enqueue to V1 | `code` | V1 |
 | 6 | Attach degraded-state marker to answer | `code` | |
 | 7 | Emit V14 invocation span; increment V17 fallback-rate metric | `code` | V14, V17 |
-| 8 | If fallback also fails: Cascade Guard → templated reply or V1, alarm | `code` | V1, V17 |
+| 8 | If fallback also fails: Cascade Guard $\to$ templated reply or V1, alarm | `code` | V1, V17 |
 
 **Skeleton** — the wiring; one `# LLM` line is the cheaper-model fallback, optional:
 
@@ -234,9 +234,9 @@ V19 has both gateway-level libraries (where provider fallback is a configuration
 ## Known Uses
 
 - **Production LLM gateways** (LiteLLM, Portkey, OpenRouter, Not Diamond) — provider-level fallback is now table stakes; many deployed agent systems install one of these as the only V19 they have, and it handles the majority of provider-side failures.
-- **Customer-support and IT agents** — common pattern: primary frontier-model agent → cheaper model on rate-limit → cached FAQ lookup on cache hit → templated "we'll get back to you" + ticket creation on full failure. Each layer logged, each layer measured.
-- **Coding agents** (Claude Code, Cursor, similar) — primary code-edit model → smaller model on quota exhaustion → "model unavailable, please retry" templated reply; the degraded-state signal is the visible fallback notice in the UI.
-- **High-availability conversational systems** — frontier model → smaller open model → static FAQ → human handoff is a well-trodden four-tier stack in enterprise deployments.
+- **Customer-support and IT agents** — common pattern: primary frontier-model agent $\to$ cheaper model on rate-limit $\to$ cached FAQ lookup on cache hit $\to$ templated "we'll get back to you" + ticket creation on full failure. Each layer logged, each layer measured.
+- **Coding agents** (Claude Code, Cursor, similar) — primary code-edit model $\to$ smaller model on quota exhaustion $\to$ "model unavailable, please retry" templated reply; the degraded-state signal is the visible fallback notice in the UI.
+- **High-availability conversational systems** — frontier model $\to$ smaller open model $\to$ static FAQ $\to$ human handoff is a well-trodden four-tier stack in enterprise deployments.
 
 ## Related Patterns
 

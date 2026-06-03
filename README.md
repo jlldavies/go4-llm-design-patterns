@@ -26,7 +26,7 @@ This is the [Gang of Four](https://en.wikipedia.org/wiki/Design_Patterns) applie
 
 ## What this helps you do
 
-**Reduce token costs** — the n² attention cost means longer contexts are not 2× more expensive than shorter ones; they're 4×. Understanding this changes how you architect retrieval, memory, and multi-agent systems. Patterns like [K7 Context Pruning](patterns/K7-Context-Pruning.md), [K6 Context Compression](patterns/K6-Context-Compression.md), [O18 Cache-Warmed Worker Pool](patterns/O18-Cache-Warmed-Worker-Pool.md), and the entire [Knowledge category](patterns/KNOWLEDGE.md) are explicitly about keeping contexts small and high-signal.
+**Reduce token costs** — the n² attention cost means longer contexts are not 2$\times$ more expensive than shorter ones; they're 4$\times$. Understanding this changes how you architect retrieval, memory, and multi-agent systems. Patterns like [K7 Context Pruning](patterns/K7-Context-Pruning.md), [K6 Context Compression](patterns/K6-Context-Compression.md), [O18 Cache-Warmed Worker Pool](patterns/O18-Cache-Warmed-Worker-Pool.md), and the entire [Knowledge category](patterns/KNOWLEDGE.md) are explicitly about keeping contexts small and high-signal.
 
 **Build agents that don't stall, loop, or hallucinate** — [V9 Bounded Execution](patterns/V9-Bounded-Execution.md), [V14 Trajectory Logging](patterns/V14-Trajectory-Logging.md), [V4 Dual LLM](patterns/V4-Dual-LLM.md), [V6 Prompt Injection Shield](patterns/V6-Prompt-Injection-Shield.md). Every production failure mode documented, with Decision Criteria that tell you when you're at risk.
 
@@ -100,7 +100,7 @@ This is the [Gang of Four](https://en.wikipedia.org/wiki/Design_Patterns) applie
 | [R2 Few-Shot CoT](patterns/R2-Few-Shot-CoT.md) | Exemplar CoT | Show worked reasoning before the target question |
 | [R3 Plan-and-Solve](patterns/R3-Plan-and-Solve.md) | Plan-then-Execute | Two-phase: explicit plan, then execute |
 | [R4 ReAct](patterns/R4-ReAct.md) | Reason+Act, Agent Loop | Adaptive tool use; each action informs the next |
-| [R5 ReWOO](patterns/R5-ReWOO.md) | Plan-then-Execute with tools | Independent tool calls; 5× token efficiency vs ReAct |
+| [R5 ReWOO](patterns/R5-ReWOO.md) | Plan-then-Execute with tools | Independent tool calls; 5$\times$ token efficiency vs ReAct |
 | [R6 Self-Ask](patterns/R6-Self-Ask.md) | Decompose-and-Answer | Multi-hop factual questions; sub-question chains |
 | [R7 Reflexion](patterns/R7-Reflexion.md) | Verbal Reinforcement Learning | Verbal self-critique across retries |
 | [R8 Self-Refine](patterns/R8-Self-Refine.md) | Generate-Critique-Refine | Iterative in-session quality improvement |
@@ -230,10 +230,10 @@ Most pattern guidance tells you *what to do*. This catalog tells you *why it wor
 
 Critical conflicts every production system must know:
 
-- **R4 ReAct ⊕ R5 ReWOO** — mutually exclusive for the same task. ReAct adapts to observations; ReWOO plans upfront. Using ReAct when all tool calls are independent wastes ~5× tokens. Using ReWOO when calls are sequentially dependent produces wrong results.
-- **O6 → O17** — O6 Orchestrator-Workers *requires* O17 Agent Isolation. Without it, workers share the orchestrator's context, defeating the n² cost bounding that produces O6's quality win.
-- **V20 + V9** — Schema Validation retry loops grow context by ~2× the bad output per retry. V9 Bounded Execution token caps must account for worst-case V20 expansion or they're silently miscalibrated.
-- **K6/K7 ⊕ K11** — Context Compression and Pruning rewrite or delete prior tokens, invalidating the provider prefix cache. K11 Observational Memory is append-only for a reason: any edit to a prior token position invalidates the KV state for that position and everything after it.
+- **R4 ReAct $\oplus$ R5 ReWOO** — mutually exclusive for the same task. ReAct adapts to observations; ReWOO plans upfront. Using ReAct when all tool calls are independent wastes ~5$\times$ tokens. Using ReWOO when calls are sequentially dependent produces wrong results.
+- **O6 $\to$ O17** — O6 Orchestrator-Workers *requires* O17 Agent Isolation. Without it, workers share the orchestrator's context, defeating the n² cost bounding that produces O6's quality win.
+- **V20 + V9** — Schema Validation retry loops grow context by ~2$\times$ the bad output per retry. V9 Bounded Execution token caps must account for worst-case V20 expansion or they're silently miscalibrated.
+- **K6/K7 $\oplus$ K11** — Context Compression and Pruning rewrite or delete prior tokens, invalidating the provider prefix cache. K11 Observational Memory is append-only for a reason: any edit to a prior token position invalidates the KV state for that position and everything after it.
 - **Dynamic S2 breaks the entire prefix cache chain** — Retrieval-augmented few-shot selection changes the prefix on every call, forfeiting not just S2's cache but the entire upstream stable prefix (S3 Persona, S5 Constraint Framing, S6 Output Template). The cost is materially larger than it appears.
 
 ---
@@ -242,7 +242,7 @@ Critical conflicts every production system must know:
 
 Two patterns in this catalog don't appear in prior literature — they were derived from the mechanical analysis in Chapter 0:
 
-**[K13 — Retrieval Bundle](patterns/K13-Retrieval-Bundle.md):** Before writing retrieval code, specify the exact operational context bundle a workflow type always needs — by field, by data shape (prose → vector search; structured document → hierarchical tree; governed tabular → semantic layer; relational → graph), by source authority, by freshness. The absence of this specification is the *rediscovery problem*: agents re-assembling the same context on every run, consuming up to 85% of compute on context construction rather than task execution.
+**[K13 — Retrieval Bundle](patterns/K13-Retrieval-Bundle.md):** Before writing retrieval code, specify the exact operational context bundle a workflow type always needs — by field, by data shape (prose $\to$ vector search; structured document $\to$ hierarchical tree; governed tabular $\to$ semantic layer; relational $\to$ graph), by source authority, by freshness. The absence of this specification is the *rediscovery problem*: agents re-assembling the same context on every run, consuming up to 85% of compute on context construction rather than task execution.
 
 **[O18 — Cache-Warmed Worker Pool](patterns/O18-Cache-Warmed-Worker-Pool.md):** Establish a stable shared context as a provider-cached prefix before dispatching parallel workers. All workers dispatched within the provider TTL window (~5 minutes, Anthropic) hit the cache rather than independently re-paying prefill cost. At N=10 workers with a 3,000-token shared prefix, the saving is ~85% on the shared portion. This follows directly from the KV cache structure and prefix caching economics in Chapter 0.
 

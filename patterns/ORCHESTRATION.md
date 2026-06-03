@@ -88,7 +88,7 @@ Patterns differ in *how the coordination layer is shaped* — fixed pipeline, cl
 |---|---|---|---|---|
 | O1 | **Single Agent** | Autonomous Agent | One LLM + tools + system prompt | Low |
 | O2 | **Prompt Chaining** | Pipeline | Output of one call feeds the next in fixed order | Low |
-| O3 | **Routing** | Classifier-Dispatcher | Classify input → specialist handler | Medium |
+| O3 | **Routing** | Classifier-Dispatcher | Classify input $\to$ specialist handler | Medium |
 | O4 | **Parallelization** | Fan-out Fan-in | Simultaneous independent LLM calls | Medium |
 
 ### IV-B — Agentic Patterns

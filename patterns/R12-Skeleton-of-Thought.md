@@ -49,9 +49,9 @@ Do not use when:
 
 R12 is right when an answer's *outline* fully determines its sections' shape and the latency budget is the binding constraint.
 
-**1. Measure answer length and structure.** On a sample of expected queries, count: average output tokens (T) and average natural section count (S). Practical threshold: **T ≥ ~400 tokens and S ≥ 3** before SoT pays. Below either, the outline-call overhead dominates; use **R1** or no scaffold.
+**1. Measure answer length and structure.** On a sample of expected queries, count: average output tokens (T) and average natural section count (S). Practical threshold: **T $\geq$ ~400 tokens and S $\geq$ 3** before SoT pays. Below either, the outline-call overhead dominates; use **R1** or no scaffold.
 
-**2. Score inter-section independence.** Take 10 representative answers and ask: could each section be written knowing only the outline and the question? If yes for ≥ 80% of sections, SoT is safe. If sections frequently reference each other's content ("as discussed in section 2, …"), use **R3 Plan-and-Solve** — serial planned execution preserves the cross-references.
+**2. Score inter-section independence.** Take 10 representative answers and ask: could each section be written knowing only the outline and the question? If yes for $\geq$ 80% of sections, SoT is safe. If sections frequently reference each other's content ("as discussed in section 2, …"), use **R3 Plan-and-Solve** — serial planned execution preserves the cross-references.
 
 **3. Cost the parallelism.** SoT adds: 1 outline call + S parallel expansion calls vs 1 sequential call. Total *tokens* rise modestly (the outline is repeated as context in each expansion). Total *wall time* drops to roughly `outline_time + max(expansion_times)` instead of `sum(expansion_times)`. The win exists only if your serving stack actually parallelises — check before adopting.
 
@@ -61,7 +61,7 @@ R12 is right when an answer's *outline* fully determines its sections' shape and
 
 **Quick test — R12 is the right pattern when:**
 
-- expected output is long-form (≥ ~400 tokens) and naturally sections into 3+ blocks, *and*
+- expected output is long-form ($\geq$ ~400 tokens) and naturally sections into 3+ blocks, *and*
 - sections are independent given the outline (no inter-section content dependencies), *and*
 - wall-clock latency is the binding constraint, not answer quality, *and*
 - the serving stack actually runs the expansion calls in parallel.
@@ -92,13 +92,13 @@ If the answer is short or tightly-coupled, choose **R1** or **R3**. If the goal 
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Router** *(optional, SoT-R only)* | the per-query decision to apply SoT | query → SoT / DIRECT | answer the query — a router that can also generate has no incentive to ever say "use SoT" honestly. |
-| **Outliner** | producing the skeleton | query → ordered list of section headings / point-stubs | expand any point — its job is structure, not content. An outliner that writes prose has already paid the sequential-decode cost the pattern exists to avoid. |
-| **Expander** | producing the prose for one point | (outline, point) → section body | look at sibling sections' expansions — that re-introduces sequential dependency and destroys the parallelism. |
-| **Aggregator** | stitching the expansions in outline order | ordered expansions → final answer | re-write sections or arbitrate contradictions silently — surface conflicts back to a coherence pass if needed. |
-| **Coherence Pass** *(optional)* | smoothing transitions and resolving cross-references | stitched answer → polished answer | expand the content (that was the Expander's call); only adjust seams between sections. |
+| **Router** *(optional, SoT-R only)* | the per-query decision to apply SoT | query $\to$ SoT / DIRECT | answer the query — a router that can also generate has no incentive to ever say "use SoT" honestly. |
+| **Outliner** | producing the skeleton | query $\to$ ordered list of section headings / point-stubs | expand any point — its job is structure, not content. An outliner that writes prose has already paid the sequential-decode cost the pattern exists to avoid. |
+| **Expander** | producing the prose for one point | (outline, point) $\to$ section body | look at sibling sections' expansions — that re-introduces sequential dependency and destroys the parallelism. |
+| **Aggregator** | stitching the expansions in outline order | ordered expansions $\to$ final answer | re-write sections or arbitrate contradictions silently — surface conflicts back to a coherence pass if needed. |
+| **Coherence Pass** *(optional)* | smoothing transitions and resolving cross-references | stitched answer $\to$ polished answer | expand the content (that was the Expander's call); only adjust seams between sections. |
 
 The Outliner and the Expander are the same model, configured as two distinct sessions. Keeping them separate is what makes the pattern honest — an Outliner allowed to write prose is just a normal generator, and the parallel speed-up evaporates.
 
@@ -148,10 +148,10 @@ A query arrives. If a Router is configured, it classifies the query; on DIRECT i
 | # | Step | Kind | Draws on |
 |---|---|---|---|
 | 1 | Router — should this query use SoT? | `LLM (or rule)` | Router session (SoT-R variant only) |
-| 2 | Branch — DIRECT → fall through to plain generation, return | `code` | |
+| 2 | Branch — DIRECT $\to$ fall through to plain generation, return | `code` | |
 | 3 | Outliner — emit ordered list of skeleton points | `LLM` | Outliner session, S6 output template |
 | 4 | Fan-out — dispatch one Expander call per point in parallel | `code` | V9 cap on points |
-| 5 | Expander (×S) — produce section body for each point | `LLM` (parallel) | Expander session |
+| 5 | Expander ($\times$S) — produce section body for each point | `LLM` (parallel) | Expander session |
 | 6 | Aggregate — concatenate expansions in outline order | `code` | |
 | 7 | Coherence Pass — smooth transitions *(optional)* | `LLM` | Coherence session |
 

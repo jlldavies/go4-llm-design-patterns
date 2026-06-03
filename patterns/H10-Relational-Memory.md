@@ -47,9 +47,9 @@ Do not use H10 when:
 
 H10 is right when the same user returns across sessions, continuity has measurable value to that user, *and* the deployment can sustain the consent, deletion, and guardrail infrastructure the pattern requires.
 
-**1. Per-user return rate.** Measure: what fraction of sessions are with a user the agent has met before? If < 20% returning users, the per-user store costs more than it earns — **H7 Adaptive Persona** for session-local calibration is enough; if ≥ 20% returning users with multi-session arcs, H10 amortises.
+**1. Per-user return rate.** Measure: what fraction of sessions are with a user the agent has met before? If < 20% returning users, the per-user store costs more than it earns — **H7 Adaptive Persona** for session-local calibration is enough; if $\geq$ 20% returning users with multi-session arcs, H10 amortises.
 
-**2. Continuity payoff test.** On a labelled rubric (V15 LLM-as-Judge is fine here), score response quality on returning-user turns *with* relational memory loaded vs. without. A ≥ 15% lift on the rubric is a meaningful continuity dividend; below that, the relational layer is decorative and may not justify the privacy surface.
+**2. Continuity payoff test.** On a labelled rubric (V15 LLM-as-Judge is fine here), score response quality on returning-user turns *with* relational memory loaded vs. without. A $\geq$ 15% lift on the rubric is a meaningful continuity dividend; below that, the relational layer is decorative and may not justify the privacy surface.
 
 **3. Consent and deletion infrastructure.** Three concrete tests, all must pass:
    - the user is informed at first use (or first H10 write) that a relational model exists, in plain language, with examples of the kinds of things stored;
@@ -67,8 +67,8 @@ H10 is right when the same user returns across sessions, continuity has measurab
 
 **Quick test — H10 is the right pattern when:**
 
-- ≥ 20% of sessions are returning users with multi-session arcs, *and*
-- a continuity-vs-cold rubric shows ≥ 15% lift from loaded relational memory, *and*
+- $\geq$ 20% of sessions are returning users with multi-session arcs, *and*
+- a continuity-vs-cold rubric shows $\geq$ 15% lift from loaded relational memory, *and*
 - consent, inspection, and full deletion are end-to-end implemented (not aspirational), *and*
 - V5 guardrails are wired at write, read, *and* output layers — with the output-layer rule on emotional reciprocity explicit, *and*
 - the user-side identity is uniquely resolved (one user per relational store).
@@ -114,15 +114,15 @@ If returning-user rate is low, use **H7 Adaptive Persona** for style calibration
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Relational Store** | the per-user persistent record | structured payload → per-user store | be shared across users, or retained after a deletion request; deletion must be end-to-end, including derived summaries in K12. |
-| **Goal Model** | the user's stated long-term goals and active projects | user statements → durable goal entries | infer goals the user has not stated and store them as if they were; speculative goals belong in a separate, low-confidence section, or not at all. |
-| **Interaction History** | compressed record of working together | session events (often from K11) → digested history | retain raw transcripts beyond the live session — only the digested form persists, and it ages. |
-| **Ethical Envelope** | per-user constraints (sensitive topics, off-limits, consent, retention) | user-stated rules + deployment defaults → enforced policy | be silently overridable by content of the session, or by the agent's own inference that "this once it would be okay". |
-| **Relational Extractor (LLM)** | proposing what to write into the store at session end | K11 log + current store → proposed diff | write directly — diffs go through V5 write-guard and, for sensitive categories, through V1 governance. |
-| **V5 Guardrail Layer** | enforcing write, read, and output limits on relational data | proposed write / proposed read / proposed output → allow / block / redact | be advisory; the output-layer reciprocity rule in particular is structural enforcement, not a prompt instruction. |
-| **Deletion Handler** | executing the user's right-to-deletion end-to-end | user request → wiped store + audit confirmation | retain "for safety" / "for compliance" anything the user asked to delete that the law does not specifically require to be retained; "we kept a summary" is the failure mode that defines HA2. |
+| **Relational Store** | the per-user persistent record | structured payload $\to$ per-user store | be shared across users, or retained after a deletion request; deletion must be end-to-end, including derived summaries in K12. |
+| **Goal Model** | the user's stated long-term goals and active projects | user statements $\to$ durable goal entries | infer goals the user has not stated and store them as if they were; speculative goals belong in a separate, low-confidence section, or not at all. |
+| **Interaction History** | compressed record of working together | session events (often from K11) $\to$ digested history | retain raw transcripts beyond the live session — only the digested form persists, and it ages. |
+| **Ethical Envelope** | per-user constraints (sensitive topics, off-limits, consent, retention) | user-stated rules + deployment defaults $\to$ enforced policy | be silently overridable by content of the session, or by the agent's own inference that "this once it would be okay". |
+| **Relational Extractor (LLM)** | proposing what to write into the store at session end | K11 log + current store $\to$ proposed diff | write directly — diffs go through V5 write-guard and, for sensitive categories, through V1 governance. |
+| **V5 Guardrail Layer** | enforcing write, read, and output limits on relational data | proposed write / proposed read / proposed output $\to$ allow / block / redact | be advisory; the output-layer reciprocity rule in particular is structural enforcement, not a prompt instruction. |
+| **Deletion Handler** | executing the user's right-to-deletion end-to-end | user request $\to$ wiped store + audit confirmation | retain "for safety" / "for compliance" anything the user asked to delete that the law does not specifically require to be retained; "we kept a summary" is the failure mode that defines HA2. |
 
 Seven roles, each independently testable. The structural disciplines that make this set work are: (1) the Extractor is a **separate session** from the Agent, like K12's Curator — the running agent never writes to the relational store mid-reasoning; (2) the V5 layer is **code, not prompt** — the output reciprocity rule in particular is enforced by an external checker, not by hopeful instructions in the system prompt; (3) the Deletion Handler is the *only* path that decides what to retain on a delete request, and its default is *delete everything*.
 

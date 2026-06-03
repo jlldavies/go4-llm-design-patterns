@@ -53,7 +53,7 @@ V15 is right when quality is generative, the rubric can be written down, and an 
 
 **2. Judge-vs-task capability.** The judge must be *at least as capable as* the generator on the rubric's dimensions. The standard heuristic: evaluate Haiku-tier outputs with Sonnet-tier or stronger; never grade GPT-4-class outputs with a 7B model unless you have measured agreement on a held-out set.
 
-**3. Calibration against humans.** Before trusting V15 at scale, run it on 50–200 human-labelled cases and measure agreement. Target ≥ 70% agreement on PASS/FAIL or ≥ 0.6 correlation on numeric scores. Below that, the judge is noise; iterate the rubric or change the judge model.
+**3. Calibration against humans.** Before trusting V15 at scale, run it on 50–200 human-labelled cases and measure agreement. Target $\geq$ 70% agreement on PASS/FAIL or $\geq$ 0.6 correlation on numeric scores. Below that, the judge is noise; iterate the rubric or change the judge model.
 
 **4. Bias audit — three known failure modes.**
 - **Position bias** (pairwise): judges favour the first option shown. *Mitigation:* run each pair in both orders, average.
@@ -62,7 +62,7 @@ V15 is right when quality is generative, the rubric can be written down, and an 
 
 If you have not measured and mitigated all three, the score is suspect.
 
-**5. Cost per evaluation × evaluation frequency.** V15 adds one (single-output) or two (pairwise with order-flip) LLM calls per evaluation. At V17 sample rates (1–10% of production traffic) this is manageable; at full coverage of high-traffic systems it is not. Sample, don't exhaustively evaluate, unless the value justifies it.
+**5. Cost per evaluation $\times$ evaluation frequency.** V15 adds one (single-output) or two (pairwise with order-flip) LLM calls per evaluation. At V17 sample rates (1–10% of production traffic) this is manageable; at full coverage of high-traffic systems it is not. Sample, don't exhaustively evaluate, unless the value justifies it.
 
 **Quick test — V15 is the right pattern when:**
 
@@ -97,13 +97,13 @@ The judge is a *separate session* from the primary, with its own setup (the rubr
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Primary LLM** | producing the output to be evaluated | task input → output | see the rubric, or score itself. A primary that knows the rubric will optimise for the judge instead of the user. |
-| **Rubric** | the written evaluation criteria — dimensions, scales, one-sentence descriptions, edge-case rulings | — → fixed setup artifact | be vague, drift between runs, or live only in the heads of the team that wrote it. A rubric that is not a checked-in artifact is not a rubric. |
-| **Judge LLM** | applying the rubric to one (or two) outputs | rubric (setup) + input + output(s) → per-dimension scores + reasoning | generate the task answer, or rewrite the rubric mid-evaluation. The judge that helps fix the output has stopped being a judge. |
-| **Score Aggregator** | combining per-dimension scores into an actionable verdict (pass/fail, weighted total, regression delta) | dimension scores → single verdict | hide failing dimensions inside a passing average. The aggregator must surface any blocking-dimension failure even when the total looks fine. |
-| **Calibration Set** *(prerequisite)* | the human-labelled cases that prove the judge agrees with humans well enough to be trusted | held-out cases + human labels → judge-vs-human agreement metric | be drawn from the same data as the eval suite — a judge calibrated on the suite cannot detect drift on the suite. |
+| **Primary LLM** | producing the output to be evaluated | task input $\to$ output | see the rubric, or score itself. A primary that knows the rubric will optimise for the judge instead of the user. |
+| **Rubric** | the written evaluation criteria — dimensions, scales, one-sentence descriptions, edge-case rulings | — $\to$ fixed setup artifact | be vague, drift between runs, or live only in the heads of the team that wrote it. A rubric that is not a checked-in artifact is not a rubric. |
+| **Judge LLM** | applying the rubric to one (or two) outputs | rubric (setup) + input + output(s) $\to$ per-dimension scores + reasoning | generate the task answer, or rewrite the rubric mid-evaluation. The judge that helps fix the output has stopped being a judge. |
+| **Score Aggregator** | combining per-dimension scores into an actionable verdict (pass/fail, weighted total, regression delta) | dimension scores $\to$ single verdict | hide failing dimensions inside a passing average. The aggregator must surface any blocking-dimension failure even when the total looks fine. |
+| **Calibration Set** *(prerequisite)* | the human-labelled cases that prove the judge agrees with humans well enough to be trusted | held-out cases + human labels $\to$ judge-vs-human agreement metric | be drawn from the same data as the eval suite — a judge calibrated on the suite cannot detect drift on the suite. |
 
 The Primary and the Judge **must be distinct sessions** even when the same model serves both — distinct setups, distinct prompts, distinct invocations. Mixing them is the pattern's most common failure: a system that grades its own output with the same context that produced it is not evaluating, it is rationalising.
 

@@ -43,7 +43,7 @@ V11 is right when the agent loops, fails routinely, and would otherwise re-spend
 
 **1. Measure error tonnage.** Across a representative session, what fraction of context tokens are error text? If > 10% the pattern pays. If > 25% it is mandatory. If < 5% the loop is too clean to bother — the overhead is not justified.
 
-**2. Measure recurrence.** Across the same session, how often does the *same* error type recur with the same root cause? If a single class repeats ≥ 3 times the deduplicator alone earns the pattern its keep; without recurrence, the compaction-on-arrival half still pays as long as raw errors are large.
+**2. Measure recurrence.** Across the same session, how often does the *same* error type recur with the same root cause? If a single class repeats $\geq$ 3 times the deduplicator alone earns the pattern its keep; without recurrence, the compaction-on-arrival half still pays as long as raw errors are large.
 
 **3. Pick the compactor mechanism.** A code-only extractor (regex on exception type + message + top frame) is enough for clean, structured exceptions and costs nothing. An LLM compactor is needed when the error is unstructured — long compiler output, stack-of-stacks across a runtime, prose error bodies — and a one-line digest requires judgement. Default to code; reach for an LLM only when code cannot.
 
@@ -94,13 +94,13 @@ If errors are rare or trivial, raw-append suffices. If errors are large but *uni
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Error Compactor** | turning a raw error into one diagnostic line | raw exception / traceback / response body → `[type] at [loc]: [root cause]` digest | drop the root cause to save tokens — a digest without cause is no longer self-healing fuel. |
-| **Error History** | the recent compact error stream + a per-class counter | digest → updated stream (append-or-increment) | re-emit a digest that is already present; the counter is the de-duplicator. |
-| **Deduplicator** | classifying a new digest as same-as-previous or new | digest + history → match / no-match | classify on raw text — match on `(type, location, root-cause-key)`, not on the full string, or near-duplicates leak through. |
-| **Escalator** | acting on threshold breach | counts + thresholds → halt / human signal | absorb the failure silently; threshold breach is the *whole* point of counting. |
-| **Audit Sink** *(V14)* | persisting the raw error outside the context | raw error → trace span | be skipped — the compacted view in context is *additional to*, never *instead of*, the audit copy. |
+| **Error Compactor** | turning a raw error into one diagnostic line | raw exception / traceback / response body $\to$ `[type] at [loc]: [root cause]` digest | drop the root cause to save tokens — a digest without cause is no longer self-healing fuel. |
+| **Error History** | the recent compact error stream + a per-class counter | digest $\to$ updated stream (append-or-increment) | re-emit a digest that is already present; the counter is the de-duplicator. |
+| **Deduplicator** | classifying a new digest as same-as-previous or new | digest + history $\to$ match / no-match | classify on raw text — match on `(type, location, root-cause-key)`, not on the full string, or near-duplicates leak through. |
+| **Escalator** | acting on threshold breach | counts + thresholds $\to$ halt / human signal | absorb the failure silently; threshold breach is the *whole* point of counting. |
+| **Audit Sink** *(V14)* | persisting the raw error outside the context | raw error $\to$ trace span | be skipped — the compacted view in context is *additional to*, never *instead of*, the audit copy. |
 
 Five narrow responsibilities. The Compactor only summarises; the History only stores; the Deduplicator only matches; the Escalator only escalates; the Audit Sink only persists. The pattern's reliability comes from that separation — particularly between the Deduplicator (decides "is this new?") and the Escalator (decides "have we seen too many?"). Conflating them produces the most common failure: an agent that quietly retries forever because a counter increments but nothing acts on it.
 
@@ -133,7 +133,7 @@ A tool call, code execution, or API request fails. The raw error is handed simul
 - Start with a code-only compactor. A regex or structured-exception parser that produces `[ErrorType] at file:line: root_cause_snippet` handles 80% of cases at zero LLM cost. Add an LLM fallback only for the unstructured remainder.
 - Define the dedup key explicitly: `(exception_type, file:line, normalised_message)` is a strong default. Normalising the message — stripping numbers, paths, request IDs — is what makes two of the "same" error actually match.
 - Carry the count visibly: render in context as `[ConnectionError] at db.query line 42: connection refused (×4)`. The bracketed count is itself a prompt the agent can reason about.
-- Decide the threshold once, write it down. The 12-Factor reference value is ~3 consecutive same-class errors → escalate. Run-total budget is task-specific; cap it.
+- Decide the threshold once, write it down. The 12-Factor reference value is ~3 consecutive same-class errors $\to$ escalate. Run-total budget is task-specific; cap it.
 - Pair V11 with V9 unconditionally. V11 detects recurrence; V9 *acts* on the cap. Without V9 the dedup counter is decoration.
 - Pair with V14 unconditionally. The active-context view is for the agent; the audit view is for everyone else.
 - For tool wrappers, do the compaction at the wrapper boundary — every tool returns either a result or a compacted error, never a raw traceback up the stack.

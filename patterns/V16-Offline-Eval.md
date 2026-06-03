@@ -96,15 +96,15 @@ If continuous deploy makes "offline" meaningless, use **V17 Online Eval** as the
 
 ## Participants
 
-| Participant | Owns | Input → Output | Must not |
+| Participant | Owns | Input $\to$ Output | Must not |
 |---|---|---|---|
-| **Golden Set** | the curated test cases and their expected outputs / criteria | — → versioned dataset | be edited mid-run, contain only happy paths, or live without an owner — an unowned set decays into Goodhart bait. |
-| **Eval Runner** | executing the System Under Test against each case | golden set + SUT → per-case outputs | mutate the golden set, retry to make scores look better, or hide failed cases. |
-| **Scorer** | producing a verdict per case | input + output + expected → score / pass-fail + reason | invent its own criteria — every score traces back to a case's declared check (exact match, structured assertion, or V15 rubric). |
-| **Baseline Store** | the last-accepted aggregate and per-case scores | accepted run → durable record | be overwritten silently — a baseline update is a decision, logged. |
-| **Comparator** | finding regressions against the baseline | current scores + baseline → diff + verdict | flag noise as regression (apply a tolerance δ); but must never apply tolerance to safety / adversarial cases. |
-| **Deployment Gate** | the ship-or-block decision | comparator verdict → PASS / FAIL | be bypassed without an explicit, logged override; a bypass without record is theatre. |
-| **System Under Test** *(the agent)* | producing outputs to be scored | input → output | see the golden set during training, prompt-tuning, or fine-tuning — leakage invalidates the gate. |
+| **Golden Set** | the curated test cases and their expected outputs / criteria | — $\to$ versioned dataset | be edited mid-run, contain only happy paths, or live without an owner — an unowned set decays into Goodhart bait. |
+| **Eval Runner** | executing the System Under Test against each case | golden set + SUT $\to$ per-case outputs | mutate the golden set, retry to make scores look better, or hide failed cases. |
+| **Scorer** | producing a verdict per case | input + output + expected $\to$ score / pass-fail + reason | invent its own criteria — every score traces back to a case's declared check (exact match, structured assertion, or V15 rubric). |
+| **Baseline Store** | the last-accepted aggregate and per-case scores | accepted run $\to$ durable record | be overwritten silently — a baseline update is a decision, logged. |
+| **Comparator** | finding regressions against the baseline | current scores + baseline $\to$ diff + verdict | flag noise as regression (apply a tolerance δ); but must never apply tolerance to safety / adversarial cases. |
+| **Deployment Gate** | the ship-or-block decision | comparator verdict $\to$ PASS / FAIL | be bypassed without an explicit, logged override; a bypass without record is theatre. |
+| **System Under Test** *(the agent)* | producing outputs to be scored | input $\to$ output | see the golden set during training, prompt-tuning, or fine-tuning — leakage invalidates the gate. |
 
 The discipline of the pattern lives in the **Must not** column: the most common V16 failure is not the absence of a suite but the silent rotting of one — vibey case additions, drifting scoring criteria, baselines updated to "make the diff green," adversarial cases that quietly get tolerance applied because they fail too often.
 
@@ -125,7 +125,7 @@ A change event — a new prompt, a model upgrade, a tool refactor — triggers t
 **Costs**
 
 - Building the initial golden set is non-trivial work (often 1–3 engineer-weeks for a serious suite).
-- Scoring via V15 costs LLM calls — a 500-case suite × 1 judge call each, run on every deploy, is a real budget line.
+- Scoring via V15 costs LLM calls — a 500-case suite $\times$ 1 judge call each, run on every deploy, is a real budget line.
 - Maintenance is forever — cases must be added, retired, and rescored as the system and the world evolve.
 - A naively-built suite slows the team's deploy cadence without catching real regressions.
 
