@@ -1,6 +1,7 @@
 \usepackage{fancyhdr}
 \usepackage{eso-pic}
 \usepackage{tikz}
+\usetikzlibrary{calc}
 \usepackage{xcolor}
 
 % Pattern card stripe colours
@@ -13,20 +14,22 @@
 \newcommand{\clearpatternname}{\renewcommand{\currentpatternname}{}}
 
 % Draw pale yellow left stripe + dark hairline + rotated pattern name on every page
+% Uses current page + explicit offsets (left margin = 2.5cm, top = 2.8cm, bottom = 2.5cm)
 \AddToShipoutPictureBG{%
   \ifx\currentpatternname\empty\else
     \begin{tikzpicture}[remember picture, overlay]
+      % Stripe occupies x in [left-1.8cm, left-0.3cm], full text height
       \fill[patternbg]
-        ([xshift=-1.8cm]current page text area.north west)
+        ($(current page.north west) + (0.7cm, -2.8cm)$)
         rectangle
-        ([xshift=-0.3cm]current page text area.south west);
+        ($(current page.south west) + (2.2cm, 2.5cm)$);
       \draw[patternsep, line width=0.4pt]
-        ([xshift=-0.3cm]current page text area.north west)
+        ($(current page.north west) + (2.2cm, -2.8cm)$)
         --
-        ([xshift=-0.3cm]current page text area.south west);
+        ($(current page.south west) + (2.2cm, 2.5cm)$);
       \node[rotate=90, anchor=center, text=patternsep,
             font=\small\sffamily]
-        at ([xshift=-1.05cm]current page.center)
+        at ($(current page.west) + (1.45cm, 0)$)
         {\currentpatternname};
     \end{tikzpicture}
   \fi

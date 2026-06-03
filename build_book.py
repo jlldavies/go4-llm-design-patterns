@@ -116,6 +116,16 @@ def shift_headings(text: str, by: int = 1) -> str:
     return "\n".join(out_lines)
 
 
+def pattern_label(path: Path) -> str:
+    """Return 'K7 — Context Pruning' from the first H1 of a pattern file."""
+    first_line = path.read_text(encoding="utf-8").splitlines()[0]
+    title = first_line.lstrip("# ").strip()
+    m = re.match(r"([A-Z]\d+)\s+(?:—\s*)?(.+)", title)
+    if m:
+        return f"{m.group(1)} — {m.group(2)}"
+    return title
+
+
 # Escape literal backslash-letter sequences ("\n", "\t" etc) outside code
 # spans/fences and outside math spans so XeLaTeX doesn't see them as
 # undefined control sequences.
@@ -199,11 +209,17 @@ def assemble() -> str:
             body = read(path)
             first_line = body.splitlines()[0]
             title = first_line.lstrip("# ").strip()
+            label = pattern_label(path)
             parts.append(PAGE_BREAK)
+            # Stripe: set for this pattern
+            parts.append(f"\n```{{=latex}}\n\\setpatternname{{{label}}}\n```\n")
             parts.append(f"## {title}\n")
             rest = strip_first_h1(body)
             parts.append(shift_headings(rest, by=2))
             parts.append("\n")
+
+        # Stripe: clear before decision companion (decision pages have no stripe)
+        parts.append("\n```{=latex}\n\\clearpatternname\n```\n")
 
         # Decision companion file — appended after section's final pattern
         decision_file = PATTERNS / intro_file.replace(".md", "-DECISION.md")
