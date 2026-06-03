@@ -1,3 +1,9 @@
+# Generated build artefacts
+book.md
+
+# Development tool files (contain local paths)
+docs/
+
 # Internal working files — not for public repo
 LOG.md
 SECTION-REVIEW.md
