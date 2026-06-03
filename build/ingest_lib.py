@@ -158,10 +158,12 @@ def related_edges(text: str, self_id: str) -> dict:
         if lbl.group(1).lower().startswith("note"):
             continue
         etype = _edge_type(lbl.group(1))
-        # Fix 1: collect IDs only from bold spans (**...**), not from prose
-        bold_spans = re.findall(r'\*\*([^*]+)\*\*', line)
+        # Only inspect the part before the em-dash explanation; IDs in prose after
+        # the dash (anti-patterns, sandboxing requirements, etc.) are false edges.
+        head = line.split("—")[0]
+        bold_spans = re.findall(r'\*\*([^*]+)\*\*', head)
         ids = []
-        for span in bold_spans:
+        for span in bold_spans[1:]:  # skip spans[0] — that is the label
             for i in _REL_ID.findall(span):
                 if i != self_id and i not in ids:
                     ids.append(i)

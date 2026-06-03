@@ -125,4 +125,20 @@ eq(category_of("A3"), "Unknown")
 
 eq(strip_first_h1("# Title\n\nBody line"), "Body line")
 
+# Regression: bold IDs after em-dash must NOT be extracted as targets
+rp_real = (
+    "## Related Patterns\n"
+    "- **Sibling of** **R5 ReWOO** — opposite trade-off (CONFLICTS.md CRITICAL 1).\n"
+    "- **Sibling of** **R13 CodeAct** — same loop shape; R13 requires **V8 Tool Sandboxing**.\n"
+    "- **Required by** **V9 Bounded Execution** — unbounded R4 is anti-pattern **A3**.\n"
+    "- **Pairs with** **V14 Trajectory Logging** — undebuggable (**A15**).\n"
+    "- **Tool layer** — **I2 Function/Tool Call** for 1-5 tools, **I3 MCP Server** for 5+.\n"
+    "## Sources\n"
+)
+e = related_edges(rp_real, "R4")
+eq(e.get("siblings"), ["R5", "R13"])     # V8 (prose, post-em-dash) excluded
+eq(e.get("related"), ["V9"])             # Required-by demoted to related; A3 excluded
+eq(e.get("composes_with"), ["V14"])      # A15 excluded; Tool-layer targets (post-em-dash) not extracted
+assert "A3" not in str(e) and "A15" not in str(e) and "V8" not in str(e), e
+
 print("ALL INGEST TESTS PASSED")
