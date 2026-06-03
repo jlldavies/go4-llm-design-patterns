@@ -1,4 +1,4 @@
-# Chapter 0 — How the Machine Works: A Mechanistic Foundation for the Patterns
+# The Mechanical Foundation
 
 > *The patterns in this catalog are not heuristics layered over a black box. Each one is grounded in the mechanical behavior of the transformer at inference time. This chapter establishes that mechanical foundation at the level of precision the patterns require. A reader who internalizes it can derive most of the catalog's recommendations from first principles rather than accepting them on authority.*
 
@@ -6,7 +6,7 @@
 
 ## Why This Chapter Exists
 
-This chapter describes what actually happens inside the model at the matrix and tensor level — so that the mechanism citations throughout the catalog have a derivable foundation rather than a purely empirical one. It goes one level deeper than engineering blog posts and practitioner advice: those sources establish that certain approaches work; this chapter establishes why.
+This chapter derives twelve mechanistic principles from how transformers actually compute — from the attention bilinear form and KV cache structure through to prefix caching economics and subagent context bounding. It is a derivation resource: when a pattern entry cites a mechanism (for example, *mechanism 2 — n² compute cost*), this is where that citation resolves. You do not need to read this chapter to use the catalog. Read it when you want to understand why a pattern's costs are what they are, not just that they are.
 
 Mechanism citations in pattern files take the form **"(mechanism N)"**. That notation refers to the numbered sections below. A reader who needs the derivation for any cited mechanism should find it here.
 
