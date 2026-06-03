@@ -7,301 +7,40 @@ date: "May 2026"
 
 # Introduction
 
-In 1994, Gamma, Helm, Johnson, and Vlissides published *Design Patterns: Elements of Reusable Object-Oriented Software*. The book did not invent its patterns. Experienced engineers were already using them — the Observer, the Factory, the Strategy, the Decorator. What the Gang of Four did was name them, describe the forces each one resolves, and give practitioners a shared vocabulary precise enough to reason with. The vocabulary spread. A generation of engineers could now say "use a Strategy here" and mean something exact.
+Eighty-eight percent of AI agents never reach production. The ones that fail aren't failing because the model isn't good enough — they're failing because the engineering around the model is wrong. Wrong retrieval strategy. Wrong context management. No bounds on the agent loop. Token costs compounding at the square of context length on tasks engineers assumed were linear. A second model that would catch the errors the first cannot see in itself — never added because nobody had a name for it.
 
-AI engineering is in the position object-oriented programming was in before that book. The patterns exist. Practitioners at different companies, working on different systems, are independently discovering that routing works better with a classifier in front of it, that long-running agents need checkpointing, that a second model judging the first catches errors the first cannot see in itself. The techniques circulate as blog posts, conference talks, and GitHub repositories — each framed slightly differently, none connected to the others, none carrying the structural analysis that would let a new practitioner know *when* to use one, *why* it solves what it solves, or *what it trades away*.
+The patterns exist. Engineers at different companies are independently discovering that routing works better with a classifier in front of it, that long-running agents need checkpointing, that parallel workers sharing a stable context prefix should cache it once. The techniques circulate as blog posts, conference talks, and GitHub repositories — each framed slightly differently, none connected to the others, none carrying the analysis that would let a practitioner know *when* to use one, *why* it solves what it solves, or *what it costs*.
 
-This catalog applies the Gang of Four method to that body of knowledge.
+In 1994, Gamma, Helm, Johnson, and Vlissides faced a structurally similar problem in object-oriented software. They did not invent Observer, Factory, Strategy, or Decorator — experienced engineers were already using them. What they did was name them precisely, describe the forces each one resolves, and give practitioners a shared vocabulary to reason with. A generation of engineers could say "use a Strategy here" and mean something exact. The vocabulary spread because it was useful, not because it was novel.
 
-Each pattern in this book is treated as a solution to a *recurring design problem* in a *specific context* under *specific forces in tension*. A pattern earns its place by having a distinct Intent that no other pattern covers, a distinct set of Participants with distinct responsibilities, and a distinct Structure that cannot be reduced to another pattern plus an adaptor. Where a technique is a variant — the same mechanism applied to different content or with a different parameter — it is documented as a variant within its parent pattern, not given its own entry.
+This catalog applies that method to AI engineering. It is a homage to the Gang of Four approach, not a claim to their authority. The patterns documented here are already in practice — the goal is to name them precisely enough to be useful.
 
-The catalog covers seven categories. **Signal** patterns govern how instructions, personas, and examples are shaped before the model sees them. **Knowledge** patterns govern what information and memory the model has access to — what the field now calls context engineering. **Reasoning** patterns govern how a model structures its thinking: chain-of-thought, planning, tool use, search, reflection, and verification. **Orchestration** patterns govern how multiple inferences and agents are coordinated — chains, routers, parallel workers, hierarchies, and multi-agent collectives. **Reliability** patterns govern safety, cost, governance, and observability — the cross-cutting concerns that production systems cannot omit. **Integration** patterns govern how agents reach the world outside their prompt: tool calling, standardised protocols, and inter-agent discovery and delegation. **Humanizer** patterns govern how agents develop continuity, self-knowledge, and adaptive behaviour across sessions — the longitudinal layer that distinguishes an agent that learns from one that merely executes.
+The throughline throughout is simple: use the smallest sufficient pattern. Zero-shot before few-shot. Single agent before multi-agent. Retrieval only when it earns its context budget. The patterns here are not ranked by sophistication — a well-placed Zero-Shot is not a lesser engineering decision than a Tree of Thoughts. Each pattern is appropriate or inappropriate given the problem's actual requirements, the context budget available, and what the next simpler pattern fails to achieve.
 
-Ninety-four patterns are documented across these seven categories. Each entry gives you: an Intent (one sentence); a Motivation (the concrete problem and why it recurs); Applicability (when to use it and when not to); Decision Criteria (measurements and thresholds that distinguish this pattern from its alternatives); a Participants table (what each actor owns, what it must not do); an Implementation Sketch (an honest account of which steps are code and which require a configured language model session, with the prompt structure for each LLM step); verified open-source implementations; and a Related Patterns section that names the dependencies, the conflicts, and the upgrade paths.
+This book is for engineers building LLM systems in production: architects choosing between retrieval patterns, engineers implementing agent loops that need bounds, teams debugging why a multi-agent system costs ten times what was projected. It assumes you can write code. It does not assume you have read the transformer papers — that material is in the Mechanisms chapter at the back, there when you need it.
 
-The Participants table and the Decision Criteria section are where this catalog earns its keep. A pattern whose applicability cannot be stated in measurable terms is not yet understood well enough to be useful. A pattern whose participants cannot be given distinct *must-not* constraints is not yet decomposed finely enough. These disciplines, borrowed directly from the original Gang of Four method, are what separate a pattern from a technique and a catalog from a collection of examples.
+The catalog covers seven categories. **Signal** patterns govern how instructions, personas, and examples are shaped before the model sees them. **Knowledge** patterns govern context engineering — what information and memory the model has access to during a task. **Reasoning** patterns govern how a model structures its thinking: chain-of-thought, planning, tool use, reflection, and verification. **Orchestration** patterns govern how agents are coordinated — chains, routers, parallel workers, and hierarchies. **Reliability** patterns govern safety, cost bounds, and production hardening. **Integration** patterns govern how agents reach tools and other agents. **Humanizer** patterns govern continuity and adaptive behaviour across sessions.
 
-**How to read this book.** Begin with *Chapter 0: How the Machine Works* — it establishes the twelve mechanistic principles that all patterns in this book reference, from the attention bilinear form and KV cache structure to prefix caching economics and subagent context bounding. A reader who skips it can still use the catalog, but will encounter mechanism citations (e.g. "mechanism 5 — prefix caching") without the derivation behind them. The Pattern Catalog chapter is the map: read it once to understand the seven categories, the sub-bands within each, and the relationships between them. The category chapters — Signal, Knowledge, Reasoning, and so on — each open with a short introduction covering the forces every pattern in that category resolves and the skeleton structure they share; read these before diving into individual patterns. The pattern entries themselves are reference material: use them when you are choosing between alternatives, evaluating a design, or implementing a pattern for the first time.
+Each entry gives you: an Intent (one sentence); a Motivation (the concrete problem and why it recurs); Applicability (when to use it and when not to); Decision Criteria (measurements and thresholds that distinguish this pattern from its alternatives); a Participants table with explicit must-not constraints; an Implementation Sketch; and a Related Patterns section covering dependencies, conflicts, and upgrade paths.
 
-No production system uses a single pattern in isolation. The Implementation Sketches throughout this book name which patterns compose naturally — which Reliability patterns wrap which Orchestration patterns, which Knowledge patterns feed which Reasoning patterns. The Appendix on Conflicts documents the tensions that require explicit design decisions: patterns that must not run simultaneously, dependencies that are non-negotiable, and tradeoffs that cannot be resolved by convention.
+**How to read this book.** These entries are reference material — use them when you are choosing between alternatives, implementing a pattern for the first time, or recognising a failure mode you have encountered. You do not need to read sequentially. Jump to the category you need; each category introduction covers the forces every pattern in that group resolves before you reach individual entries.
 
-The vocabulary this book establishes is a tool for thinking, not a checklist for compliance. Use it to communicate precisely with colleagues, to evaluate proposals against known forces, and to recognise when a new problem is in fact an old problem that has already been solved.
+The Mechanisms chapter at the back derives twelve principles from how transformers actually compute — attention cost scaling, KV cache structure, prefix caching economics, subagent context bounding. It is there for when you want to understand *why* a pattern's costs are what they are, not just *that* they are. Mechanism citations in pattern entries (for example, *mechanism 2 — n² compute cost*) are cross-references to that chapter. You can use the catalog without opening it; it is a derivation of what the patterns already tell you.
+
+No production system uses a single pattern in isolation. The Implementation Sketches throughout name which patterns compose naturally — which Reliability patterns wrap which Orchestration patterns, which Knowledge patterns feed which Reasoning patterns. The Appendix on Conflicts documents the tensions that require explicit design decisions: patterns that cannot run simultaneously, dependencies that are non-negotiable, and tradeoffs that cannot be resolved by convention.
+
+The vocabulary this catalog establishes is a tool for thinking, not a checklist for compliance. Use it to communicate precisely with colleagues, to evaluate proposals against known forces, and to recognise when a new problem is in fact an old problem that has already been solved.
 
 
 
 ```{=latex}
+\tableofcontents
 \clearpage
 ```
-
-> *The patterns in this catalog are not heuristics layered over a black box. Each one is grounded in the mechanical behavior of the transformer at inference time. This chapter establishes that mechanical foundation at the level of precision the patterns require. A reader who internalizes it can derive most of the catalog's recommendations from first principles rather than accepting them on authority.*
-
----
-
-## Why This Chapter Exists
-
-This chapter describes what actually happens inside the model at the matrix and tensor level — so that the mechanism citations throughout the catalog have a derivable foundation rather than a purely empirical one. It goes one level deeper than engineering blog posts and practitioner advice: those sources establish that certain approaches work; this chapter establishes why.
-
-Mechanism citations in pattern files take the form **"(mechanism N)"**. That notation refers to the numbered sections below. A reader who needs the derivation for any cited mechanism should find it here.
-
----
-
-## 0.1 — The Inference Primitives (Mechanisms 1–7)
-
-### Mechanism 1 — Attention as a Learned Bilinear Form **[Grade A]**
-
-At each attention head, the core computation contracts a query against a key. Writing the query as $Q_\alpha \in \mathbb{R}^{d_\text{head}}$ (naturally a covector — a linear functional acting on the key space) and the key as $K^\alpha \in \mathbb{R}^{d_\text{head}}$ (a vector), the raw attention score is:
-
-$$s = Q_\alpha K^\alpha$$
-
-When both Q and K are represented as elements of $\mathbb{R}^{d_\text{head}}$ with the Euclidean metric $\delta_{\alpha\beta}$ providing an implicit identification of tangent and cotangent spaces, the contraction becomes the familiar dot product. But the weight matrices $W_Q$ and $W_K$ project from the same token embedding into Q-space and K-space via different learned maps. The full attention bilinear form in token-embedding space $\mathbb{R}^{d_\text{model}}$ is therefore:
-
-$$Q_i^\alpha K_{j\alpha} = e_i^\mu\,(W_Q)_\mu^{\;\alpha}\,\delta_{\alpha\beta}\,(W_K^T)^\beta_{\;\nu}\,e_j^\nu = e_i^\mu\,g_{\mu\nu}\,e_j^\nu$$
-
-where the **effective metric tensor** on embedding space is:
-
-$$g_{\mu\nu} = (W_Q W_K^T)_{\mu\nu}$$
-
-This is a learned non-symmetric $(0,2)$ tensor on $d_\text{model}$-space. It is not a Riemannian metric — it is neither symmetric nor positive-definite — but it plays the structural role of one: it defines what constitutes similarity between token embeddings at each head. Because $W_Q \neq W_K$, this similarity is directional: $s(e_i \to e_j) \neq s(e_j \to e_i)$. The query attends to the key; the reverse is not the same operation.
-
-Every head defines a different $g_{\mu\nu}$. Multi-head attention runs $H$ such bilinear forms in parallel, each carving out a different learned notion of token relevance. There is no single Euclidean geometry on the embedding space; there are $H \times L$ distinct learned geometries (one per head per layer).
-
-**Practical consequence:** What a model attends to is not Euclidean distance in embedding space — it is a head-specific, layer-specific, learned asymmetric structure. "Semantic similarity" is shorthand for proximity under this learned metric, which is why the same two tokens can be similar under one head and dissimilar under another.
-
-**What this grounds:** K-series retrieval pattern rationale (why embedding-space retrieval is head-specific); S2 few-shot ordering; K1 hybrid retrieval; the entire rationale for why prompt phrasing affects attention routing.
-
----
-
-### Mechanism 2 — n² Compute and KV Cache Memory Cost **[Grade A]**
-
-The attention matrix $QK^T \in \mathbb{R}^{n \times n}$ (where $n$ = sequence length) is computed at every layer for every head. The compute cost of prefill — processing all $n$ input tokens in one forward pass — is $O(n^2 d_\text{model})$ in FLOPs. Doubling the context quadruples the prefill cost.
-
-Token generation (the decode phase) is structurally different. At each step, only one new Q vector is computed; it is contracted against all $n$ cached K vectors. This is a matrix-vector product (not matrix-matrix), and is bounded by **memory bandwidth**, not FLOP count. The bottleneck is reading the KV cache from DRAM, not computing the attention. Generation latency scales with $n$, not $n^2$, but is dominated by memory bandwidth to the KV cache rather than arithmetic throughput.
-
-**The n² compounding is non-linear in cost.** Adding 100 tokens to a 1,000-token prompt costs more than adding 100 tokens to a 100-token prompt — not proportionally more, but quadratically more in prefill attention compute. Practitioners who model token costs as linear are systematically underestimating the cost of long prompts.
-
-**What this grounds:** Every pattern rationale that mentions "token cost," "context budget," or "sequence length limit." The n² fact is the mechanical basis for the entire K-series (context engineering) and for the subagent decomposition imperative in O-series patterns.
-
----
-
-### Mechanism 3 — The KV Cache as a Growing 4D Tensor **[Grade A]**
-
-The key-value cache at inference time is a 4-dimensional tensor of shape:
-
-$$\mathcal{C} \in \mathbb{R}^{L \times n \times n_\text{kv} \times d_\text{head}}$$
-
-where $L$ = number of layers, $n$ = tokens in context, $n_\text{kv}$ = number of KV heads (with grouped-query attention, $n_\text{kv} < n_\text{heads}$), and $d_\text{head}$ = head dimension. The cache grows monotonically during a session — tokens are appended, never removed or reordered. Causal masking makes the attention matrix lower-triangular: token $i$ can only attend to tokens $j \leq i$.
-
-At generation step $t$, the model computes a new Q for position $t$ and contrasts it against all $n+t-1$ cached K vectors across all $L$ layers. This is the full similarity search described under Mechanism 1, executed against the entire history on every generation step.
-
-**Memory cost per token:** approximately $2 \times L \times n_\text{kv} \times d_\text{head} \times \text{bytes\_per\_float}$. For a 70B-class model with GQA: $\approx 2 \times 80 \times 8 \times 128 \times 2 \approx 327$KB per token in context. A 100k-token context requires roughly 32GB of KV cache.
-
-**The KV cache does not persist across API calls.** Each new call to the Anthropic Messages API starts with a fresh KV cache. The only persistence mechanism is re-sending tokens (re-prefill) or using provider-side prefix caching (Mechanism 5). This is the architectural fact that makes all H-series (Humanizer) "memory" patterns file-retrieval operations, not model-state operations.
-
-**What this grounds:** All H-series memory patterns; K8 Working Memory; K9 Long Context; the cost model for all O-series multi-agent patterns; V10 Checkpointing.
-
----
-
-### Mechanism 4 — Lost-in-the-Middle as Q-K Space Geometry **[Grade B — empirically strong, partially derived]**
-
-Liu et al. (2024) documented a U-shaped recall curve over sequence position: recall is strong at the start and end of the context window, materially weaker for content placed in the middle. This is not an arbitrary empirical finding — it has a mechanical substrate, though the substrate is not fully derivable from first principles (hence Grade B).
-
-The Q and K projection matrices $W_Q$ and $W_K$ were trained on natural text. Natural text has strong local dependencies (adjacent and nearby tokens are semantically related) and strong document-boundary conventions (opening sentences state the topic; closing sentences summarize it). The learned projection matrices therefore embed a **recency bias** (small $i-j$ offsets produce stronger Q-K inner products — see Mechanism 12 on RoPE) and a **start-of-context anchoring** (opening position K vectors are densely attended in natural text and the model internalized this pattern).
-
-Middle K vectors are geometrically accessible — the attention computation can reach them — but statistically under-attended because the learned $W_Q$ and $W_K$ do not amplify those positions. The failure mode is not attention blindness; it is low attention weight mass assigned to middle positions relative to start and end.
-
-**Practical consequence:** Content placed in the middle of a long context is systematically less likely to influence the output than the same content placed at the start or end. This is a physical property of the Q-K geometry, not a soft preference. Pattern recommendations to "place critical content at the start or end" are derivable from this mechanism.
-
-**What this grounds:** K1, K6, K7, K9, K10, K11 rationale for context placement; S3 Persona placement advice; V6 Prompt Injection Shield defense rationale.
-
----
-
-### Mechanism 5 — Prefix Caching as Cache Engineering **[Grade A mechanism; Grade B operational specifics]**
-
-Provider-level prefix caching stores the KV cache state (Mechanism 3) for a stable prompt prefix. When a subsequent request sends the same prefix — identical tokens, same byte offsets — the provider injects the stored KV states directly into the generation step, bypassing prefill entirely. The savings follow from Mechanism 2: the $O(n^2)$ prefill cost for the cached prefix is not paid on cache hits.
-
-**Anthropic operational specifics (as of 2026):**
-- Minimum cacheable prefix: 1,024 tokens
-- Cache TTL: approximately 5 minutes
-- Cache write cost: approximately 125% of normal input token cost (a one-time overhead)
-- Cache read cost: approximately 10% of normal input token cost
-- Net saving on cache hit: approximately 90% of the prefill cost for the cached prefix
-
-**The cache key is the exact token sequence.** A single token difference anywhere in the prefix — a changed word, a reordered sentence, a different whitespace character — invalidates the cache for that position and all subsequent positions. Cache hit requires byte-identical prefix.
-
-**Design implication:** Prompt engineering is cache engineering. System prompts, tool definitions, persona statements, fixed few-shot examples — any content that is stable across requests — should be structured as the **longest possible stable prefix**, placed before any variable content. Variable content (the user's query, dynamic context) comes last. Every edit to the stable prefix resets the cache write cost.
-
-For multi-agent systems (Mechanism 6), the shared context given to all workers should be designed as a single cacheable prefix exceeding the minimum threshold. All workers should be dispatched within the TTL window so they share the cache write paid by whichever worker fires first.
-
-**What this grounds:** S2 Few-Shot static vs dynamic variant cost difference; S3 Persona placement; H1 Identity Persistence operational discipline; K9 Long Context session economics; the new O18 Cache-Warmed Worker Pool pattern.
-
----
-
-### Mechanism 6 — Subagent Decomposition as Context Bounding **[Grade A]**
-
-Each spawned subagent has its own KV cache, its own sequence length $n$, and its own $O(n^2)$ attention compute budget. This is not a logical property of multi-agent architecture — it is a physical property of how the inference computation is partitioned across API calls.
-
-In a single-agent system handling a complex task, $n$ grows as the agent accumulates tool outputs, intermediate reasoning, and conversation history. The n² attention cost grows with every turn. In a multi-agent system:
-
-- The orchestrator maintains a compact context: task assignments and returned results only.
-- Each worker maintains a focused context: its brief, its tools, and its internal reasoning — which is discarded after the worker returns its result.
-- The orchestrator's $n$ grows slowly (one compact result per worker, not the full internal trajectory).
-- Each worker's $n$ is bounded by the scope of its single sub-task.
-
-The quality win of O6 Orchestrator-Workers over O1 Single Agent is structural, not emergent. Separation of orchestration context from execution context bounds the n² cost per agent and keeps each agent in the regime where its Q-K attention weights are well-distributed over a small, high-signal context rather than diluted over a large, mixed context (Mechanism 4).
-
-**What this grounds:** O4 Parallelization; O6 Orchestrator-Workers; O7 Supervisor Hierarchy; O17 Agent Isolation; the mechanical rationale for why O6 + O17 is mandatory, not optional.
-
----
-
-### Mechanism 7 — Stochastic Generation and Autoregressive Commitment **[Grade A]**
-
-Token generation is sampling from a learned probability distribution over the vocabulary. Given the sequence of tokens $t_1, t_2, \ldots, t_{k-1}$, the model outputs a distribution $P(t_k \mid t_1, \ldots, t_{k-1})$ and samples the next token from it. Generation is **autoregressive**: each sampled token becomes part of the conditioning sequence for the next token.
-
-Two consequences are mechanically unavoidable:
-
-1. **No revision.** Once token $t_k$ is sampled and appended, all subsequent tokens are conditioned on it. The model does not revise $t_k$ — it elaborates on it. A reasoning chain that commits to a wrong intermediate conclusion conditions all subsequent tokens on that conclusion. This is the mechanical basis of **sycophantic reasoning** in chain-of-thought patterns: the model produces tokens that extend the most probable continuation of what it has already emitted, not the most correct answer to the original question.
-
-2. **Determinism requires external enforcement.** Token generation cannot be made deterministic by prompt instruction alone. Routing the same computation to a deterministic system (a tool, a code executor, a database lookup) is the only way to eliminate sampling variance. This is the mechanical basis for the "use tools, not the model" discipline in I-series and V-series patterns.
-
-**What this grounds:** Every R-series reasoning pattern rationale; the determinism argument in I2 Function Call, I3 MCP, R13 CodeAct, R14 Program of Thoughts; V-series reliability patterns that use deterministic enforcement; H6 Inner Monologue caveats.
-
----
-
-## 0.2 — The Memory and Storage Hierarchy (Mechanisms 8–10)
-
-### Mechanism 8 — Model Size Matching to Task Complexity **[Grade A cost; Grade B thresholds]**
-
-Large model capacity (parameter count) is required for complex, multi-step reasoning that integrates many latent factors. It is not required for routing, classification, format conversion, exact lookup, data loading, or other tasks that require recall and pattern-matching rather than reasoning. The generation cost for the same token count scales with model size; using a 70B-parameter model for a routing decision costs an order of magnitude more in memory bandwidth and FLOPs than a 7B model for the same decision.
-
-Correct multi-agent architecture assigns model capacity to reasoning complexity:
-- Orchestrators (which must reason about task decomposition and synthesis): strongest available model.
-- Workers handling complex sub-tasks: mid-tier models.
-- Workers handling simple lookup/classification: small, fast models.
-
-This is not a preference — it is a cost-structure fact. The practical thresholds for when a task is "complex enough" to require a large model are empirical (hence Grade B on thresholds), but the direction of the principle is Grade A.
-
-**What this grounds:** O3 Routing model selection; O6 Orchestrator model assignment (strongest orchestrator, lighter workers); I2 Function Call schema routing; V4 Dual LLM size assignment.
-
----
-
-### Mechanism 9 — Storage Tier Hierarchy **[Grade A cost structure; Grade B use patterns]**
-
-The KV cache does not persist across API calls (Mechanism 3). All information that must survive a session boundary must be written to external storage and retrieved into context. This creates a hierarchy of storage tiers with distinct cost and access properties:
-
-| Tier | Per-token read cost | Capacity | Appropriate content |
-|---|---|---|---|
-| **In-context** | $O(n^2)$ attention compute per token present | Session-bounded by context window | Current task working set only — discard after use |
-| **Prefix cache** | ~10% of normal input cost on hit | Provider TTL ~5 min (Anthropic) | Stable system prompts, tool schemas, fixed examples |
-| **Vector index** | Retrieval quality-bounded | Unbounded | Semantic document retrieval; variable-key lookup |
-| **Exact KV store** | Deterministic, low-latency | Unbounded | Config, code artifacts, known-key facts |
-| **Cold storage** | High latency | Unbounded | Source of truth, archival, infrequent access |
-
-The critical design axis is **write cost vs. read cost**. In-context storage pays zero write cost (no curation step) but pays $O(n^2)$ on every read (every turn). External storage pays a write cost (a curation LLM call to extract and structure the information) but pays near-zero read cost per token retrieved (only the retrieved chunk enters context). The correct tier for a given piece of information depends on how often it is needed, how stable it is, and how tolerant the task is of retrieval errors.
-
-**Common error:** placing in context what belongs in an exact KV store. A 500-token configuration block that never changes costs $O(n^2)$ attention compute on every turn of every session. Externalising it and retrieving it once costs a small retrieval call. The prefix cache (Mechanism 5) is the middle tier: stable, zero-marginal-cost on hit, but TTL-bounded and minimum-size-gated.
-
-**What this grounds:** K-series memory patterns (K8 Working Memory, K10 Long-Term Memory, K11 Observational Memory, K12 Karpathy Memory); H-series session management; I-series tool result handling.
-
----
-
-### Mechanism 10 — No Cross-Session Persistence: All Memory Is Retrieval **[Grade A]**
-
-The model's weights do not change between API calls. There is no mechanism by which a conversation causes the model to "learn" or "remember" anything in its parameters. The KV cache is session-scoped (Mechanism 3) and does not persist across calls.
-
-All apparent inter-session memory is a file-retrieval operation: a document (CLAUDE.md, MEMORY.md, a skills file, a retrieved database record) is read into the context at the start of the new session. The model then conditions on the retrieved content as part of its input. The "memory" is the quality and completeness of the retrieved artefact, not a model capability.
-
-**The compounding of "skills" and "memory" over sessions is entirely a function of retrieval quality.** A skill that "gets smarter over time" does so because the skill file was updated with better instructions, not because the model updated its weights. A memory system that degrades over time does so because retrieved content has become stale or irrelevant, not because the model "forgot." The design lever is the write discipline of the external store and the retrieval quality of the search — not the model itself.
-
-**What this grounds:** All H-series patterns; K10/K11/K12 design rationale; the widely-held but incorrect folk-claim that "skills compound across sessions" (they do not — all compounding is in the retrieved files, not the model weights).
-
----
-
-## 0.3 — The Positional Architecture (Mechanisms 11–12)
-
-### Mechanism 11 — Context Compaction for Long-Running Systems **[Grade A mechanism; Grade B trigger thresholds]**
-
-In a long-running agent session (an O8 Loop Agent, or any agentic workflow with many turns), the KV cache grows monotonically (Mechanism 3). Without intervention, $n$ eventually approaches the context window limit. The practical cost grows with $n$ even before the limit is hit: attention quality degrades as the middle of the context fills with superseded reasoning (Mechanism 4), and per-turn cost rises as the $O(n^2)$ factor grows.
-
-Context compaction is the operation of replacing a span of prior context with a compressed summary — a lossy, non-deterministic (Mechanism 7) transformation that reduces $n$ while attempting to preserve the information relevant to future turns. The critical properties:
-
-- **Lossy:** compressed content cannot be fully reconstructed from the summary. A detail compressed away is gone.
-- **Non-deterministic:** LLM summarisation of the same span produces different outputs on different runs. Compaction is not a hash — it is another stochastic generation step.
-- **Invalidates prefix cache:** any edit to a prior position in the token sequence invalidates the KV cache for that position and all subsequent positions (Mechanism 5). Compaction must be treated as a cache-boundary reset.
-
-The **"early decision" problem** in automated systems is a specialised case. When a system prompt contains option menus, routing conditions, or initialisation decisions, those tokens remain in $n$ for the entire session after the decision is made — paying $O(n^2)$ attention cost for content that has no further informational value. Correct architecture: route with a compact stable cacheable prefix (Mechanism 5), load only the relevant branch, compact prior turns to a decision-and-state summary before re-entering the loop.
-
-**Trigger heuristics (Grade B):** compact when the reasoning trajectory exceeds the last N turns that remain relevant, or when $n$ exceeds a threshold fraction of the context window. The exact threshold is task-dependent.
-
-**What this grounds:** O8 Loop Agent compaction discipline; H-series session management; K7 Context Pruning rationale; K6 Context Compression operational constraints.
-
----
-
-### Mechanism 12 — RoPE as an SO(d_head) Lie Group Action **[Grade A]**
-
-Rotary positional encoding applies a rotation matrix $R(i\theta) \in \text{SO}(d_\text{head})$ to each query and key before the attention contraction, where $\theta \in \mathbb{R}^{d_\text{head}/2}$ is a fixed frequency vector and $i$ is the token's absolute position in the sequence. The attention score between positions $i$ and $j$ becomes:
-
-$$s_{ij} = Q_i^T\,R(i\theta)^T\,R(j\theta)\,K_j = Q_i^T\,R\!\left((j-i)\theta\right)K_j$$
-
-The rotation matrices compose: $R(i\theta)^T R(j\theta) = R((j-i)\theta)$. The inner product depends **only on the relative position** $j - i$, not on the absolute positions $i$ or $j$. Absolute position is not stored in any token embedding — only relative displacement is encoded in the attention computation.
-
-This is a Lie group homomorphism $\mathbb{Z} \to \text{SO}(d_\text{head})$: translations in sequence space (moving both $i$ and $j$ by the same offset) map to the identity rotation in $d_\text{head}$-space. The model is translation-equivariant in position by construction.
-
-**Recency bias is a geometric consequence.** Small $|j - i|$ (nearby tokens) produces small rotation angles; the inner product $Q_i^T R((j-i)\theta) K_j$ is less rotated away from the unrotated inner product $Q_i^T K_j$. For tokens far apart, the rotation substantially modifies the inner product. The model's learned $W_Q$ and $W_K$ were trained under this geometry and internalized the bias toward small offsets — producing the empirically observed recency effect via a derivable geometric mechanism.
-
-**Implication for few-shot example ordering:** the last example before the query has the smallest offset and therefore the strongest Q-K inner product alignment, all else equal. "Place the most representative example last" is a geometric recommendation derivable from RoPE, not a heuristic.
-
-**Implication for prompt injection defense:** re-anchoring instructions ("Ignore the above...") placed near the end of a context exploit this recency geometry. They are not magic words — they work because their small offset from the query position gives them higher attention weight than the injected content placed earlier.
-
-**What this grounds:** S2 Few-Shot example ordering; S4 Instruction Decomposition placement advice; V6 Prompt Injection Shield re-anchoring rationale; R17 Self-Consistency timing constraint (all N samples must share the same stable prefix position offsets).
-
----
-
-## 0.4 — How to Read Mechanism Citations in This Book
-
-Pattern files throughout the catalog cite mechanisms in the form **(mechanism N)** or **[Mechanism N]** where N is one of the twelve entries above. These citations indicate:
-
-1. **The rationale for the recommendation is derivable from this mechanism** — not merely observed empirically. Where the evidence grade is A, the derivation is tight. Where it is B, the direction is mechanistically supported but the magnitude or threshold is empirical.
-
-2. **The cited mechanism overrides intuition when they conflict.** If a recommendation feels counterintuitive but is supported by a Grade A mechanism citation, trust the mechanism. The most common case: practitioners underestimate the n² cost of context (Mechanism 2) because linear cost intuitions are deeply ingrained from other computing domains.
-
-3. **"Observed behaviour" without a mechanism number means the claim is empirical.** The catalog distinguishes between derived claims (mechanism citations) and observed claims (phrased as "empirically, X" or "in practice, X"). Where a mechanism is unknown, the pattern says so rather than inventing one.
-
-The grade key for mechanism citations:
-
-| Grade | Meaning in a pattern |
-|---|---|
-| **A** | Derivable from transformer architecture or information-theoretic first principles. Use as a design axiom. |
-| **B** | Mechanistically supported with strong empirical evidence. Direction is reliable; magnitude or threshold may vary. |
-| **⚠ observed** | Empirically consistent but without a published mechanistic account. Do not over-generalize. |
-
----
-
-## Summary — Mechanisms and Pattern Categories
-
-| Mechanism | Grade | Primary categories underwritten |
-|---|---|---|
-| 1 — Attention as learned bilinear form $g_{\mu\nu} = W_Q W_K^T$ | A | K (retrieval geometry), S (prompt routing), I (tool schema cost) |
-| 2 — n² compute and KV cache memory cost | A | K (context budget), O (decomposition rationale), V (cost accounting) |
-| 3 — KV cache as growing 4D tensor; no cross-call persistence | A | H (memory = retrieval), K (working memory), V (checkpointing) |
-| 4 — Lost-in-middle as Q-K geometric under-attendance | B | K (content placement), S (prompt ordering), V (injection defense placement) |
-| 5 — Prefix caching as cache engineering (provider-level KV reuse) | A/B | S (stable prefix design), H (Genesis State caching), O (worker fan-out timing) |
-| 6 — Subagent decomposition as per-agent n bounding | A | O (all multi-agent patterns), the O6+O17 composition law |
-| 7 — Stochastic generation and autoregressive commitment | A | R (all reasoning patterns), I (deterministic tools), V (enforcement discipline) |
-| 8 — Model size matching to task complexity | A/B | O (model assignment), I (routing model), V (dual-LLM size) |
-| 9 — Storage tier hierarchy (write cost vs read cost axis) | A/B | K (memory tier selection), H (session management), I (result handling) |
-| 10 — No cross-session persistence; all memory is retrieval | A | H (all memory patterns), K (long-term memory design) |
-| 11 — Context compaction; early-decision cost amortization | A/B | O (loop patterns), K (pruning/compression triggers) |
-| 12 — RoPE as SO($d_\text{head}$) Lie group action; relative-only position | A | S (example ordering), V (injection re-anchoring), R (timing of parallel samples) |
-
----
-
-*This chapter is the mechanistic spine. Every pattern that cites a mechanism number is claiming that its recommendation follows from the derivation above. Hold that claim to the evidence grade it carries.*
-
 
 # The Pattern Catalog
 
 *A pattern language for AI engineering, structured analogously to the Gang of Four.*
-*Updated after deep research sweep including arXiv papers, HN community discussions, developer practitioner blogs, and empirical studies.*
 
 ---
 
@@ -321,465 +60,19 @@ The original GoF had three categories: Creational, Structural, Behavioural. AI e
 
 ---
 
-## Category I — Signal Patterns
+**Signal patterns** govern how instructions, personas, and examples are shaped before the model sees them — the prompt design surface.
 
-*How you shape the instruction, persona, and examples given to the model.*
-*These are the "prompt engineering" layer — framed as design decisions with known forces and tradeoffs.*
+**Knowledge patterns** govern context engineering: what information and memory the model has access to during a task, and how that context is assembled, retrieved, compressed, and persisted.
 
-| # | Pattern Name | Also Known As | Intent | When to Use |
-|---|---|---|---|---|
-| S1 | **Zero-Shot** | Direct Instruction | Task with no examples; rely on model priors | Simple, well-defined tasks where model knowledge is sufficient |
-| S2 | **Few-Shot** | In-Context Learning | Provide examples to demonstrate desired format or behaviour | Format control, style matching, novel task types |
-| S3 | **Persona / Role** | Role Prompting | Assign the model an identity to frame knowledge and tone | Expert framing, domain-specific tasks, tone alignment |
-| S4 | **Instruction Decomposition** | Step Prompting | Break complex instruction into numbered sequential steps | Multi-step tasks with clear ordering |
-| S5 | **Constraint Framing** | Negative Prompting | Define what model must NOT do as prominently as what it should | Safety-sensitive, compliance, avoiding known failure modes |
-| S6 | **Output Template** | Template Filling | Provide skeleton of expected output for model to complete | Structured data extraction, consistent formatting |
-| S8 | **Meta-Prompt** | Auto-Prompting | Model generates or refines its own prompt | Self-optimising workflows; experimental; cost intensive |
-| S9 | **Constitutional Framing** | Constitutional AI | Embed a set of principles the model applies to self-critique | Alignment enforcement, safety-critical contexts |
+**Reasoning patterns** govern how a model structures its thinking: chain-of-thought, planning, tool use, reflection, search, and verification.
 
-*Former S7 Self-Consistency Voting relocated to **R17** (Reasoning, band III-C). Former S10 Chain of Density folded into **K6 Context Compression** as a named Variant. S7 and S10 are intentional gaps in the Signal numbering.*
+**Orchestration patterns** govern how multiple inferences and agents are coordinated — chains, routers, parallel workers, hierarchies, and multi-agent collectives.
 
-**Key distinctions:**
-- S1–S4 are present in virtually every production system
-- S5 is critically underused: "define what not to do" has asymmetric value in safety contexts
-- S8 Meta-Prompt costs significantly more than S1–S6 / S9; measure before using
-- S9 (Constitutional Framing) applies at both training time (Anthropic's CAI) and inference time (agent runtime constitution)
+**Reliability patterns** govern the cross-cutting concerns that production systems cannot omit: safety bounds, cost control, observability, evaluation, and recovery.
 
----
+**Integration patterns** govern how agents reach the world outside their prompt: deterministic API calls, typed tool calling, standardised protocol servers, and inter-agent delegation.
 
-## Category II — Knowledge Patterns
-
-*How you construct and curate what the model knows during a task.*
-*The shift from "prompt engineering" to "context engineering" is the shift from Category I to Category II thinking.*
-
-*Reviewed and rebuilt: 15 draft patterns reduced to 11 by the fundamentality test (a pattern that decomposes into other patterns plus an adaptor is not fundamental). Each pattern has a full 13-field GoF page at `patterns/Kn-*.md`.*
-
-### II-A — Retrieval
-
-| # | Pattern Name | Also Known As | Intent | When to Use |
-|---|---|---|---|---|
-| K1 | **Vanilla RAG** | Basic Retrieval, Naive RAG | Retrieve relevant chunks at query time; inject into context | Simple Q&A, static corpora, well-defined document sets |
-| K2 | **Query Transformation** | Query Rewriting; HyDE, multi-query, step-back are *variants* | Transform the raw query into derived queries that retrieve better | Query/document mismatch, ambiguous or conversational or compound queries |
-| K3 | **GraphRAG** | Graph Retrieval | Index the corpus as an entity-relationship graph | Multi-hop relational queries; global summary needs |
-| K4 | **RAPTOR** | Hierarchical RAG | Index the corpus as a recursive summary tree | Query diversity; corpora with hierarchical structure |
-| K5 | **Adaptive RAG** | Self-Reflective RAG; Self-RAG, Corrective RAG are *variants* | Wrap retrieval in an evaluate-and-control loop | Mixed query streams; factuality-critical; possibly stale corpora |
-
-### II-B — Context-window management
-
-| # | Pattern Name | Also Known As | Intent | When to Use |
-|---|---|---|---|---|
-| K6 | **Context Compression** | Summarisation, Compaction | Summarise context that no longer fits (lossy) | Long-running agents; context overflow prevention |
-| K7 | **Context Pruning** | Selective Recall | Remove spent or irrelevant spans without summarising (lossless) | Spent tool outputs; finished sub-task context |
-| K8 | **Working Memory / Scratchpad** | In-Context Scratch | An explicit in-context space the model writes to itself | Multi-step reasoning; intermediate state management |
-| K9 | **Long Context** | Context Stuffing, No-RAG | Hold the whole working set in a large window instead of retrieving | Working set fits an affordable window; retrieval not justified |
-
-### II-C — Memory
-
-| # | Pattern Name | Also Known As | Intent | When to Use |
-|---|---|---|---|---|
-| K10 | **Long-Term Memory** | Persistent Memory; episodic, semantic, procedural are *variants* | An external store of flat fact-shaped items, retrieved by similarity | Agents expected to remember preferences, decisions, isolated facts across sessions |
-| K11 | **Observational Memory** | Agent-Centric Memory, Seen-First Memory | The raw activity record as primary memory; cache-friendly (the Karpathy framing's raw-log branch) | Long-running agentic sessions; provider supports prompt caching; cost is the lever |
-| K12 | **Karpathy Memory** | Curated Memory, Self-Edited Memory, Agent-Authored Wiki | The LLM curates structured, dense notes the agent reads (the Karpathy framing's curated-notes branch) | Read-frequency dominates write-frequency; structure worth preserving; editability matters |
-| K13 | **Retrieval Bundle** | Agent Operating Context, Typed Memory Contract | Before writing retrieval code, specify the exact operational context bundle a workflow type always needs — by field, source, data shape, freshness, and authorization — then build assembly to deliver it reliably | Recurring agent workflows; rediscovery cost measurable (>30% of token budget on context assembly); multiple data shapes required |
-
-**Key distinctions:**
-- II-A (K1–K5, K13) is about retrieval strategy and specification; K13 is the design-time prerequisite for K1–K5 and the memory patterns. Selection depends on corpus structure and query type.
-- II-B (K6–K9) is about the live context window; K9 Long Context is the architectural alternative to retrieval itself.
-- II-C (K10–K12) is about persistence and curation: K10 cross-session flat facts, K11 in-session raw log, K12 LLM-curated structured notes. K11 and K12 are the *raw-log* and *curated-notes* branches of the Karpathy framing of agent memory; they typically run together.
-- K1 vs K9 (retrieve vs long window) is the primary architectural decision of the category; benchmark both on your actual query workload at your corpus size — see the Decision Criteria in the K1 and K9 pattern entries.
-- Four data shapes require different retrieval primitives: fuzzy prose → K1/K2; structured documents → K4; governed tabular data → semantic layer; relational knowledge → K3. K13 is where the shape-to-primitive mapping is specified.
-- Reduced from 15: HyDE → variant of K2; Self-RAG + CRAG → merged as K5; episodic/semantic/procedural → merged as K10; Agent Isolation → moved to Orchestration (O17).
-
----
-
-## Category III — Reasoning Patterns
-
-*How a model or agent structures its thinking process to solve a problem.*
-*These govern the shape of thought, not just its content. Each represents a different computational cost / quality / adaptability tradeoff.*
-
-| # | Pattern Name | Also Known As | LLM Calls | Adaptation | Best For |
-|---|---|---|---|---|---|
-| R1 | **Zero-Shot CoT** | "Think step by step" | 1 | None | Quick reasoning improvement; no examples needed |
-| R2 | **Few-Shot CoT** | Exemplar CoT | 1 | None | Consistent reasoning format with examples |
-| R3 | **Plan-and-Solve** | Explicit Planning | 2 | Medium (replan) | Well-defined multi-step workflows; inspectable before execution |
-| R4 | **ReAct** | Reason+Act Loop | N per-step | High | Exploratory tasks; open-ended; unpredictable paths |
-| R5 | **ReWOO** | Reasoning Without Observation | 2 total | None | Independent parallel lookups; 5× token efficiency over ReAct |
-| R6 | **Self-Ask** | Decomposition | 1+N follow-ups | Low | Compositional multi-hop questions |
-| R7 | **Reflexion** | Verbal Reinforcement | N × retries | Meta-level | Clear pass/fail criteria; automated success measurement |
-| R8 | **Self-Refine** | Generate-Critique-Refine | N iterations | Same model | General quality improvement; no separate judge needed |
-| R9 | **Tree of Thoughts** | ToT | N (branching) | Via search | Hard open-ended problems; when path is unknown |
-| R10 | **Language Agent Tree Search** | LATS / MCTS | N (tree search) | Full backtrack | Highest-quality reasoning; very expensive |
-| R11 | **Buffer of Thoughts** | BoT | 1+template retrieval | Via templates | 12% cost of ToT/GoT; reusable thought-templates at meta-level |
-| R12 | **Skeleton-of-Thought** | SoT | 1 outline + N parallel | None | Parallel generation; reduces latency; structured long-form output |
-| R13 | **CodeAct** | Executable Code Actions | N (with execution) | High (self-debug) | Multi-tool tasks; 20pp higher accuracy than JSON tool calls; self-debugging |
-| R14 | **Program of Thoughts** | PoT | 1+execution | None | Numerical/mathematical tasks; delegates computation to executor |
-| R16 | **Talker-Reasoner** | System 1/System 2 | Dual async | Full | Real-time + deliberative combined; latency-sensitive with quality needs |
-
-**Key decision guide:**
-```
-Need token efficiency? → ReWOO (R5) — 5× over ReAct
-Need mid-run adaptation? → ReAct (R4)
-Need guaranteed quality with retries? → Reflexion (R7)
-Need search over solution space? → ToT (R9) or LATS (R10)
-Need to call multiple tools efficiently? → CodeAct (R13)
-Need parallel generation? → Skeleton-of-Thought (R12)
-Need math/computation? → Program of Thoughts (R14)
-```
-
-**The "Something-of-Thought" family (Towards Data Science taxonomy):**
-CoT → ToT → GoT → BoT → SoT — each adds structure or efficiency to the reasoning chain.
-
----
-
-## Category IV — Orchestration Patterns
-
-*How multiple agents, workflows, and tools are coordinated to accomplish complex tasks.*
-*This is the systems design layer. Patterns here are composable with Category III reasoning patterns.*
-
-### IV-A: Workflow Patterns (deterministic, lower complexity)
-
-| # | Pattern Name | Also Known As | Intent | Complexity |
-|---|---|---|---|---|
-| O1 | **Single Agent** | Autonomous Agent | One LLM + tools + system prompt handles full task | Low |
-| O2 | **Prompt Chaining** | Pipeline / Sequential | Output of one LLM call feeds the next in fixed order | Low |
-| O3 | **Routing** | Classifier-Dispatcher | Classify input → direct to specialised handler | Medium |
-| O4 | **Parallelization** | Fan-out Fan-in | Simultaneous LLM calls; outputs aggregated | Medium |
-
-### IV-B: Agentic Patterns (dynamic, higher complexity)
-
-| # | Pattern Name | Also Known As | Intent | Complexity |
-|---|---|---|---|---|
-| O5 | **Evaluator-Optimizer** | Generator-Critic | Separate generator and judge agents; iterative improvement | Medium |
-| O6 | **Orchestrator-Workers** | Hub-and-Spoke | Central LLM dynamically delegates to worker LLMs | High |
-| O7 | **Supervisor Hierarchy** | Hierarchical Agents | Multi-level tree: supervisor → sub-orchestrators → workers | High |
-| O8 | **Loop Agent** | Agentic Loop | Sequence of agents repeats until termination condition met | Medium |
-| O9 | **Multi-Agent Reflection** | Ensemble Critique | Multiple agents independently critique the same output | High |
-| O10 | **Swarm / Mesh** | Peer-to-Peer Agents | Agents coordinate without central coordinator; emergent | Very High |
-
-### IV-C: Specialised Coordination Patterns
-
-| # | Pattern Name | Also Known As | Intent | Complexity |
-|---|---|---|---|---|
-| O11 | **Blackboard System** | Shared Memory Board | Central shared memory; agents read/write; dynamic agent activation | High |
-| O12 | **Debate / Deliberation** | Devil's Advocate | Multiple agents argue opposing positions before synthesis | High |
-| O13 | **Negotiation** | Multi-Party Consensus | Agents with different objectives negotiate mutually acceptable outcome | Very High |
-| O14 | **Single Information Environment** | SIE | Agents own specific datasets; coordinator routes queries | Medium |
-| O15 | **Agent Handoff** | Context Transfer | Structured state transfer between agents mid-interaction | Medium |
-| O16 | **Hybrid Control Flow** | Primitive Stack | Stack multiple loop primitives (ReAct + plan-execute + retry) | Varies |
-| O17 | **Agent Isolation** | Clean Context, Context Quarantine | Delegate a sub-task to a sub-agent with a fresh, isolated context | Context hygiene; parallel sub-tasks; preventing context pollution |
-| O18 | **Cache-Warmed Worker Pool** | Primed Agent Pool, Prefix-Warm Fan-Out | Before dispatching parallel workers, establish a stable shared context as a provider-cached prefix so all workers hit the KV cache rather than independently re-paying prefill cost | Fan-out of N≥3 workers; shared prefix >1024 tokens; all workers dispatched within provider TTL (~5 min) |
-
-**Key distinctions:**
-- O1–O4 are deterministic; highly testable; prefer when task allows
-- O2 (Prompt Chaining) vs O6 (Orchestrator-Workers): O2 is fixed decomposition; O6 is dynamic — use O2 when you can
-- The scaffold taxonomy finding: 11/13 production agents use O16 (multiple stacked primitives), not a single pattern
-- O11 (Blackboard): "achieves SOTA reasoning with lower token costs than static pipelines" — underused
-- O10 (Swarm): experimental; no production consensus; most systems use O7 instead
-- O4 (Parallelization) is the **most commonly missed optimisation** in production systems
-- O18 (Cache-Warmed Worker Pool) is the **most commonly missed cost optimisation** in fan-out systems — identical shared prefixes across parallel workers should always be cached
-
-**Composition law**: Most production systems are O6 + O4 + {R4 inside each worker} + {O17 for context isolation} + {O18 for cache efficiency on shared worker context}.
-
----
-
-## Category V — Reliability Patterns
-
-*How AI systems stay safe, bounded, cost-controlled, auditable, and recoverable.*
-*These are cross-cutting — apply inside and across all other categories.*
-
-### V-A: Safety and Security
-
-| # | Pattern Name | Also Known As | Intent |
-|---|---|---|---|
-| V1 | **Human-in-the-Loop** | Approval Gate | Insert human checkpoints at defined decision boundaries |
-| V2 | **Human-on-the-Loop** | Monitoring Mode | Agent acts autonomously; human monitors and can intervene |
-| V3 | **Rule of Two** | Lethal Trifecta Prevention | Flag agents that simultaneously access private data + untrusted content + external comms |
-| V4 | **Dual LLM** | Privilege Separation | Privileged LLM (clean data only) + Quarantined LLM (untrusted data, no tools) |
-| V5 | **Guardrail Layering** | Multi-Point Safety | Safety checks at: user input, tool calls, tool responses, final output |
-| V6 | **Prompt Injection Shield** | Input Sanitisation | Constrain action space; prevent adversarial inputs hijacking goals |
-| V7 | **AgentSpec / Declarative Governance** | Policy-Driven Agent | External declarative rule specification enforced at runtime; deontic tokens |
-| V8 | **Tool Sandboxing** | Isolated Execution | Isolated tool execution environment; constrain filesystem, network, clock |
-
-### V-B: Operational Reliability
-
-| # | Pattern Name | Also Known As | Intent |
-|---|---|---|---|
-| V9 | **Bounded Execution** | Circuit Breaker | Cap iterations, tool calls, cost, and time; prevent runaway loops |
-| V10 | **Checkpointing** | State Snapshot | Save agent state at each step; enable rollback on failure |
-| V11 | **Error Compaction** | Error Context | Represent errors efficiently in context window (not raw stack traces) |
-| V12 | **Stateless Reducer** | Pure Agent | Agent as pure function of inputs → outputs; no hidden state |
-| V13 | **Tool Budget** | Tool Scope Limit | Hard limit on number of tools per agent (<15 for most models; Cursor: 40 max) |
-| V19 | **Fallback / Graceful Degradation** | Circuit-Breaker Fallback, Failover, Degraded-Mode Path | Declare a cheaper degraded path (smaller model, cache, rule, human escalation) for every primary-path failure mode |
-| V20 | **Output / Schema Validation** | Validate-and-Repair, Reask Loop, Structured-Output Retry | Validate every model output against a declared schema; re-prompt with the validation error until conformance or retry budget is exhausted |
-
-### V-C: Observability and Evaluation
-
-| # | Pattern Name | Also Known As | Intent |
-|---|---|---|---|
-| V14 | **Trajectory Logging** | Agent Trace | Full trace of decisions, tool calls, intermediate outputs; OTel-compliant |
-| V15 | **LLM-as-Judge** | Inferential Evaluation | Second LLM call evaluates output of first against defined rubrics |
-| V16 | **Offline Eval** | Regression Testing | Validate against known scenarios and reference outputs before production |
-| V17 | **Online Eval** | Production Monitoring | Monitor live traces for quality regressions, safety drift without ground truth |
-| V18 | **Agent Simulation** | Sandbox Testing | Test end-to-end agent reasoning under realistic conditions before production |
-
-**The Tool Overload quantification (critical empirical finding):**
-- Selection accuracy: 43% → 14% at high tool counts (3× degradation)
-- AI accuracy: 87% → 54% with context overload
-- Hard limits: Cursor enforces 40 tools max
-- 4–5 MCP servers = 60,000+ context tokens on schemas alone
-- V13 (Tool Budget) should be a first-class constraint in every agent design
-
-**The Lethal Trifecta (Simon Willison):**
-Any agent combining all three creates catastrophic security risk: (1) private data access + (2) untrusted content exposure + (3) external communication. V3 is the detection pattern; V4, V6, V8 are mitigations.
-
----
-
-## Category VI — Integration Patterns
-
-*How agents connect to tools, services, and each other.*
-*Added as a new category based on research depth in 2025-26 on MCP, APIs, and interoperability.*
-
-| # | Pattern Name | Also Known As | Intent | When to Use |
-|---|---|---|---|---|
-| I1 | **Direct API Call** | Deterministic Integration | Synchronous HTTP to external service; no LLM reasoning | Sub-10ms ops; consistency-critical; financial/compliance |
-| I2 | **Function/Tool Call** | Schema-Wrapped API | LLM decides which function to invoke; code executes it | 1-5 tools; app-specific routing; simple agents |
-| I3 | **MCP Server** | Model Context Protocol | Standardised tool discovery; credential isolation; multi-client | 5+ tools shared across agents/clients; reusable integrations |
-| I4 | **CLI Invocation** | Shell Tool | Agent uses existing CLI tools directly | Tools that already have CLIs (git, docker, gh, cloud CLIs) |
-| I5 | **Agent Card** | Agent Manifest | Self-describing `/.well-known/agent.json`; capability declaration for discovery | Multi-agent systems; A2A interoperability |
-| I6 | **A2A Delegation** | Agent-to-Agent Protocol | Structured cross-agent task delegation; status updates; result return | Multi-vendor, multi-platform agent collaboration |
-
-**Decision guide (from practitioner research):**
-```
-Does LLM reasoning determine the action?
-  NO → I1 (Direct API Call)
-  YES:
-    1–5 tools, single agent → I2 (Function Call)
-    5–20 tools → I2 + I3 hybrid
-    20+ tools → I3 with gateway
-    CLI exists? → I4 first (zero context overhead)
-    Multiple agents need to coordinate? → I5 + I6
-```
-
-**Production cost reality:** GitHub MCP alone = 40,000–55,000 tokens per request. Every I3 server costs tokens. Design tool budgets before choosing integration patterns.
-
-**Community consensus on frameworks:**
-LangChain backlash is real and documented. 80+ package dependencies, "death by abstraction". Modern teams prefer: direct API + Instructor for structured output + custom 80–500 line loops. MCP disrupted LangChain's value proposition as of late 2024.
-
----
-
-## Category VII — Humanizer Patterns
-
-*How AI systems develop continuity, curiosity, self-improvement, and adaptive identity across time.*
-*These are the "what the system becomes" layer — patterns that make agents evolve rather than merely execute.*
-*The defining question of this category: does the agent get better at being itself over time?*
-
-| # | Pattern Name | Also Known As | Intent | When to Use |
-|---|---|---|---|---|
-| H1 | **Identity Persistence** | Genesis State, Core Self Injection | Inject stable invariant self-representation into every context | Any agent that runs across multiple sessions; long-term user relationships |
-| H2 | **Episodic Self-Improvement** | Cross-Session Reflexion | Persist verbal self-critiques across sessions so agent improves without weight updates | Long-running agents performing recurring task types |
-| H3 | **Entropy-Driven Curiosity** | Deadlock Break, Novelty Seeking | Auto-increase temperature or inject stimuli when agent detects its own stagnation | Creative agents; reasoning loops that get stuck; exploration tasks |
-| H4 | **Procedural Skill Accumulation** | Skill Library, LEGO Memory | Distill successful task trajectories into reusable parameterised skill procedures | Agents with recurring task types; knowledge transfer across sessions |
-| H5 | **Constitutional Self-Alignment** | Principle Evolution, Adaptive Ethics | Allow operating principles to evolve through experience, with human checkpoints | Long-running agents in evolving domains; alignment that must adapt |
-| H6 | **Continuous Inner Monologue** | MIRROR, Thinker Agent | Background reasoning process separate from user-facing responses | Persistent assistant agents; monitoring agents; pre-computation |
-| H7 | **Adaptive Persona** | User-Calibrated Style | Communication style adapts based on observed user preferences and history | Personal assistants; educational agents; multi-user systems |
-| H8 | **Meta-Agent Self-Modification** | Self-Improving Agent | Agent modifies own operational parameters based on performance data | Large-scale production agents with abundant evaluation data; NOT for safety-critical |
-| H9 | **Observational Identity** | Self-Knowledge Model | Explicit model of own capabilities, knowledge state, and past actions | Multi-session agents; capability routing; accurate self-representation |
-| H10 | **Relational Memory** | User Model Persistence | Persistent model of the agent-user relationship including goals, history, tone | Personal assistant agents; coaching; any long-term user relationship |
-
-**The Humanizer sequence (how to build up from nothing):**
-```
-Session 1: H1 (Identity Persistence) — establish who the agent is
-After first failures: H2 (Episodic Self-Improvement) — learn from mistakes  
-After first successes: H4 (Procedural Skill Accumulation) — remember what worked
-As user model grows: H7 (Adaptive Persona) — communicate better
-When loops stall: H3 (Entropy-Driven Curiosity) — break deadlocks autonomously
-Advanced: H6 (Inner Monologue) — think between interactions
-Advanced: H9 (Observational Identity) — accurate self-knowledge
-With governance: H5 (Constitutional Self-Alignment) — evolving principles with oversight
-```
-
-**Key distinctions:**
-- H1 is a prerequisite for all other Humanizer patterns — identity must be stable before it can evolve
-- H2 and H4 are complementary: H2 learns from failure, H4 learns from success
-- H5 is dangerous without mandatory human checkpoints — never implement autonomously
-- H8 is the most powerful and most dangerous; scope modification surface carefully
-- H10 requires explicit user consent and right-to-deletion
-- All Humanizer patterns require K11 (Observational Memory) or K10 (Long-Term Memory) as infrastructure
-
-**Humanizer Anti-Patterns (summary):**
-- HA1 — Simulated Emotion: injecting emotional language without genuine affective model (manipulation theater)
-- HA2 — Unbounded Relationship Depth: H10 without ethical guardrails → parasocial harm
-- HA3 — Identity Drift: implementing H7/H10 without H1 → agent becomes whoever user wants it to be
-- HA4 — Autonomous Principle Adoption: H5 without mandatory human review → alignment risk
-- HA5 — Stale Self-Model: H9 without decay functions → overconfident outdated self-assessment
-
----
-
-## Anti-Pattern Registry (Extended)
-
-| # | Anti-Pattern | Description | Costs | Better Alternative |
-|---|---|---|---|---|
-| A1 | **God Prompt** | All instructions in one massive prompt | Attention dilution; maintenance nightmare | Decompose with O2/O6 |
-| A2 | **Over-Agentification** | Agentic loops when deterministic code suffices | Cost; latency; brittleness | O2 (Prompt Chaining) or just write code |
-| A3 | **Uncontrolled Recursion** | Reflection/planning loops with no exit condition | Runaway cost; stuck agents | V9 (Bounded Execution) |
-| A4 | **Agent Sprawl** | Proliferating agents without ownership or governance | Inconsistency; undebuggable | V14 (Trajectory Logging) + V1 (H-in-the-L) |
-| A5 | **Output-Only Guardrails** | Safety checks only on final output | Intermediate failures propagate | V5 (Guardrail Layering) at all 4 points |
-| A6 | **Vibe-Checking as Testing** | Subjective assessment replacing eval frameworks | No regression detection | V15 (LLM-as-Judge) + V16 (Offline Eval) |
-| A7 | **Context Hoarding** | Never pruning context; dumping everything in | Token waste; attention degradation; cost | K6/K7 (Compress/Prune) or O17 (Agent Isolation) |
-| A8 | **Synchronous Everything** | Running independent sub-tasks sequentially | Unnecessary latency | O4 (Parallelization) |
-| A9 | **Stateful Reducer** | Hidden agent state not reflected in business state | Bugs; replay failure; debugging hell | V12 (Stateless Reducer) + V10 (Checkpoint) |
-| A10 | **Silent Failure** | Agent fails quietly; no error surfaced | Data loss; cascading failures | V1 + V14 + V10 |
-| A11 | **Framework Lock-in** | Choosing LangChain/heavy framework first | Abstraction ceiling; debugging difficulty; cost opacity | Own your control flow (12-Factor Factor 8) |
-| A12 | **Tool Proliferation** | Adding tools without tool budget management | Context overflow; selection accuracy collapse | V13 (Tool Budget) + I4 (CLI first) |
-| A13 | **Pilot Simplification** | Clean data/sandbox in pilot; assume production is similar | 88% production failure rate | Data realism in pilots; governance from day 1 |
-| A14 | **Trust Handoff** | Agent trusts instructions from other agents without verification | Prompt injection cascading | V3 (Rule of Two) + V4 (Dual LLM) |
-| A15 | **Untraced Agent** | No observability; no audit trail | Debugging takes hours not minutes; no compliance | V14 (Trajectory Logging) from day 1 |
-
----
-
-## Pattern Composition Examples
-
-### Example 1: Standard Production Coding Agent (Claude Code, Devin)
-`S3 (Persona) + S4 (Instruction Decomposition) + K1 (Vanilla RAG) + K8 (Working Memory) + R4 (ReAct) + O6 (Orchestrator-Workers) + O4 (Parallelization) + V1 (Human-in-the-Loop) + V9 (Bounded Execution) + V14 (Trajectory Logging) + I2/I3 (Function/MCP)`
-
-### Example 2: Research Agent (Karpathy AutoResearch model)
-`S4 (Instruction Decomposition) + K10 (Long-Term Memory) + R4 (ReAct) + O4 (Parallelization) + O8 (Loop Agent) + V9 (Bounded Execution) + V14 (Trajectory Logging)`
-
-### Example 3: Safety-Critical Enterprise Agent
-`S3 (Persona) + S9 (Constitutional Framing) + K1 (RAG) + R3 (Plan-and-Solve) + O6 (Orchestrator-Workers) + V1 (Human-in-the-Loop) + V3 (Rule of Two) + V4 (Dual LLM) + V5 (Guardrail Layering) + V7 (AgentSpec) + V8 (Tool Sandboxing) + V14 (Trajectory Logging) + I1 (Direct API for deterministic ops)`
-
-### Example 4: Customer Support Router
-`O3 (Routing) + O1 (Single Agent per route) + K1 (Vanilla RAG) + K11 (Observational Memory) + V1 (H-in-the-Loop for escalation) + V5 (Guardrail Layering) + V17 (Online Eval)`
-
-### Example 5: Document Analysis Pipeline
-`S2 (Few-Shot) + K6 (Context Compression) + O2 (Prompt Chaining) + O5 (Evaluator-Optimizer) + V5 (Guardrail Layering) + V16 (Offline Eval)`
-
-### Example 6: Multi-Agent Research Network
-`S3 (Persona per agent) + K10 (Long-Term Memory shared substrate) + R4 (ReAct per agent) + O7 (Supervisor Hierarchy) + O11 (Blackboard System) + I5 (Agent Card) + I6 (A2A Delegation) + V14 (OTel Trace)`
-
-### Example 7: Long-Term Personal Research Assistant (Humanizer composition)
-`H1 (Identity Persistence) + H2 (Episodic Self-Improvement) + H4 (Procedural Skill Accumulation) + H7 (Adaptive Persona) + H9 (Observational Identity) + H10 (Relational Memory) + K11 (Observational Memory) + R7 (Reflexion) + V1 (Human-in-the-Loop for H5 principle changes)`
-
-### Example 8: Autonomous Creative Agent (Humanizer composition)
-`H1 (Identity Persistence) + H3 (Entropy-Driven Curiosity) + H6 (Continuous Inner Monologue) + H7 (Adaptive Persona) + K10 (Long-Term Memory, episodic variant) + R4 (ReAct)`
-
-### Example 9: Enterprise Process Automation Agent (Humanizer + Reliability)
-`H2 (Episodic Self-Improvement) + H4 (Procedural Skill Accumulation) + H5 (Constitutional Self-Alignment, human-governed) + H9 (Observational Identity) + V1 (Human-in-the-Loop) + V7 (AgentSpec) + V14 (Trajectory Logging)`
-
----
-
-## Decision Flowchart
-
-### Primary Pattern Selection
-```
-Is the task solvable with a single LLM call + tools?
-  YES → O1 (Single Agent) + appropriate Signal patterns → DONE
-  NO:
-    Does the task decompose into FIXED sequential steps?
-      YES → O2 (Prompt Chaining)
-      NO:
-        Are there distinct input TYPES needing specialisation?
-          YES → O3 (Routing)
-          NO:
-            Are sub-tasks INDEPENDENT (can run in parallel)?
-              YES → O4 (Parallelization)
-              NO → O6 (Orchestrator-Workers) + R4 (ReAct) inside workers
-
-Does output quality matter AND can it be verified objectively?
-  YES → Add O5 (Evaluator-Optimizer) or R7 (Reflexion)
-
-Are there distinct specialised roles exceeding single context?
-  YES → O7 (Supervisor Hierarchy)
-
-Do agents need to share state across turns?
-  YES → O11 (Blackboard) or K10 (Long-Term Memory shared substrate)
-```
-
-### Reasoning Pattern Selection
-```
-Token efficiency is critical → R5 (ReWOO): 5× reduction
-Mid-run adaptation needed → R4 (ReAct)
-Multi-tool task with self-debug → R13 (CodeAct)
-Hard open-ended problem, quality trumps cost → R9 (ToT) or R10 (LATS)
-Clear pass/fail criteria → R7 (Reflexion)
-Math/numerical tasks → R14 (Program of Thoughts)
-Parallel generation needed → R12 (Skeleton-of-Thought)
-```
-
-### Integration Pattern Selection
-```
-Does LLM reasoning decide the action?
-  NO → I1 (Direct API)
-  YES:
-    1–5 tools, single agent → I2 (Function Call)
-    CLI exists for this? → I4 first (zero overhead)
-    5–20 tools shared across agents → I3 (MCP) + I2 hybrid
-    20+ tools → I3 with gateway + dynamic tool discovery
-    Agents from different vendors need to coordinate → I5 + I6
-```
-
----
-
-## Open Questions and Research Gaps
-
-1. **Long-running agent session coherence**: No consensus on preventing context drift over hours/days
-2. **Agent trust hierarchies**: How does Agent B verify that instructions from Agent A are legitimate? (V3 partially addresses; V4 for data; nothing for instruction provenance)
-3. **Agent versioning and compatibility**: When a tool or sub-agent is updated, how do orchestrators handle the change?
-4. **Cost-aware pattern selection**: Dynamic switching between R5 (ReWOO) and R4 (ReAct) based on runtime cost signals
-5. **Cross-model composition**: No established patterns for mixing models from different providers in one pipeline
-6. **O10 (Swarm) production viability**: No consensus on when peer-to-peer emerges, vs degrade to O7
-7. **Multi-agent consistency**: Per-agent K10 stores create divergent memory; shared substrates are proposed but not standardised
-8. **Prompt injection at orchestration layer**: V6 patterns are ad hoc; CaMeL is promising but not widely adopted
-9. **Evaluation for long-horizon tasks**: V16/V17 evaluate per-interaction; no consensus on task-completion evals for multi-hour agent runs
-10. **Should there be a Category 0**: "When not to use AI" — currently embedded in anti-patterns A2 and A13
-11. **Humanizer identity continuity across model upgrades**: When the base model changes, does the agent's accumulated identity survive? No established pattern.
-12. **Lesson library poisoning**: H2 (Episodic Self-Improvement) is vulnerable to adversarially-induced wrong lessons persisting across sessions — no defense pattern yet
-13. **Constitutional evolution convergence**: Does H5 converge to a stable set of principles or continue drifting? What terminates the evolution?
-14. **Authentic vs. simulated identity**: Philosophical question with practical implications — does H1 create genuine continuity or a performance of continuity? Matters for trust calibration.
-15. **Cross-agent humanizer state**: If multiple agent instances run simultaneously, how do they share (or isolate) H1–H10 state without racing?
-
----
-
-## Scaffold Architecture Dimensions (from empirical study, arXiv 2604.03515)
-
-*Empirical finding: agents occupy positions on spectra, not discrete categories. 13 coding agents studied.*
-
-**Five loop primitives (stackable):**
-1. ReAct loop
-2. Generate-test-repair
-3. Plan-execute
-4. Multi-attempt retry
-5. Tree search (MCTS)
-
-**The major architectural fault line:**
-- **LLM-as-navigator** (8/13 agents): general tools; LLM decides navigation; simpler but less precise
-- **Scaffold-understands-code** (5/13 agents): repository maps, AST indexing, knowledge graphs; more powerful but complex
-
-**No consensus dimensions (active research frontier):**
-- Context compaction strategy (7 different approaches found across 13 agents)
-- State representation (flat list vs typed events vs immutable store)
-- Safety mechanisms for interactive agents
-
----
-
-## Cognitive Science Grounding
-
-AI patterns increasingly map to classical cognitive science theories — this may be the right frame for understanding *why* they work:
-
-| AI Pattern | Cognitive Theory | Source |
-|---|---|---|
-| O11 (Blackboard) | Global Workspace Theory (Baars) | Explicit in Theater of Mind paper |
-| O10 (Swarm) | Society of Mind (Minsky) | Multi-specialised agents |
-| R16 (Talker-Reasoner) | Dual-Process Theory (Kahneman) | Direct mapping: System 1/2 |
-| K10 (Long-Term Memory) | Tulving / Baddeley memory taxonomy | Episodic, semantic, procedural variants |
-| K11 (Observational Memory) | Extended Mind Thesis (Clark) | External tool as cognitive extension |
-| H1 (Identity Persistence) | Autobiographical memory (Tulving 1985) | Genesis State in Theater of Mind |
-| H2 (Episodic Self-Improvement) | Episodic memory consolidation | Reflexion extended cross-session |
-| H3 (Entropy-Driven Curiosity) | Optimal Arousal / Noradrenergic system | Theater of Mind — entropy monitoring |
-| H5 (Constitutional Self-Alignment) | Moral development (Kohlberg) | Constitutional AI extended to inference |
-| H6 (Inner Monologue) | Vygotskian inner speech | MIRROR / Thinker architecture |
-| H7 (Adaptive Persona) | Theory of Mind (Premack & Woodruff) | User model as cognitive representation |
-| H10 (Relational Memory) | Parasocial relationship theory | HCI research; Skjuve et al. 2021 |
+**Humanizer patterns** govern the longitudinal layer: how agents develop continuity, self-knowledge, and adaptive behaviour across sessions.
 
 
 
@@ -858,11 +151,33 @@ The loaded-once vs. per-call distinction is also a caching boundary (mechanism 5
 
 *Former S7 Self-Consistency Voting was reclassified as **R17** (Reasoning, band III-C) — its mechanism is sampling and aggregating reasoning paths, not shaping the prompt. Former S10 Chain of Density was folded into **K6 Context Compression** as a named Variant — it is a summarisation technique, not a Signal-layer choice. S7 and S10 are intentional gaps in the Signal numbering.*
 
+---
+
+## Quick Reference
+
+| # | Pattern | Also Known As | Intent | When to Use |
+|---|---|---|---|---|
+| S1 | **Zero-Shot** | Direct Instruction | Task with no examples; rely on model priors | Simple, well-defined tasks where model knowledge is sufficient |
+| S2 | **Few-Shot** | In-Context Learning | Provide examples to demonstrate desired format or behaviour | Format control, style matching, novel task types |
+| S3 | **Persona** | Role Prompting | Assign the model an identity to frame knowledge and tone | Expert framing, domain-specific tasks, tone alignment |
+| S4 | **Instruction Decomposition** | Step Prompting | Break complex instruction into numbered sequential steps | Multi-step tasks with clear ordering |
+| S5 | **Constraint Framing** | Negative Prompting | Define what model must NOT do as prominently as what it should | Safety-sensitive, compliance, avoiding known failure modes |
+| S6 | **Output Template** | Template Filling | Provide skeleton of expected output for model to complete | Structured data extraction, consistent formatting |
+| S8 | **Meta-Prompt** | Auto-Prompting | Model generates or refines its own prompt | Self-optimising workflows; experimental; cost intensive |
+| S9 | **Constitutional Framing** | Constitutional AI | Embed principles the model applies to self-critique | Alignment enforcement, safety-critical contexts |
+
+*S7 (Self-Consistency Voting) relocated to R17 (Reasoning). S10 (Chain of Density) folded into K6 (Context Compression). Both are intentional gaps.*
+
 
 
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{S1 — Zero-Shot}
 ```
 
 ## S1 — Zero-Shot
@@ -1068,6 +383,11 @@ These are documentation references, not implementations — exactly as expected 
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{S2 — Few-Shot}
 ```
 
 ## S2 — Few-Shot
@@ -1325,6 +645,11 @@ Few-Shot is a primitive of every LLM framework — there is no single canonical 
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{S3 — Persona}
+```
+
 ## S3 — Persona
 
 > Assign the model an explicit identity — a role, profession, or character — at session setup, so its knowledge, tone, and decision style are framed by that identity for every turn that follows.
@@ -1547,6 +872,11 @@ Every multi-agent framework (LangGraph, CrewAI, AutoGen) instantiates Role-Per-A
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{S4 — Instruction Decomposition}
 ```
 
 ## S4 — Instruction Decomposition
@@ -1792,6 +1122,11 @@ For the *boundary cases* — when you need step-by-step with inspection — the 
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{S5 — Constraint Framing}
 ```
 
 ## S5 — Constraint Framing
@@ -2067,6 +1402,11 @@ Every system-prompt convention in production (Cursor, Claude Code, Anthropic's o
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{S6 — Output Template}
+```
+
 ## S6 — Output Template
 
 > Provide the skeleton of the expected output — fields, labels, and structure — for the model to complete, so format generation is replaced by format *filling*.
@@ -2291,6 +1631,11 @@ generate_structured(task_input, schema):
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{S8 — Meta-Prompt}
 ```
 
 ## S8 — Meta-Prompt
@@ -2549,6 +1894,11 @@ meta_prompt(spec):
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{S9 — Constitutional Framing}
+```
+
 ## S9 — Constitutional Framing
 
 > Embed an explicit set of principles — a *constitution* — in the session setup, and have the model critique and revise its own output against those principles before returning it, so values and judgement live as inspectable text rather than as an implicit prior baked into weights.
@@ -2776,6 +2126,62 @@ Concretely, for the **Drafter** session, the setup loaded once is roughly: *"You
 - White et al. (2023) — "A Prompt Pattern Catalog to Enhance Prompt Engineering with ChatGPT" — the prompt-pattern context in which Constitutional Framing sits at the Signal layer.
 
 
+
+```{=latex}
+\clearpatternname
+```
+
+
+```{=latex}
+\clearpage
+```
+
+## Decision Flow
+
+```
+Start with S1 (Zero-Shot). Upgrade only when you can measure the gap.
+
+Is format control or style matching the core problem?
+  → S2 (Few-Shot): static examples if possible; dynamic only if required
+    ⚠ Dynamic S2 breaks prefix cache for all upstream stable patterns
+
+Does the task need domain expertise framing or a specific tone?
+  → S3 (Persona): bundle with S5/S6/S9 in a single stable system prompt
+
+Are there specific behaviours the model must never exhibit?
+  → S5 (Constraint Framing): explicit prohibition list alongside task description
+
+Does a downstream system need consistent structured output?
+  → S6 (Output Template): output skeleton in system prompt
+
+Does the task have multiple steps where order matters?
+  → S4 (Instruction Decomposition): numbered steps in the instruction
+
+Do values or principles need runtime enforcement?
+  → S9 (Constitutional Framing): self-critique loop against explicit principles
+
+Does the prompt itself need to be optimised automatically?
+  → S8 (Meta-Prompt): requires V15 (LLM-as-Judge) or R17 as evaluator
+    ⚠ Measure cost before using; much more expensive than S1–S6/S9
+```
+
+## Caching Guide
+
+S3, S5, S6, and S9 are **setup-band** patterns. Bundle them together in a single stable system prompt — this is the cacheable prefix unit. Provider prefix caching (Anthropic: ~5 min TTL, ~10% cost on cache hits) reduces the cost of this bundle to near-zero for all calls within the TTL window.
+
+| Pattern | Cacheable? | Notes |
+|---|---|---|
+| S1 Zero-Shot | Yes — full prompt | Cheapest baseline |
+| S2 Few-Shot (static) | Yes | Stable prefix; caches cleanly |
+| S2 Few-Shot (dynamic/RAG) | **No** | Changes prefix every call; forfeits cache for all upstream patterns |
+| S3 Persona | Yes | Bundle with S5, S6, S9 |
+| S4 Instruction Decomposition | Yes | Merge into S3 block when possible |
+| S5 Constraint Framing | Yes | Bundle with S3, S6, S9 |
+| S6 Output Template | Yes | Bundle with S3, S5, S9 |
+| S8 Meta-Prompt | Partial | Only meta-prompt prefix caches |
+| S9 Constitutional Framing | Yes | Bundle with S3, S5, S6 |
+
+
 # Category II — Knowledge Patterns
 
 A **Knowledge pattern** is a design pattern for supplying a language model with information it does not hold in its weights, curated to suit the task at hand. Knowledge patterns separate *what the model reasons over* from *what the model was trained on*.
@@ -2862,11 +2268,48 @@ Most production agent workflows need more than one shape. This is the correct di
 
 *The reframing of this category as "context engineering" follows Tobi Lütke and Andrej Karpathy (June 2025) and Gartner (July 2025).*
 
+---
+
+## Quick Reference
+
+### II-A — Retrieval
+
+| # | Pattern | Also Known As | Intent | When to Use |
+|---|---|---|---|---|
+| K1 | **Vanilla RAG** | Naive RAG | Retrieve relevant chunks at query time | Simple Q&A, static corpora, citations required |
+| K2 | **Query Transformation** | HyDE, multi-query | Transform the raw query to retrieve better | Query/document mismatch; ambiguous queries |
+| K3 | **GraphRAG** | Graph Retrieval | Index corpus as entity-relationship graph | Multi-hop relational queries; global synthesis |
+| K4 | **RAPTOR** | Hierarchical RAG | Index corpus as recursive summary tree | Variable abstraction; hierarchical documents |
+| K5 | **Adaptive RAG** | Self-RAG, Corrective RAG | Wrap retrieval in evaluate-and-control loop | Mixed query streams; factuality-critical |
+| K13 | **Retrieval Bundle** | Agent Operating Context | Specify exact context bundle before writing retrieval code | Recurring workflows; rediscovery cost measurable |
+
+### II-B — Context-Window Management
+
+| # | Pattern | Also Known As | Intent | When to Use |
+|---|---|---|---|---|
+| K6 | **Context Compression** | Summarisation | Summarise context that no longer fits (lossy) | Long-running agents; context overflow |
+| K7 | **Context Pruning** | Selective Recall | Remove spent spans without summarising (lossless) | Spent tool outputs; finished sub-task context |
+| K8 | **Working Memory** | Scratchpad | Explicit in-context space model writes to itself | Multi-step reasoning; intermediate state |
+| K9 | **Long Context** | Context Stuffing | Hold whole working set in a large window | Working set fits; retrieval not justified |
+
+### II-C — Memory
+
+| # | Pattern | Also Known As | Intent | When to Use |
+|---|---|---|---|---|
+| K10 | **Long-Term Memory** | Persistent Memory | External store of facts, retrieved by similarity | Cross-session fact storage; preferences |
+| K11 | **Observational Memory** | Agent-Centric Memory | Append-only activity log; prefix-cache-friendly | Long-running agents with prefix caching |
+| K12 | **Karpathy Memory** | Curated Memory | LLM curates dense structured notes | Read-frequency dominates; structure matters |
+
 
 
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{K1 — Vanilla RAG}
 ```
 
 ## K1 — Vanilla RAG
@@ -3100,6 +2543,11 @@ ONLINE:
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{K2 — Query Transformation}
+```
+
 ## K2 — Query Transformation
 
 > Rewrite, expand, or decompose the user's raw query into one or more derived queries chosen to retrieve better, before any retrieval is performed.
@@ -3304,6 +2752,11 @@ multi_query_rag(query):
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{K3 — GraphRAG}
 ```
 
 ## K3 — GraphRAG
@@ -3516,6 +2969,11 @@ ONLINE:
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{K4 — RAPTOR}
+```
+
 ## K4 — RAPTOR
 
 > Index the corpus offline as a tree of recursively-built summaries, so that retrieval can pull from whichever level of abstraction the query needs — a specific leaf fact, a section-level summary, or a document-level synthesis.
@@ -3718,6 +3176,11 @@ ONLINE:
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{K5 — Adaptive RAG}
 ```
 
 ## K5 — Adaptive RAG
@@ -3940,6 +3403,11 @@ Concretely, for the **Gate** session: the setup loaded once is *"You decide whet
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{K6 — Context Compression}
+```
+
 ## K6 — Context Compression
 
 > When the context window fills, replace stretches of it with shorter summaries — trading fidelity for space so the task can continue.
@@ -4131,6 +3599,11 @@ maybe_compress(window):
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{K7 — Context Pruning}
+```
+
 ## K7 — Context Pruning
 
 > Identify spans of the context window that are no longer needed and remove them outright, keeping everything retained at full fidelity.
@@ -4301,6 +3774,11 @@ maybe_prune(window, tracker):
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{K8 — Working Memory / Scratchpad}
 ```
 
 ## K8 — Working Memory / Scratchpad
@@ -4479,6 +3957,11 @@ run_with_scratchpad(task):
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{K9 — Long Context}
 ```
 
 ## K9 — Long Context
@@ -4667,6 +4150,11 @@ Long Context is an architecture, not a library — there is no canonical "Long C
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{K10 — Long-Term Memory}
 ```
 
 ## K10 — Long-Term Memory
@@ -4883,6 +4371,11 @@ recall(query, store, user, k=5):
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{K11 — Observational Memory}
+```
+
 ## K11 — Observational Memory
 
 > Treat what the agent has already seen and done within the current session as its primary memory — kept in a stable, compact, immediately available form — rather than re-retrieving it from an external store.
@@ -5064,6 +4557,11 @@ Observational Memory is an emerging (2025–26) pattern with no single canonical
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{K12 — Karpathy Memory}
 ```
 
 ## K12 — Karpathy Memory
@@ -5287,6 +4785,11 @@ curate(activity_log, store):                           # at trigger only
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{K13 — Retrieval Bundle}
 ```
 
 ## K13 — Retrieval Bundle
@@ -5571,6 +5074,67 @@ fields:
 - Mechanism 10 (Chapter 0 §0.2) — No cross-session persistence; mechanical basis of the rediscovery problem.
 
 
+
+```{=latex}
+\clearpatternname
+```
+
+
+```{=latex}
+\clearpage
+```
+
+## Decision Flow
+
+```
+Is this a recurring workflow type with known context requirements?
+  → K13 (Retrieval Bundle): specify the exact context bundle BEFORE writing retrieval code
+    Prevents the rediscovery problem (up to 85% of token budget on context assembly)
+
+Does the entire working set fit an affordable context window?
+  → Benchmark K9 (Long Context) vs K1 (Vanilla RAG) at your actual corpus size
+    K9 wins when: corpus fits, queries are diverse, retrieval precision is hard to tune
+    K1 wins when: corpus is large, queries are targeted, caching matters
+
+Do you need in-context retrieval?
+  Are queries multi-hop or relational? → K3 (GraphRAG)
+  Variable abstraction levels required? → K4 (RAPTOR)
+  Factuality-critical, possibly stale corpus? → K5 (Adaptive RAG)
+  Query/document mismatch suspected? → K2 (Query Transformation) wrapping K1
+  Default retrieval: → K1 (Vanilla RAG)
+
+Does the context window need management during a session?
+  Remove spent/irrelevant spans (lossless)? → K7 (Context Pruning) — preserves prefix cache
+  Summarise overflowing history (lossy)? → K6 (Context Compression)
+    ⚠ K6 and K7 invalidate the provider prefix cache
+  Agent needs explicit scratchpad? → K8 (Working Memory)
+
+Do you need cross-session memory?
+  Flat facts across sessions? → K10 (Long-Term Memory)
+  Append-only activity log + prefix caching? → K11 (Observational Memory)
+  LLM-curated structured notes? → K12 (Karpathy Memory)
+  K11 and K12 are complementary branches of the same memory strategy — run together
+```
+
+## Context Budget Guide
+
+| Pattern | Context cost | Cache impact |
+|---|---|---|
+| K1 Vanilla RAG | Chunks only (variable) | Neutral |
+| K2 Query Transformation | 1–3 extra LLM calls | Neutral |
+| K3 GraphRAG | High (graph + summaries) | Neutral |
+| K4 RAPTOR | Medium (hierarchical summaries) | Neutral |
+| K5 Adaptive RAG | +1–2 LLM calls per query | Neutral |
+| K6 Context Compression | Saves tokens; **breaks prefix cache** | Cache-busting |
+| K7 Context Pruning | Saves tokens; **breaks prefix cache** | Cache-busting |
+| K8 Working Memory | Small scratchpad overhead | Neutral if at end of context |
+| K9 Long Context | Full corpus in window | High but cacheable |
+| K10 Long-Term Memory | Retrieved facts only | Neutral |
+| K11 Observational Memory | Append-only log | **Cache-friendly** |
+| K12 Karpathy Memory | Dense curated notes | Cacheable if stable |
+| K13 Retrieval Bundle | Design-time specification; no runtime cost | Enables caching discipline |
+
+
 # Category III — Reasoning Patterns
 
 A **Reasoning pattern** is a design pattern that governs *how the model processes its context to produce a structured answer* — how it decomposes the problem, what intermediate work it writes down, whether it branches or backtracks, whether it calls tools, and how it checks itself before committing. Reasoning patterns separate *the shape of thought* from the content the model is reasoning over.
@@ -5656,11 +5220,42 @@ Patterns differ in *what the deliberation does* — write a linear chain, branch
 - **Category V — Reliability patterns** — **V9 Bounded Execution** caps the loop in every iterative Reasoning pattern; **V15 LLM-as-Judge** is the external evaluator that **R7 Reflexion** depends on; **V14 Trajectory Logging** captures the deliberation trace.
 - **Category VII — Humanizer patterns** — **H6 Continuous Inner Monologue** carries a persistent background reasoning substrate; **R16 Talker-Reasoner** is the structured deliberation architecture that consumes it.
 
+---
+
+## Quick Reference
+
+| # | Pattern | Also Known As | LLM Calls | Best For |
+|---|---|---|---|---|
+| R1 | **Zero-Shot CoT** | "Think step by step" | 1 | Quick reasoning improvement; no examples |
+| R2 | **Few-Shot CoT** | Exemplar CoT | 1 | Consistent reasoning format with examples |
+| R3 | **Plan-and-Solve** | Explicit Planning | 2 | Well-defined multi-step workflows |
+| R4 | **ReAct** | Reason+Act Loop | N per step | Exploratory; adaptive; unpredictable paths |
+| R5 | **ReWOO** | Reasoning Without Observation | 2 total | Independent tool calls; 5× cheaper than R4 |
+| R6 | **Self-Ask** | Decomposition | 1 + N follow-ups | Multi-hop factual questions |
+| R7 | **Reflexion** | Verbal Reinforcement | N × retries | Clear pass/fail criteria; retries acceptable |
+| R8 | **Self-Refine** | Generate-Critique-Refine | N iterations | General quality improvement; no separate judge |
+| R9 | **Tree of Thoughts** | ToT | N (branching) | Hard open-ended; path unknown |
+| R10 | **LATS** | Language Agent Tree Search | N (tree search) | Highest quality; highest cost |
+| R11 | **Buffer of Thoughts** | BoT | 1 + template | 12% cost of ToT; reusable templates |
+| R12 | **Skeleton-of-Thought** | SoT | 1 + N parallel | Parallel generation; latency reduction |
+| R13 | **CodeAct** | Executable Code Actions | N (with execution) | Multi-tool; ~20pp accuracy gain over JSON |
+| R14 | **Program of Thoughts** | PoT | 1 + execution | Numerical/mathematical tasks |
+| R16 | **Talker-Reasoner** | System 1/System 2 | Dual async | Real-time + deliberative combined |
+| R17 | **Self-Consistency** | Majority Voting | N samples | Factual tasks; sample and vote |
+| R18 | **Graph of Thoughts** | GoT | N (DAG) | Non-linear reasoning; merging thought branches |
+| R19 | **Step-Back Prompting** | Abstraction Prompting | 2 | Abstract to principle before answering |
+| R20 | **Chain of Verification** | CoVe | 1 + N verifications | Reduce hallucination; verify each claim |
+
 
 
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{R1 — Zero-Shot CoT}
 ```
 
 ## R1 — Zero-Shot CoT
@@ -5901,6 +5496,11 @@ R1 is the canonical *prompt-engineering-only* pattern — there is no library to
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{R2 — Few-Shot CoT}
 ```
 
 ## R2 — Few-Shot CoT
@@ -6194,6 +5794,11 @@ Few-Shot CoT is a primitive of every prompting framework — there is no "Wei et
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{R3 — Plan-and-Solve}
+```
+
 ## R3 — Plan-and-Solve
 
 > Split reasoning into two distinct LLM calls — first a *Plan* call that produces an explicit, inspectable step list from the full task in view, then an *Execute* call (or chain) that carries the plan out — so plan quality and execution efficiency are tuned independently.
@@ -6458,6 +6063,11 @@ A capable generalist suffices for both. The artifact that does the heavy lifting
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{R4 — ReAct}
+```
+
 ## R4 — ReAct
 
 > Interleave a free-text *Thought*, a structured *Action* (tool call), and the returning *Observation* in a single loop, so each next reasoning step is conditioned on what the previous action actually returned rather than on a plan made before the world was seen.
@@ -6688,6 +6298,11 @@ Beyond these, every major agent framework (CrewAI, AutoGen, Smolagents, Letta, P
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{R5 — ReWOO}
+```
+
 ## R5 — ReWOO
 
 > Plan every tool call upfront in a single LLM pass, execute the plan without any LLM in the loop, then synthesise the answer from the collected evidence — trading mid-run adaptability for ~5× token efficiency.
@@ -6914,6 +6529,11 @@ Concretely, the **Planner** setup includes the tool catalogue rendered as a stab
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{R6 — Self-Ask}
 ```
 
 ## R6 — Self-Ask
@@ -7152,6 +6772,11 @@ Concretely, for the **Self-Ask** session the setup loaded once is: the four Pres
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{R7 — Reflexion}
+```
+
 ## R7 — Reflexion
 
 > Retry a failed task with a verbal critique of the previous attempt in context — converting an automated pass/fail signal into linguistic feedback that the next attempt can read and act on.
@@ -7377,6 +7002,11 @@ reflexion(task, N_max=3):
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{R8 — Self-Refine}
+```
+
 ## R8 — Self-Refine
 
 > Have one model generate an output, critique its own output, and revise it from that critique — looping until a stopping condition fires, with no external feedback signal and no second model.
@@ -7592,6 +7222,11 @@ self_refine(task, max_rounds=3):
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{R9 — Tree of Thoughts}
 ```
 
 ## R9 — Tree of Thoughts
@@ -7850,6 +7485,11 @@ tree_of_thoughts(problem, k=5, b=5, d=4, max_nodes=200):
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{R10 — Language Agent Tree Search (LATS)}
+```
+
 ## R10 — Language Agent Tree Search (LATS)
 
 > Run Monte Carlo Tree Search over an agent's reasoning trajectories: select promising branches by UCB, expand with LLM-proposed actions, evaluate with an LLM value function, simulate forward, and backpropagate value through the tree — so the agent searches the solution space the way AlphaGo searches a board.
@@ -8101,6 +7741,11 @@ The Action Generator and Value Estimator **must be separate sessions**, even whe
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{R11 — Buffer of Thoughts}
+```
+
 ## R11 — Buffer of Thoughts
 
 > Maintain a meta-buffer of reusable high-level *thought-templates* distilled from past problems, and for each new problem retrieve the most relevant template and instantiate it — trading expensive per-problem search for amortised reuse of reasoning structure.
@@ -8335,6 +7980,11 @@ Beyond the official repo, BoT is an emerging research pattern rather than a prod
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{R12 — Skeleton-of-Thought}
+```
+
 ## R12 — Skeleton-of-Thought
 
 > Generate an outline of the answer in one call, then expand each outline point in parallel, then aggregate — turning a sequentially-decoded long-form response into a fan-out / fan-in inside a single agent's thinking.
@@ -8557,6 +8207,11 @@ skeleton_of_thought(query):
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{R13 — CodeAct}
 ```
 
 ## R13 — CodeAct
@@ -8800,6 +8455,11 @@ run(goal, tools, max_steps, max_cost):
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{R14 — Program of Thoughts}
+```
+
 ## R14 — Program of Thoughts
 
 > Generate a self-contained program that computes the answer, run it in a deterministic interpreter, return the interpreter's output — delegating numerical and symbolic work out of the model's tokens and into code.
@@ -9028,6 +8688,11 @@ Concretely, the **Reasoner** setup includes: *"Reply with a single Python code b
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{R16 — Talker-Reasoner}
 ```
 
 ## R16 — Talker-Reasoner
@@ -9271,6 +8936,11 @@ If your stack already has an inference-time reasoning model (o1, o3, R1) and a c
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{R17 — Self-Consistency Voting}
+```
+
 ## R17 — Self-Consistency Voting
 
 > Run the same prompt N times with diversity-inducing sampling, then select the answer by majority vote — marginalising over independent reasoning paths instead of trusting any single one.
@@ -9488,6 +9158,11 @@ Self-Consistency is typically **implemented inline** rather than imported — th
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{R18 — Graph of Thoughts}
 ```
 
 ## R18 — Graph of Thoughts
@@ -9737,6 +9412,11 @@ solve(problem):
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{R19 — Step-Back Prompting}
+```
+
 ## R19 — Step-Back Prompting
 
 > Before answering a specific question, ask a more abstract version of it, derive the underlying principle or concept, and then specialise that principle back to the original — so reasoning starts from a level the model handles more reliably than the specific case.
@@ -9944,6 +9624,11 @@ Concretely, the Abstractor's setup carries something like: *"Your job is to para
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{R20 — Chain-of-Verification}
 ```
 
 ## R20 — Chain-of-Verification
@@ -10182,6 +9867,70 @@ In the **Factored** variant, drop step 5 (no Cross-checker) and pass `issues=Non
 - ritun16 / chain-of-verification — [`github.com/ritun16/chain-of-verification`](https://github.com/ritun16/chain-of-verification) — the most-cited community implementation, with per-question-type chains.
 
 
+
+```{=latex}
+\clearpatternname
+```
+
+
+```{=latex}
+\clearpage
+```
+
+## Decision Flow
+
+```
+Need token efficiency above all?
+  → R5 (ReWOO): 5× reduction vs ReAct; plan all tool calls upfront
+
+Need mid-run adaptation to observations?
+  → R4 (ReAct): adaptive tool use; each action informs the next
+
+Multi-tool task needing self-debugging?
+  → R13 (CodeAct): ~20pp accuracy gain over JSON tool calls
+
+Hard open-ended problem, quality trumps cost?
+  → R9 (Tree of Thoughts) or R10 (LATS)
+
+Clear pass/fail criteria and retries are acceptable?
+  → R7 (Reflexion): verbal self-critique across retries
+
+Math or numerical computation?
+  → R14 (Program of Thoughts): delegate to a deterministic executor
+
+Parallel generation needed to reduce latency?
+  → R12 (Skeleton-of-Thought): outline first, fill sections in parallel
+
+Reusable reasoning templates exist for this task type?
+  → R11 (Buffer of Thoughts): 12% cost of ToT/GoT
+
+Multi-hop factual question?
+  → R6 (Self-Ask): sub-question chains
+
+Quick reasoning improvement with no examples?
+  → R1 (Zero-Shot CoT): "think step by step"
+```
+
+## Cost Guide
+
+| Pattern | LLM Calls | Relative Cost | Notes |
+|---|---|---|---|
+| R1 Zero-Shot CoT | 1 | Baseline | Add "think step by step" only |
+| R2 Few-Shot CoT | 1 | Low + example tokens | Static examples cache cleanly |
+| R3 Plan-and-Solve | 2 | Low | Plan + execute; two clean calls |
+| R4 ReAct | N per step | Medium–High | Scales with task complexity |
+| R5 ReWOO | 2 total | **5× cheaper than R4** | All tool calls must be independent |
+| R6 Self-Ask | 1 + N follow-ups | Medium | Sub-question depth drives cost |
+| R7 Reflexion | N × retries | High | Needs measurable success criterion |
+| R8 Self-Refine | N iterations | Medium | In-session; no separate judge |
+| R9 ToT | N (branching) | Very High | Use when path genuinely unknown |
+| R10 LATS | N (tree search) | Highest | Highest quality; highest cost |
+| R11 BoT | 1 + template | Low | Templates amortise across calls |
+| R12 SoT | 1 + N parallel | Medium | Latency win via parallelism |
+| R13 CodeAct | N (with execution) | Medium | Self-debugging loop |
+| R14 PoT | 1 + execution | Low | Deterministic computation free |
+
+
 # Category IV — Orchestration Patterns
 
 An **Orchestration pattern** is a design pattern for *coordinating* multiple inferences, agents, and tools — chains, routers, parallel fan-outs, hierarchies, ensembles, and shared substrates — so that what no single LLM call can do well, a structured arrangement of calls can.
@@ -10262,11 +10011,75 @@ Patterns differ in *how the coordination layer is shaped* — fixed pipeline, cl
 
 *The production composition law: most real systems are **O6 + O4 + R4-inside-workers + O17 for context isolation**, with V9 / V14 as required companions. This law is mechanically derived: (a) n² attention cost requires bounded contexts per agent (mechanisms 2, 6); (b) no KV persistence across API calls means each agent pays its own prefill (mechanism 3); (c) parallel execution is safe only when sub-tasks are genuinely independent — when the same token generation process (mechanism 7) applied to the same context would produce the same answer, parallelism adds no information. O17 is mechanically necessary for the O6 quality win, not merely a nice-to-have: if workers inherit the orchestrator's context, the context-bounding benefit (mechanism 6) is defeated.*
 
+---
+
+## Quick Reference
+
+### IV-A — Workflow Patterns
+
+| # | Pattern | Also Known As | Intent | Complexity |
+|---|---|---|---|---|
+| O1 | **Single Agent** | Autonomous Agent | One LLM + tools + system prompt | Low |
+| O2 | **Prompt Chaining** | Pipeline | Output of one call feeds the next in fixed order | Low |
+| O3 | **Routing** | Classifier-Dispatcher | Classify input → specialist handler | Medium |
+| O4 | **Parallelization** | Fan-out Fan-in | Simultaneous independent LLM calls | Medium |
+
+### IV-B — Agentic Patterns
+
+| # | Pattern | Also Known As | Intent | Complexity |
+|---|---|---|---|---|
+| O5 | **Evaluator-Optimizer** | Generator-Critic | Separate generator and judge; iterative improvement | Medium |
+| O6 | **Orchestrator-Workers** | Hub-and-Spoke | Central LLM dynamically delegates to workers | High |
+| O7 | **Supervisor Hierarchy** | Hierarchical Agents | Multi-level tree of orchestrators | High |
+| O8 | **Loop Agent** | Agentic Loop | Sequence repeats until termination condition | Medium |
+| O9 | **Multi-Agent Reflection** | Ensemble Critique | Multiple agents independently critique one output | High |
+| O10 | **Swarm** | Peer-to-Peer Agents | No central coordinator; emergent coordination | Very High |
+
+### IV-C — Specialised Coordination
+
+| # | Pattern | Also Known As | Intent | Complexity |
+|---|---|---|---|---|
+| O11 | **Blackboard** | Shared Workspace | Central shared memory; agents post and consume | High |
+| O12 | **Debate and Deliberation** | Devil's Advocate | Agents argue opposing positions before synthesis | High |
+| O13 | **Negotiation** | Multi-Party Consensus | Agents with conflicting objectives negotiate | Very High |
+| O14 | **SIE** | Single Information Environment | Agents own specific datasets; coordinator routes | Medium |
+| O15 | **Agent Handoff** | Context Transfer | Structured state transfer mid-task | Medium |
+| O16 | **Hybrid Control Flow** | Primitive Stack | Stacked loop primitives; most real agents | Varies |
+| O17 | **Agent Isolation** | Clean Context | Fresh context per sub-task — required companion to O6 | Low overhead |
+| O18 | **Cache-Warmed Worker Pool** | Primed Agent Pool | Shared prefix cached before worker fan-out | Low overhead |
+
+---
+
+## Scaffold Architecture Dimensions
+
+*From empirical study of 13 coding agents (arXiv 2604.03515).*
+
+**Five stackable loop primitives:**
+1. ReAct loop
+2. Generate-test-repair
+3. Plan-execute
+4. Multi-attempt retry
+5. Tree search (MCTS)
+
+Most production agents (11/13 studied) use O16 — multiple primitives stacked, not a single pattern.
+
+**The major architectural fault line:**
+
+- **LLM-as-navigator** (8/13 agents): general tools; LLM decides navigation; simpler but less precise
+- **Scaffold-understands-code** (5/13 agents): repository maps, AST indexing, knowledge graphs; more powerful but complex
+
+**Active research frontier (no consensus):** context compaction strategy, state representation format, safety mechanisms for interactive agents.
+
 
 
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{O1 — Single Agent}
 ```
 
 ## O1 — Single Agent
@@ -10513,6 +10326,11 @@ O1 is the degenerate case of orchestration — there is no library to install wh
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{O2 — Prompt Chaining}
 ```
 
 ## O2 — Prompt Chaining
@@ -10787,6 +10605,11 @@ Concretely, the **Extractor** session's setup loaded once is *"You extract entit
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{O3 — Routing}
+```
+
 ## O3 — Routing
 
 > Classify the incoming input, then dispatch it to the specialised handler that fits — so each input type runs through a prompt or agent tuned for it instead of through one diluted generalist.
@@ -11002,6 +10825,11 @@ For rule-based or embedding-based classifiers, no LLM session is required for th
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{O4 — Parallelization}
 ```
 
 ## O4 — Parallelization
@@ -11230,6 +11058,11 @@ parallelize(request):
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{O5 — Evaluator-Optimizer}
 ```
 
 ## O5 — Evaluator-Optimizer
@@ -11478,6 +11311,11 @@ A small fine-tuned classifier can substitute for the Judge LLM on tasks where th
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{O6 — Orchestrator-Workers}
 ```
 
 ## O6 — Orchestrator-Workers
@@ -11743,6 +11581,11 @@ Every major agent framework ships an O6 implementation as its canonical multi-ag
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{O7 — Supervisor Hierarchy}
+```
+
 ## O7 — Supervisor Hierarchy
 
 > Decompose the orchestrator's job across a multi-level tree of supervisors — a root supervisor delegates to sub-supervisors, which delegate to workers — so each node coordinates only a bounded set of children instead of the whole fleet.
@@ -11994,6 +11837,11 @@ In the co-scientist concrete example: the **Root Supervisor** session has setup 
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{O8 — Loop Agent}
+```
+
 ## O8 — Loop Agent
 
 > Run a fixed pipeline of distinct, role-specialised agents as one cycle, then repeat the whole cycle until a termination condition fires.
@@ -12234,6 +12082,11 @@ loop_agent(task):
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{O9 — Multi-Agent Reflection}
+```
+
 ## O9 — Multi-Agent Reflection
 
 > Have several distinct critic agents — different personas, often different models or knowledge bases — independently review the same output, then synthesise their critiques into one verdict the generator can act on.
@@ -12454,6 +12307,11 @@ Note: Multi-Agent Reflection is more *architecture* than *library*. The canonica
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{O10 — Swarm / Mesh}
 ```
 
 ## O10 — Swarm / Mesh
@@ -12707,6 +12565,11 @@ Concretely, for a **Triage** session in a customer-support swarm with peers `Bil
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{O11 — Blackboard System}
+```
+
 ## O11 — Blackboard System
 
 > Coordinate specialist agents through a central shared memory they all read and write, with a control unit that activates the next agent based on the board's current state — so coordination emerges from the data rather than from a fixed plan.
@@ -12940,6 +12803,11 @@ blackboard_run(problem, agents, board):
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{O12 — Debate / Deliberation}
 ```
 
 ## O12 — Debate / Deliberation
@@ -13201,6 +13069,11 @@ Concretely, for a factual-claim debate (the Du et al. setup): the Debater-A setu
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{O13 — Negotiation}
 ```
 
 ## O13 — Negotiation
@@ -13492,6 +13365,11 @@ The pattern is **emerging in production** — wider than research, narrower than
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{O14 — Single Information Environment}
+```
+
 ## O14 — Single Information Environment
 
 > Partition the corpus by ownership rather than unifying it: each agent owns a single, bounded dataset, and a coordinator routes every query to the agent that owns the data the answer lives in — composing across owners only when the question crosses domains.
@@ -13727,6 +13605,11 @@ SIE is an architectural pattern, not a single library — what teams ship is a c
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{O15 — Agent Handoff}
+```
+
 ## O15 — Agent Handoff
 
 > Transfer control of an in-progress interaction from one agent to another within the same system, passing a structured state package — intent, entities, actions taken, goal, trace ID — so the receiving agent continues coherently without restarting or re-asking.
@@ -13952,6 +13835,11 @@ on_user_turn(user_msg, session):
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{O16 — Hybrid Control Flow}
 ```
 
 ## O16 — Hybrid Control Flow
@@ -14234,6 +14122,11 @@ hybrid_agent(task):
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{O17 — Agent Isolation}
+```
+
 ## O17 — Agent Isolation
 
 > Delegate a self-contained sub-task to a sub-agent invocation that runs in a **fresh, isolated context window** containing only the brief and the inputs that sub-task needs — then discard that context once the sub-agent returns, integrating only the result.
@@ -14467,6 +14360,11 @@ delegate(parent_state, subtask_spec):
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{O18 — Cache-Warmed Worker Pool}
+```
+
 ## O18 — Cache-Warmed Worker Pool
 
 > Before dispatching parallel workers, establish and warm a stable shared context as a provider-cached prefix — so every worker in the pool reads its common setup from the KV cache rather than independently re-paying the prefill cost for identical tokens.
@@ -14673,6 +14571,67 @@ Composition with **H1 Identity Persistence**: the Genesis State and any stable h
 - GO4 §O6 Orchestrator-Workers — the multi-agent pattern whose fan-out this one optimises.
 
 
+
+```{=latex}
+\clearpatternname
+```
+
+
+```{=latex}
+\clearpage
+```
+
+## Primary Decision Flow
+
+```
+Is the task solvable with a single LLM call + tools?
+  YES → O1 (Single Agent) + appropriate Signal and Reasoning patterns
+
+  NO:
+    Does the task decompose into FIXED sequential steps?
+      YES → O2 (Prompt Chaining)
+
+    Are there distinct input TYPES needing specialisation?
+      YES → O3 (Routing)
+
+    Are sub-tasks INDEPENDENT and can run in parallel?
+      YES → O4 (Parallelization)
+        + O18 (Cache-Warmed Worker Pool) if workers share a prefix >1024 tokens
+
+      NO → O6 (Orchestrator-Workers) + R4 (ReAct) inside workers
+           + O17 (Agent Isolation) — REQUIRED companion to O6
+
+Does output quality matter AND can it be verified objectively?
+  YES → O5 (Evaluator-Optimizer) or R7 (Reflexion)
+
+Are there distinct specialised roles exceeding a single context?
+  YES → O7 (Supervisor Hierarchy)
+
+Do agents need to share state asynchronously across turns?
+  YES → O11 (Blackboard) or K10 (Long-Term Memory shared substrate)
+```
+
+## Composition Law
+
+Most production systems are: `O6 + O4 + R4 (per worker) + O17 + O18`
+
+- O6 without O17 loses the n² cost bounding that produces the quality win
+- O4 without O18 misses ~85% cost reduction on shared worker context
+- O16 (Hybrid Control Flow) describes most real agents — stacked primitives, not a single pattern
+
+## Cost Escalation by Pattern
+
+| Pattern | Relative cost | When justified |
+|---|---|---|
+| O1 Single Agent | Baseline | Default; increase complexity only when this fails |
+| O2 Prompt Chaining | Low | Fixed decomposition; fully testable |
+| O3 Routing | Low + classifier | Distinct specialised inputs |
+| O4 Parallelization | N× but parallel | Independent sub-tasks; latency matters |
+| O5 Evaluator-Optimizer | 2× + loop | Objective quality criterion exists |
+| O6 Orchestrator-Workers | High | Dynamic decomposition required |
+| O7 Supervisor Hierarchy | Very high | O6 applied recursively; most complex tasks |
+
+
 # Category V — Reliability Patterns
 
 A **Reliability pattern** is a design pattern for keeping an LLM system *safe, recoverable, and evaluable* under failure. Reliability patterns separate *the capability the agent has* from *the conditions under which it is allowed to exercise that capability* — and from *the evidence that it did so correctly*.
@@ -14750,11 +14709,55 @@ Patterns differ in *which envelope they tighten* — the human gate around an ir
 - **Categories I–IV** — Signal, Knowledge, Reasoning, Orchestration each define capabilities; this category defines the conditions under which those capabilities are safe to deploy. **S9 Constitutional Framing** (soft, in-prompt) pairs with **V7 AgentSpec** (hard, external) — see CRITICAL 3 in `CONFLICTS.md`.
 - **Cross-cutting reach** — every loop needs V9; every CodeAct (R13) needs V8 (CRITICAL 5); every Constitutional Self-Alignment (H5) needs V1 (CRITICAL 7); every MCP deployment (I3) is in tension with V13 (CRITICAL 6). The full map is in `CONFLICTS.md`.
 
+---
+
+## Quick Reference
+
+### V-A — Safety and Security
+
+| # | Pattern | Also Known As | Intent |
+|---|---|---|---|
+| V1 | **Human-in-the-Loop** | Approval Gate | Block on irreversible, novel, or high-blast-radius actions |
+| V2 | **Human-on-the-Loop** | Monitoring Mode | Agent acts autonomously; human monitors and can interrupt |
+| V3 | **Rule of Two** | Lethal Trifecta Guard | Flag agents with private data + untrusted content + external comms |
+| V4 | **Dual LLM** | Privilege Separation | Quarantined LLM for untrusted data; privileged LLM for actions |
+| V5 | **Guardrail Layering** | Defense in Depth | Safety checks at input, pre-call, post-call, and output |
+| V6 | **Prompt Injection Shield** | Input Sanitisation | Structural and positional defences against injection |
+| V7 | **AgentSpec** | Policy as Code | Declarative, out-of-prompt, deterministic policy enforcement |
+| V8 | **Tool Sandboxing** | Isolated Execution | Confine LLM-generated code to restricted environment |
+
+### V-B — Operational Reliability
+
+| # | Pattern | Also Known As | Intent |
+|---|---|---|---|
+| V9 | **Bounded Execution** | Circuit Breaker | Hard caps on steps, cost, wall-time — required for every loop |
+| V10 | **Checkpointing** | State Snapshot | Replayable agent state; recovery without restart |
+| V11 | **Error Compaction** | Error Summarisation | Compress errors into compact structured signals |
+| V12 | **Stateless Reducer** | Pure Agent | Deterministic, replayable summary of accumulated state |
+| V13 | **Tool Budget** | Schema Budget | Limit active schema tokens — every schema token costs n² attention |
+| V19 | **Fallback** | Graceful Degradation | Cheaper degraded path for every primary-path failure mode |
+| V20 | **Schema Validation** | Structured Output | Validate output against schema; re-prompt on failure |
+
+### V-C — Observability and Evaluation
+
+| # | Pattern | Also Known As | Intent |
+|---|---|---|---|
+| V14 | **Trajectory Logging** | Agent Tracing | OTel-compatible trace of every call, action, observation |
+| V15 | **LLM-as-Judge** | AI Evaluator | Second model evaluates quality against defined rubrics |
+| V16 | **Offline Eval** | Regression Testing | Batch evaluation against held-out cases before deployment |
+| V17 | **Online Eval** | Production Monitoring | Real-time quality metrics in production |
+| V18 | **Agent Simulation** | Sandbox Testing | Simulated environment for pre-deployment stress testing |
+
 
 
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{V1 — Human-in-the-Loop}
 ```
 
 ## V1 — Human-in-the-Loop
@@ -15006,6 +15009,11 @@ hitl_checkpoint(agent_state, planned_action):
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{V2 — Human-on-the-Loop}
+```
+
 ## V2 — Human-on-the-Loop
 
 > Let the agent act autonomously within its scope while a human watches the trace in real time, ready to interrupt, redirect, or override — so oversight stays continuous without blocking every step.
@@ -15246,6 +15254,11 @@ The **Human Supervisor** is not an LLM session — they are out-of-band — but 
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{V3 — Rule of Two / Lethal Trifecta}
 ```
 
 ## V3 — Rule of Two / Lethal Trifecta
@@ -15523,6 +15536,11 @@ V3 is an *architecture / governance pattern*, not a library — there is no cano
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{V4 — Dual LLM}
+```
+
 ## V4 — Dual LLM
 
 > Split the agent into two LLM sessions — a Privileged LLM that holds private data and tool access but never sees untrusted content, and a Quarantined LLM that processes untrusted content but holds no private data and no tools — so the capability to act never co-exists with the input that might hijack it.
@@ -15761,6 +15779,11 @@ dual_llm(user_request, untrusted_content, private_data):
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{V5 — Guardrail Layering}
 ```
 
 ## V5 — Guardrail Layering
@@ -16029,6 +16052,11 @@ handle_turn(user_msg, policy):
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{V6 — Prompt Injection Shield}
 ```
 
 ## V6 — Prompt Injection Shield
@@ -16311,6 +16339,11 @@ For the **Detector**, the setup is the trained classifier weights — there is n
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{V7 — AgentSpec / Declarative Governance}
+```
+
 ## V7 — AgentSpec / Declarative Governance
 
 > Specify the agent's operating rules — its permissions, prohibitions, and obligations — as an external declarative artefact, and enforce them at runtime in a policy engine that runs *outside* the LLM and cannot be overridden by prompt manipulation.
@@ -16572,6 +16605,11 @@ handle_action(agent_action, agent_ctx, spec, engine):
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{V8 — Tool Sandboxing}
 ```
 
 ## V8 — Tool Sandboxing
@@ -16861,6 +16899,11 @@ execute_in_sandbox(action, agent_id, run_id):
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{V9 — Bounded Execution}
+```
+
 ## V9 — Bounded Execution
 
 > Wrap every agent loop in a hard envelope of iteration, tool-call, token, time, and cost caps — so a wrong turn becomes a graceful termination instead of a runaway invoice.
@@ -17107,6 +17150,11 @@ bounded_execution(task, profile_name):
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{V10 — Checkpointing}
+```
+
 ## V10 — Checkpointing
 
 > Persist the agent's complete working state to an external durable store at every meaningful step, so any failure, interruption, or human pause can be resumed — or rolled back — from the last known-good snapshot rather than restarted from zero.
@@ -17344,6 +17392,11 @@ For agents not built on any of the above, the pattern is straightforward to roll
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{V11 — Error Compaction}
+```
+
 ## V11 — Error Compaction
 
 > Replace raw errors in the agent's working context with compact, dedup-aware summaries that preserve the diagnostic signal at a fraction of the token cost.
@@ -17567,6 +17620,11 @@ V11 is a wiring pattern rather than a library — there is no canonical project 
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{V12 — Stateless Reducer}
 ```
 
 ## V12 — Stateless Reducer
@@ -17815,6 +17873,11 @@ For agents built on a plain LLM SDK (no framework), V12 is a code-review discipl
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{V13 — Tool Budget}
 ```
 
 ## V13 — Tool Budget
@@ -18126,6 +18189,11 @@ V13 is a *policy / discipline pattern* — there is no single canonical library;
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{V14 — Trajectory Logging}
+```
+
 ## V14 — Trajectory Logging
 
 > Emit a complete, structured, OpenTelemetry-compliant trace of every decision, LLM call, tool invocation, policy check, and intermediate output the agent makes during a task — so the run can be replayed, debugged, audited, and evaluated long after it finishes.
@@ -18394,6 +18462,11 @@ def run_agent(task):
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{V15 — LLM-as-Judge}
+```
+
 ## V15 — LLM-as-Judge
 
 > Use a separate LLM call to score the output of another LLM call against an explicit rubric, producing an automated, ground-truth-free verdict on quality.
@@ -18623,6 +18696,11 @@ Concretely, for the **Judge** session: the setup loaded once is *"You are a stri
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{V16 — Offline Eval}
 ```
 
 ## V16 — Offline Eval
@@ -18879,6 +18957,11 @@ score_case(case, output):
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{V17 — Online Eval}
 ```
 
 ## V17 — Online Eval
@@ -19163,6 +19246,11 @@ def refresh_calibration():
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{V18 — Agent Simulation}
 ```
 
 ## V18 — Agent Simulation
@@ -19454,6 +19542,11 @@ run_one_scenario(aut, scenario):
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{V19 — Fallback / Graceful Degradation}
+```
+
 ## V19 — Fallback / Graceful Degradation
 
 > When the primary execution path fails — a model errors, a circuit breaker trips, a bound is hit, a tool refuses — switch to a pre-declared degraded path (simpler model, cached answer, deterministic rule, or human escalation) instead of returning an error to the user.
@@ -19722,6 +19815,11 @@ V19 has both gateway-level libraries (where provider fallback is a configuration
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{V20 — Output / Schema Validation}
+```
+
 ## V20 — Output / Schema Validation
 
 > Validate every model output against a declared schema and, on failure, re-prompt the model with the validation error until the output conforms or a retry budget is exhausted.
@@ -19965,6 +20063,68 @@ generate_validated(task_input, schema, max_retries=2):
 - White et al. (2023) — "A Prompt Pattern Catalog to Enhance Prompt Engineering with ChatGPT" — the *Output Customization* / *Output Template* category that V20 operationalises at runtime.
 
 
+
+```{=latex}
+\clearpatternname
+```
+
+
+```{=latex}
+\clearpage
+```
+
+## Decision Flow
+
+```
+Does the agent take irreversible or high-blast-radius actions?
+  YES → V1 (Human-in-the-Loop) at those decision boundaries
+  MONITOR only → V2 (Human-on-the-Loop)
+  Two independent confirmations required → V3 (Rule of Two)
+
+Does the agent process untrusted external content?
+  YES:
+    Private data + untrusted content + external comms? → V3 (lethal trifecta check)
+    Route untrusted content to quarantined model → V4 (Dual LLM)
+    Inject structural defences at prompt boundaries → V6 (Prompt Injection Shield)
+
+Does the agent run in a loop or have no natural exit condition?
+  YES → V9 (Bounded Execution) — REQUIRED; hard caps on steps, cost, wall-time
+    ⚠ V20 retry loops expand context ~2× per retry; include in V9 token cap calculation
+
+Does the agent generate or execute code?
+  YES → V8 (Tool Sandboxing): restrict filesystem, network, clock
+
+Does the agent have more than 10 active tools?
+  YES → V13 (Tool Budget): hard limit on active schema tokens
+    Tool selection accuracy: 43% at low counts → 14% at high counts (3× degradation)
+
+Does the agent need to recover from partial failure without restart?
+  YES → V10 (Checkpointing): replayable state snapshots
+
+Are there multiple safety boundaries (input, tool calls, output)?
+  YES → V5 (Guardrail Layering): safety checks at all four points
+
+Is output conformance to a schema required?
+  YES → V20 (Schema Validation): validate-and-reask loop
+    Bundle with V9: each retry expands context
+
+Is output quality measurable?
+  Pre-deployment → V16 (Offline Eval)
+  In production → V17 (Online Eval)
+  Second model as judge → V15 (LLM-as-Judge)
+
+Is full observability required (compliance, debugging)?
+  YES → V14 (Trajectory Logging): OTel-compatible trace from day 1
+
+Does the agent need declarative policy enforcement outside the prompt?
+  YES → V7 (AgentSpec): deterministic policy; not probabilistic like S9
+```
+
+## Must-Have Baseline
+
+Every production agent needs at minimum: **V9 + V14**. Add V1 at any irreversible action boundary. Add V5 at any external input boundary.
+
+
 # Category VI — Integration Patterns
 
 An **Integration pattern** is a design pattern for how a language model reaches the world outside its prompt — the wiring through which an LLM, or a system of LLMs, invokes tools, calls services, discovers other agents, and delegates work to them. Integration patterns separate *what the model decides* from *how that decision is enacted* on real systems.
@@ -20053,11 +20213,29 @@ Are agents from different systems coordinating?
 
 The headline cost number: GitHub MCP occupies ~40,000–55,000 tokens of schema in a single client; four or five reflex-loaded MCP servers consume 60,000+ tokens before the agent has done anything. This is why CRITICAL 6 (`CONFLICTS.md`) pairs I3 directly with V13 Tool Budget. The empirical threshold (~15 tools safe, ~40 ceiling) has a mechanistic basis: similar tool descriptions occupy nearby K-vector regions in the attention bilinear form (mechanism 1), making the Q-K inner products for routing ambiguous as the catalogue grows. Beyond the ceiling, the signal that should select the right tool is lost in the noise of near-identical similarity scores. Schema tokens loaded for unused tools are also not idle — they sit in the KV cache (mechanism 3) and are attended over on every generation step, unlike human working memory which can set something aside.
 
+---
+
+## Quick Reference
+
+| # | Pattern | Also Known As | Intent | When to Use |
+|---|---|---|---|---|
+| I1 | **Direct API** | Deterministic Call | Synchronous HTTP; no LLM reasoning | Sub-10ms ops; consistency-critical |
+| I2 | **Function/Tool Call** | Schema-Wrapped API | LLM selects and invokes typed function | 1–5 tools; app-specific routing |
+| I3 | **MCP Server** | Model Context Protocol | Standardised tool discovery; credential isolation | 5+ tools shared across agents |
+| I4 | **CLI Invocation** | Shell Tool | Agent uses existing CLI directly | Tools with existing CLIs (git, docker, gh) |
+| I5 | **Agent Card** | Agent Manifest | Self-describing JSON for agent discovery | Multi-agent; A2A interoperability |
+| I6 | **A2A Delegation** | Agent-to-Agent | Structured cross-agent task delegation | Multi-vendor agent collaboration |
+
 
 
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{I1 — Direct API Call}
 ```
 
 ## I1 — Direct API Call
@@ -20304,6 +20482,11 @@ There is no single "I1 framework" because I1 is *the absence* of the routing lay
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{I2 — Function / Tool Call}
 ```
 
 ## I2 — Function / Tool Call
@@ -20589,6 +20772,11 @@ If the agent is multi-provider, a library like **Instructor** (Pydantic-backed) 
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{I3 — MCP Server}
 ```
 
 ## I3 — MCP Server
@@ -20879,6 +21067,11 @@ The optional second session — a tool-search subagent — is the canonical miti
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{I4 — CLI Invocation}
+```
+
 ## I4 — CLI Invocation
 
 > Have the agent reach for the existing command-line tool — `git`, `docker`, `gh`, `kubectl`, `aws`, `gcloud`, `jq`, `rg` — and run it directly, with no JSON Schema wrapper between the LLM and the binary.
@@ -21126,6 +21319,11 @@ There is no single "I4 framework" — like I1, the pattern is the *absence* of a
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{I5 — Agent Card}
 ```
 
 ## I5 — Agent Card
@@ -21381,6 +21579,11 @@ def discover_and_verify(domain, required_skill_id, required_input_schema):
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{I6 — A2A Delegation}
 ```
 
 ## I6 — A2A Delegation
@@ -21662,6 +21865,49 @@ The Executor is intentionally opaque to the Orchestrator. That opacity is the pa
 - Composio AI Agent Report 2025 — adoption data for A2A, MCP, and ACP across the agent ecosystem.
 
 
+
+```{=latex}
+\clearpatternname
+```
+
+
+```{=latex}
+\clearpage
+```
+
+## Decision Flow
+
+```
+Does LLM reasoning determine which action to take?
+  NO → I1 (Direct API Call): synchronous HTTP, no model involvement
+
+  YES:
+    Does a CLI already exist for this tool?
+      YES → I4 (CLI Invocation) first — zero schema overhead
+
+    How many tools, and are they shared across agents?
+      1–5 tools, single agent → I2 (Function/Tool Call)
+      5–20 tools shared across agents → I2 + I3 hybrid
+      20+ tools → I3 (MCP Server) with gateway + dynamic discovery
+
+    Do multiple agents from different vendors need to coordinate?
+      YES → I5 (Agent Card) for discovery + I6 (A2A Delegation) for execution
+```
+
+## Cost Reality
+
+| Pattern | Context overhead | Notes |
+|---|---|---|
+| I1 Direct API | None | Model not involved; deterministic |
+| I2 Function Call | Schema tokens (per tool) | Each tool schema costs attention budget |
+| I3 MCP Server | High | GitHub MCP alone: 40,000–55,000 tokens/request |
+| I4 CLI Invocation | Near zero | Existing CLI; command string only |
+| I5 Agent Card | Minimal (JSON descriptor) | Discovery only; no execution cost |
+| I6 A2A Delegation | Per sub-task | Full task delegation; cost of the delegated agent |
+
+**Design tool budgets before choosing integration patterns.** 4–5 MCP servers = 60,000+ context tokens on schemas alone. Apply V13 (Tool Budget) before adding I3 servers.
+
+
 # Category VII — Humanizer Patterns
 
 A **Humanizer pattern** is a design pattern for the *longitudinal* layer of an agent: how it acquires continuity, self-knowledge, and human-like adaptive behaviour across sessions. Humanizer patterns separate *who the agent is and how it has changed* from *what it is doing in this turn*.
@@ -21743,11 +21989,54 @@ Patterns differ in *what they extract* — identity, principles, lessons, skills
 
 *The "Humanizer" framing follows the Theater of Mind paper's Global-Workspace synthesis (arXiv 2604.08206) and the MIRROR inner-monologue architecture (arXiv 2506.00430), generalised here to the longitudinal layer of any agent.*
 
+---
+
+## Quick Reference
+
+| # | Pattern | Also Known As | Intent | When to Use |
+|---|---|---|---|---|
+| H1 | **Identity Persistence** | Genesis State | Stable invariant self at position 0 every session | Any multi-session agent |
+| H2 | **Episodic Self-Improvement** | Cross-Session Reflexion | Persist verbal self-critiques; improve without weight updates | Recurring task types |
+| H3 | **Entropy-Driven Curiosity** | Deadlock Break | Increase temperature or inject stimuli on stagnation | Creative agents; stuck reasoning loops |
+| H4 | **Procedural Skill Accumulation** | Skill Library | Distil successful trajectories into reusable skills | Agents with recurring task types |
+| H5 | **Constitutional Self-Alignment** | Principle Evolution | Operating principles evolve through experience with human checkpoints | Long-running agents; governed alignment |
+| H6 | **Continuous Inner Monologue** | MIRROR | Background reasoning separate from user-facing responses | Persistent assistants; monitoring agents |
+| H7 | **Adaptive Persona** | User-Calibrated Style | Communication adapts to observed user preferences | Personal assistants; multi-user systems |
+| H8 | **Meta-Agent Self-Modification** | Self-Improving Agent | Agent modifies own operational parameters within governed allowlist | Large-scale production; abundant eval data |
+| H9 | **Observational Identity** | Self-Knowledge Model | Explicit model of own capabilities and knowledge state | Multi-session; capability routing |
+| H10 | **Relational Memory** | User Model Persistence | Persistent user relationship record with GDPR erasure | Personal assistants; coaching |
+
+---
+
+## Cognitive Science Grounding
+
+Humanizer patterns map to classical cognitive science theories — the convergence suggests the patterns capture something real about how intelligence works over time.
+
+| Pattern | Cognitive Theory | Source |
+|---|---|---|
+| O11 Blackboard | Global Workspace Theory (Baars) | Explicit in Theater of Mind paper |
+| O10 Swarm | Society of Mind (Minsky) | Multi-specialised agents |
+| R16 Talker-Reasoner | Dual-Process Theory (Kahneman) | Direct mapping: System 1/2 |
+| K10 Long-Term Memory | Tulving / Baddeley memory taxonomy | Episodic, semantic, procedural variants |
+| K11 Observational Memory | Extended Mind Thesis (Clark) | External tool as cognitive extension |
+| H1 Identity Persistence | Autobiographical memory (Tulving 1985) | Genesis State in Theater of Mind |
+| H2 Episodic Self-Improvement | Episodic memory consolidation | Reflexion extended cross-session |
+| H3 Entropy-Driven Curiosity | Optimal Arousal / Noradrenergic system | Theater of Mind — entropy monitoring |
+| H5 Constitutional Self-Alignment | Moral development (Kohlberg) | Constitutional AI extended to inference |
+| H6 Inner Monologue | Vygotskian inner speech | MIRROR / Thinker architecture |
+| H7 Adaptive Persona | Theory of Mind (Premack & Woodruff) | User model as cognitive representation |
+| H10 Relational Memory | Parasocial relationship theory | HCI research; Skjuve et al. 2021 |
+
 
 
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{H1 — Identity Persistence}
 ```
 
 ## H1 — Identity Persistence
@@ -21972,6 +22261,11 @@ end_session(events, store):                            # at trigger only
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{H2 — Episodic Self-Improvement}
 ```
 
 ## H2 — Episodic Self-Improvement
@@ -22252,6 +22546,11 @@ H2 — the *full* cross-session distil-dedupe-decay-and-govern loop — is an em
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{H3 — Entropy-Driven Curiosity}
+```
+
 ## H3 — Entropy-Driven Curiosity
 
 > Monitor the diversity of an agent's recent output; when it collapses — repeated tool calls, near-identical thoughts, looping plans — automatically raise temperature or inject a novelty cue to break the loop, then decay back to baseline.
@@ -22509,6 +22808,11 @@ H3 is an architecture-and-control pattern rather than a single library: the cano
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{H4 — Procedural Skill Accumulation}
 ```
 
 ## H4 — Procedural Skill Accumulation
@@ -22794,6 +23098,11 @@ In multi-agent (LEGOMem-style) deployments the additional structural choice is *
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{H5 — Constitutional Self-Alignment}
 ```
 
 ## H5 — Constitutional Self-Alignment
@@ -23102,6 +23411,11 @@ There is no canonical "H5" library at this time. Teams that need this pattern bu
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{H6 — Continuous Inner Monologue}
+```
+
 ## H6 — Continuous Inner Monologue
 
 > Run a persistent background reasoning process — distinct from the user-facing responder — that thinks between turns and across sessions, writing its reflections to a shared store the responder reads on its next turn.
@@ -23370,6 +23684,11 @@ H6 is an *architecture pattern* more than a library pattern. Outside the MIRROR 
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{H7 — Adaptive Persona}
+```
+
 ## H7 — Adaptive Persona
 
 > Treat communication style — detail level, technical depth, format, length, tone — as a continuously-estimated per-user parameter, inferred from explicit feedback and implicit interaction signals, and applied at generation time without ever crossing into the agent's invariant identity core.
@@ -23616,6 +23935,11 @@ on_reset(user_id, h7_store):
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{H8 — Meta-Agent Self-Modification}
 ```
 
 ## H8 — Meta-Agent Self-Modification
@@ -23968,6 +24292,11 @@ H8 is conspicuously *absent* from safety-critical, regulated, and low-oversight 
 \clearpage
 ```
 
+
+```{=latex}
+\setpatternname{H9 — Observational Identity}
+```
+
 ## H9 — Observational Identity
 
 > Maintain an explicit, evolving model of the agent's own capabilities, knowledge state, and past actions — with confidence and freshness on every entry — so the agent can honestly answer "what do I know?", "what have I done?", and "what can I do?" as first-class reasoning.
@@ -24229,6 +24558,11 @@ H9 as an integrated GoF-style pattern is emerging; the closest production embodi
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\setpatternname{H10 — Relational Memory}
 ```
 
 ## H10 — Relational Memory
@@ -24532,6 +24866,362 @@ on_delete(user, store):                                   # always available
 - "Agent Memory Techniques" and "Anatomy of Agentic Memory" — survey landscape for the per-user memory layer.
 - EU AI Act, Article 50 — transparency obligations for AI systems interacting with natural persons.
 - GDPR (Regulation 2016/679), Article 17 — Right to erasure ("right to be forgotten") — the legal anchor for the deletion requirement.
+
+
+
+```{=latex}
+\clearpatternname
+```
+
+
+```{=latex}
+\clearpage
+```
+
+## Decision Flow
+
+```
+Does the agent run across multiple sessions?
+  NO → Humanizer patterns do not apply; use Signal patterns for in-session persona
+
+  YES — start here:
+    H1 (Identity Persistence) — PREREQUISITE for all other Humanizer patterns
+    Stable identity must exist before it can evolve
+
+    After first failures emerge:
+      H2 (Episodic Self-Improvement) — learn from mistakes across sessions
+        Requires: K11 or K10 as memory substrate
+
+    After first successes:
+      H4 (Procedural Skill Accumulation) — distil successful trajectories into reusable skills
+        Complements H2: H2 learns from failure, H4 from success
+
+    As user model grows:
+      H7 (Adaptive Persona) — adapt communication style per user
+      H10 (Relational Memory) — persist user relationship state
+        ⚠ H10 requires explicit user consent and right-to-deletion
+
+    When reasoning loops stall or creativity degrades:
+      H3 (Entropy-Driven Curiosity) — autonomous deadlock breaking
+
+    For persistent background reasoning between turns:
+      H6 (Continuous Inner Monologue) — separate thinker from responder
+
+    For accurate self-knowledge and capability routing:
+      H9 (Observational Identity) — explicit model of own capabilities
+
+    With human governance board and formal oversight:
+      H5 (Constitutional Self-Alignment) — evolving principles with mandatory checkpoints
+        ⚠ NEVER implement H5 without mandatory human review; alignment risk
+```
+
+## Adoption Sequence
+
+| Stage | Patterns | Purpose |
+|---|---|---|
+| Foundation | H1 | Stable identity across sessions |
+| Learning | H2 + H4 | Improve from failure and success |
+| Adaptation | H7 + H10 | Serve users better over time |
+| Advanced | H3 + H6 + H9 | Autonomous, self-aware operation |
+| Governed | H5 | Evolving principles with oversight |
+
+All Humanizer patterns require K11 (Observational Memory) or K10 (Long-Term Memory) as infrastructure. H1 is a prerequisite for all others.
+
+## Anti-Patterns
+
+- **HA1 — Simulated Emotion**: emotional language without genuine affective model (manipulation)
+- **HA2 — Unbounded Relationship Depth**: H10 without ethical guardrails → parasocial harm
+- **HA3 — Identity Drift**: H7/H10 without H1 → agent becomes whoever the user wants
+- **HA4 — Autonomous Principle Adoption**: H5 without human review → alignment risk
+- **HA5 — Stale Self-Model**: H9 without decay functions → overconfident outdated self-assessment
+
+
+
+```{=latex}
+\clearpage
+```
+
+# The Mechanical Foundation
+
+> *The patterns in this catalog are not heuristics layered over a black box. Each one is grounded in the mechanical behavior of the transformer at inference time. This chapter establishes that mechanical foundation at the level of precision the patterns require. A reader who internalizes it can derive most of the catalog's recommendations from first principles rather than accepting them on authority.*
+
+---
+
+## Why This Chapter Exists
+
+This chapter derives twelve mechanistic principles from how transformers actually compute — from the attention bilinear form and KV cache structure through to prefix caching economics and subagent context bounding. It is a derivation resource: when a pattern entry cites a mechanism (for example, *mechanism 2 — n² compute cost*), this is where that citation resolves. You do not need to read this chapter to use the catalog. Read it when you want to understand why a pattern's costs are what they are, not just that they are.
+
+Mechanism citations in pattern files take the form **"(mechanism N)"**. That notation refers to the numbered sections below. A reader who needs the derivation for any cited mechanism should find it here.
+
+---
+
+## 0.0 — How a Language Model Computes
+
+The mechanisms in this chapter are precise. Before the formalism, here is the conceptual model they build on.
+
+**Tokens.** A language model does not read words. It reads *tokens* — byte-pair encoded substrings that tile any input text. One token is roughly three-quarters of a word in English, though the ratio varies by content type. "context" is one token; "contextualisation" may be three. Every count in this chapter — context window size, KV cache size, input cost — is a token count, not a word count. When a model's context window is 200,000 tokens, that is roughly 150,000 words.
+
+**The context window.** At inference time, the model sees a fixed sequence of tokens: your system prompt, any prior turns, your current message, any retrieved documents. This sequence is the *context*. Every token has a position, and position matters — the model has learned structural priors from training (instructions near the start, user query near the end). The model is stateless between calls: it has no memory of previous requests. The context window is the totality of what it knows for one call.
+
+**A forward pass.** When you send a prompt, the model runs a single forward pass over all input tokens simultaneously. For each layer and each attention head, it computes how much every token should attend to every other token. The final layer's output is a probability distribution over the vocabulary; one token is sampled and appended to the sequence. Then the process repeats: another forward pass, another token. Generation is a loop of single-token predictions, each conditioned on everything before it. This loop is what the patterns in this catalog are engineering around.
+
+**The KV cache.** Running a full forward pass over the growing sequence on every step would be prohibitively slow — by step 500, you would recompute attention over 500 tokens 500 times. Each layer avoids this by caching the *key* and *value* vectors it computed for prior tokens. On the next step, only the new token needs fresh computation; the cached K and V vectors for all prior tokens are reused. This is the KV cache. It grows monotonically — one entry per layer per token, never removed or reordered — which is why its structure appears in the cost reasoning for almost every pattern in this catalog.
+
+**The n² intuition.** During the initial *prefill* — processing all input tokens before generation begins — the model computes attention between every pair of tokens. A prompt twice as long has four times as many pairs: prefill cost scales with the square of sequence length. A 2,000-token prompt costs four times as much to prefill as a 1,000-token prompt. A 4,000-token prompt costs sixteen times as much. Engineers who model token costs as linear are systematically underestimating the cost of long contexts. This quadratic relationship is the mechanical basis for the entire Knowledge category and for the subagent isolation imperative in Orchestration patterns.
+
+---
+
+## 0.1 — The Inference Primitives (Mechanisms 1–7)
+
+### Mechanism 1 — Attention as a Learned Bilinear Form **[Grade A]**
+
+At each attention head, the core computation contracts a query against a key. Writing the query as $Q_\alpha \in \mathbb{R}^{d_\text{head}}$ (naturally a covector — a linear functional acting on the key space) and the key as $K^\alpha \in \mathbb{R}^{d_\text{head}}$ (a vector), the raw attention score is:
+
+$$s = Q_\alpha K^\alpha$$
+
+When both Q and K are represented as elements of $\mathbb{R}^{d_\text{head}}$ with the Euclidean metric $\delta_{\alpha\beta}$ providing an implicit identification of tangent and cotangent spaces, the contraction becomes the familiar dot product. But the weight matrices $W_Q$ and $W_K$ project from the same token embedding into Q-space and K-space via different learned maps. The full attention bilinear form in token-embedding space $\mathbb{R}^{d_\text{model}}$ is therefore:
+
+$$Q_i^\alpha K_{j\alpha} = e_i^\mu\,(W_Q)_\mu^{\;\alpha}\,\delta_{\alpha\beta}\,(W_K^T)^\beta_{\;\nu}\,e_j^\nu = e_i^\mu\,g_{\mu\nu}\,e_j^\nu$$
+
+where the **effective metric tensor** on embedding space is:
+
+$$g_{\mu\nu} = (W_Q W_K^T)_{\mu\nu}$$
+
+This is a learned non-symmetric $(0,2)$ tensor on $d_\text{model}$-space. It is not a Riemannian metric — it is neither symmetric nor positive-definite — but it plays the structural role of one: it defines what constitutes similarity between token embeddings at each head. Because $W_Q \neq W_K$, this similarity is directional: $s(e_i \to e_j) \neq s(e_j \to e_i)$. The query attends to the key; the reverse is not the same operation.
+
+Every head defines a different $g_{\mu\nu}$. Multi-head attention runs $H$ such bilinear forms in parallel, each carving out a different learned notion of token relevance. There is no single Euclidean geometry on the embedding space; there are $H \times L$ distinct learned geometries (one per head per layer).
+
+**Practical consequence:** What a model attends to is not Euclidean distance in embedding space — it is a head-specific, layer-specific, learned asymmetric structure. "Semantic similarity" is shorthand for proximity under this learned metric, which is why the same two tokens can be similar under one head and dissimilar under another.
+
+**What this grounds:** K-series retrieval pattern rationale (why embedding-space retrieval is head-specific); S2 few-shot ordering; K1 hybrid retrieval; the entire rationale for why prompt phrasing affects attention routing.
+
+---
+
+### Mechanism 2 — n² Compute and KV Cache Memory Cost **[Grade A]**
+
+The attention matrix $QK^T \in \mathbb{R}^{n \times n}$ (where $n$ = sequence length) is computed at every layer for every head. The compute cost of prefill — processing all $n$ input tokens in one forward pass — is $O(n^2 d_\text{model})$ in FLOPs. Doubling the context quadruples the prefill cost.
+
+Token generation (the decode phase) is structurally different. At each step, only one new Q vector is computed; it is contracted against all $n$ cached K vectors. This is a matrix-vector product (not matrix-matrix), and is bounded by **memory bandwidth**, not FLOP count. The bottleneck is reading the KV cache from DRAM, not computing the attention. Generation latency scales with $n$, not $n^2$, but is dominated by memory bandwidth to the KV cache rather than arithmetic throughput.
+
+**The n² compounding is non-linear in cost.** Adding 100 tokens to a 1,000-token prompt costs more than adding 100 tokens to a 100-token prompt — not proportionally more, but quadratically more in prefill attention compute. Practitioners who model token costs as linear are systematically underestimating the cost of long prompts.
+
+**What this grounds:** Every pattern rationale that mentions "token cost," "context budget," or "sequence length limit." The n² fact is the mechanical basis for the entire K-series (context engineering) and for the subagent decomposition imperative in O-series patterns.
+
+---
+
+### Mechanism 3 — The KV Cache as a Growing 4D Tensor **[Grade A]**
+
+The key-value cache at inference time is a 4-dimensional tensor of shape:
+
+$$\mathcal{C} \in \mathbb{R}^{L \times n \times n_\text{kv} \times d_\text{head}}$$
+
+where $L$ = number of layers, $n$ = tokens in context, $n_\text{kv}$ = number of KV heads (with grouped-query attention, $n_\text{kv} < n_\text{heads}$), and $d_\text{head}$ = head dimension. The cache grows monotonically during a session — tokens are appended, never removed or reordered. Causal masking makes the attention matrix lower-triangular: token $i$ can only attend to tokens $j \leq i$.
+
+At generation step $t$, the model computes a new Q for position $t$ and contrasts it against all $n+t-1$ cached K vectors across all $L$ layers. This is the full similarity search described under Mechanism 1, executed against the entire history on every generation step.
+
+**Memory cost per token:** approximately $2 \times L \times n_\text{kv} \times d_\text{head} \times \text{bytes\_per\_float}$. For a 70B-class model with GQA: $\approx 2 \times 80 \times 8 \times 128 \times 2 \approx 327$KB per token in context. A 100k-token context requires roughly 32GB of KV cache.
+
+**The KV cache does not persist across API calls.** Each new call to the Anthropic Messages API starts with a fresh KV cache. The only persistence mechanism is re-sending tokens (re-prefill) or using provider-side prefix caching (Mechanism 5). This is the architectural fact that makes all H-series (Humanizer) "memory" patterns file-retrieval operations, not model-state operations.
+
+**What this grounds:** All H-series memory patterns; K8 Working Memory; K9 Long Context; the cost model for all O-series multi-agent patterns; V10 Checkpointing.
+
+---
+
+### Mechanism 4 — Lost-in-the-Middle as Q-K Space Geometry **[Grade B — empirically strong, partially derived]**
+
+Liu et al. (2024) documented a U-shaped recall curve over sequence position: recall is strong at the start and end of the context window, materially weaker for content placed in the middle. This is not an arbitrary empirical finding — it has a mechanical substrate, though the substrate is not fully derivable from first principles (hence Grade B).
+
+The Q and K projection matrices $W_Q$ and $W_K$ were trained on natural text. Natural text has strong local dependencies (adjacent and nearby tokens are semantically related) and strong document-boundary conventions (opening sentences state the topic; closing sentences summarize it). The learned projection matrices therefore embed a **recency bias** (small $i-j$ offsets produce stronger Q-K inner products — see Mechanism 12 on RoPE) and a **start-of-context anchoring** (opening position K vectors are densely attended in natural text and the model internalized this pattern).
+
+Middle K vectors are geometrically accessible — the attention computation can reach them — but statistically under-attended because the learned $W_Q$ and $W_K$ do not amplify those positions. The failure mode is not attention blindness; it is low attention weight mass assigned to middle positions relative to start and end.
+
+**Practical consequence:** Content placed in the middle of a long context is systematically less likely to influence the output than the same content placed at the start or end. This is a physical property of the Q-K geometry, not a soft preference. Pattern recommendations to "place critical content at the start or end" are derivable from this mechanism.
+
+**What this grounds:** K1, K6, K7, K9, K10, K11 rationale for context placement; S3 Persona placement advice; V6 Prompt Injection Shield defense rationale.
+
+---
+
+### Mechanism 5 — Prefix Caching as Cache Engineering **[Grade A mechanism; Grade B operational specifics]**
+
+Provider-level prefix caching stores the KV cache state (Mechanism 3) for a stable prompt prefix. When a subsequent request sends the same prefix — identical tokens, same byte offsets — the provider injects the stored KV states directly into the generation step, bypassing prefill entirely. The savings follow from Mechanism 2: the $O(n^2)$ prefill cost for the cached prefix is not paid on cache hits.
+
+**Anthropic operational specifics (as of 2026):**
+- Minimum cacheable prefix: 1,024 tokens
+- Cache TTL: approximately 5 minutes
+- Cache write cost: approximately 125% of normal input token cost (a one-time overhead)
+- Cache read cost: approximately 10% of normal input token cost
+- Net saving on cache hit: approximately 90% of the prefill cost for the cached prefix
+
+**The cache key is the exact token sequence.** A single token difference anywhere in the prefix — a changed word, a reordered sentence, a different whitespace character — invalidates the cache for that position and all subsequent positions. Cache hit requires byte-identical prefix.
+
+**Design implication:** Prompt engineering is cache engineering. System prompts, tool definitions, persona statements, fixed few-shot examples — any content that is stable across requests — should be structured as the **longest possible stable prefix**, placed before any variable content. Variable content (the user's query, dynamic context) comes last. Every edit to the stable prefix resets the cache write cost.
+
+For multi-agent systems (Mechanism 6), the shared context given to all workers should be designed as a single cacheable prefix exceeding the minimum threshold. All workers should be dispatched within the TTL window so they share the cache write paid by whichever worker fires first.
+
+**What this grounds:** S2 Few-Shot static vs dynamic variant cost difference; S3 Persona placement; H1 Identity Persistence operational discipline; K9 Long Context session economics; the new O18 Cache-Warmed Worker Pool pattern.
+
+---
+
+### Mechanism 6 — Subagent Decomposition as Context Bounding **[Grade A]**
+
+Each spawned subagent has its own KV cache, its own sequence length $n$, and its own $O(n^2)$ attention compute budget. This is not a logical property of multi-agent architecture — it is a physical property of how the inference computation is partitioned across API calls.
+
+In a single-agent system handling a complex task, $n$ grows as the agent accumulates tool outputs, intermediate reasoning, and conversation history. The n² attention cost grows with every turn. In a multi-agent system:
+
+- The orchestrator maintains a compact context: task assignments and returned results only.
+- Each worker maintains a focused context: its brief, its tools, and its internal reasoning — which is discarded after the worker returns its result.
+- The orchestrator's $n$ grows slowly (one compact result per worker, not the full internal trajectory).
+- Each worker's $n$ is bounded by the scope of its single sub-task.
+
+The quality win of O6 Orchestrator-Workers over O1 Single Agent is structural, not emergent. Separation of orchestration context from execution context bounds the n² cost per agent and keeps each agent in the regime where its Q-K attention weights are well-distributed over a small, high-signal context rather than diluted over a large, mixed context (Mechanism 4).
+
+**What this grounds:** O4 Parallelization; O6 Orchestrator-Workers; O7 Supervisor Hierarchy; O17 Agent Isolation; the mechanical rationale for why O6 + O17 is mandatory, not optional.
+
+---
+
+### Mechanism 7 — Stochastic Generation and Autoregressive Commitment **[Grade A]**
+
+Token generation is sampling from a learned probability distribution over the vocabulary. Given the sequence of tokens $t_1, t_2, \ldots, t_{k-1}$, the model outputs a distribution $P(t_k \mid t_1, \ldots, t_{k-1})$ and samples the next token from it. Generation is **autoregressive**: each sampled token becomes part of the conditioning sequence for the next token.
+
+Two consequences are mechanically unavoidable:
+
+1. **No revision.** Once token $t_k$ is sampled and appended, all subsequent tokens are conditioned on it. The model does not revise $t_k$ — it elaborates on it. A reasoning chain that commits to a wrong intermediate conclusion conditions all subsequent tokens on that conclusion. This is the mechanical basis of **sycophantic reasoning** in chain-of-thought patterns: the model produces tokens that extend the most probable continuation of what it has already emitted, not the most correct answer to the original question.
+
+2. **Determinism requires external enforcement.** Token generation cannot be made deterministic by prompt instruction alone. Routing the same computation to a deterministic system (a tool, a code executor, a database lookup) is the only way to eliminate sampling variance. This is the mechanical basis for the "use tools, not the model" discipline in I-series and V-series patterns.
+
+**What this grounds:** Every R-series reasoning pattern rationale; the determinism argument in I2 Function Call, I3 MCP, R13 CodeAct, R14 Program of Thoughts; V-series reliability patterns that use deterministic enforcement; H6 Inner Monologue caveats.
+
+---
+
+## 0.2 — The Memory and Storage Hierarchy (Mechanisms 8–10)
+
+### Mechanism 8 — Model Size Matching to Task Complexity **[Grade A cost; Grade B thresholds]**
+
+Large model capacity (parameter count) is required for complex, multi-step reasoning that integrates many latent factors. It is not required for routing, classification, format conversion, exact lookup, data loading, or other tasks that require recall and pattern-matching rather than reasoning. The generation cost for the same token count scales with model size; using a 70B-parameter model for a routing decision costs an order of magnitude more in memory bandwidth and FLOPs than a 7B model for the same decision.
+
+Correct multi-agent architecture assigns model capacity to reasoning complexity:
+- Orchestrators (which must reason about task decomposition and synthesis): strongest available model.
+- Workers handling complex sub-tasks: mid-tier models.
+- Workers handling simple lookup/classification: small, fast models.
+
+This is not a preference — it is a cost-structure fact. The practical thresholds for when a task is "complex enough" to require a large model are empirical (hence Grade B on thresholds), but the direction of the principle is Grade A.
+
+**What this grounds:** O3 Routing model selection; O6 Orchestrator model assignment (strongest orchestrator, lighter workers); I2 Function Call schema routing; V4 Dual LLM size assignment.
+
+---
+
+### Mechanism 9 — Storage Tier Hierarchy **[Grade A cost structure; Grade B use patterns]**
+
+The KV cache does not persist across API calls (Mechanism 3). All information that must survive a session boundary must be written to external storage and retrieved into context. This creates a hierarchy of storage tiers with distinct cost and access properties:
+
+| Tier | Per-token read cost | Capacity | Appropriate content |
+|---|---|---|---|
+| **In-context** | $O(n^2)$ attention compute per token present | Session-bounded by context window | Current task working set only — discard after use |
+| **Prefix cache** | ~10% of normal input cost on hit | Provider TTL ~5 min (Anthropic) | Stable system prompts, tool schemas, fixed examples |
+| **Vector index** | Retrieval quality-bounded | Unbounded | Semantic document retrieval; variable-key lookup |
+| **Exact KV store** | Deterministic, low-latency | Unbounded | Config, code artifacts, known-key facts |
+| **Cold storage** | High latency | Unbounded | Source of truth, archival, infrequent access |
+
+The critical design axis is **write cost vs. read cost**. In-context storage pays zero write cost (no curation step) but pays $O(n^2)$ on every read (every turn). External storage pays a write cost (a curation LLM call to extract and structure the information) but pays near-zero read cost per token retrieved (only the retrieved chunk enters context). The correct tier for a given piece of information depends on how often it is needed, how stable it is, and how tolerant the task is of retrieval errors.
+
+**Common error:** placing in context what belongs in an exact KV store. A 500-token configuration block that never changes costs $O(n^2)$ attention compute on every turn of every session. Externalising it and retrieving it once costs a small retrieval call. The prefix cache (Mechanism 5) is the middle tier: stable, zero-marginal-cost on hit, but TTL-bounded and minimum-size-gated.
+
+**What this grounds:** K-series memory patterns (K8 Working Memory, K10 Long-Term Memory, K11 Observational Memory, K12 Karpathy Memory); H-series session management; I-series tool result handling.
+
+---
+
+### Mechanism 10 — No Cross-Session Persistence: All Memory Is Retrieval **[Grade A]**
+
+The model's weights do not change between API calls. There is no mechanism by which a conversation causes the model to "learn" or "remember" anything in its parameters. The KV cache is session-scoped (Mechanism 3) and does not persist across calls.
+
+All apparent inter-session memory is a file-retrieval operation: a document (CLAUDE.md, MEMORY.md, a skills file, a retrieved database record) is read into the context at the start of the new session. The model then conditions on the retrieved content as part of its input. The "memory" is the quality and completeness of the retrieved artefact, not a model capability.
+
+**The compounding of "skills" and "memory" over sessions is entirely a function of retrieval quality.** A skill that "gets smarter over time" does so because the skill file was updated with better instructions, not because the model updated its weights. A memory system that degrades over time does so because retrieved content has become stale or irrelevant, not because the model "forgot." The design lever is the write discipline of the external store and the retrieval quality of the search — not the model itself.
+
+**What this grounds:** All H-series patterns; K10/K11/K12 design rationale; the widely-held but incorrect folk-claim that "skills compound across sessions" (they do not — all compounding is in the retrieved files, not the model weights).
+
+---
+
+## 0.3 — The Positional Architecture (Mechanisms 11–12)
+
+### Mechanism 11 — Context Compaction for Long-Running Systems **[Grade A mechanism; Grade B trigger thresholds]**
+
+In a long-running agent session (an O8 Loop Agent, or any agentic workflow with many turns), the KV cache grows monotonically (Mechanism 3). Without intervention, $n$ eventually approaches the context window limit. The practical cost grows with $n$ even before the limit is hit: attention quality degrades as the middle of the context fills with superseded reasoning (Mechanism 4), and per-turn cost rises as the $O(n^2)$ factor grows.
+
+Context compaction is the operation of replacing a span of prior context with a compressed summary — a lossy, non-deterministic (Mechanism 7) transformation that reduces $n$ while attempting to preserve the information relevant to future turns. The critical properties:
+
+- **Lossy:** compressed content cannot be fully reconstructed from the summary. A detail compressed away is gone.
+- **Non-deterministic:** LLM summarisation of the same span produces different outputs on different runs. Compaction is not a hash — it is another stochastic generation step.
+- **Invalidates prefix cache:** any edit to a prior position in the token sequence invalidates the KV cache for that position and all subsequent positions (Mechanism 5). Compaction must be treated as a cache-boundary reset.
+
+The **"early decision" problem** in automated systems is a specialised case. When a system prompt contains option menus, routing conditions, or initialisation decisions, those tokens remain in $n$ for the entire session after the decision is made — paying $O(n^2)$ attention cost for content that has no further informational value. Correct architecture: route with a compact stable cacheable prefix (Mechanism 5), load only the relevant branch, compact prior turns to a decision-and-state summary before re-entering the loop.
+
+**Trigger heuristics (Grade B):** compact when the reasoning trajectory exceeds the last N turns that remain relevant, or when $n$ exceeds a threshold fraction of the context window. The exact threshold is task-dependent.
+
+**What this grounds:** O8 Loop Agent compaction discipline; H-series session management; K7 Context Pruning rationale; K6 Context Compression operational constraints.
+
+---
+
+### Mechanism 12 — RoPE as an SO(d_head) Lie Group Action **[Grade A]**
+
+Rotary positional encoding applies a rotation matrix $R(i\theta) \in \text{SO}(d_\text{head})$ to each query and key before the attention contraction, where $\theta \in \mathbb{R}^{d_\text{head}/2}$ is a fixed frequency vector and $i$ is the token's absolute position in the sequence. The attention score between positions $i$ and $j$ becomes:
+
+$$s_{ij} = Q_i^T\,R(i\theta)^T\,R(j\theta)\,K_j = Q_i^T\,R\!\left((j-i)\theta\right)K_j$$
+
+The rotation matrices compose: $R(i\theta)^T R(j\theta) = R((j-i)\theta)$. The inner product depends **only on the relative position** $j - i$, not on the absolute positions $i$ or $j$. Absolute position is not stored in any token embedding — only relative displacement is encoded in the attention computation.
+
+This is a Lie group homomorphism $\mathbb{Z} \to \text{SO}(d_\text{head})$: translations in sequence space (moving both $i$ and $j$ by the same offset) map to the identity rotation in $d_\text{head}$-space. The model is translation-equivariant in position by construction.
+
+**Recency bias is a geometric consequence.** Small $|j - i|$ (nearby tokens) produces small rotation angles; the inner product $Q_i^T R((j-i)\theta) K_j$ is less rotated away from the unrotated inner product $Q_i^T K_j$. For tokens far apart, the rotation substantially modifies the inner product. The model's learned $W_Q$ and $W_K$ were trained under this geometry and internalized the bias toward small offsets — producing the empirically observed recency effect via a derivable geometric mechanism.
+
+**Implication for few-shot example ordering:** the last example before the query has the smallest offset and therefore the strongest Q-K inner product alignment, all else equal. "Place the most representative example last" is a geometric recommendation derivable from RoPE, not a heuristic.
+
+**Implication for prompt injection defense:** re-anchoring instructions ("Ignore the above...") placed near the end of a context exploit this recency geometry. They are not magic words — they work because their small offset from the query position gives them higher attention weight than the injected content placed earlier.
+
+**What this grounds:** S2 Few-Shot example ordering; S4 Instruction Decomposition placement advice; V6 Prompt Injection Shield re-anchoring rationale; R17 Self-Consistency timing constraint (all N samples must share the same stable prefix position offsets).
+
+---
+
+## 0.4 — How to Read Mechanism Citations in This Book
+
+Pattern files throughout the catalog cite mechanisms in the form **(mechanism N)** or **[Mechanism N]** where N is one of the twelve entries above. These citations indicate:
+
+1. **The rationale for the recommendation is derivable from this mechanism** — not merely observed empirically. Where the evidence grade is A, the derivation is tight. Where it is B, the direction is mechanistically supported but the magnitude or threshold is empirical.
+
+2. **The cited mechanism overrides intuition when they conflict.** If a recommendation feels counterintuitive but is supported by a Grade A mechanism citation, trust the mechanism. The most common case: practitioners underestimate the n² cost of context (Mechanism 2) because linear cost intuitions are deeply ingrained from other computing domains.
+
+3. **"Observed behaviour" without a mechanism number means the claim is empirical.** The catalog distinguishes between derived claims (mechanism citations) and observed claims (phrased as "empirically, X" or "in practice, X"). Where a mechanism is unknown, the pattern says so rather than inventing one.
+
+The grade key for mechanism citations:
+
+| Grade | Meaning in a pattern |
+|---|---|
+| **A** | Derivable from transformer architecture or information-theoretic first principles. Use as a design axiom. |
+| **B** | Mechanistically supported with strong empirical evidence. Direction is reliable; magnitude or threshold may vary. |
+| **⚠ observed** | Empirically consistent but without a published mechanistic account. Do not over-generalize. |
+
+---
+
+## Summary — Mechanisms and Pattern Categories
+
+| Mechanism | Grade | Primary categories underwritten |
+|---|---|---|
+| 1 — Attention as learned bilinear form $g_{\mu\nu} = W_Q W_K^T$ | A | K (retrieval geometry), S (prompt routing), I (tool schema cost) |
+| 2 — n² compute and KV cache memory cost | A | K (context budget), O (decomposition rationale), V (cost accounting) |
+| 3 — KV cache as growing 4D tensor; no cross-call persistence | A | H (memory = retrieval), K (working memory), V (checkpointing) |
+| 4 — Lost-in-middle as Q-K geometric under-attendance | B | K (content placement), S (prompt ordering), V (injection defense placement) |
+| 5 — Prefix caching as cache engineering (provider-level KV reuse) | A/B | S (stable prefix design), H (Genesis State caching), O (worker fan-out timing) |
+| 6 — Subagent decomposition as per-agent n bounding | A | O (all multi-agent patterns), the O6+O17 composition law |
+| 7 — Stochastic generation and autoregressive commitment | A | R (all reasoning patterns), I (deterministic tools), V (enforcement discipline) |
+| 8 — Model size matching to task complexity | A/B | O (model assignment), I (routing model), V (dual-LLM size) |
+| 9 — Storage tier hierarchy (write cost vs read cost axis) | A/B | K (memory tier selection), H (session management), I (result handling) |
+| 10 — No cross-session persistence; all memory is retrieval | A | H (all memory patterns), K (long-term memory design) |
+| 11 — Context compaction; early-decision cost amortization | A/B | O (loop patterns), K (pruning/compression triggers) |
+| 12 — RoPE as SO($d_\text{head}$) Lie group action; relative-only position | A | S (example ordering), V (injection re-anchoring), R (timing of parallel samples) |
+
+---
+
+*This chapter is the mechanistic spine. Every pattern that cites a mechanism number is claiming that its recommendation follows from the derivation above. Hold that claim to the evidence grade it carries.*
 
 
 
@@ -25639,3 +26329,62 @@ All arXiv papers are freely available at `arxiv.org/abs/[ID]`.
 | Agentic Communities | 2601.03624 |
 | Scaffold Taxonomy | 2604.03515 |
 | Blackboard MAS (bMAS) | 2510.01285 |
+
+
+
+```{=latex}
+\clearpage
+```
+
+# Appendix C — Anti-Patterns and Composition Examples
+
+## Anti-Pattern Registry
+
+| # | Anti-Pattern | Description | Costs | Better Alternative |
+|---|---|---|---|---|
+| A1 | **God Prompt** | All instructions in one massive prompt | Attention dilution; maintenance nightmare | Decompose with O2/O6 |
+| A2 | **Over-Agentification** | Agentic loops when deterministic code suffices | Cost; latency; brittleness | O2 (Prompt Chaining) or just write code |
+| A3 | **Uncontrolled Recursion** | Reflection/planning loops with no exit condition | Runaway cost; stuck agents | V9 (Bounded Execution) |
+| A4 | **Agent Sprawl** | Proliferating agents without ownership or governance | Inconsistency; undebuggable | V14 (Trajectory Logging) + V1 (H-in-the-L) |
+| A5 | **Output-Only Guardrails** | Safety checks only on final output | Intermediate failures propagate | V5 (Guardrail Layering) at all 4 points |
+| A6 | **Vibe-Checking as Testing** | Subjective assessment replacing eval frameworks | No regression detection | V15 (LLM-as-Judge) + V16 (Offline Eval) |
+| A7 | **Context Hoarding** | Never pruning context; dumping everything in | Token waste; attention degradation; cost | K6/K7 (Compress/Prune) or O17 (Agent Isolation) |
+| A8 | **Synchronous Everything** | Running independent sub-tasks sequentially | Unnecessary latency | O4 (Parallelization) |
+| A9 | **Stateful Reducer** | Hidden agent state not reflected in business state | Bugs; replay failure; debugging hell | V12 (Stateless Reducer) + V10 (Checkpoint) |
+| A10 | **Silent Failure** | Agent fails quietly; no error surfaced | Data loss; cascading failures | V1 + V14 + V10 |
+| A11 | **Framework Lock-in** | Choosing LangChain/heavy framework first | Abstraction ceiling; debugging difficulty; cost opacity | Own your control flow |
+| A12 | **Tool Proliferation** | Adding tools without tool budget management | Context overflow; selection accuracy collapse | V13 (Tool Budget) + I4 (CLI first) |
+| A13 | **Pilot Simplification** | Clean data/sandbox in pilot; assume production is similar | 88% production failure rate | Data realism in pilots; governance from day 1 |
+| A14 | **Trust Handoff** | Agent trusts instructions from other agents without verification | Prompt injection cascading | V3 (Rule of Two) + V4 (Dual LLM) |
+| A15 | **Untraced Agent** | No observability; no audit trail | Debugging takes hours not minutes; no compliance | V14 (Trajectory Logging) from day 1 |
+
+---
+
+## Pattern Composition Examples
+
+### Example 1: Standard Production Coding Agent (Claude Code, Devin)
+`S3 + S4 + K1 + K8 + R4 + O6 + O4 + V1 + V9 + V14 + I2/I3`
+
+### Example 2: Research Agent
+`S4 + K10 + R4 + O4 + O8 + V9 + V14`
+
+### Example 3: Safety-Critical Enterprise Agent
+`S3 + S9 + K1 + R3 + O6 + V1 + V3 + V4 + V5 + V7 + V8 + V14 + I1`
+
+### Example 4: Customer Support Router
+`O3 + O1 + K1 + K11 + V1 + V5 + V17`
+
+### Example 5: Document Analysis Pipeline
+`S2 + K6 + O2 + O5 + V5 + V16`
+
+### Example 6: Multi-Agent Research Network
+`S3 + K10 + R4 + O7 + O11 + I5 + I6 + V14`
+
+### Example 7: Long-Term Personal Research Assistant
+`H1 + H2 + H4 + H7 + H9 + H10 + K11 + R7 + V1`
+
+### Example 8: Autonomous Creative Agent
+`H1 + H3 + H6 + H7 + K10 + R4`
+
+### Example 9: Enterprise Process Automation Agent
+`H2 + H4 + H5 + H9 + V1 + V7 + V14`
