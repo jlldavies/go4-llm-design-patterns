@@ -573,40 +573,40 @@ All arXiv papers are freely available at `arxiv.org/abs/[ID]`.
 
 | Paper | arXiv ID |
 |---|---|
-| GPT-3 (Brown et al.) | 2005.14165 |
-| Chain-of-Thought (Wei et al.) | 2201.11903 |
-| Self-Consistency (Wang et al.) | 2203.11171 |
-| Zero-Shot CoT (Kojima et al.) | 2205.11916 |
-| Plan-and-Solve (Wang et al.) | 2305.04091 |
-| ReAct (Yao et al.) | 2210.03629 |
-| ReWOO (Xu et al.) | 2305.18323 |
-| Self-Ask (Press et al.) | 2210.03350 |
-| Reflexion (Shinn et al.) | 2303.11366 |
-| Self-Refine (Madaan et al.) | 2303.17651 |
-| Tree of Thoughts (Yao et al.) | 2305.10601 |
-| LATS (Zhou et al.) | 2310.04406 |
-| Buffer of Thoughts (Yang et al.) | 2406.04271 |
-| Skeleton-of-Thought (Ning et al.) | 2307.15337 |
-| CodeAct (Wang et al.) | 2402.01030 |
-| Program of Thoughts (Chen et al.) | 2211.12588 |
-| Chain of Density (Adams et al.) | 2309.04269 |
-| MemGPT (Packer et al.) | 2310.08560 |
-| HyDE (Gao et al.) | 2212.10496 |
-| GraphRAG (Edge et al.) | 2404.16130 |
-| RAPTOR (Sarthi et al.) | 2401.18059 |
-| Self-RAG (Asai et al.) | 2310.11511 |
-| Corrective RAG (Yan et al.) | 2401.15884 |
-| Voyager (Wang et al.) | 2305.16291 |
-| LAMP Personalisation (Salemi et al.) | 2304.11406 |
-| LLM-as-Judge (Zheng et al.) | 2306.05685 |
-| Constitutional AI (Bai et al.) | 2212.08073 |
-| Prompt Injection (Perez & Ribeiro) | 2211.09527 |
-| Prompt Pattern Catalog (White et al.) | 2302.11382 |
-| AutoPDL | 2504.04365 |
-| Meta Prompting | 2311.11482 |
-| Theater of Mind | 2604.08206 |
-| MIRROR Inner Monologue | 2506.00430 |
-| Talker-Reasoner | 2410.08328 |
-| Agentic Communities | 2601.03624 |
-| Scaffold Taxonomy | 2604.03515 |
-| Blackboard MAS (bMAS) | 2510.01285 |
+| GPT-3 (Brown et al.) | [2005.14165](https://arxiv.org/abs/2005.14165) |
+| Chain-of-Thought (Wei et al.) | [2201.11903](https://arxiv.org/abs/2201.11903) |
+| Self-Consistency (Wang et al.) | [2203.11171](https://arxiv.org/abs/2203.11171) |
+| Zero-Shot CoT (Kojima et al.) | [2205.11916](https://arxiv.org/abs/2205.11916) |
+| Plan-and-Solve (Wang et al.) | [2305.04091](https://arxiv.org/abs/2305.04091) |
+| ReAct (Yao et al.) | [2210.03629](https://arxiv.org/abs/2210.03629) |
+| ReWOO (Xu et al.) | [2305.18323](https://arxiv.org/abs/2305.18323) |
+| Self-Ask (Press et al.) | [2210.03350](https://arxiv.org/abs/2210.03350) |
+| Reflexion (Shinn et al.) | [2303.11366](https://arxiv.org/abs/2303.11366) |
+| Self-Refine (Madaan et al.) | [2303.17651](https://arxiv.org/abs/2303.17651) |
+| Tree of Thoughts (Yao et al.) | [2305.10601](https://arxiv.org/abs/2305.10601) |
+| LATS (Zhou et al.) | [2310.04406](https://arxiv.org/abs/2310.04406) |
+| Buffer of Thoughts (Yang et al.) | [2406.04271](https://arxiv.org/abs/2406.04271) |
+| Skeleton-of-Thought (Ning et al.) | [2307.15337](https://arxiv.org/abs/2307.15337) |
+| CodeAct (Wang et al.) | [2402.01030](https://arxiv.org/abs/2402.01030) |
+| Program of Thoughts (Chen et al.) | [2211.12588](https://arxiv.org/abs/2211.12588) |
+| Chain of Density (Adams et al.) | [2309.04269](https://arxiv.org/abs/2309.04269) |
+| MemGPT (Packer et al.) | [2310.08560](https://arxiv.org/abs/2310.08560) |
+| HyDE (Gao et al.) | [2212.10496](https://arxiv.org/abs/2212.10496) |
+| GraphRAG (Edge et al.) | [2404.16130](https://arxiv.org/abs/2404.16130) |
+| RAPTOR (Sarthi et al.) | [2401.18059](https://arxiv.org/abs/2401.18059) |
+| Self-RAG (Asai et al.) | [2310.11511](https://arxiv.org/abs/2310.11511) |
+| Corrective RAG (Yan et al.) | [2401.15884](https://arxiv.org/abs/2401.15884) |
+| Voyager (Wang et al.) | [2305.16291](https://arxiv.org/abs/2305.16291) |
+| LAMP Personalisation (Salemi et al.) | [2304.11406](https://arxiv.org/abs/2304.11406) |
+| LLM-as-Judge (Zheng et al.) | [2306.05685](https://arxiv.org/abs/2306.05685) |
+| Constitutional AI (Bai et al.) | [2212.08073](https://arxiv.org/abs/2212.08073) |
+| Prompt Injection (Perez & Ribeiro) | [2211.09527](https://arxiv.org/abs/2211.09527) |
+| Prompt Pattern Catalog (White et al.) | [2302.11382](https://arxiv.org/abs/2302.11382) |
+| AutoPDL | [2504.04365](https://arxiv.org/abs/2504.04365) |
+| Meta Prompting | [2311.11482](https://arxiv.org/abs/2311.11482) |
+| Theater of Mind | [2604.08206](https://arxiv.org/abs/2604.08206) |
+| MIRROR Inner Monologue | [2506.00430](https://arxiv.org/abs/2506.00430) |
+| Talker-Reasoner | [2410.08328](https://arxiv.org/abs/2410.08328) |
+| Agentic Communities | [2601.03624](https://arxiv.org/abs/2601.03624) |
+| Scaffold Taxonomy | [2604.03515](https://arxiv.org/abs/2604.03515) |
+| Blackboard MAS (bMAS) | [2510.01285](https://arxiv.org/abs/2510.01285) |
