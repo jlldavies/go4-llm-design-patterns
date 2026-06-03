@@ -205,6 +205,13 @@ def assemble() -> str:
             parts.append(shift_headings(rest, by=2))
             parts.append("\n")
 
+        # Decision companion file — appended after section's final pattern
+        decision_file = PATTERNS / intro_file.replace(".md", "-DECISION.md")
+        if decision_file.exists():
+            parts.append(PAGE_BREAK)
+            parts.append(strip_first_h1(read(decision_file)))
+            parts.append("\n")
+
     # Mechanisms — back-matter reference (formerly Chapter 0)
     parts.append(PAGE_BREAK)
     chapter0 = read(ROOT / "CHAPTER-0.md")
