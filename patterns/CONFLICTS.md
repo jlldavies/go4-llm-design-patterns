@@ -13,11 +13,11 @@ Six types of conflict appear across this pattern language:
 
 | Type | Symbol | Meaning |
 |---|---|---|
-| **Mutually Exclusive** | ⊕ | Cannot apply both to the same task; using both is the anti-pattern |
-| **Direct Tension** | ↔ | Both are valid but pull in opposite directions; must choose a balance point |
-| **Prerequisite Dependency** | → | A requires B; using A without B is unsafe or broken |
-| **Composability Tension** | ~ | Both can be used together, but their interaction produces unexpected behavior that must be explicitly managed |
-| **Scale Progression** | ↑ | A is correct at small scale; B is correct at large scale; the upgrade path is one-way |
+| **Mutually Exclusive** | $\oplus$ | Cannot apply both to the same task; using both is the anti-pattern |
+| **Direct Tension** | $\leftrightarrow$ | Both are valid but pull in opposite directions; must choose a balance point |
+| **Prerequisite Dependency** | $\to$ | A requires B; using A without B is unsafe or broken |
+| **Composability Tension** | $\sim$ | Both can be used together, but their interaction produces unexpected behavior that must be explicitly managed |
+| **Scale Progression** | $\uparrow$ | A is correct at small scale; B is correct at large scale; the upgrade path is one-way |
 | **Hard vs Soft** | H/S | A and B achieve the same goal with different enforcement strength; they are complementary, not alternatives |
 
 ---
@@ -28,7 +28,7 @@ These are the conflicts most likely to cause production failures if not understo
 
 ---
 
-### CRITICAL 1: R4 (ReAct) ⊕ R5 (ReWOO)
+### CRITICAL 1: R4 (ReAct) $\oplus$ R5 (ReWOO)
 **Type:** Mutually Exclusive
 
 ReAct interleaves reasoning and observation — it can adapt mid-task based on what it discovers. ReWOO plans all tool calls upfront and executes them without mid-run observation. These two are **fundamentally incompatible for the same task**:
@@ -37,15 +37,15 @@ ReAct interleaves reasoning and observation — it can adapt mid-task based on w
 - ReAct assumes you *don't know* what you'll need next until you see the current result. If tool calls are independent, ReAct wastes 5× more tokens doing what ReWOO does in two calls.
 
 **Resolution rule:** 
-- Independent parallel lookups (search, retrieve, fetch from multiple sources) → R5 (ReWOO): 5× token efficiency
-- Exploratory tasks where each step informs the next → R4 (ReAct): adaptability is worth the cost
+- Independent parallel lookups (search, retrieve, fetch from multiple sources) $\to$ R5 (ReWOO): 5× token efficiency
+- Exploratory tasks where each step informs the next $\to$ R4 (ReAct): adaptability is worth the cost
 - If in doubt at design time: prototype with R4 to understand the dependency structure; migrate to R5 once it's clear which calls are independent
 
 **Never do:** Use R4 on a task where all sub-problems are provably independent. Use R5 on a task where sub-problems are sequential and dependent.
 
 ---
 
-### CRITICAL 2: V1 (Human-in-the-Loop) ↔ V2 (Human-on-the-Loop)
+### CRITICAL 2: V1 (Human-in-the-Loop) $\leftrightarrow$ V2 (Human-on-the-Loop)
 **Type:** Direct Tension
 
 V1 blocks: the agent cannot proceed until a human approves. V2 monitors: the agent proceeds while a human watches and can interrupt. These represent fundamentally different trust and risk postures:
@@ -75,11 +75,11 @@ They are not alternatives. They are layered enforcement:
 ```
 S9 (Constitutional Framing) — soft, broad, in-prompt
     "I should not reveal confidential data"
-    → model usually follows; can be manipulated by injection
+    $\to$ model usually follows; can be manipulated by injection
 
 V7 (AgentSpec / Declarative Governance) — hard, specific, external
     PROHIBIT: tool_call.name == "send_email" AND context.contains(classified_data)
-    → enforced at runtime regardless of what model "thinks"
+    $\to$ enforced at runtime regardless of what model "thinks"
 ```
 
 **Resolution rule:**
@@ -91,7 +91,7 @@ V7 (AgentSpec / Declarative Governance) — hard, specific, external
 
 ---
 
-### CRITICAL 4: H3 (Entropy-Driven Curiosity) ⊕ R17 (Self-Consistency Voting)
+### CRITICAL 4: H3 (Entropy-Driven Curiosity) $\oplus$ R17 (Self-Consistency Voting)
 **Type:** Mutually Exclusive
 
 R17 reduces entropy: it samples multiple outputs and selects the majority answer — the most consistent, lowest-entropy result. H3 increases entropy: it detects low-entropy states and injects novelty by raising temperature or pivoting approach.
@@ -106,7 +106,7 @@ If you apply both to the same task simultaneously, they cancel each other out at
 
 ---
 
-### CRITICAL 5: R13 (CodeAct) → V8 (Tool Sandboxing)
+### CRITICAL 5: R13 (CodeAct) $\to$ V8 (Tool Sandboxing)
 **Type:** Prerequisite Dependency
 
 R13 (CodeAct) achieves its ~20pp accuracy advantage over JSON tool calls by executing arbitrary Python code. This is only safe inside a constrained execution environment. Without V8:
@@ -122,11 +122,11 @@ R13 (CodeAct) achieves its ~20pp accuracy advantage over JSON tool calls by exec
 
 ---
 
-### CRITICAL 6: I3 (MCP Server) ↔ V13 (Tool Budget)
+### CRITICAL 6: I3 (MCP Server) $\leftrightarrow$ V13 (Tool Budget)
 **Type:** Direct Tension
 
 MCP makes it easy to add tool servers. Each server contributes its full schema to the context window. The empirical data:
-- Tool selection accuracy: 43% → 14% at high tool counts (3× degradation)
+- Tool selection accuracy: 43% $\to$ 14% at high tool counts (3× degradation)
 - GitHub MCP alone: 40,000–55,000 tokens of schema overhead
 - 4–5 MCP servers: 60,000+ tokens consumed by schemas before the agent has done anything
 
@@ -140,7 +140,7 @@ The tension: MCP's value proposition is ecosystem richness (many tools, standard
 
 ---
 
-### CRITICAL 7: H5 (Constitutional Self-Alignment) → V1 (Human-in-the-Loop)
+### CRITICAL 7: H5 (Constitutional Self-Alignment) $\to$ V1 (Human-in-the-Loop)
 **Type:** Prerequisite Dependency
 
 H5 allows the agent to propose modifications to its own operating principles. This is the most dangerous pattern in the collection if implemented without human review. An agent that autonomously adopts its own principles can:
@@ -155,7 +155,7 @@ H5 allows the agent to propose modifications to its own operating principles. Th
 
 ---
 
-### CRITICAL 8: V12 (Stateless Reducer) ~ V10 (Checkpointing)
+### CRITICAL 8: V12 (Stateless Reducer) $\sim$ V10 (Checkpointing)
 **Type:** Composability Tension
 
 At first glance these conflict: V12 says agents should be pure functions with no internal state; V10 says agent state should be saved at each step. The resolution is that they are operating at different layers:
@@ -186,125 +186,125 @@ checkpoint_store.save(session_id, state)    # V10 save
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
 |---|---|---|---|
-| S1 (Zero-Shot) | ↑ | S2 (Few-Shot) | S1 is the default; add S2 when output format is inconsistent. S2 costs 3-5× more tokens. |
-| S3 (Persona) | ~ | S5 (Constraint Framing) | Persona may imply latitude that constraints prohibit. Add explicit "constraints override persona." |
-| S3 (Persona) | ~ | S9 (Constitutional Framing) | Persona implies identity; constitution implies values. Conflict when persona's implied expertise contradicts constitutional safety constraints. Constitution wins. |
-| S4 (Instruction Decomposition) | ↑ | O2 (Prompt Chaining) | S4 puts all steps in one prompt; O2 distributes across calls. S4 is cheaper but loses inter-step inspection. |
-| S6 (Output Template) | ↑ | Structured Output API | Structured output API (JSON mode) is strictly better when available. S6 free-text templates only when API not available. |
-| R17 (Self-Consistency) | ⊕ | H3 (Entropy Curiosity) | See CRITICAL 4. Never apply simultaneously. |
-| S8 (Meta-Prompt) | → | R17 or V15 | S8 requires an evaluation signal to select between generated prompts. Without R17 or V15, S8 cannot function. |
+| S1 (Zero-Shot) | $\uparrow$ | S2 (Few-Shot) | S1 is the default; add S2 when output format is inconsistent. S2 costs 3-5× more tokens. |
+| S3 (Persona) | $\sim$ | S5 (Constraint Framing) | Persona may imply latitude that constraints prohibit. Add explicit "constraints override persona." |
+| S3 (Persona) | $\sim$ | S9 (Constitutional Framing) | Persona implies identity; constitution implies values. Conflict when persona's implied expertise contradicts constitutional safety constraints. Constitution wins. |
+| S4 (Instruction Decomposition) | $\uparrow$ | O2 (Prompt Chaining) | S4 puts all steps in one prompt; O2 distributes across calls. S4 is cheaper but loses inter-step inspection. |
+| S6 (Output Template) | $\uparrow$ | Structured Output API | Structured output API (JSON mode) is strictly better when available. S6 free-text templates only when API not available. |
+| R17 (Self-Consistency) | $\oplus$ | H3 (Entropy Curiosity) | See CRITICAL 4. Never apply simultaneously. |
+| S8 (Meta-Prompt) | $\to$ | R17 or V15 | S8 requires an evaluation signal to select between generated prompts. Without R17 or V15, S8 cannot function. |
 | S9 (Constitutional Framing) | H/S | V7 (AgentSpec) | See CRITICAL 3. Complementary; S9 soft/broad, V7 hard/specific. |
 
 ### Signal vs Reasoning
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
 |---|---|---|---|
-| S2 (Few-Shot) | ~ | R17 (Self-Consistency) | S2 shapes what the model produces; R17 samples multiple versions and votes. They compose: S2 sets format, R17 improves reliability. Ensure S2 examples don't bias R17 toward a single answer style. |
-| S4 (Instruction Decomposition) | ↑ | R3 (Plan-and-Solve) | S4 is a prompt-level step list; R3 is an agent-level planning cycle with separate plan and execution calls. R3 is more powerful but costs more. |
-| S9 (Constitutional Framing) | ~ | R7 (Reflexion) | Reflexion critiques outputs; constitution critiques against principles. If both are active, ensure they don't generate contradictory critique: R7 might say "be more detailed" while S9 says "be more concise." Make priorities explicit. |
+| S2 (Few-Shot) | $\sim$ | R17 (Self-Consistency) | S2 shapes what the model produces; R17 samples multiple versions and votes. They compose: S2 sets format, R17 improves reliability. Ensure S2 examples don't bias R17 toward a single answer style. |
+| S4 (Instruction Decomposition) | $\uparrow$ | R3 (Plan-and-Solve) | S4 is a prompt-level step list; R3 is an agent-level planning cycle with separate plan and execution calls. R3 is more powerful but costs more. |
+| S9 (Constitutional Framing) | $\sim$ | R7 (Reflexion) | Reflexion critiques outputs; constitution critiques against principles. If both are active, ensure they don't generate contradictory critique: R7 might say "be more detailed" while S9 says "be more concise." Make priorities explicit. |
 
 ### Knowledge vs Knowledge
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
 |---|---|---|---|
-| K1 (Vanilla RAG) | ↑ | K3 (GraphRAG) | K1 for simple, direct lookup; K3 for multi-hop relational queries. Upgrade when queries require understanding entity relationships. K3 has 2-5× index build cost. |
-| K1 (Vanilla RAG) | ↑ | K4 (RAPTOR) | K1 for specific queries; K4 for breadth across large heterogeneous corpora. Upgrade when query diversity is high and K1 retrieval quality is inconsistent. |
-| K1 (Vanilla RAG) | ↔ | K9 (Long Context) | The primary architectural fork of Category II: retrieve a selected subset, or place the whole working set in a large window. K1 scales to any corpus size; K9 avoids retrieval infrastructure and retrieval misses when the working set fits an affordable window. |
-| K6 (Context Compression) | ↔ | K11 (Observational Memory) | K6 compresses what is in context; K11 prioritises what goes into context. They work together but ordering matters: K11 selects, K6 compresses what K11 selected. |
-| K10 (Long-Term Memory) | ↔ | K12 (Karpathy Memory) | K10 stores flat fact-shaped items in a vector store, retrieved by similarity. K12 stores structured curated notes the LLM authors, retrieved by name/topic/inclusion. The read pattern decides — similarity → K10; structural navigation → K12. Often run together (facts in K10, structured understanding in K12), not as alternatives. |
-| K11 (Observational Memory) | ~ | K12 (Karpathy Memory) | The *raw-log* and *curated-notes* branches of the Karpathy framing. K11 holds the raw activity record cheaply via caching; K12 has the LLM digest it into structured dense notes. K11 typically feeds K12 — the K12 Curator reads K11's log as input. Cache hostility is the tension: K12 curations change the prefix K11 wants stable, so schedule curations at session boundaries, not mid-session. |
+| K1 (Vanilla RAG) | $\uparrow$ | K3 (GraphRAG) | K1 for simple, direct lookup; K3 for multi-hop relational queries. Upgrade when queries require understanding entity relationships. K3 has 2-5× index build cost. |
+| K1 (Vanilla RAG) | $\uparrow$ | K4 (RAPTOR) | K1 for specific queries; K4 for breadth across large heterogeneous corpora. Upgrade when query diversity is high and K1 retrieval quality is inconsistent. |
+| K1 (Vanilla RAG) | $\leftrightarrow$ | K9 (Long Context) | The primary architectural fork of Category II: retrieve a selected subset, or place the whole working set in a large window. K1 scales to any corpus size; K9 avoids retrieval infrastructure and retrieval misses when the working set fits an affordable window. |
+| K6 (Context Compression) | $\leftrightarrow$ | K11 (Observational Memory) | K6 compresses what is in context; K11 prioritises what goes into context. They work together but ordering matters: K11 selects, K6 compresses what K11 selected. |
+| K10 (Long-Term Memory) | $\leftrightarrow$ | K12 (Karpathy Memory) | K10 stores flat fact-shaped items in a vector store, retrieved by similarity. K12 stores structured curated notes the LLM authors, retrieved by name/topic/inclusion. The read pattern decides — similarity $\to$ K10; structural navigation $\to$ K12. Often run together (facts in K10, structured understanding in K12), not as alternatives. |
+| K11 (Observational Memory) | $\sim$ | K12 (Karpathy Memory) | The *raw-log* and *curated-notes* branches of the Karpathy framing. K11 holds the raw activity record cheaply via caching; K12 has the LLM digest it into structured dense notes. K11 typically feeds K12 — the K12 Curator reads K11's log as input. Cache hostility is the tension: K12 curations change the prefix K11 wants stable, so schedule curations at session boundaries, not mid-session. |
 
-*Note: the former K10 Episodic ~ K11 Semantic tension is now an intra-pattern choice between variants of K10 Long-Term Memory, not a cross-pattern conflict. The former K13 Agent Isolation ↔ K11 tension moved with Agent Isolation to Orchestration (O17); see O17's Related Patterns.*
+*Note: the former K10 Episodic $\sim$ K11 Semantic tension is now an intra-pattern choice between variants of K10 Long-Term Memory, not a cross-pattern conflict. The former K13 Agent Isolation $\leftrightarrow$ K11 tension moved with Agent Isolation to Orchestration (O17); see O17's Related Patterns.*
 
 ### Knowledge vs Reasoning
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
 |---|---|---|---|
-| K8 (Working Memory) | ~ | R9 (Tree of Thoughts) | ToT generates many branches; all branches share the same working memory. Without explicit per-branch scratchpad management, branches contaminate each other. Each ToT branch needs its own K8 instance. |
-| K11 (Observational Memory) | ~ | R5 (ReWOO) | ReWOO plans all observations before executing. K11 provides what the agent has already observed. If K11 contains prior observations relevant to the current plan, inject them before planning — not mid-execution. |
+| K8 (Working Memory) | $\sim$ | R9 (Tree of Thoughts) | ToT generates many branches; all branches share the same working memory. Without explicit per-branch scratchpad management, branches contaminate each other. Each ToT branch needs its own K8 instance. |
+| K11 (Observational Memory) | $\sim$ | R5 (ReWOO) | ReWOO plans all observations before executing. K11 provides what the agent has already observed. If K11 contains prior observations relevant to the current plan, inject them before planning — not mid-execution. |
 
 ### Reasoning vs Reasoning
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
 |---|---|---|---|
-| R4 (ReAct) | ⊕ | R5 (ReWOO) | See CRITICAL 1. Mutually exclusive for the same task. |
-| R7 (Reflexion) | ↔ | R17 (Self-Consistency) | Both improve reliability through repetition but via different mechanisms. R17: parallel sampling + voting. R7: sequential iteration with memory of failures. R17 is parallel (immediate N× cost); R7 is sequential (cost scales only on failure). For tasks with automated feedback → R7. Without feedback → R17. |
-| R9 (ToT) | ↔ | R10 (LATS) | ToT uses heuristic tree search; LATS uses MCTS with full backtracking. LATS is strictly more powerful but can be 10× more expensive. Use ToT as default; upgrade to LATS only for the highest-stakes open-ended problems where LATS's backtracking provides decisive advantage. |
-| R11 (Buffer of Thoughts) | ↔ | R9 (ToT) | BoT achieves 12% of ToT's compute cost by reusing thought templates. BoT is appropriate when similar reasoning tasks recur; ToT is appropriate for novel problems where templates don't exist. |
-| R13 (CodeAct) | → | V8 (Tool Sandboxing) | See CRITICAL 5. R13 requires V8; no exceptions. |
+| R4 (ReAct) | $\oplus$ | R5 (ReWOO) | See CRITICAL 1. Mutually exclusive for the same task. |
+| R7 (Reflexion) | $\leftrightarrow$ | R17 (Self-Consistency) | Both improve reliability through repetition but via different mechanisms. R17: parallel sampling + voting. R7: sequential iteration with memory of failures. R17 is parallel (immediate N× cost); R7 is sequential (cost scales only on failure). For tasks with automated feedback $\to$ R7. Without feedback $\to$ R17. |
+| R9 (ToT) | $\leftrightarrow$ | R10 (LATS) | ToT uses heuristic tree search; LATS uses MCTS with full backtracking. LATS is strictly more powerful but can be 10× more expensive. Use ToT as default; upgrade to LATS only for the highest-stakes open-ended problems where LATS's backtracking provides decisive advantage. |
+| R11 (Buffer of Thoughts) | $\leftrightarrow$ | R9 (ToT) | BoT achieves 12% of ToT's compute cost by reusing thought templates. BoT is appropriate when similar reasoning tasks recur; ToT is appropriate for novel problems where templates don't exist. |
+| R13 (CodeAct) | $\to$ | V8 (Tool Sandboxing) | See CRITICAL 5. R13 requires V8; no exceptions. |
 
 ### Reasoning vs Orchestration
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
 |---|---|---|---|
-| R4 (ReAct) | ~ | O6 (Orchestrator-Workers) | R4 is a reasoning loop within a single agent; O6 is delegation across agents. In O6 systems, each worker typically runs R4 internally. The conflict: if R4 loops are unbounded (A3), they prevent the orchestrator from receiving timely worker results. Always pair R4 with V9 (Bounded Execution) inside O6 workers. |
-| R7 (Reflexion) | ~ | O5 (Evaluator-Optimizer) | Reflexion is self-critique within a single agent; O5 uses a separate evaluator agent. They compose: R7 for intra-agent improvement; O5 for validated cross-agent quality gates. Don't run both simultaneously on the same task — the critique loops will conflict. |
-| R12 (Skeleton-of-Thought) | ~ | O4 (Parallelization) | SoT generates an outline then fills sections in parallel; O4 parallelises independent sub-tasks. They are essentially the same pattern at different levels of abstraction. If you implement SoT, you are implementing O4 at the section level. No conflict — but avoid implementing both independently for the same task. |
+| R4 (ReAct) | $\sim$ | O6 (Orchestrator-Workers) | R4 is a reasoning loop within a single agent; O6 is delegation across agents. In O6 systems, each worker typically runs R4 internally. The conflict: if R4 loops are unbounded (A3), they prevent the orchestrator from receiving timely worker results. Always pair R4 with V9 (Bounded Execution) inside O6 workers. |
+| R7 (Reflexion) | $\sim$ | O5 (Evaluator-Optimizer) | Reflexion is self-critique within a single agent; O5 uses a separate evaluator agent. They compose: R7 for intra-agent improvement; O5 for validated cross-agent quality gates. Don't run both simultaneously on the same task — the critique loops will conflict. |
+| R12 (Skeleton-of-Thought) | $\sim$ | O4 (Parallelization) | SoT generates an outline then fills sections in parallel; O4 parallelises independent sub-tasks. They are essentially the same pattern at different levels of abstraction. If you implement SoT, you are implementing O4 at the section level. No conflict — but avoid implementing both independently for the same task. |
 
 ### Orchestration vs Orchestration
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
 |---|---|---|---|
-| O2 (Prompt Chaining) | ↑ | O6 (Orchestrator-Workers) | O2 uses a fixed, predetermined sequence; O6 uses dynamic task decomposition at runtime. Start with O2 — cheaper and more testable. Upgrade to O6 when the decomposition cannot be predetermined at design time. |
-| O6 (Orchestrator-Workers) | ↔ | O7 (Supervisor Hierarchy) | O6 is single-level delegation; O7 is multi-level. Use O6 as long as the orchestrator can maintain oversight of all workers. Add hierarchy (O7) when the number of workers exceeds what the orchestrator can coordinate effectively (~5-10 workers). |
-| O9 (Multi-Agent Reflection) | ↔ | R17 (Self-Consistency) | Both achieve reliability through multiple independent assessments. R17 samples the same model N times; O9 uses distinct agents with different personas or knowledge. O9 is more expensive but produces genuinely diverse perspectives when agents are well-differentiated. R17 if you have one model and need reliability; O9 if you have multiple specialist agents and need diverse critique. |
-| O10 (Swarm/Mesh) | ↔ | O7 (Supervisor Hierarchy) | Swarm is emergent, peer-to-peer, no central coordinator; hierarchy is structured, top-down, coordinated. Swarm has no production consensus (as of 2025); hierarchy is the validated path. Use O7; revisit O10 when swarm coordination protocols mature. |
-| O11 (Blackboard) | ~ | K10 (Long-Term Memory) | Blackboard is active shared state that triggers agent activation; K10 is passive shared memory that agents query. In a fully developed multi-agent system, both may coexist: K10 as the long-term knowledge substrate, O11 as the working session coordination mechanism. Avoid treating them as alternatives. |
-| O15 (Agent Handoff) | ↔ | I6 (A2A Delegation) | O15 is intra-system state transfer (same codebase, different agent contexts); I6 is inter-system task delegation (different codebases, different organisations). If agents are in the same system: O15. If agents are in different systems: I6. |
+| O2 (Prompt Chaining) | $\uparrow$ | O6 (Orchestrator-Workers) | O2 uses a fixed, predetermined sequence; O6 uses dynamic task decomposition at runtime. Start with O2 — cheaper and more testable. Upgrade to O6 when the decomposition cannot be predetermined at design time. |
+| O6 (Orchestrator-Workers) | $\leftrightarrow$ | O7 (Supervisor Hierarchy) | O6 is single-level delegation; O7 is multi-level. Use O6 as long as the orchestrator can maintain oversight of all workers. Add hierarchy (O7) when the number of workers exceeds what the orchestrator can coordinate effectively (~5-10 workers). |
+| O9 (Multi-Agent Reflection) | $\leftrightarrow$ | R17 (Self-Consistency) | Both achieve reliability through multiple independent assessments. R17 samples the same model N times; O9 uses distinct agents with different personas or knowledge. O9 is more expensive but produces genuinely diverse perspectives when agents are well-differentiated. R17 if you have one model and need reliability; O9 if you have multiple specialist agents and need diverse critique. |
+| O10 (Swarm/Mesh) | $\leftrightarrow$ | O7 (Supervisor Hierarchy) | Swarm is emergent, peer-to-peer, no central coordinator; hierarchy is structured, top-down, coordinated. Swarm has no production consensus (as of 2025); hierarchy is the validated path. Use O7; revisit O10 when swarm coordination protocols mature. |
+| O11 (Blackboard) | $\sim$ | K10 (Long-Term Memory) | Blackboard is active shared state that triggers agent activation; K10 is passive shared memory that agents query. In a fully developed multi-agent system, both may coexist: K10 as the long-term knowledge substrate, O11 as the working session coordination mechanism. Avoid treating them as alternatives. |
+| O15 (Agent Handoff) | $\leftrightarrow$ | I6 (A2A Delegation) | O15 is intra-system state transfer (same codebase, different agent contexts); I6 is inter-system task delegation (different codebases, different organisations). If agents are in the same system: O15. If agents are in different systems: I6. |
 
 ### Reliability vs Signal/Reasoning
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
 |---|---|---|---|
-| V1 (HITL) | ↔ | V2 (Human-on-Loop) | See CRITICAL 2. Not a sliding scale — a design choice based on action reversibility. |
-| V5 (Guardrail Layering) | ~ | S5 (Constraint Framing) | S5 is model self-restraint via prompt; V5 is external enforcement via code. They are complementary, not alternatives. S5 catches broad behavioral constraints; V5 enforces specific, enumerable violations. Use both: S5 for "spirit of the rules"; V5 for "letter of the rules." |
-| V9 (Bounded Execution) | ~ | R10 (LATS) | LATS requires deep tree search; bounds truncate it. This is an unavoidable tension: set bounds too tight and LATS never reaches good solutions; too loose and cost explodes. Resolution: profile LATS on representative problems; set bounds at p95 completion cost, not p50. |
-| V11 (Error Compaction) | ~ | V14 (Trajectory Logging) | V11 compresses errors for the context window; V14 logs full errors for audit. They are not alternatives — V14 stores the full error in the trace; V11 stores the compact version in the active context. Both must be active simultaneously for different audiences (agent vs. operator). |
-| V12 (Stateless Reducer) | ~ | V10 (Checkpointing) | See CRITICAL 8. Resolved by externalising state. |
-| V13 (Tool Budget) | ↔ | I3 (MCP Server) | See CRITICAL 6. MCP adds richness; V13 enforces the cost limit of that richness. |
+| V1 (HITL) | $\leftrightarrow$ | V2 (Human-on-Loop) | See CRITICAL 2. Not a sliding scale — a design choice based on action reversibility. |
+| V5 (Guardrail Layering) | $\sim$ | S5 (Constraint Framing) | S5 is model self-restraint via prompt; V5 is external enforcement via code. They are complementary, not alternatives. S5 catches broad behavioral constraints; V5 enforces specific, enumerable violations. Use both: S5 for "spirit of the rules"; V5 for "letter of the rules." |
+| V9 (Bounded Execution) | $\sim$ | R10 (LATS) | LATS requires deep tree search; bounds truncate it. This is an unavoidable tension: set bounds too tight and LATS never reaches good solutions; too loose and cost explodes. Resolution: profile LATS on representative problems; set bounds at p95 completion cost, not p50. |
+| V11 (Error Compaction) | $\sim$ | V14 (Trajectory Logging) | V11 compresses errors for the context window; V14 logs full errors for audit. They are not alternatives — V14 stores the full error in the trace; V11 stores the compact version in the active context. Both must be active simultaneously for different audiences (agent vs. operator). |
+| V12 (Stateless Reducer) | $\sim$ | V10 (Checkpointing) | See CRITICAL 8. Resolved by externalising state. |
+| V13 (Tool Budget) | $\leftrightarrow$ | I3 (MCP Server) | See CRITICAL 6. MCP adds richness; V13 enforces the cost limit of that richness. |
 
 ### Reliability vs Orchestration
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
 |---|---|---|---|
-| V3 (Lethal Trifecta) | → | V4 or V6 or V8 | V3 is detection only; it requires at least one mitigation. V4 is the strongest architectural mitigation; V6 and V8 are operational mitigations. V3 without any mitigation is incomplete. |
-| V7 (AgentSpec) | ~ | O6 (Orchestrator-Workers) | Orchestrators typically have broad capability; workers are specialised. AgentSpec must be differentiated per agent role — the orchestrator's policy differs from workers'. A single AgentSpec for all agents in an O6 system is a misconfiguration. |
-| V8 (Tool Sandboxing) | → | R13 (CodeAct) | See CRITICAL 5. Dependency, not a conflict. |
+| V3 (Lethal Trifecta) | $\to$ | V4 or V6 or V8 | V3 is detection only; it requires at least one mitigation. V4 is the strongest architectural mitigation; V6 and V8 are operational mitigations. V3 without any mitigation is incomplete. |
+| V7 (AgentSpec) | $\sim$ | O6 (Orchestrator-Workers) | Orchestrators typically have broad capability; workers are specialised. AgentSpec must be differentiated per agent role — the orchestrator's policy differs from workers'. A single AgentSpec for all agents in an O6 system is a misconfiguration. |
+| V8 (Tool Sandboxing) | $\to$ | R13 (CodeAct) | See CRITICAL 5. Dependency, not a conflict. |
 
 ### Integration vs Integration
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
 |---|---|---|---|
-| I1 (Direct API) | ↑ | I2 (Function Call) | I1 is the execution layer; I2 is LLM routing layer on top. When LLM routing adds no value (deterministic action), skip I2 and use I1 directly. |
-| I2 (Function Call) | ↑ | I3 (MCP Server) | I2 for small, stable, single-agent tool sets. I3 when tools must be shared across agents or tool count exceeds V13 limits. Migration from I2 to I3 is low-cost — start with I2. |
-| I3 (MCP Server) | ↔ | I4 (CLI Invocation) | I3: typed schemas, structured output, high token cost. I4: zero schema overhead, unstructured text output. For any tool with an existing CLI, prefer I4. Use I3 when: credential isolation is required, or tool output must be typed and validated, or the tool has no CLI. |
-| I5 (Agent Card) | ~ | I3 (MCP Server) | Agent Cards are agent-level discovery; MCP is tool-level discovery. An agent may serve both: an Agent Card describing its high-level capabilities and an MCP server describing its specific tools. They are complementary, different granularity levels. |
-| I6 (A2A Delegation) | ↔ | O15 (Agent Handoff) | I6 for cross-system delegation (different codebases/organisations). O15 for intra-system context transfer (same codebase, different agent contexts). |
+| I1 (Direct API) | $\uparrow$ | I2 (Function Call) | I1 is the execution layer; I2 is LLM routing layer on top. When LLM routing adds no value (deterministic action), skip I2 and use I1 directly. |
+| I2 (Function Call) | $\uparrow$ | I3 (MCP Server) | I2 for small, stable, single-agent tool sets. I3 when tools must be shared across agents or tool count exceeds V13 limits. Migration from I2 to I3 is low-cost — start with I2. |
+| I3 (MCP Server) | $\leftrightarrow$ | I4 (CLI Invocation) | I3: typed schemas, structured output, high token cost. I4: zero schema overhead, unstructured text output. For any tool with an existing CLI, prefer I4. Use I3 when: credential isolation is required, or tool output must be typed and validated, or the tool has no CLI. |
+| I5 (Agent Card) | $\sim$ | I3 (MCP Server) | Agent Cards are agent-level discovery; MCP is tool-level discovery. An agent may serve both: an Agent Card describing its high-level capabilities and an MCP server describing its specific tools. They are complementary, different granularity levels. |
+| I6 (A2A Delegation) | $\leftrightarrow$ | O15 (Agent Handoff) | I6 for cross-system delegation (different codebases/organisations). O15 for intra-system context transfer (same codebase, different agent contexts). |
 
 ### Humanizer vs Humanizer
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
 |---|---|---|---|
-| H1 (Identity Persistence) | ↔ | H7 (Adaptive Persona) | H1 defines what is invariant; H7 adapts what is variable. The conflict: without clear boundary, H7 can erode H1 through gradual style adaptation. Resolution: explicitly partition "identity core" (H1: values, principles, commitments) from "expression surface" (H7: tone, vocabulary, detail level). H7 may never touch the identity core. |
-| H1 (Identity Persistence) | ~ | H9 (Observational Identity) | H1 is the stable identity; H9 is the evolving self-knowledge. They must be kept consistent: if H9 determines the agent is incapable of a task it previously claimed confidence in, H1's self-representation must update. H9 data informs H1 updates; H1 provides the stable anchor that H9 can't erode through capability measurement alone. |
-| H2 (Episodic Self-Improvement) | ~ | H4 (Procedural Skill Accumulation) | H2 accumulates failure lessons; H4 accumulates successful procedures. They are complementary but must not contaminate each other: a partially successful trajectory that also had failures should go to H4 (the successful parts) AND H2 (the failure patterns). Ensure deduplication at the boundary. |
-| H3 (Entropy Curiosity) | ⊕ | R17 (Self-Consistency) | See CRITICAL 4. Never simultaneously. |
-| H5 (Constitutional Self-Alignment) | → | V1 (Human-in-the-Loop) | See CRITICAL 7. H5 requires V1; no exceptions. |
+| H1 (Identity Persistence) | $\leftrightarrow$ | H7 (Adaptive Persona) | H1 defines what is invariant; H7 adapts what is variable. The conflict: without clear boundary, H7 can erode H1 through gradual style adaptation. Resolution: explicitly partition "identity core" (H1: values, principles, commitments) from "expression surface" (H7: tone, vocabulary, detail level). H7 may never touch the identity core. |
+| H1 (Identity Persistence) | $\sim$ | H9 (Observational Identity) | H1 is the stable identity; H9 is the evolving self-knowledge. They must be kept consistent: if H9 determines the agent is incapable of a task it previously claimed confidence in, H1's self-representation must update. H9 data informs H1 updates; H1 provides the stable anchor that H9 can't erode through capability measurement alone. |
+| H2 (Episodic Self-Improvement) | $\sim$ | H4 (Procedural Skill Accumulation) | H2 accumulates failure lessons; H4 accumulates successful procedures. They are complementary but must not contaminate each other: a partially successful trajectory that also had failures should go to H4 (the successful parts) AND H2 (the failure patterns). Ensure deduplication at the boundary. |
+| H3 (Entropy Curiosity) | $\oplus$ | R17 (Self-Consistency) | See CRITICAL 4. Never simultaneously. |
+| H5 (Constitutional Self-Alignment) | $\to$ | V1 (Human-in-the-Loop) | See CRITICAL 7. H5 requires V1; no exceptions. |
 | H5 (Constitutional Self-Alignment) | H/S | V7 (AgentSpec) | V7 defines hard constraints that H5 cannot evolve. H5 evolves soft principles within the space V7 permits. H5 proposes; V7 enforces the boundary; humans approve within the space between them. |
-| H8 (Meta-Agent Self-Modification) | → | V1 (Human-in-the-Loop) | H8 must have human review for any significant behavioral modification. The scope of auto-modification (without human review) must be explicitly enumerated and minimal. |
-| H8 (Meta-Agent Self-Modification) | ↔ | H5 (Constitutional Self-Alignment) | H8 cannot modify H5's constitutional boundary. H8 tunes parameters; H5 (with human approval) evolves principles; V7 enforces the outer boundary. Never allow H8 to modify constitutional principles, even if "performance data suggests it would help." |
-| H10 (Relational Memory) | → | V5 (Guardrail Layering) | Relational memory containing sensitive user data must be subject to guardrails. H10 without explicit V5 guardrails on relationship depth and data access is an ethical and security liability. |
+| H8 (Meta-Agent Self-Modification) | $\to$ | V1 (Human-in-the-Loop) | H8 must have human review for any significant behavioral modification. The scope of auto-modification (without human review) must be explicitly enumerated and minimal. |
+| H8 (Meta-Agent Self-Modification) | $\leftrightarrow$ | H5 (Constitutional Self-Alignment) | H8 cannot modify H5's constitutional boundary. H8 tunes parameters; H5 (with human approval) evolves principles; V7 enforces the outer boundary. Never allow H8 to modify constitutional principles, even if "performance data suggests it would help." |
+| H10 (Relational Memory) | $\to$ | V5 (Guardrail Layering) | Relational memory containing sensitive user data must be subject to guardrails. H10 without explicit V5 guardrails on relationship depth and data access is an ethical and security liability. |
 
 ### Humanizer vs Other Categories
 
 | Pattern A | Conflict Type | Pattern B | Resolution |
 |---|---|---|---|
-| H1 (Identity Persistence) | ↔ | S3 (Persona) | S3 is per-session, stateless. H1 is persistent, session-spanning. H1 is strictly more capable; S3 is the default for systems without session persistence. Do not implement both for the same agent — H1 subsumes S3. |
-| H2 (Episodic Self-Improvement) | ~ | R7 (Reflexion) | R7 is within-session Reflexion; H2 persists R7's outputs across sessions. H2 requires R7 as its data source — they compose sequentially, not in conflict. The tension: H2's accumulated lessons may contradict a fresh R7 critique in a new context. Resolution: treat H2 lessons as prior evidence with confidence weighting, not as absolute rules. |
-| H6 (Inner Monologue) | ↔ | V1 (Human-in-the-Loop) | A continuous inner monologue (H6) implies significant autonomous operation between user interactions. When H6 leads to autonomous actions (not just thoughts), V1 must gate those actions. H6's Thinker should be designed to produce insights, not autonomous actions, unless those actions are explicitly scoped and gated. |
-| H7 (Adaptive Persona) | ~ | S2 (Few-Shot) | If few-shot examples are from a different user's interaction style than the current user's H7 model suggests, the examples and the persona adaptation will pull in different directions. When H7 is active, prefer zero-shot (S1) or ensure few-shot examples match the H7 user model. |
-| H8 (Meta-Agent Self-Modification) | ↔ | V16 (Offline Eval) | H8's modifications must be validated before deployment. If H8 can modify prompts or configurations, each modification must pass a V16 eval before becoming active. H8 without V16 is unsafe: the "performance signal" H8 optimises against may not represent actual user value. |
-| H9 (Observational Identity) | ~ | K11 (Observational Memory) | K11 observes what the agent has seen in the current session; H9 maintains a persistent self-model of what the agent knows and can do across all sessions. They operate at different time scales: K11 is session-scoped; H9 is life-span-scoped. K11 feeds H9 at session end. |
+| H1 (Identity Persistence) | $\leftrightarrow$ | S3 (Persona) | S3 is per-session, stateless. H1 is persistent, session-spanning. H1 is strictly more capable; S3 is the default for systems without session persistence. Do not implement both for the same agent — H1 subsumes S3. |
+| H2 (Episodic Self-Improvement) | $\sim$ | R7 (Reflexion) | R7 is within-session Reflexion; H2 persists R7's outputs across sessions. H2 requires R7 as its data source — they compose sequentially, not in conflict. The tension: H2's accumulated lessons may contradict a fresh R7 critique in a new context. Resolution: treat H2 lessons as prior evidence with confidence weighting, not as absolute rules. |
+| H6 (Inner Monologue) | $\leftrightarrow$ | V1 (Human-in-the-Loop) | A continuous inner monologue (H6) implies significant autonomous operation between user interactions. When H6 leads to autonomous actions (not just thoughts), V1 must gate those actions. H6's Thinker should be designed to produce insights, not autonomous actions, unless those actions are explicitly scoped and gated. |
+| H7 (Adaptive Persona) | $\sim$ | S2 (Few-Shot) | If few-shot examples are from a different user's interaction style than the current user's H7 model suggests, the examples and the persona adaptation will pull in different directions. When H7 is active, prefer zero-shot (S1) or ensure few-shot examples match the H7 user model. |
+| H8 (Meta-Agent Self-Modification) | $\leftrightarrow$ | V16 (Offline Eval) | H8's modifications must be validated before deployment. If H8 can modify prompts or configurations, each modification must pass a V16 eval before becoming active. H8 without V16 is unsafe: the "performance signal" H8 optimises against may not represent actual user value. |
+| H9 (Observational Identity) | $\sim$ | K11 (Observational Memory) | K11 observes what the agent has seen in the current session; H9 maintains a persistent self-model of what the agent knows and can do across all sessions. They operate at different time scales: K11 is session-scoped; H9 is life-span-scoped. K11 feeds H9 at session end. |
 
 ---
 
@@ -409,8 +409,8 @@ When R17 (Self-Consistency Voting) wraps R2 (Few-Shot CoT) with a static exempla
 
 ---
 
-### CONNECTION D: K1 vs K9 decision is query-frequency-dependent, not size-dependent (direct tension ↔)
-**Type:** Direct Tension ↔
+### CONNECTION D: K1 vs K9 decision is query-frequency-dependent, not size-dependent (direct tension $\leftrightarrow$)
+**Type:** Direct Tension $\leftrightarrow$
 
 K1 (Vanilla RAG) pays n² attention cost at retrieval time over a small context (retrieved chunks only). K9 (Long Context) pays n² at prefill time over a large context (entire document set). The received wisdom — "use K1 for large corpora, K9 for small" — is incomplete.
 
@@ -420,8 +420,8 @@ K1 (Vanilla RAG) pays n² attention cost at retrieval time over a small context 
 
 ---
 
-### CONNECTION E: V4 Dual LLM + V15 LLM-as-Judge + V6 injection creates an unguarded attack surface (→)
-**Type:** Prerequisite Dependency →
+### CONNECTION E: V4 Dual LLM + V15 LLM-as-Judge + V6 injection creates an unguarded attack surface ($\to$)
+**Type:** Prerequisite Dependency $\to$
 
 V4 (Dual LLM) routes untrusted content through a quarantined Q-LLM before it reaches the privileged P-LLM. When V15 (LLM-as-Judge) serves as V4's Validation Layer, the judge session receives the Q-LLM's output — which may contain injected instructions from the original untrusted source (mechanism 3, 12: injected content occupies positions in the KV cache where it can influence attention). V6 (Prompt Injection Shield) MUST wrap the V15 judge session in this configuration.
 
@@ -431,8 +431,8 @@ V4 (Dual LLM) routes untrusted content through a quarantined Q-LLM before it rea
 
 ---
 
-### CONNECTION F: O6+O17 quality win requires O17 as load-bearing component (→)
-**Type:** Prerequisite Dependency →
+### CONNECTION F: O6+O17 quality win requires O17 as load-bearing component ($\to$)
+**Type:** Prerequisite Dependency $\to$
 
 The O6 (Orchestrator-Workers) quality win — cited as ~90% accuracy improvement — depends mechanically on each worker having a bounded seq_len separate from the orchestrator (mechanism 6). O17 (Agent Isolation) is the pattern that enforces this. Without O17, workers share context with the orchestrator; n² cost grows as if it were a single agent and the lost-in-middle degradation (mechanism 4) applies to the combined context.
 
