@@ -6,8 +6,8 @@ category: Orchestration
 summary: "Run the whole task inside one agent: a single configured LLM with a system prompt, a small tool set, and a ReAct-style inner loop."
 when_to_use: "Baseline; one model, one loop"
 also_known_as: [Autonomous Agent, Solo Agent, Monolithic Agent, Single-Loop Agent, Tool-Using Assistant]
+related: [O2, O3, O4, O5, O6, O7, O17, V9, V14]
 composes_with: [R4, I2, I3, K8, K11, S3, S5, S6]
-related: [V9, V14, O2, O6]
 mechanism_refs: [1, 2, 3, 4]
 canonical: patterns/O1-Single-Agent.md
 derived: true
@@ -22,4 +22,4 @@ Run the whole task inside one agent: a single configured LLM with a system promp
 - the task does not split into roles that are genuinely *distinct in expertise or context* — a "researcher" and a "writer" persona at the same model and same context is not a real split;
 - iteration speed and debuggability matter — one agent has one failure domain.
 
-Related: [[R4-ReAct]] · [[I2-Function-Call]] · [[I3-MCP-Server]] · [[K8-Working-Memory]] · [[K11-Observational-Memory]] · [[S3-Persona]] · [[S5-Constraint-Framing]] · [[S6-Output-Template]] · [[V9-Bounded-Execution]] · [[V14-Trajectory-Logging]] · [[O2-Prompt-Chaining]] · [[O6-Orchestrator-Workers]]
+Related: [[R4-ReAct]] · [[I2-Function-Call]] · [[I3-MCP-Server]] · [[K8-Working-Memory]] · [[K11-Observational-Memory]] · [[S3-Persona]] · [[S5-Constraint-Framing]] · [[S6-Output-Template]] · [[O2-Prompt-Chaining]] · [[O3-Routing]] · [[O4-Parallelization]] · [[O5-Evaluator-Optimizer]] · [[O6-Orchestrator-Workers]] · [[O7-Supervisor-Hierarchy]] · [[O17-Agent-Isolation]] · [[V9-Bounded-Execution]] · [[V14-Trajectory-Logging]]

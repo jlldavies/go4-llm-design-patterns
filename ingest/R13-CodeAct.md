@@ -7,7 +7,7 @@ summary: "Make the agent's Action a *program*, not a tool call — so one step c
 when_to_use: Python as action language; ~20pp accuracy gain over JSON tool calls
 also_known_as: [Executable Code Actions, Code-as-Action, Programmatic Tool Calling, Code Agent]
 siblings: [R4, R5]
-related: [V8, V9, R14]
+related: [V8, V9, R14, I2, I3]
 composes_with: [V14, O6, R7, K6, K7]
 requires: [V8]
 mechanism_refs: [2, 3, 4]
@@ -24,4 +24,4 @@ Make the agent's Action a *program*, not a tool call — so one step can call se
 - control flow (loops over collections, conditional branches, retries) is part of the action, not the reasoning;
 - the model is strong enough to write correct Python against the available tool surface (modern frontier or tool-tuned mid-size models);
 
-Related: [[V8-Tool-Sandboxing]] · [[V14-Trajectory-Logging]] · [[O6-Orchestrator-Workers]] · [[R7-Reflexion]] · [[K6-Context-Compression]] · [[K7-Context-Pruning]] · [[R4-ReAct]] · [[R5-ReWOO]] · [[V9-Bounded-Execution]] · [[R14-Program-of-Thoughts]]
+Related: [[V8-Tool-Sandboxing]] · [[V14-Trajectory-Logging]] · [[O6-Orchestrator-Workers]] · [[R7-Reflexion]] · [[K6-Context-Compression]] · [[K7-Context-Pruning]] · [[R4-ReAct]] · [[R5-ReWOO]] · [[V9-Bounded-Execution]] · [[R14-Program-of-Thoughts]] · [[I2-Function-Call]] · [[I3-MCP-Server]]

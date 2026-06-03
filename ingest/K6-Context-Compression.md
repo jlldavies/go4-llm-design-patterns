@@ -6,6 +6,7 @@ category: Knowledge
 summary: "Keep a long-running task within the context window by summarising older or bulky content into a denser form, preserving as much of its information as the reclaimed space allows.."
 when_to_use: Reduce context size; session history management
 also_known_as: [Conversation Compression, History Summarisation, Context Summarisation, Compaction]
+related: [K7, K4, K10, K11, K12]
 mechanism_refs: [1, 2, 4, 7]
 canonical: patterns/K6-Context-Compression.md
 derived: true
@@ -18,3 +19,5 @@ Keep a long-running task within the context window by summarising older or bulky
 - the task is a long-running agent session — at scale this is mandatory, not optional;
 - a multi-turn conversation has grown past roughly half the window;
 - the agent produces bulky tool outputs (SQL results, file contents, API dumps) that accumulate.
+
+Related: [[K7-Context-Pruning]] · [[K4-RAPTOR]] · [[K10-Long-Term-Memory]] · [[K11-Observational-Memory]] · [[K12-Karpathy-Memory]]

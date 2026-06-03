@@ -19,6 +19,19 @@
       "file": "ingest/H1-Identity-Persistence.md",
       "canonical": "patterns/H1-Identity-Persistence.md",
       "edges": {
+        "composes_with": [
+          "K10",
+          "K12",
+          "V6",
+          "V5",
+          "H5",
+          "V1"
+        ],
+        "related": [
+          "S3",
+          "H7",
+          "H9"
+        ],
         "mechanism_refs": [
           2,
           4,
@@ -36,6 +49,27 @@
       "file": "ingest/H10-Relational-Memory.md",
       "canonical": "patterns/H10-Relational-Memory.md",
       "edges": {
+        "requires": [
+          "H1",
+          "K10",
+          "K12"
+        ],
+        "composes_with": [
+          "H7",
+          "K11",
+          "V1",
+          "H1",
+          "H5"
+        ],
+        "related": [
+          "H9",
+          "S3",
+          "H1",
+          "K10",
+          "K12",
+          "V5",
+          "H7"
+        ],
         "mechanism_refs": [
           2,
           4,
@@ -53,7 +87,18 @@
       "canonical": "patterns/H2-Episodic-Self-Improvement.md",
       "edges": {
         "composes_with": [
-          "V1"
+          "R7",
+          "K12",
+          "V1",
+          "H4",
+          "H9"
+        ],
+        "related": [
+          "R7",
+          "H1",
+          "K10",
+          "K12",
+          "S8"
         ],
         "mechanism_refs": [
           2,
@@ -74,6 +119,15 @@
       "edges": {
         "conflicts_with": [
           "R17"
+        ],
+        "composes_with": [
+          "V9",
+          "V20"
+        ],
+        "related": [
+          "H1",
+          "R17",
+          "H7"
         ],
         "mechanism_refs": [
           1,
@@ -129,6 +183,16 @@
         "requires": [
           "V1"
         ],
+        "composes_with": [
+          "V15",
+          "H2"
+        ],
+        "related": [
+          "S9",
+          "V7",
+          "H8",
+          "V1"
+        ],
         "mechanism_refs": [
           2,
           3,
@@ -145,6 +209,12 @@
       "file": "ingest/H6-Continuous-Inner-Monologue.md",
       "canonical": "patterns/H6-Continuous-Inner-Monologue.md",
       "edges": {
+        "composes_with": [
+          "H1"
+        ],
+        "siblings": [
+          "H3"
+        ],
         "related": [
           "R16"
         ],
@@ -166,6 +236,22 @@
       "file": "ingest/H7-Adaptive-Persona.md",
       "canonical": "patterns/H7-Adaptive-Persona.md",
       "edges": {
+        "requires": [
+          "H1"
+        ],
+        "composes_with": [
+          "K10",
+          "K12",
+          "H10",
+          "H2",
+          "V5",
+          "H1"
+        ],
+        "related": [
+          "S3",
+          "H1",
+          "H9"
+        ],
         "mechanism_refs": [
           2,
           5
@@ -181,6 +267,23 @@
       "file": "ingest/H8-Meta-Agent-Self-Modification.md",
       "canonical": "patterns/H8-Meta-Agent-Self-Modification.md",
       "edges": {
+        "composes_with": [
+          "V16",
+          "V15",
+          "H2",
+          "H4"
+        ],
+        "siblings": [
+          "R7",
+          "S8"
+        ],
+        "related": [
+          "S8",
+          "V1",
+          "V16",
+          "V7",
+          "H5"
+        ],
         "mechanism_refs": [
           7
         ]
@@ -195,8 +298,17 @@
       "file": "ingest/H9-Observational-Identity.md",
       "canonical": "patterns/H9-Observational-Identity.md",
       "edges": {
+        "composes_with": [
+          "H1",
+          "K11",
+          "K12"
+        ],
         "related": [
-          "HA5"
+          "H2",
+          "H4",
+          "H1",
+          "K10",
+          "K11"
         ],
         "mechanism_refs": [
           2,
@@ -215,6 +327,15 @@
       "file": "ingest/I1-Direct-API.md",
       "canonical": "patterns/I1-Direct-API.md",
       "edges": {
+        "composes_with": [
+          "V5",
+          "V1"
+        ],
+        "related": [
+          "I2",
+          "I3",
+          "I4"
+        ],
         "mechanism_refs": [
           2,
           3,
@@ -231,6 +352,18 @@
       "file": "ingest/I2-Function-Call.md",
       "canonical": "patterns/I2-Function-Call.md",
       "edges": {
+        "composes_with": [
+          "V13",
+          "V1"
+        ],
+        "siblings": [
+          "I3",
+          "I4"
+        ],
+        "related": [
+          "I1",
+          "R4"
+        ],
         "mechanism_refs": [
           2,
           3
@@ -247,6 +380,20 @@
       "canonical": "patterns/I3-MCP-Server.md",
       "edges": {
         "conflicts_with": [
+          "V13"
+        ],
+        "composes_with": [
+          "V6",
+          "V8",
+          "R4",
+          "R13"
+        ],
+        "siblings": [
+          "I4"
+        ],
+        "related": [
+          "I2",
+          "I1",
           "V13"
         ],
         "mechanism_refs": [
@@ -266,6 +413,19 @@
       "file": "ingest/I4-CLI-Invocation.md",
       "canonical": "patterns/I4-CLI-Invocation.md",
       "edges": {
+        "composes_with": [
+          "V6",
+          "V11",
+          "V1"
+        ],
+        "siblings": [
+          "I2",
+          "I3"
+        ],
+        "related": [
+          "I1",
+          "V8"
+        ],
         "mechanism_refs": [
           2,
           3,
@@ -282,6 +442,15 @@
       "file": "ingest/I5-Agent-Card.md",
       "canonical": "patterns/I5-Agent-Card.md",
       "edges": {
+        "composes_with": [
+          "V7"
+        ],
+        "related": [
+          "I6",
+          "I3",
+          "O15",
+          "I1"
+        ],
         "mechanism_refs": [
           2,
           4,
@@ -328,6 +497,22 @@
       "file": "ingest/K1-Vanilla-RAG.md",
       "canonical": "patterns/K1-Vanilla-RAG.md",
       "edges": {
+        "composes_with": [
+          "K6",
+          "K7",
+          "S6",
+          "V15",
+          "V16",
+          "R4"
+        ],
+        "related": [
+          "K2",
+          "K3",
+          "K4",
+          "K5",
+          "K9",
+          "K11"
+        ],
         "mechanism_refs": [
           1,
           4
@@ -343,6 +528,15 @@
       "file": "ingest/K10-Long-Term-Memory.md",
       "canonical": "patterns/K10-Long-Term-Memory.md",
       "edges": {
+        "composes_with": [
+          "K12"
+        ],
+        "related": [
+          "K1",
+          "H2",
+          "H4",
+          "H10"
+        ],
         "mechanism_refs": [
           1,
           3,
@@ -361,6 +555,12 @@
       "file": "ingest/K11-Observational-Memory.md",
       "canonical": "patterns/K11-Observational-Memory.md",
       "edges": {
+        "composes_with": [
+          "K12"
+        ],
+        "related": [
+          "K10"
+        ],
         "mechanism_refs": [
           2,
           3,
@@ -377,6 +577,11 @@
       "file": "ingest/K12-Karpathy-Memory.md",
       "canonical": "patterns/K12-Karpathy-Memory.md",
       "edges": {
+        "related": [
+          "K10",
+          "K11",
+          "K6"
+        ],
         "mechanism_refs": [
           2,
           3,
@@ -395,6 +600,14 @@
       "file": "ingest/K13-Retrieval-Bundle.md",
       "canonical": "patterns/K13-Retrieval-Bundle.md",
       "edges": {
+        "composes_with": [
+          "O18",
+          "K9"
+        ],
+        "related": [
+          "K12",
+          "K5"
+        ],
         "mechanism_refs": [
           1,
           2,
@@ -418,6 +631,10 @@
         "composes_with": [
           "K5"
         ],
+        "related": [
+          "K1",
+          "K5"
+        ],
         "mechanism_refs": [
           1,
           8
@@ -433,6 +650,12 @@
       "file": "ingest/K3-GraphRAG.md",
       "canonical": "patterns/K3-GraphRAG.md",
       "edges": {
+        "siblings": [
+          "K4"
+        ],
+        "related": [
+          "K1"
+        ],
         "mechanism_refs": [
           1,
           2,
@@ -450,6 +673,13 @@
       "file": "ingest/K4-RAPTOR.md",
       "canonical": "patterns/K4-RAPTOR.md",
       "edges": {
+        "siblings": [
+          "K3"
+        ],
+        "related": [
+          "K1",
+          "K6"
+        ],
         "mechanism_refs": [
           1,
           7,
@@ -466,6 +696,9 @@
       "file": "ingest/K5-Adaptive-RAG.md",
       "canonical": "patterns/K5-Adaptive-RAG.md",
       "edges": {
+        "related": [
+          "K2"
+        ],
         "mechanism_refs": [
           2,
           7,
@@ -482,6 +715,13 @@
       "file": "ingest/K6-Context-Compression.md",
       "canonical": "patterns/K6-Context-Compression.md",
       "edges": {
+        "related": [
+          "K7",
+          "K4",
+          "K10",
+          "K11",
+          "K12"
+        ],
         "mechanism_refs": [
           1,
           2,
@@ -516,6 +756,13 @@
       "file": "ingest/K8-Working-Memory.md",
       "canonical": "patterns/K8-Working-Memory.md",
       "edges": {
+        "related": [
+          "K6",
+          "K7",
+          "K10",
+          "K11",
+          "K12"
+        ],
         "mechanism_refs": [
           1,
           2,
@@ -534,6 +781,9 @@
       "file": "ingest/K9-Long-Context.md",
       "canonical": "patterns/K9-Long-Context.md",
       "edges": {
+        "related": [
+          "K1"
+        ],
         "mechanism_refs": [
           2,
           4,
@@ -561,10 +811,15 @@
           "S6"
         ],
         "related": [
-          "V9",
-          "V14",
           "O2",
-          "O6"
+          "O3",
+          "O4",
+          "O5",
+          "O6",
+          "O7",
+          "O17",
+          "V9",
+          "V14"
         ],
         "mechanism_refs": [
           1,
@@ -583,6 +838,15 @@
       "file": "ingest/O10-Swarm.md",
       "canonical": "patterns/O10-Swarm.md",
       "edges": {
+        "composes_with": [
+          "O15"
+        ],
+        "related": [
+          "O7",
+          "O6",
+          "O11",
+          "O3"
+        ],
         "mechanism_refs": [
           1,
           2,
@@ -599,6 +863,14 @@
       "file": "ingest/O11-Blackboard.md",
       "canonical": "patterns/O11-Blackboard.md",
       "edges": {
+        "composes_with": [
+          "K10"
+        ],
+        "related": [
+          "O6",
+          "K10",
+          "O2"
+        ],
         "mechanism_refs": [
           2,
           4,
@@ -615,6 +887,15 @@
       "file": "ingest/O12-Debate-Deliberation.md",
       "canonical": "patterns/O12-Debate-Deliberation.md",
       "edges": {
+        "composes_with": [
+          "V15"
+        ],
+        "related": [
+          "O9",
+          "O5",
+          "R17",
+          "O11"
+        ],
         "mechanism_refs": [
           1,
           3,
@@ -631,6 +912,16 @@
       "file": "ingest/O13-Negotiation.md",
       "canonical": "patterns/O13-Negotiation.md",
       "edges": {
+        "composes_with": [
+          "V15",
+          "S6"
+        ],
+        "related": [
+          "O12",
+          "O5",
+          "O9",
+          "O11"
+        ],
         "mechanism_refs": [
           1,
           3,
@@ -650,6 +941,14 @@
       "file": "ingest/O14-SIE.md",
       "canonical": "patterns/O14-SIE.md",
       "edges": {
+        "composes_with": [
+          "K1"
+        ],
+        "related": [
+          "O3",
+          "O6",
+          "O7"
+        ],
         "mechanism_refs": [
           1,
           5
@@ -694,6 +993,16 @@
       "file": "ingest/O16-Hybrid-Control-Flow.md",
       "canonical": "patterns/O16-Hybrid-Control-Flow.md",
       "edges": {
+        "composes_with": [
+          "O17",
+          "O4",
+          "V15"
+        ],
+        "related": [
+          "O8",
+          "O6",
+          "O2"
+        ],
         "mechanism_refs": [
           2,
           3,
@@ -741,6 +1050,16 @@
       "file": "ingest/O18-Cache-Warmed-Worker-Pool.md",
       "canonical": "patterns/O18-Cache-Warmed-Worker-Pool.md",
       "edges": {
+        "requires": [
+          "O17"
+        ],
+        "composes_with": [
+          "O4"
+        ],
+        "related": [
+          "O4",
+          "K9"
+        ],
         "mechanism_refs": [
           2,
           5,
@@ -790,6 +1109,19 @@
       "file": "ingest/O3-Routing.md",
       "canonical": "patterns/O3-Routing.md",
       "edges": {
+        "composes_with": [
+          "O1",
+          "O2",
+          "R4",
+          "R7",
+          "V15"
+        ],
+        "related": [
+          "O2",
+          "O4",
+          "O6",
+          "K5"
+        ],
         "mechanism_refs": [
           1,
           8
@@ -805,6 +1137,22 @@
       "file": "ingest/O4-Parallelization.md",
       "canonical": "patterns/O4-Parallelization.md",
       "edges": {
+        "composes_with": [
+          "O6",
+          "O17",
+          "O2",
+          "V15"
+        ],
+        "siblings": [
+          "R12"
+        ],
+        "related": [
+          "O2",
+          "O6",
+          "O11",
+          "O12",
+          "R17"
+        ],
         "mechanism_refs": [
           2,
           6,
@@ -821,6 +1169,15 @@
       "file": "ingest/O5-Evaluator-Optimizer.md",
       "canonical": "patterns/O5-Evaluator-Optimizer.md",
       "edges": {
+        "composes_with": [
+          "V15",
+          "V9"
+        ],
+        "related": [
+          "R8",
+          "R7",
+          "O9"
+        ],
         "mechanism_refs": [
           1,
           3,
@@ -842,14 +1199,18 @@
           "O4",
           "O17",
           "V14",
-          "V15"
+          "V15",
+          "R4",
+          "R13"
         ],
         "related": [
           "O2",
           "O7",
           "O4",
           "O5",
-          "V9"
+          "V9",
+          "O17",
+          "V14"
         ],
         "mechanism_refs": [
           4,
@@ -866,6 +1227,12 @@
       "file": "ingest/O7-Supervisor-Hierarchy.md",
       "canonical": "patterns/O7-Supervisor-Hierarchy.md",
       "edges": {
+        "related": [
+          "O6",
+          "O10",
+          "O11",
+          "O16"
+        ],
         "mechanism_refs": [
           2,
           4,
@@ -882,6 +1249,17 @@
       "file": "ingest/O8-Loop-Agent.md",
       "canonical": "patterns/O8-Loop-Agent.md",
       "edges": {
+        "composes_with": [
+          "O9",
+          "V15"
+        ],
+        "related": [
+          "O2",
+          "R4",
+          "R7",
+          "O5",
+          "O6"
+        ],
         "mechanism_refs": [
           1,
           2,
@@ -898,6 +1276,19 @@
       "file": "ingest/O9-Multi-Agent-Reflection.md",
       "canonical": "patterns/O9-Multi-Agent-Reflection.md",
       "edges": {
+        "composes_with": [
+          "O4",
+          "V15",
+          "S6"
+        ],
+        "siblings": [
+          "R17"
+        ],
+        "related": [
+          "O5",
+          "R8",
+          "O12"
+        ],
         "mechanism_refs": [
           1,
           7
@@ -913,6 +1304,20 @@
       "file": "ingest/R1-Zero-Shot-CoT.md",
       "canonical": "patterns/R1-Zero-Shot-CoT.md",
       "edges": {
+        "siblings": [
+          "R2"
+        ],
+        "related": [
+          "S1",
+          "R3",
+          "R4",
+          "R14",
+          "R17",
+          "R7",
+          "R8",
+          "O6",
+          "O4"
+        ],
         "mechanism_refs": [
           1,
           2,
@@ -930,6 +1335,18 @@
       "file": "ingest/R10-LATS.md",
       "canonical": "patterns/R10-LATS.md",
       "edges": {
+        "composes_with": [
+          "V15"
+        ],
+        "siblings": [
+          "R9"
+        ],
+        "related": [
+          "R4",
+          "R7",
+          "R9",
+          "R3"
+        ],
         "mechanism_refs": [
           5,
           7,
@@ -946,6 +1363,21 @@
       "file": "ingest/R11-Buffer-of-Thoughts.md",
       "canonical": "patterns/R11-Buffer-of-Thoughts.md",
       "edges": {
+        "composes_with": [
+          "K1",
+          "K10"
+        ],
+        "siblings": [
+          "R9",
+          "R10"
+        ],
+        "related": [
+          "R9",
+          "R10",
+          "K10",
+          "K12",
+          "R2"
+        ],
         "mechanism_refs": [
           2,
           5,
@@ -963,6 +1395,13 @@
       "file": "ingest/R12-Skeleton-of-Thought.md",
       "canonical": "patterns/R12-Skeleton-of-Thought.md",
       "edges": {
+        "siblings": [
+          "O4"
+        ],
+        "related": [
+          "R3",
+          "S4"
+        ],
         "mechanism_refs": [
           6,
           7
@@ -995,7 +1434,9 @@
         "related": [
           "V8",
           "V9",
-          "R14"
+          "R14",
+          "I2",
+          "I3"
         ],
         "mechanism_refs": [
           2,
@@ -1013,6 +1454,15 @@
       "file": "ingest/R14-Program-of-Thoughts.md",
       "canonical": "patterns/R14-Program-of-Thoughts.md",
       "edges": {
+        "composes_with": [
+          "R17"
+        ],
+        "siblings": [
+          "R13"
+        ],
+        "related": [
+          "V8"
+        ],
         "mechanism_refs": [
           2,
           7
@@ -1028,6 +1478,9 @@
       "file": "ingest/R16-Talker-Reasoner.md",
       "canonical": "patterns/R16-Talker-Reasoner.md",
       "edges": {
+        "siblings": [
+          "H6"
+        ],
         "mechanism_refs": [
           2,
           3,
@@ -1048,6 +1501,20 @@
         "conflicts_with": [
           "H3"
         ],
+        "composes_with": [
+          "V9",
+          "V15"
+        ],
+        "siblings": [
+          "R7",
+          "R8"
+        ],
+        "related": [
+          "O5",
+          "S8",
+          "V15",
+          "H3"
+        ],
         "mechanism_refs": [
           2,
           7,
@@ -1064,6 +1531,13 @@
       "file": "ingest/R18-Graph-of-Thoughts.md",
       "canonical": "patterns/R18-Graph-of-Thoughts.md",
       "edges": {
+        "siblings": [
+          "R9",
+          "R10"
+        ],
+        "related": [
+          "R17"
+        ],
         "mechanism_refs": [
           2,
           5,
@@ -1081,6 +1555,14 @@
       "file": "ingest/R19-Step-Back-Prompting.md",
       "canonical": "patterns/R19-Step-Back-Prompting.md",
       "edges": {
+        "composes_with": [
+          "K5"
+        ],
+        "related": [
+          "K2",
+          "R1",
+          "R3"
+        ],
         "mechanism_refs": [
           1,
           5,
@@ -1097,6 +1579,19 @@
       "file": "ingest/R2-Few-Shot-CoT.md",
       "canonical": "patterns/R2-Few-Shot-CoT.md",
       "edges": {
+        "composes_with": [
+          "R17",
+          "S3",
+          "S6",
+          "R1"
+        ],
+        "related": [
+          "R1",
+          "S2",
+          "R3",
+          "R4",
+          "R14"
+        ],
         "mechanism_refs": [
           1,
           2,
@@ -1113,6 +1608,14 @@
       "file": "ingest/R20-Chain-of-Verification.md",
       "canonical": "patterns/R20-Chain-of-Verification.md",
       "edges": {
+        "siblings": [
+          "R8",
+          "R7",
+          "R17"
+        ],
+        "related": [
+          "O5"
+        ],
         "mechanism_refs": [
           1,
           3,
@@ -1175,7 +1678,10 @@
           "K8",
           "K6",
           "K7",
-          "R7"
+          "R7",
+          "I2",
+          "I3",
+          "I4"
         ],
         "siblings": [
           "R5",
@@ -1208,6 +1714,16 @@
         "conflicts_with": [
           "R4"
         ],
+        "composes_with": [
+          "O4",
+          "R4"
+        ],
+        "related": [
+          "R4",
+          "R3",
+          "S6",
+          "S2"
+        ],
         "mechanism_refs": [
           2,
           5,
@@ -1225,6 +1741,15 @@
       "file": "ingest/R6-Self-Ask.md",
       "canonical": "patterns/R6-Self-Ask.md",
       "edges": {
+        "composes_with": [
+          "K1",
+          "R4"
+        ],
+        "related": [
+          "R3",
+          "R4",
+          "R5"
+        ],
         "mechanism_refs": [
           2,
           3,
@@ -1242,6 +1767,19 @@
       "file": "ingest/R7-Reflexion.md",
       "canonical": "patterns/R7-Reflexion.md",
       "edges": {
+        "composes_with": [
+          "V15",
+          "K10",
+          "K12"
+        ],
+        "siblings": [
+          "R17",
+          "R8"
+        ],
+        "related": [
+          "H2",
+          "O5"
+        ],
         "mechanism_refs": [
           2,
           9,
@@ -1258,6 +1796,17 @@
       "file": "ingest/R8-Self-Refine.md",
       "canonical": "patterns/R8-Self-Refine.md",
       "edges": {
+        "composes_with": [
+          "S6",
+          "V9"
+        ],
+        "siblings": [
+          "R7",
+          "R17"
+        ],
+        "related": [
+          "O5"
+        ],
         "mechanism_refs": [
           1,
           4,
@@ -1274,6 +1823,23 @@
       "file": "ingest/R9-Tree-of-Thoughts.md",
       "canonical": "patterns/R9-Tree-of-Thoughts.md",
       "edges": {
+        "composes_with": [
+          "V9",
+          "V15"
+        ],
+        "siblings": [
+          "R10"
+        ],
+        "related": [
+          "R17",
+          "R4",
+          "R3",
+          "R1",
+          "R2",
+          "R18",
+          "R11",
+          "R12"
+        ],
         "mechanism_refs": [
           2,
           5,
@@ -1290,6 +1856,21 @@
       "file": "ingest/S1-Zero-Shot.md",
       "canonical": "patterns/S1-Zero-Shot.md",
       "edges": {
+        "related": [
+          "S2",
+          "S3",
+          "S4",
+          "S5",
+          "S6",
+          "S8",
+          "S9",
+          "S7",
+          "S10",
+          "R17",
+          "K6",
+          "R7",
+          "O6"
+        ],
         "mechanism_refs": [
           1,
           2,
@@ -1307,6 +1888,12 @@
       "file": "ingest/S2-Few-Shot.md",
       "canonical": "patterns/S2-Few-Shot.md",
       "edges": {
+        "composes_with": [
+          "R17"
+        ],
+        "related": [
+          "S1"
+        ],
         "mechanism_refs": [
           2,
           5,
@@ -1387,6 +1974,10 @@
           "S9",
           "V5",
           "V7",
+          "K5",
+          "K12",
+          "R4",
+          "V15",
           "H5"
         ],
         "mechanism_refs": [
@@ -1405,6 +1996,9 @@
       "file": "ingest/S6-Output-Template.md",
       "canonical": "patterns/S6-Output-Template.md",
       "edges": {
+        "composes_with": [
+          "S4"
+        ],
         "mechanism_refs": [
           2,
           4,
@@ -1422,6 +2016,15 @@
       "file": "ingest/S8-Meta-Prompt.md",
       "canonical": "patterns/S8-Meta-Prompt.md",
       "edges": {
+        "siblings": [
+          "R7"
+        ],
+        "related": [
+          "R17",
+          "V15",
+          "K12",
+          "O5"
+        ],
         "mechanism_refs": [
           2,
           5
@@ -1470,8 +2073,19 @@
       "file": "ingest/V1-Human-in-the-Loop.md",
       "canonical": "patterns/V1-Human-in-the-Loop.md",
       "edges": {
+        "requires": [
+          "V10"
+        ],
         "conflicts_with": [
           "V2"
+        ],
+        "composes_with": [
+          "V14",
+          "V7"
+        ],
+        "related": [
+          "V2",
+          "H6"
         ],
         "mechanism_refs": [
           7
@@ -1487,6 +2101,16 @@
       "file": "ingest/V10-Checkpointing.md",
       "canonical": "patterns/V10-Checkpointing.md",
       "edges": {
+        "composes_with": [
+          "V12",
+          "V14"
+        ],
+        "related": [
+          "V9",
+          "K8",
+          "V14",
+          "K11"
+        ],
         "mechanism_refs": [
           3,
           5
@@ -1502,6 +2126,14 @@
       "file": "ingest/V11-Error-Compaction.md",
       "canonical": "patterns/V11-Error-Compaction.md",
       "edges": {
+        "composes_with": [
+          "V14",
+          "V9"
+        ],
+        "related": [
+          "K6",
+          "K7"
+        ],
         "mechanism_refs": [
           2,
           3,
@@ -1519,6 +2151,10 @@
       "canonical": "patterns/V12-Stateless-Reducer.md",
       "edges": {
         "composes_with": [
+          "V10",
+          "V14"
+        ],
+        "related": [
           "V10"
         ],
         "mechanism_refs": [
@@ -1539,6 +2175,18 @@
         "conflicts_with": [
           "I3"
         ],
+        "composes_with": [
+          "I2",
+          "O17",
+          "V14",
+          "K6",
+          "V11"
+        ],
+        "related": [
+          "I3",
+          "V3",
+          "V9"
+        ],
         "mechanism_refs": [
           1,
           2,
@@ -1555,6 +2203,21 @@
       "file": "ingest/V14-Trajectory-Logging.md",
       "canonical": "patterns/V14-Trajectory-Logging.md",
       "edges": {
+        "composes_with": [
+          "K11"
+        ],
+        "related": [
+          "V1",
+          "V5",
+          "V7",
+          "V9",
+          "V15",
+          "V16",
+          "V17",
+          "V18",
+          "V10",
+          "V11"
+        ],
         "mechanism_refs": [
           3,
           7
@@ -1570,6 +2233,15 @@
       "file": "ingest/V15-LLM-as-Judge.md",
       "canonical": "patterns/V15-LLM-as-Judge.md",
       "edges": {
+        "composes_with": [
+          "V14",
+          "S6"
+        ],
+        "related": [
+          "O5",
+          "V16",
+          "R17"
+        ],
         "mechanism_refs": [
           1,
           4
@@ -1585,6 +2257,20 @@
       "file": "ingest/V16-Offline-Eval.md",
       "canonical": "patterns/V16-Offline-Eval.md",
       "edges": {
+        "composes_with": [
+          "V15",
+          "V17",
+          "V14",
+          "V18",
+          "V6"
+        ],
+        "related": [
+          "V15",
+          "V17",
+          "V5",
+          "V9",
+          "V14"
+        ],
         "mechanism_refs": [
           7
         ]
@@ -1599,6 +2285,23 @@
       "file": "ingest/V17-Online-Eval.md",
       "canonical": "patterns/V17-Online-Eval.md",
       "edges": {
+        "composes_with": [
+          "V15",
+          "V19",
+          "V1",
+          "V2",
+          "V5",
+          "V7",
+          "V9"
+        ],
+        "siblings": [
+          "V16"
+        ],
+        "related": [
+          "V14",
+          "V18",
+          "V16"
+        ],
         "mechanism_refs": [
           1,
           7
@@ -1614,6 +2317,19 @@
       "file": "ingest/V18-Agent-Simulation.md",
       "canonical": "patterns/V18-Agent-Simulation.md",
       "edges": {
+        "composes_with": [
+          "V16",
+          "V17",
+          "V14",
+          "V15",
+          "V9",
+          "V6",
+          "V8"
+        ],
+        "related": [
+          "V16",
+          "V17"
+        ],
         "mechanism_refs": [
           4,
           10
@@ -1629,6 +2345,16 @@
       "file": "ingest/V19-Fallback.md",
       "canonical": "patterns/V19-Fallback.md",
       "edges": {
+        "composes_with": [
+          "V9",
+          "V11",
+          "V14",
+          "V17"
+        ],
+        "related": [
+          "V1",
+          "K5"
+        ],
         "mechanism_refs": [
           8
         ]
@@ -1660,7 +2386,8 @@
         ],
         "related": [
           "V14",
-          "H6"
+          "H6",
+          "V1"
         ],
         "mechanism_refs": [
           1,
@@ -1679,6 +2406,14 @@
       "file": "ingest/V20-Schema-Validation.md",
       "canonical": "patterns/V20-Schema-Validation.md",
       "edges": {
+        "composes_with": [
+          "S6"
+        ],
+        "related": [
+          "V5",
+          "V15",
+          "S6"
+        ],
         "mechanism_refs": [
           4,
           7,
@@ -1695,6 +2430,17 @@
       "file": "ingest/V3-Rule-of-Two.md",
       "canonical": "patterns/V3-Rule-of-Two.md",
       "edges": {
+        "composes_with": [
+          "V4",
+          "V14",
+          "V17"
+        ],
+        "related": [
+          "V4",
+          "V6",
+          "V8",
+          "V5"
+        ],
         "mechanism_refs": [
           2,
           4
@@ -1710,6 +2456,16 @@
       "file": "ingest/V4-Dual-LLM.md",
       "canonical": "patterns/V4-Dual-LLM.md",
       "edges": {
+        "composes_with": [
+          "V6",
+          "V7",
+          "V8"
+        ],
+        "related": [
+          "V3",
+          "V6",
+          "O17"
+        ],
         "mechanism_refs": [
           1,
           3,
@@ -1726,6 +2482,19 @@
       "file": "ingest/V5-Guardrail-Layering.md",
       "canonical": "patterns/V5-Guardrail-Layering.md",
       "edges": {
+        "composes_with": [
+          "S5",
+          "V6",
+          "V7",
+          "V1",
+          "V4",
+          "V3",
+          "V15",
+          "V8"
+        ],
+        "related": [
+          "V6"
+        ],
         "mechanism_refs": [
           1,
           2,
@@ -1743,7 +2512,18 @@
       "canonical": "patterns/V6-Prompt-Injection-Shield.md",
       "edges": {
         "composes_with": [
-          "V17"
+          "V3",
+          "V4",
+          "V8",
+          "V17",
+          "V13",
+          "S5",
+          "V7"
+        ],
+        "related": [
+          "V4",
+          "V5",
+          "S9"
         ],
         "mechanism_refs": [
           3,
@@ -1760,6 +2540,25 @@
       "file": "ingest/V7-AgentSpec.md",
       "canonical": "patterns/V7-AgentSpec.md",
       "edges": {
+        "composes_with": [
+          "V5",
+          "V14",
+          "V4",
+          "V6",
+          "V8",
+          "V3",
+          "V16",
+          "V17"
+        ],
+        "related": [
+          "S9",
+          "H5",
+          "V4",
+          "V6",
+          "V8",
+          "V5",
+          "V15"
+        ],
         "mechanism_refs": [
           5,
           7
@@ -1803,6 +2602,11 @@
       "file": "ingest/V9-Bounded-Execution.md",
       "canonical": "patterns/V9-Bounded-Execution.md",
       "edges": {
+        "composes_with": [
+          "V10",
+          "V14",
+          "V1"
+        ],
         "mechanism_refs": [
           2,
           3,
@@ -1813,14 +2617,204 @@
   ],
   "edges": [
     {
+      "from": "H1",
+      "to": "K10",
+      "type": "composes_with"
+    },
+    {
+      "from": "H1",
+      "to": "K12",
+      "type": "composes_with"
+    },
+    {
+      "from": "H1",
+      "to": "V6",
+      "type": "composes_with"
+    },
+    {
+      "from": "H1",
+      "to": "V5",
+      "type": "composes_with"
+    },
+    {
+      "from": "H1",
+      "to": "H5",
+      "type": "composes_with"
+    },
+    {
+      "from": "H1",
+      "to": "V1",
+      "type": "composes_with"
+    },
+    {
+      "from": "H1",
+      "to": "S3",
+      "type": "related"
+    },
+    {
+      "from": "H1",
+      "to": "H7",
+      "type": "related"
+    },
+    {
+      "from": "H1",
+      "to": "H9",
+      "type": "related"
+    },
+    {
+      "from": "H10",
+      "to": "H1",
+      "type": "requires"
+    },
+    {
+      "from": "H10",
+      "to": "K10",
+      "type": "requires"
+    },
+    {
+      "from": "H10",
+      "to": "K12",
+      "type": "requires"
+    },
+    {
+      "from": "H10",
+      "to": "H7",
+      "type": "composes_with"
+    },
+    {
+      "from": "H10",
+      "to": "K11",
+      "type": "composes_with"
+    },
+    {
+      "from": "H10",
+      "to": "V1",
+      "type": "composes_with"
+    },
+    {
+      "from": "H10",
+      "to": "H1",
+      "type": "composes_with"
+    },
+    {
+      "from": "H10",
+      "to": "H5",
+      "type": "composes_with"
+    },
+    {
+      "from": "H10",
+      "to": "H9",
+      "type": "related"
+    },
+    {
+      "from": "H10",
+      "to": "S3",
+      "type": "related"
+    },
+    {
+      "from": "H10",
+      "to": "H1",
+      "type": "related"
+    },
+    {
+      "from": "H10",
+      "to": "K10",
+      "type": "related"
+    },
+    {
+      "from": "H10",
+      "to": "K12",
+      "type": "related"
+    },
+    {
+      "from": "H10",
+      "to": "V5",
+      "type": "related"
+    },
+    {
+      "from": "H10",
+      "to": "H7",
+      "type": "related"
+    },
+    {
+      "from": "H2",
+      "to": "R7",
+      "type": "composes_with"
+    },
+    {
+      "from": "H2",
+      "to": "K12",
+      "type": "composes_with"
+    },
+    {
       "from": "H2",
       "to": "V1",
       "type": "composes_with"
     },
     {
+      "from": "H2",
+      "to": "H4",
+      "type": "composes_with"
+    },
+    {
+      "from": "H2",
+      "to": "H9",
+      "type": "composes_with"
+    },
+    {
+      "from": "H2",
+      "to": "R7",
+      "type": "related"
+    },
+    {
+      "from": "H2",
+      "to": "H1",
+      "type": "related"
+    },
+    {
+      "from": "H2",
+      "to": "K10",
+      "type": "related"
+    },
+    {
+      "from": "H2",
+      "to": "K12",
+      "type": "related"
+    },
+    {
+      "from": "H2",
+      "to": "S8",
+      "type": "related"
+    },
+    {
       "from": "H3",
       "to": "R17",
       "type": "conflicts_with"
+    },
+    {
+      "from": "H3",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "H3",
+      "to": "V20",
+      "type": "composes_with"
+    },
+    {
+      "from": "H3",
+      "to": "H1",
+      "type": "related"
+    },
+    {
+      "from": "H3",
+      "to": "R17",
+      "type": "related"
+    },
+    {
+      "from": "H3",
+      "to": "H7",
+      "type": "related"
     },
     {
       "from": "H4",
@@ -1888,19 +2882,354 @@
       "type": "requires"
     },
     {
+      "from": "H5",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "H5",
+      "to": "H2",
+      "type": "composes_with"
+    },
+    {
+      "from": "H5",
+      "to": "S9",
+      "type": "related"
+    },
+    {
+      "from": "H5",
+      "to": "V7",
+      "type": "related"
+    },
+    {
+      "from": "H5",
+      "to": "H8",
+      "type": "related"
+    },
+    {
+      "from": "H5",
+      "to": "V1",
+      "type": "related"
+    },
+    {
+      "from": "H6",
+      "to": "H1",
+      "type": "composes_with"
+    },
+    {
+      "from": "H6",
+      "to": "H3",
+      "type": "siblings"
+    },
+    {
       "from": "H6",
       "to": "R16",
       "type": "related"
     },
     {
+      "from": "H7",
+      "to": "H1",
+      "type": "requires"
+    },
+    {
+      "from": "H7",
+      "to": "K10",
+      "type": "composes_with"
+    },
+    {
+      "from": "H7",
+      "to": "K12",
+      "type": "composes_with"
+    },
+    {
+      "from": "H7",
+      "to": "H10",
+      "type": "composes_with"
+    },
+    {
+      "from": "H7",
+      "to": "H2",
+      "type": "composes_with"
+    },
+    {
+      "from": "H7",
+      "to": "V5",
+      "type": "composes_with"
+    },
+    {
+      "from": "H7",
+      "to": "H1",
+      "type": "composes_with"
+    },
+    {
+      "from": "H7",
+      "to": "S3",
+      "type": "related"
+    },
+    {
+      "from": "H7",
+      "to": "H1",
+      "type": "related"
+    },
+    {
+      "from": "H7",
+      "to": "H9",
+      "type": "related"
+    },
+    {
+      "from": "H8",
+      "to": "V16",
+      "type": "composes_with"
+    },
+    {
+      "from": "H8",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "H8",
+      "to": "H2",
+      "type": "composes_with"
+    },
+    {
+      "from": "H8",
+      "to": "H4",
+      "type": "composes_with"
+    },
+    {
+      "from": "H8",
+      "to": "R7",
+      "type": "siblings"
+    },
+    {
+      "from": "H8",
+      "to": "S8",
+      "type": "siblings"
+    },
+    {
+      "from": "H8",
+      "to": "S8",
+      "type": "related"
+    },
+    {
+      "from": "H8",
+      "to": "V1",
+      "type": "related"
+    },
+    {
+      "from": "H8",
+      "to": "V16",
+      "type": "related"
+    },
+    {
+      "from": "H8",
+      "to": "V7",
+      "type": "related"
+    },
+    {
+      "from": "H8",
+      "to": "H5",
+      "type": "related"
+    },
+    {
       "from": "H9",
-      "to": "HA5",
+      "to": "H1",
+      "type": "composes_with"
+    },
+    {
+      "from": "H9",
+      "to": "K11",
+      "type": "composes_with"
+    },
+    {
+      "from": "H9",
+      "to": "K12",
+      "type": "composes_with"
+    },
+    {
+      "from": "H9",
+      "to": "H2",
+      "type": "related"
+    },
+    {
+      "from": "H9",
+      "to": "H4",
+      "type": "related"
+    },
+    {
+      "from": "H9",
+      "to": "H1",
+      "type": "related"
+    },
+    {
+      "from": "H9",
+      "to": "K10",
+      "type": "related"
+    },
+    {
+      "from": "H9",
+      "to": "K11",
+      "type": "related"
+    },
+    {
+      "from": "I1",
+      "to": "V5",
+      "type": "composes_with"
+    },
+    {
+      "from": "I1",
+      "to": "V1",
+      "type": "composes_with"
+    },
+    {
+      "from": "I1",
+      "to": "I2",
+      "type": "related"
+    },
+    {
+      "from": "I1",
+      "to": "I3",
+      "type": "related"
+    },
+    {
+      "from": "I1",
+      "to": "I4",
+      "type": "related"
+    },
+    {
+      "from": "I2",
+      "to": "V13",
+      "type": "composes_with"
+    },
+    {
+      "from": "I2",
+      "to": "V1",
+      "type": "composes_with"
+    },
+    {
+      "from": "I2",
+      "to": "I3",
+      "type": "siblings"
+    },
+    {
+      "from": "I2",
+      "to": "I4",
+      "type": "siblings"
+    },
+    {
+      "from": "I2",
+      "to": "I1",
+      "type": "related"
+    },
+    {
+      "from": "I2",
+      "to": "R4",
       "type": "related"
     },
     {
       "from": "I3",
       "to": "V13",
       "type": "conflicts_with"
+    },
+    {
+      "from": "I3",
+      "to": "V6",
+      "type": "composes_with"
+    },
+    {
+      "from": "I3",
+      "to": "V8",
+      "type": "composes_with"
+    },
+    {
+      "from": "I3",
+      "to": "R4",
+      "type": "composes_with"
+    },
+    {
+      "from": "I3",
+      "to": "R13",
+      "type": "composes_with"
+    },
+    {
+      "from": "I3",
+      "to": "I4",
+      "type": "siblings"
+    },
+    {
+      "from": "I3",
+      "to": "I2",
+      "type": "related"
+    },
+    {
+      "from": "I3",
+      "to": "I1",
+      "type": "related"
+    },
+    {
+      "from": "I3",
+      "to": "V13",
+      "type": "related"
+    },
+    {
+      "from": "I4",
+      "to": "V6",
+      "type": "composes_with"
+    },
+    {
+      "from": "I4",
+      "to": "V11",
+      "type": "composes_with"
+    },
+    {
+      "from": "I4",
+      "to": "V1",
+      "type": "composes_with"
+    },
+    {
+      "from": "I4",
+      "to": "I2",
+      "type": "siblings"
+    },
+    {
+      "from": "I4",
+      "to": "I3",
+      "type": "siblings"
+    },
+    {
+      "from": "I4",
+      "to": "I1",
+      "type": "related"
+    },
+    {
+      "from": "I4",
+      "to": "V8",
+      "type": "related"
+    },
+    {
+      "from": "I5",
+      "to": "V7",
+      "type": "composes_with"
+    },
+    {
+      "from": "I5",
+      "to": "I6",
+      "type": "related"
+    },
+    {
+      "from": "I5",
+      "to": "I3",
+      "type": "related"
+    },
+    {
+      "from": "I5",
+      "to": "O15",
+      "type": "related"
+    },
+    {
+      "from": "I5",
+      "to": "I1",
+      "type": "related"
     },
     {
       "from": "I6",
@@ -1948,9 +3277,234 @@
       "type": "related"
     },
     {
+      "from": "K1",
+      "to": "K6",
+      "type": "composes_with"
+    },
+    {
+      "from": "K1",
+      "to": "K7",
+      "type": "composes_with"
+    },
+    {
+      "from": "K1",
+      "to": "S6",
+      "type": "composes_with"
+    },
+    {
+      "from": "K1",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "K1",
+      "to": "V16",
+      "type": "composes_with"
+    },
+    {
+      "from": "K1",
+      "to": "R4",
+      "type": "composes_with"
+    },
+    {
+      "from": "K1",
+      "to": "K2",
+      "type": "related"
+    },
+    {
+      "from": "K1",
+      "to": "K3",
+      "type": "related"
+    },
+    {
+      "from": "K1",
+      "to": "K4",
+      "type": "related"
+    },
+    {
+      "from": "K1",
+      "to": "K5",
+      "type": "related"
+    },
+    {
+      "from": "K1",
+      "to": "K9",
+      "type": "related"
+    },
+    {
+      "from": "K1",
+      "to": "K11",
+      "type": "related"
+    },
+    {
+      "from": "K10",
+      "to": "K12",
+      "type": "composes_with"
+    },
+    {
+      "from": "K10",
+      "to": "K1",
+      "type": "related"
+    },
+    {
+      "from": "K10",
+      "to": "H2",
+      "type": "related"
+    },
+    {
+      "from": "K10",
+      "to": "H4",
+      "type": "related"
+    },
+    {
+      "from": "K10",
+      "to": "H10",
+      "type": "related"
+    },
+    {
+      "from": "K11",
+      "to": "K12",
+      "type": "composes_with"
+    },
+    {
+      "from": "K11",
+      "to": "K10",
+      "type": "related"
+    },
+    {
+      "from": "K12",
+      "to": "K10",
+      "type": "related"
+    },
+    {
+      "from": "K12",
+      "to": "K11",
+      "type": "related"
+    },
+    {
+      "from": "K12",
+      "to": "K6",
+      "type": "related"
+    },
+    {
+      "from": "K13",
+      "to": "O18",
+      "type": "composes_with"
+    },
+    {
+      "from": "K13",
+      "to": "K9",
+      "type": "composes_with"
+    },
+    {
+      "from": "K13",
+      "to": "K12",
+      "type": "related"
+    },
+    {
+      "from": "K13",
+      "to": "K5",
+      "type": "related"
+    },
+    {
       "from": "K2",
       "to": "K5",
       "type": "composes_with"
+    },
+    {
+      "from": "K2",
+      "to": "K1",
+      "type": "related"
+    },
+    {
+      "from": "K2",
+      "to": "K5",
+      "type": "related"
+    },
+    {
+      "from": "K3",
+      "to": "K4",
+      "type": "siblings"
+    },
+    {
+      "from": "K3",
+      "to": "K1",
+      "type": "related"
+    },
+    {
+      "from": "K4",
+      "to": "K3",
+      "type": "siblings"
+    },
+    {
+      "from": "K4",
+      "to": "K1",
+      "type": "related"
+    },
+    {
+      "from": "K4",
+      "to": "K6",
+      "type": "related"
+    },
+    {
+      "from": "K5",
+      "to": "K2",
+      "type": "related"
+    },
+    {
+      "from": "K6",
+      "to": "K7",
+      "type": "related"
+    },
+    {
+      "from": "K6",
+      "to": "K4",
+      "type": "related"
+    },
+    {
+      "from": "K6",
+      "to": "K10",
+      "type": "related"
+    },
+    {
+      "from": "K6",
+      "to": "K11",
+      "type": "related"
+    },
+    {
+      "from": "K6",
+      "to": "K12",
+      "type": "related"
+    },
+    {
+      "from": "K8",
+      "to": "K6",
+      "type": "related"
+    },
+    {
+      "from": "K8",
+      "to": "K7",
+      "type": "related"
+    },
+    {
+      "from": "K8",
+      "to": "K10",
+      "type": "related"
+    },
+    {
+      "from": "K8",
+      "to": "K11",
+      "type": "related"
+    },
+    {
+      "from": "K8",
+      "to": "K12",
+      "type": "related"
+    },
+    {
+      "from": "K9",
+      "to": "K1",
+      "type": "related"
     },
     {
       "from": "O1",
@@ -1994,6 +3548,41 @@
     },
     {
       "from": "O1",
+      "to": "O2",
+      "type": "related"
+    },
+    {
+      "from": "O1",
+      "to": "O3",
+      "type": "related"
+    },
+    {
+      "from": "O1",
+      "to": "O4",
+      "type": "related"
+    },
+    {
+      "from": "O1",
+      "to": "O5",
+      "type": "related"
+    },
+    {
+      "from": "O1",
+      "to": "O6",
+      "type": "related"
+    },
+    {
+      "from": "O1",
+      "to": "O7",
+      "type": "related"
+    },
+    {
+      "from": "O1",
+      "to": "O17",
+      "type": "related"
+    },
+    {
+      "from": "O1",
       "to": "V9",
       "type": "related"
     },
@@ -2003,13 +3592,123 @@
       "type": "related"
     },
     {
-      "from": "O1",
+      "from": "O10",
+      "to": "O15",
+      "type": "composes_with"
+    },
+    {
+      "from": "O10",
+      "to": "O7",
+      "type": "related"
+    },
+    {
+      "from": "O10",
+      "to": "O6",
+      "type": "related"
+    },
+    {
+      "from": "O10",
+      "to": "O11",
+      "type": "related"
+    },
+    {
+      "from": "O10",
+      "to": "O3",
+      "type": "related"
+    },
+    {
+      "from": "O11",
+      "to": "K10",
+      "type": "composes_with"
+    },
+    {
+      "from": "O11",
+      "to": "O6",
+      "type": "related"
+    },
+    {
+      "from": "O11",
+      "to": "K10",
+      "type": "related"
+    },
+    {
+      "from": "O11",
       "to": "O2",
       "type": "related"
     },
     {
-      "from": "O1",
+      "from": "O12",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "O12",
+      "to": "O9",
+      "type": "related"
+    },
+    {
+      "from": "O12",
+      "to": "O5",
+      "type": "related"
+    },
+    {
+      "from": "O12",
+      "to": "R17",
+      "type": "related"
+    },
+    {
+      "from": "O12",
+      "to": "O11",
+      "type": "related"
+    },
+    {
+      "from": "O13",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "O13",
+      "to": "S6",
+      "type": "composes_with"
+    },
+    {
+      "from": "O13",
+      "to": "O12",
+      "type": "related"
+    },
+    {
+      "from": "O13",
+      "to": "O5",
+      "type": "related"
+    },
+    {
+      "from": "O13",
+      "to": "O9",
+      "type": "related"
+    },
+    {
+      "from": "O13",
+      "to": "O11",
+      "type": "related"
+    },
+    {
+      "from": "O14",
+      "to": "K1",
+      "type": "composes_with"
+    },
+    {
+      "from": "O14",
+      "to": "O3",
+      "type": "related"
+    },
+    {
+      "from": "O14",
       "to": "O6",
+      "type": "related"
+    },
+    {
+      "from": "O14",
+      "to": "O7",
       "type": "related"
     },
     {
@@ -2058,6 +3757,36 @@
       "type": "related"
     },
     {
+      "from": "O16",
+      "to": "O17",
+      "type": "composes_with"
+    },
+    {
+      "from": "O16",
+      "to": "O4",
+      "type": "composes_with"
+    },
+    {
+      "from": "O16",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "O16",
+      "to": "O8",
+      "type": "related"
+    },
+    {
+      "from": "O16",
+      "to": "O6",
+      "type": "related"
+    },
+    {
+      "from": "O16",
+      "to": "O2",
+      "type": "related"
+    },
+    {
       "from": "O17",
       "to": "O6",
       "type": "composes_with"
@@ -2100,6 +3829,26 @@
     {
       "from": "O17",
       "to": "K12",
+      "type": "related"
+    },
+    {
+      "from": "O18",
+      "to": "O17",
+      "type": "requires"
+    },
+    {
+      "from": "O18",
+      "to": "O4",
+      "type": "composes_with"
+    },
+    {
+      "from": "O18",
+      "to": "O4",
+      "type": "related"
+    },
+    {
+      "from": "O18",
+      "to": "K9",
       "type": "related"
     },
     {
@@ -2163,6 +3912,126 @@
       "type": "related"
     },
     {
+      "from": "O3",
+      "to": "O1",
+      "type": "composes_with"
+    },
+    {
+      "from": "O3",
+      "to": "O2",
+      "type": "composes_with"
+    },
+    {
+      "from": "O3",
+      "to": "R4",
+      "type": "composes_with"
+    },
+    {
+      "from": "O3",
+      "to": "R7",
+      "type": "composes_with"
+    },
+    {
+      "from": "O3",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "O3",
+      "to": "O2",
+      "type": "related"
+    },
+    {
+      "from": "O3",
+      "to": "O4",
+      "type": "related"
+    },
+    {
+      "from": "O3",
+      "to": "O6",
+      "type": "related"
+    },
+    {
+      "from": "O3",
+      "to": "K5",
+      "type": "related"
+    },
+    {
+      "from": "O4",
+      "to": "O6",
+      "type": "composes_with"
+    },
+    {
+      "from": "O4",
+      "to": "O17",
+      "type": "composes_with"
+    },
+    {
+      "from": "O4",
+      "to": "O2",
+      "type": "composes_with"
+    },
+    {
+      "from": "O4",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "O4",
+      "to": "R12",
+      "type": "siblings"
+    },
+    {
+      "from": "O4",
+      "to": "O2",
+      "type": "related"
+    },
+    {
+      "from": "O4",
+      "to": "O6",
+      "type": "related"
+    },
+    {
+      "from": "O4",
+      "to": "O11",
+      "type": "related"
+    },
+    {
+      "from": "O4",
+      "to": "O12",
+      "type": "related"
+    },
+    {
+      "from": "O4",
+      "to": "R17",
+      "type": "related"
+    },
+    {
+      "from": "O5",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "O5",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "O5",
+      "to": "R8",
+      "type": "related"
+    },
+    {
+      "from": "O5",
+      "to": "R7",
+      "type": "related"
+    },
+    {
+      "from": "O5",
+      "to": "O9",
+      "type": "related"
+    },
+    {
       "from": "O6",
       "to": "O4",
       "type": "composes_with"
@@ -2180,6 +4049,16 @@
     {
       "from": "O6",
       "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "O6",
+      "to": "R4",
+      "type": "composes_with"
+    },
+    {
+      "from": "O6",
+      "to": "R13",
       "type": "composes_with"
     },
     {
@@ -2205,6 +4084,246 @@
     {
       "from": "O6",
       "to": "V9",
+      "type": "related"
+    },
+    {
+      "from": "O6",
+      "to": "O17",
+      "type": "related"
+    },
+    {
+      "from": "O6",
+      "to": "V14",
+      "type": "related"
+    },
+    {
+      "from": "O7",
+      "to": "O6",
+      "type": "related"
+    },
+    {
+      "from": "O7",
+      "to": "O10",
+      "type": "related"
+    },
+    {
+      "from": "O7",
+      "to": "O11",
+      "type": "related"
+    },
+    {
+      "from": "O7",
+      "to": "O16",
+      "type": "related"
+    },
+    {
+      "from": "O8",
+      "to": "O9",
+      "type": "composes_with"
+    },
+    {
+      "from": "O8",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "O8",
+      "to": "O2",
+      "type": "related"
+    },
+    {
+      "from": "O8",
+      "to": "R4",
+      "type": "related"
+    },
+    {
+      "from": "O8",
+      "to": "R7",
+      "type": "related"
+    },
+    {
+      "from": "O8",
+      "to": "O5",
+      "type": "related"
+    },
+    {
+      "from": "O8",
+      "to": "O6",
+      "type": "related"
+    },
+    {
+      "from": "O9",
+      "to": "O4",
+      "type": "composes_with"
+    },
+    {
+      "from": "O9",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "O9",
+      "to": "S6",
+      "type": "composes_with"
+    },
+    {
+      "from": "O9",
+      "to": "R17",
+      "type": "siblings"
+    },
+    {
+      "from": "O9",
+      "to": "O5",
+      "type": "related"
+    },
+    {
+      "from": "O9",
+      "to": "R8",
+      "type": "related"
+    },
+    {
+      "from": "O9",
+      "to": "O12",
+      "type": "related"
+    },
+    {
+      "from": "R1",
+      "to": "R2",
+      "type": "siblings"
+    },
+    {
+      "from": "R1",
+      "to": "S1",
+      "type": "related"
+    },
+    {
+      "from": "R1",
+      "to": "R3",
+      "type": "related"
+    },
+    {
+      "from": "R1",
+      "to": "R4",
+      "type": "related"
+    },
+    {
+      "from": "R1",
+      "to": "R14",
+      "type": "related"
+    },
+    {
+      "from": "R1",
+      "to": "R17",
+      "type": "related"
+    },
+    {
+      "from": "R1",
+      "to": "R7",
+      "type": "related"
+    },
+    {
+      "from": "R1",
+      "to": "R8",
+      "type": "related"
+    },
+    {
+      "from": "R1",
+      "to": "O6",
+      "type": "related"
+    },
+    {
+      "from": "R1",
+      "to": "O4",
+      "type": "related"
+    },
+    {
+      "from": "R10",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "R10",
+      "to": "R9",
+      "type": "siblings"
+    },
+    {
+      "from": "R10",
+      "to": "R4",
+      "type": "related"
+    },
+    {
+      "from": "R10",
+      "to": "R7",
+      "type": "related"
+    },
+    {
+      "from": "R10",
+      "to": "R9",
+      "type": "related"
+    },
+    {
+      "from": "R10",
+      "to": "R3",
+      "type": "related"
+    },
+    {
+      "from": "R11",
+      "to": "K1",
+      "type": "composes_with"
+    },
+    {
+      "from": "R11",
+      "to": "K10",
+      "type": "composes_with"
+    },
+    {
+      "from": "R11",
+      "to": "R9",
+      "type": "siblings"
+    },
+    {
+      "from": "R11",
+      "to": "R10",
+      "type": "siblings"
+    },
+    {
+      "from": "R11",
+      "to": "R9",
+      "type": "related"
+    },
+    {
+      "from": "R11",
+      "to": "R10",
+      "type": "related"
+    },
+    {
+      "from": "R11",
+      "to": "K10",
+      "type": "related"
+    },
+    {
+      "from": "R11",
+      "to": "K12",
+      "type": "related"
+    },
+    {
+      "from": "R11",
+      "to": "R2",
+      "type": "related"
+    },
+    {
+      "from": "R12",
+      "to": "O4",
+      "type": "siblings"
+    },
+    {
+      "from": "R12",
+      "to": "R3",
+      "type": "related"
+    },
+    {
+      "from": "R12",
+      "to": "S4",
       "type": "related"
     },
     {
@@ -2263,9 +4382,179 @@
       "type": "related"
     },
     {
+      "from": "R13",
+      "to": "I2",
+      "type": "related"
+    },
+    {
+      "from": "R13",
+      "to": "I3",
+      "type": "related"
+    },
+    {
+      "from": "R14",
+      "to": "R17",
+      "type": "composes_with"
+    },
+    {
+      "from": "R14",
+      "to": "R13",
+      "type": "siblings"
+    },
+    {
+      "from": "R14",
+      "to": "V8",
+      "type": "related"
+    },
+    {
+      "from": "R16",
+      "to": "H6",
+      "type": "siblings"
+    },
+    {
       "from": "R17",
       "to": "H3",
       "type": "conflicts_with"
+    },
+    {
+      "from": "R17",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "R17",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "R17",
+      "to": "R7",
+      "type": "siblings"
+    },
+    {
+      "from": "R17",
+      "to": "R8",
+      "type": "siblings"
+    },
+    {
+      "from": "R17",
+      "to": "O5",
+      "type": "related"
+    },
+    {
+      "from": "R17",
+      "to": "S8",
+      "type": "related"
+    },
+    {
+      "from": "R17",
+      "to": "V15",
+      "type": "related"
+    },
+    {
+      "from": "R17",
+      "to": "H3",
+      "type": "related"
+    },
+    {
+      "from": "R18",
+      "to": "R9",
+      "type": "siblings"
+    },
+    {
+      "from": "R18",
+      "to": "R10",
+      "type": "siblings"
+    },
+    {
+      "from": "R18",
+      "to": "R17",
+      "type": "related"
+    },
+    {
+      "from": "R19",
+      "to": "K5",
+      "type": "composes_with"
+    },
+    {
+      "from": "R19",
+      "to": "K2",
+      "type": "related"
+    },
+    {
+      "from": "R19",
+      "to": "R1",
+      "type": "related"
+    },
+    {
+      "from": "R19",
+      "to": "R3",
+      "type": "related"
+    },
+    {
+      "from": "R2",
+      "to": "R17",
+      "type": "composes_with"
+    },
+    {
+      "from": "R2",
+      "to": "S3",
+      "type": "composes_with"
+    },
+    {
+      "from": "R2",
+      "to": "S6",
+      "type": "composes_with"
+    },
+    {
+      "from": "R2",
+      "to": "R1",
+      "type": "composes_with"
+    },
+    {
+      "from": "R2",
+      "to": "R1",
+      "type": "related"
+    },
+    {
+      "from": "R2",
+      "to": "S2",
+      "type": "related"
+    },
+    {
+      "from": "R2",
+      "to": "R3",
+      "type": "related"
+    },
+    {
+      "from": "R2",
+      "to": "R4",
+      "type": "related"
+    },
+    {
+      "from": "R2",
+      "to": "R14",
+      "type": "related"
+    },
+    {
+      "from": "R20",
+      "to": "R8",
+      "type": "siblings"
+    },
+    {
+      "from": "R20",
+      "to": "R7",
+      "type": "siblings"
+    },
+    {
+      "from": "R20",
+      "to": "R17",
+      "type": "siblings"
+    },
+    {
+      "from": "R20",
+      "to": "O5",
+      "type": "related"
     },
     {
       "from": "R3",
@@ -2374,6 +4663,21 @@
     },
     {
       "from": "R4",
+      "to": "I2",
+      "type": "composes_with"
+    },
+    {
+      "from": "R4",
+      "to": "I3",
+      "type": "composes_with"
+    },
+    {
+      "from": "R4",
+      "to": "I4",
+      "type": "composes_with"
+    },
+    {
+      "from": "R4",
       "to": "R5",
       "type": "siblings"
     },
@@ -2406,6 +4710,251 @@
       "from": "R5",
       "to": "R4",
       "type": "conflicts_with"
+    },
+    {
+      "from": "R5",
+      "to": "O4",
+      "type": "composes_with"
+    },
+    {
+      "from": "R5",
+      "to": "R4",
+      "type": "composes_with"
+    },
+    {
+      "from": "R5",
+      "to": "R4",
+      "type": "related"
+    },
+    {
+      "from": "R5",
+      "to": "R3",
+      "type": "related"
+    },
+    {
+      "from": "R5",
+      "to": "S6",
+      "type": "related"
+    },
+    {
+      "from": "R5",
+      "to": "S2",
+      "type": "related"
+    },
+    {
+      "from": "R6",
+      "to": "K1",
+      "type": "composes_with"
+    },
+    {
+      "from": "R6",
+      "to": "R4",
+      "type": "composes_with"
+    },
+    {
+      "from": "R6",
+      "to": "R3",
+      "type": "related"
+    },
+    {
+      "from": "R6",
+      "to": "R4",
+      "type": "related"
+    },
+    {
+      "from": "R6",
+      "to": "R5",
+      "type": "related"
+    },
+    {
+      "from": "R7",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "R7",
+      "to": "K10",
+      "type": "composes_with"
+    },
+    {
+      "from": "R7",
+      "to": "K12",
+      "type": "composes_with"
+    },
+    {
+      "from": "R7",
+      "to": "R17",
+      "type": "siblings"
+    },
+    {
+      "from": "R7",
+      "to": "R8",
+      "type": "siblings"
+    },
+    {
+      "from": "R7",
+      "to": "H2",
+      "type": "related"
+    },
+    {
+      "from": "R7",
+      "to": "O5",
+      "type": "related"
+    },
+    {
+      "from": "R8",
+      "to": "S6",
+      "type": "composes_with"
+    },
+    {
+      "from": "R8",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "R8",
+      "to": "R7",
+      "type": "siblings"
+    },
+    {
+      "from": "R8",
+      "to": "R17",
+      "type": "siblings"
+    },
+    {
+      "from": "R8",
+      "to": "O5",
+      "type": "related"
+    },
+    {
+      "from": "R9",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "R9",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "R9",
+      "to": "R10",
+      "type": "siblings"
+    },
+    {
+      "from": "R9",
+      "to": "R17",
+      "type": "related"
+    },
+    {
+      "from": "R9",
+      "to": "R4",
+      "type": "related"
+    },
+    {
+      "from": "R9",
+      "to": "R3",
+      "type": "related"
+    },
+    {
+      "from": "R9",
+      "to": "R1",
+      "type": "related"
+    },
+    {
+      "from": "R9",
+      "to": "R2",
+      "type": "related"
+    },
+    {
+      "from": "R9",
+      "to": "R18",
+      "type": "related"
+    },
+    {
+      "from": "R9",
+      "to": "R11",
+      "type": "related"
+    },
+    {
+      "from": "R9",
+      "to": "R12",
+      "type": "related"
+    },
+    {
+      "from": "S1",
+      "to": "S2",
+      "type": "related"
+    },
+    {
+      "from": "S1",
+      "to": "S3",
+      "type": "related"
+    },
+    {
+      "from": "S1",
+      "to": "S4",
+      "type": "related"
+    },
+    {
+      "from": "S1",
+      "to": "S5",
+      "type": "related"
+    },
+    {
+      "from": "S1",
+      "to": "S6",
+      "type": "related"
+    },
+    {
+      "from": "S1",
+      "to": "S8",
+      "type": "related"
+    },
+    {
+      "from": "S1",
+      "to": "S9",
+      "type": "related"
+    },
+    {
+      "from": "S1",
+      "to": "S7",
+      "type": "related"
+    },
+    {
+      "from": "S1",
+      "to": "S10",
+      "type": "related"
+    },
+    {
+      "from": "S1",
+      "to": "R17",
+      "type": "related"
+    },
+    {
+      "from": "S1",
+      "to": "K6",
+      "type": "related"
+    },
+    {
+      "from": "S1",
+      "to": "R7",
+      "type": "related"
+    },
+    {
+      "from": "S1",
+      "to": "O6",
+      "type": "related"
+    },
+    {
+      "from": "S2",
+      "to": "R17",
+      "type": "composes_with"
+    },
+    {
+      "from": "S2",
+      "to": "S1",
+      "type": "related"
     },
     {
       "from": "S3",
@@ -2509,7 +5058,57 @@
     },
     {
       "from": "S5",
+      "to": "K5",
+      "type": "related"
+    },
+    {
+      "from": "S5",
+      "to": "K12",
+      "type": "related"
+    },
+    {
+      "from": "S5",
+      "to": "R4",
+      "type": "related"
+    },
+    {
+      "from": "S5",
+      "to": "V15",
+      "type": "related"
+    },
+    {
+      "from": "S5",
       "to": "H5",
+      "type": "related"
+    },
+    {
+      "from": "S6",
+      "to": "S4",
+      "type": "composes_with"
+    },
+    {
+      "from": "S8",
+      "to": "R7",
+      "type": "siblings"
+    },
+    {
+      "from": "S8",
+      "to": "R17",
+      "type": "related"
+    },
+    {
+      "from": "S8",
+      "to": "V15",
+      "type": "related"
+    },
+    {
+      "from": "S8",
+      "to": "K12",
+      "type": "related"
+    },
+    {
+      "from": "S8",
+      "to": "O5",
       "type": "related"
     },
     {
@@ -2569,8 +5168,83 @@
     },
     {
       "from": "V1",
+      "to": "V10",
+      "type": "requires"
+    },
+    {
+      "from": "V1",
       "to": "V2",
       "type": "conflicts_with"
+    },
+    {
+      "from": "V1",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "V1",
+      "to": "V7",
+      "type": "composes_with"
+    },
+    {
+      "from": "V1",
+      "to": "V2",
+      "type": "related"
+    },
+    {
+      "from": "V1",
+      "to": "H6",
+      "type": "related"
+    },
+    {
+      "from": "V10",
+      "to": "V12",
+      "type": "composes_with"
+    },
+    {
+      "from": "V10",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "V10",
+      "to": "V9",
+      "type": "related"
+    },
+    {
+      "from": "V10",
+      "to": "K8",
+      "type": "related"
+    },
+    {
+      "from": "V10",
+      "to": "V14",
+      "type": "related"
+    },
+    {
+      "from": "V10",
+      "to": "K11",
+      "type": "related"
+    },
+    {
+      "from": "V11",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "V11",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "V11",
+      "to": "K6",
+      "type": "related"
+    },
+    {
+      "from": "V11",
+      "to": "K7",
+      "type": "related"
     },
     {
       "from": "V12",
@@ -2578,9 +5252,319 @@
       "type": "composes_with"
     },
     {
+      "from": "V12",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "V12",
+      "to": "V10",
+      "type": "related"
+    },
+    {
       "from": "V13",
       "to": "I3",
       "type": "conflicts_with"
+    },
+    {
+      "from": "V13",
+      "to": "I2",
+      "type": "composes_with"
+    },
+    {
+      "from": "V13",
+      "to": "O17",
+      "type": "composes_with"
+    },
+    {
+      "from": "V13",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "V13",
+      "to": "K6",
+      "type": "composes_with"
+    },
+    {
+      "from": "V13",
+      "to": "V11",
+      "type": "composes_with"
+    },
+    {
+      "from": "V13",
+      "to": "I3",
+      "type": "related"
+    },
+    {
+      "from": "V13",
+      "to": "V3",
+      "type": "related"
+    },
+    {
+      "from": "V13",
+      "to": "V9",
+      "type": "related"
+    },
+    {
+      "from": "V14",
+      "to": "K11",
+      "type": "composes_with"
+    },
+    {
+      "from": "V14",
+      "to": "V1",
+      "type": "related"
+    },
+    {
+      "from": "V14",
+      "to": "V5",
+      "type": "related"
+    },
+    {
+      "from": "V14",
+      "to": "V7",
+      "type": "related"
+    },
+    {
+      "from": "V14",
+      "to": "V9",
+      "type": "related"
+    },
+    {
+      "from": "V14",
+      "to": "V15",
+      "type": "related"
+    },
+    {
+      "from": "V14",
+      "to": "V16",
+      "type": "related"
+    },
+    {
+      "from": "V14",
+      "to": "V17",
+      "type": "related"
+    },
+    {
+      "from": "V14",
+      "to": "V18",
+      "type": "related"
+    },
+    {
+      "from": "V14",
+      "to": "V10",
+      "type": "related"
+    },
+    {
+      "from": "V14",
+      "to": "V11",
+      "type": "related"
+    },
+    {
+      "from": "V15",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "V15",
+      "to": "S6",
+      "type": "composes_with"
+    },
+    {
+      "from": "V15",
+      "to": "O5",
+      "type": "related"
+    },
+    {
+      "from": "V15",
+      "to": "V16",
+      "type": "related"
+    },
+    {
+      "from": "V15",
+      "to": "R17",
+      "type": "related"
+    },
+    {
+      "from": "V16",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "V16",
+      "to": "V17",
+      "type": "composes_with"
+    },
+    {
+      "from": "V16",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "V16",
+      "to": "V18",
+      "type": "composes_with"
+    },
+    {
+      "from": "V16",
+      "to": "V6",
+      "type": "composes_with"
+    },
+    {
+      "from": "V16",
+      "to": "V15",
+      "type": "related"
+    },
+    {
+      "from": "V16",
+      "to": "V17",
+      "type": "related"
+    },
+    {
+      "from": "V16",
+      "to": "V5",
+      "type": "related"
+    },
+    {
+      "from": "V16",
+      "to": "V9",
+      "type": "related"
+    },
+    {
+      "from": "V16",
+      "to": "V14",
+      "type": "related"
+    },
+    {
+      "from": "V17",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "V17",
+      "to": "V19",
+      "type": "composes_with"
+    },
+    {
+      "from": "V17",
+      "to": "V1",
+      "type": "composes_with"
+    },
+    {
+      "from": "V17",
+      "to": "V2",
+      "type": "composes_with"
+    },
+    {
+      "from": "V17",
+      "to": "V5",
+      "type": "composes_with"
+    },
+    {
+      "from": "V17",
+      "to": "V7",
+      "type": "composes_with"
+    },
+    {
+      "from": "V17",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "V17",
+      "to": "V16",
+      "type": "siblings"
+    },
+    {
+      "from": "V17",
+      "to": "V14",
+      "type": "related"
+    },
+    {
+      "from": "V17",
+      "to": "V18",
+      "type": "related"
+    },
+    {
+      "from": "V17",
+      "to": "V16",
+      "type": "related"
+    },
+    {
+      "from": "V18",
+      "to": "V16",
+      "type": "composes_with"
+    },
+    {
+      "from": "V18",
+      "to": "V17",
+      "type": "composes_with"
+    },
+    {
+      "from": "V18",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "V18",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "V18",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "V18",
+      "to": "V6",
+      "type": "composes_with"
+    },
+    {
+      "from": "V18",
+      "to": "V8",
+      "type": "composes_with"
+    },
+    {
+      "from": "V18",
+      "to": "V16",
+      "type": "related"
+    },
+    {
+      "from": "V18",
+      "to": "V17",
+      "type": "related"
+    },
+    {
+      "from": "V19",
+      "to": "V9",
+      "type": "composes_with"
+    },
+    {
+      "from": "V19",
+      "to": "V11",
+      "type": "composes_with"
+    },
+    {
+      "from": "V19",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "V19",
+      "to": "V17",
+      "type": "composes_with"
+    },
+    {
+      "from": "V19",
+      "to": "V1",
+      "type": "related"
+    },
+    {
+      "from": "V19",
+      "to": "K5",
+      "type": "related"
     },
     {
       "from": "V2",
@@ -2638,9 +5622,264 @@
       "type": "related"
     },
     {
+      "from": "V2",
+      "to": "V1",
+      "type": "related"
+    },
+    {
+      "from": "V20",
+      "to": "S6",
+      "type": "composes_with"
+    },
+    {
+      "from": "V20",
+      "to": "V5",
+      "type": "related"
+    },
+    {
+      "from": "V20",
+      "to": "V15",
+      "type": "related"
+    },
+    {
+      "from": "V20",
+      "to": "S6",
+      "type": "related"
+    },
+    {
+      "from": "V3",
+      "to": "V4",
+      "type": "composes_with"
+    },
+    {
+      "from": "V3",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "V3",
+      "to": "V17",
+      "type": "composes_with"
+    },
+    {
+      "from": "V3",
+      "to": "V4",
+      "type": "related"
+    },
+    {
+      "from": "V3",
+      "to": "V6",
+      "type": "related"
+    },
+    {
+      "from": "V3",
+      "to": "V8",
+      "type": "related"
+    },
+    {
+      "from": "V3",
+      "to": "V5",
+      "type": "related"
+    },
+    {
+      "from": "V4",
+      "to": "V6",
+      "type": "composes_with"
+    },
+    {
+      "from": "V4",
+      "to": "V7",
+      "type": "composes_with"
+    },
+    {
+      "from": "V4",
+      "to": "V8",
+      "type": "composes_with"
+    },
+    {
+      "from": "V4",
+      "to": "V3",
+      "type": "related"
+    },
+    {
+      "from": "V4",
+      "to": "V6",
+      "type": "related"
+    },
+    {
+      "from": "V4",
+      "to": "O17",
+      "type": "related"
+    },
+    {
+      "from": "V5",
+      "to": "S5",
+      "type": "composes_with"
+    },
+    {
+      "from": "V5",
+      "to": "V6",
+      "type": "composes_with"
+    },
+    {
+      "from": "V5",
+      "to": "V7",
+      "type": "composes_with"
+    },
+    {
+      "from": "V5",
+      "to": "V1",
+      "type": "composes_with"
+    },
+    {
+      "from": "V5",
+      "to": "V4",
+      "type": "composes_with"
+    },
+    {
+      "from": "V5",
+      "to": "V3",
+      "type": "composes_with"
+    },
+    {
+      "from": "V5",
+      "to": "V15",
+      "type": "composes_with"
+    },
+    {
+      "from": "V5",
+      "to": "V8",
+      "type": "composes_with"
+    },
+    {
+      "from": "V5",
+      "to": "V6",
+      "type": "related"
+    },
+    {
+      "from": "V6",
+      "to": "V3",
+      "type": "composes_with"
+    },
+    {
+      "from": "V6",
+      "to": "V4",
+      "type": "composes_with"
+    },
+    {
+      "from": "V6",
+      "to": "V8",
+      "type": "composes_with"
+    },
+    {
       "from": "V6",
       "to": "V17",
       "type": "composes_with"
+    },
+    {
+      "from": "V6",
+      "to": "V13",
+      "type": "composes_with"
+    },
+    {
+      "from": "V6",
+      "to": "S5",
+      "type": "composes_with"
+    },
+    {
+      "from": "V6",
+      "to": "V7",
+      "type": "composes_with"
+    },
+    {
+      "from": "V6",
+      "to": "V4",
+      "type": "related"
+    },
+    {
+      "from": "V6",
+      "to": "V5",
+      "type": "related"
+    },
+    {
+      "from": "V6",
+      "to": "S9",
+      "type": "related"
+    },
+    {
+      "from": "V7",
+      "to": "V5",
+      "type": "composes_with"
+    },
+    {
+      "from": "V7",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "V7",
+      "to": "V4",
+      "type": "composes_with"
+    },
+    {
+      "from": "V7",
+      "to": "V6",
+      "type": "composes_with"
+    },
+    {
+      "from": "V7",
+      "to": "V8",
+      "type": "composes_with"
+    },
+    {
+      "from": "V7",
+      "to": "V3",
+      "type": "composes_with"
+    },
+    {
+      "from": "V7",
+      "to": "V16",
+      "type": "composes_with"
+    },
+    {
+      "from": "V7",
+      "to": "V17",
+      "type": "composes_with"
+    },
+    {
+      "from": "V7",
+      "to": "S9",
+      "type": "related"
+    },
+    {
+      "from": "V7",
+      "to": "H5",
+      "type": "related"
+    },
+    {
+      "from": "V7",
+      "to": "V4",
+      "type": "related"
+    },
+    {
+      "from": "V7",
+      "to": "V6",
+      "type": "related"
+    },
+    {
+      "from": "V7",
+      "to": "V8",
+      "type": "related"
+    },
+    {
+      "from": "V7",
+      "to": "V5",
+      "type": "related"
+    },
+    {
+      "from": "V7",
+      "to": "V15",
+      "type": "related"
     },
     {
       "from": "V8",
@@ -2691,6 +5930,21 @@
       "from": "V8",
       "to": "I2",
       "type": "related"
+    },
+    {
+      "from": "V9",
+      "to": "V10",
+      "type": "composes_with"
+    },
+    {
+      "from": "V9",
+      "to": "V14",
+      "type": "composes_with"
+    },
+    {
+      "from": "V9",
+      "to": "V1",
+      "type": "composes_with"
     }
   ],
   "stats": {

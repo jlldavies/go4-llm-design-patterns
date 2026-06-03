@@ -7,7 +7,7 @@ summary: "Preserve meaningful human oversight over an autonomous agent without p
 when_to_use: Monitor and interrupt; agent proceeds by default
 also_known_as: [Monitoring Mode, Supervisory Control, HOTL, Brake-Pedal Oversight]
 siblings: [V1]
-related: [V14, H6]
+related: [V14, H6, V1]
 composes_with: [V10, V9, V17, V15, R4, O6, O8]
 conflicts_with: [V1]
 mechanism_refs: [1, 2, 5, 11]

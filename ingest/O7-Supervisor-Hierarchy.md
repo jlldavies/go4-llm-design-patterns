@@ -6,6 +6,7 @@ category: Orchestration
 summary: "Scale orchestration past the point where a single coordinator can hold all worker context, by stacking O6 Orchestrator-Workers nodes into a tree where every supervisor manages only its direct children.."
 when_to_use: O6 applied recursively; supervisor of supervisors
 also_known_as: [Hierarchical Agents, Multi-Level Delegation, Tree of Agents, Nested Supervisors, Hierarchical Multi-Agent System]
+related: [O6, O10, O11, O16]
 mechanism_refs: [2, 4, 8]
 canonical: patterns/O7-Supervisor-Hierarchy.md
 derived: true
@@ -19,3 +20,5 @@ Scale orchestration past the point where a single coordinator can hold all worke
 - the domain has natural hierarchical decomposition — project $\to$ workstream $\to$ task, research goal $\to$ strategy $\to$ hypothesis-action, ticket $\to$ triage-class $\to$ resolution-step;
 - worker count exceeds the ~5–10 a single orchestrator can coordinate cleanly;
 - different sub-tree branches need genuinely different coordination policies (the Generation-branch supervisor in co-scientist runs a tournament; the Reflection-branch supervisor runs a review queue).
+
+Related: [[O6-Orchestrator-Workers]] · [[O10-Swarm]] · [[O11-Blackboard]] · [[O16-Hybrid-Control-Flow]]

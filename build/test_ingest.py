@@ -125,20 +125,30 @@ eq(category_of("A3"), "Unknown")
 
 eq(strip_first_h1("# Title\n\nBody line"), "Body line")
 
-# Regression: bold IDs after em-dash must NOT be extracted as targets
+# Both bullet formats: Format A (targets bold before em-dash) and Format B (targets plain after em-dash)
 rp_real = (
     "## Related Patterns\n"
-    "- **Sibling of** **R5 ReWOO** — opposite trade-off (CONFLICTS.md CRITICAL 1).\n"
-    "- **Sibling of** **R13 CodeAct** — same loop shape; R13 requires **V8 Tool Sandboxing**.\n"
+    "- **Sibling of** **R5 ReWOO** — opposite trade-off.\n"
+    "- **Sibling of** **R13 CodeAct** — R13 requires **V8 Tool Sandboxing**.\n"
     "- **Required by** **V9 Bounded Execution** — unbounded R4 is anti-pattern **A3**.\n"
     "- **Pairs with** **V14 Trajectory Logging** — undebuggable (**A15**).\n"
     "- **Tool layer** — **I2 Function/Tool Call** for 1-5 tools, **I3 MCP Server** for 5+.\n"
     "## Sources\n"
 )
 e = related_edges(rp_real, "R4")
-eq(e.get("siblings"), ["R5", "R13"])     # V8 (prose, post-em-dash) excluded
-eq(e.get("related"), ["V9"])             # Required-by demoted to related; A3 excluded
-eq(e.get("composes_with"), ["V14"])      # A15 excluded; Tool-layer targets (post-em-dash) not extracted
-assert "A3" not in str(e) and "A15" not in str(e) and "V8" not in str(e), e
+eq(e.get("siblings"), ["R5", "R13"])             # V8 excluded (Format A target found pre-dash; post ignored)
+eq(e.get("related"), ["V9"])                     # 'Required by' demoted; A3 excluded
+eq(e.get("composes_with"), ["V14", "I2", "I3"])  # V14 (Format A) + Tool-layer I2,I3 (Format B); A15 excluded
+
+# Format B test: targets in plain text after em-dash only
+rp_b = (
+    "## Related Patterns\n"
+    "- **Composes with** — K2, K3 apply here.\n"
+    "- **Distinct from** — A1 is an anti-pattern; K9 is the alternative.\n"
+    "## Sources\n"
+)
+eb = related_edges(rp_b, "K1")
+eq(eb.get("composes_with"), ["K2", "K3"])
+eq(eb.get("related"), ["K9"])                    # A1 (anti-pattern) excluded
 
 print("ALL INGEST TESTS PASSED")

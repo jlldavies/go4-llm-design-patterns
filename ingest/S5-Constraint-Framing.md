@@ -7,7 +7,7 @@ summary: "Give the model an explicit, enumerable list of forbidden behaviours at
 when_to_use: "Safety-sensitive tasks, known failure modes"
 also_known_as: [Negative Prompting, Boundary Definition, What-Not-To-Do, Hard Constraints, the Prohibition Block]
 composes_with: [S3, S6]
-related: [S9, V5, V7, H5]
+related: [S9, V5, V7, K5, K12, R4, V15, H5]
 mechanism_refs: [2, 4, 7]
 canonical: patterns/S5-Constraint-Framing.md
 derived: true
@@ -19,4 +19,4 @@ Give the model an explicit, enumerable list of forbidden behaviours at session s
 ## Key points
 - a persona (**S3**) implies authority the model does not have ("as your doctor…") — S5 disclaims it. This is a *mandatory* pairing, not optional: persona without S5 is the false-expertise failure mode.
 
-Related: [[S3-Persona]] · [[S6-Output-Template]] · [[S9-Constitutional-Framing]] · [[V5-Guardrail-Layering]] · [[V7-AgentSpec]] · [[H5-Constitutional-Self-Alignment]]
+Related: [[S3-Persona]] · [[S6-Output-Template]] · [[S9-Constitutional-Framing]] · [[V5-Guardrail-Layering]] · [[V7-AgentSpec]] · [[K5-Adaptive-RAG]] · [[K12-Karpathy-Memory]] · [[R4-ReAct]] · [[V15-LLM-as-Judge]] · [[H5-Constitutional-Self-Alignment]]

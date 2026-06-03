@@ -76,6 +76,7 @@ EDGE_LABELS = [  # (lowercase prefix, edge type) — order matters, first match 
     ("named after", "related"), ("aligned with", "related"), ("echoes", "related"),
 ]
 _REL_ID = re.compile(r'\b([A-Z]+\d+)\b')
+_VALID_ID = re.compile(r'^[SKROVIH]\d+$')
 
 
 def _edge_type(label: str) -> str:
@@ -84,6 +85,16 @@ def _edge_type(label: str) -> str:
         if low.startswith(prefix):
             return etype
     return "related"
+
+
+def _valid_ids(raw_ids: list, self_id: str) -> list:
+    """Filter a list of raw ID strings: keep only valid pattern IDs, no self."""
+    seen, out = set(), []
+    for i in raw_ids:
+        if _VALID_ID.match(i) and i != self_id and i not in seen:
+            seen.add(i)
+            out.append(i)
+    return out
 
 
 _MECH_HEAD = re.compile(
@@ -143,7 +154,13 @@ def conflict_edges(conflicts_md: str) -> list:
 
 
 def related_edges(text: str, self_id: str) -> dict:
-    """Parse '## Related Patterns' bullets into {edge_type: [ids]} (deduped, no self)."""
+    """Parse '## Related Patterns' bullets into {edge_type: [ids]} (deduped, no self).
+
+    Handles two bullet formats:
+      Format A: - **Label** **TargetID Title** — prose…   (targets bold before em-dash)
+      Format B: - **Label** — T1, T2 targets…            (targets plain text after em-dash)
+    Anti-patterns (A\\d+) and any non-pattern token are excluded via _VALID_ID whitelist.
+    """
     sec = re.search(r'^## Related Patterns\s*\n(.*?)(?:\n## |\Z)', text, re.S | re.M)
     edges = {}
     if not sec:
@@ -154,19 +171,19 @@ def related_edges(text: str, self_id: str) -> dict:
         lbl = re.match(r'\s*-\s*\*\*(.+?)\*\*', line)
         if not lbl:
             continue
-        # Fix 3: skip editorial "Note on…" bullets
+        # Skip editorial "Note on…" bullets
         if lbl.group(1).lower().startswith("note"):
             continue
         etype = _edge_type(lbl.group(1))
-        # Only inspect the part before the em-dash explanation; IDs in prose after
-        # the dash (anti-patterns, sandboxing requirements, etc.) are false edges.
-        head = line.split("—")[0]
-        bold_spans = re.findall(r'\*\*([^*]+)\*\*', head)
-        ids = []
-        for span in bold_spans[1:]:  # skip spans[0] — that is the label
-            for i in _REL_ID.findall(span):
-                if i != self_id and i not in ids:
-                    ids.append(i)
+        pre, _, post = line.partition("—")
+        # Format A: bold spans in pre after the first (the first bold span is the label)
+        format_a_spans = re.findall(r'\*\*([^*]+)\*\*', pre)[1:]
+        raw_a = [i for span in format_a_spans for i in _REL_ID.findall(span)]
+        ids = _valid_ids(raw_a, self_id)
+        if not ids and post:
+            # Format B fallback: plain-text IDs from the post-em-dash prose
+            raw_b = _REL_ID.findall(post)
+            ids = _valid_ids(raw_b, self_id)
         if ids:
             edges.setdefault(etype, [])
             for i in ids:

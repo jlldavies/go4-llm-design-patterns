@@ -6,6 +6,7 @@ category: Knowledge
 summary: "Improve retrieval quality by transforming the user's raw query into a form better matched to the corpus, in the moment between the user submitting the query and the retriever running.."
 when_to_use: Improve retrieval by rewriting the query first
 also_known_as: [Query Rewriting, Pre-Retrieval Query Optimisation]
+related: [K1, K5]
 composes_with: [K5]
 mechanism_refs: [1, 8]
 canonical: patterns/K2-Query-Transformation.md
@@ -21,4 +22,4 @@ Improve retrieval quality by transforming the user's raw query into a form bette
 - the system is conversational and queries depend on prior turns;
 - queries are compound and need several distinct passages.
 
-Related: [[K5-Adaptive-RAG]]
+Related: [[K5-Adaptive-RAG]] · [[K1-Vanilla-RAG]]
