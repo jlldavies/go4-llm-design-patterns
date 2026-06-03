@@ -30,18 +30,18 @@ jobs:
             | tar -xz -C /usr/local/bin
 
       - name: Validate SUMMARY.md
-        run: python3 site/validate.py
+        run: python3 build/validate.py
 
       - name: Prepare source files
-        run: python3 site/prepare.py
+        run: python3 build/prepare.py
 
       - name: Build mdBook
-        run: mdbook build
+        run: mdbook build build
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: book/
+          path: build/book
 
       - name: Deploy to GitHub Pages
         id: deployment

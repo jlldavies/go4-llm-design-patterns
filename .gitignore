@@ -1,8 +1,8 @@
 # Generated build artefacts
-book.md
-book/
-src/patterns/
-src/pdf-source/
+build/book.md
+build/book/
+build/src/patterns/
+build/src/pdf-source/
 
 # Development tool files (contain local paths)
 docs/

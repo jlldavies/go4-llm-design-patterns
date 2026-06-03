@@ -212,7 +212,7 @@ This is the [Gang of Four](https://en.wikipedia.org/wiki/Design_Patterns) applie
 
 Most pattern guidance tells you *what to do*. This catalog tells you *why it works* — from transformer mechanics.
 
-**Chapter 0** ([`CHAPTER-0.md`](CHAPTER-0.md)) derives twelve principles from how LLMs actually compute:
+**The Mechanical Foundation** ([`build/content/CHAPTER-0.md`](build/content/CHAPTER-0.md)) derives twelve principles from how LLMs actually compute:
 
 > **Why context length is expensive (not just "costs tokens"):** The attention computation is $O(n^2)$ in sequence length. Doubling your context doesn't double your cost — it quadruples the pairwise attention computation. This is why [K7 Context Pruning](patterns/K7-Context-Pruning.md), [K6 Context Compression](patterns/K6-Context-Compression.md), and context bounding via [O17 Agent Isolation](patterns/O17-Agent-Isolation.md) aren't just "best practices" — they're responses to a quadratic cost curve.
 
@@ -253,26 +253,22 @@ Two patterns in this catalog don't appear in prior literature — they were deri
 ## Repo Structure
 
 ```
-├── GO4.pdf                   ← Start here — 1,163 pages, fully typeset
-├── CHAPTER-0.md              ← The mechanical foundation (read before patterns)
-├── book.md                   ← Full book, single searchable Markdown file
-├── INTRO.md                  ← Introduction
-├── REFERENCES.md             ← Full bibliography (60+ sources)
-├── TAXONOMY-DRAFT.md         ← Pattern index with decision flowcharts
-├── patterns/
-│   ├── CONFLICTS.md          ← Cross-pattern tensions (must-read for production)
-│   ├── SIGNAL.md             ← Category overview
-│   ├── KNOWLEDGE.md          ← Category overview
-│   ├── REASONING.md          ← Category overview
-│   ├── ORCHESTRATION.md      ← Category overview
-│   ├── RELIABILITY.md        ← Category overview
-│   ├── INTEGRATION.md        ← Category overview
-│   ├── HUMANIZERS.md         ← Category overview
+├── GO4.pdf                   ← the typeset book (download)
+├── README.md
+├── patterns/                 ← the catalogue
+│   ├── CONFLICTS.md          ← cross-pattern tensions (must-read for production)
+│   ├── SIGNAL.md … HUMANIZERS.md   ← seven category overviews + decision guides
 │   └── [94 pattern files]
 ├── research/
-│   └── MECHANISMS.md         ← Folk-claim → mechanism → evidence mapping
-├── build_book.py             ← Assembles book.md + pandoc → PDF
-└── header.tex                ← LaTeX header for PDF build
+│   └── MECHANISMS.md         ← folk-claim → mechanism → evidence mapping
+└── build/                    ← everything that builds the PDF and the website
+    ├── build_book.py         ← assembles content + pandoc → GO4.pdf
+    ├── book.toml             ← mdBook config (the online edition)
+    ├── prepare.py · validate.py · linkify.py   ← site build + cross-reference links
+    ├── header.tex            ← LaTeX header for the PDF
+    ├── content/              ← book-source markdown (intro, mechanical foundation, references)
+    ├── src/SUMMARY.md        ← online navigation
+    └── theme/head.hbs        ← MathJax config for the site
 ```
 
 ---
@@ -280,7 +276,7 @@ Two patterns in this catalog don't appear in prior literature — they were deri
 ## Start Here
 
 1. **[Download the PDF](https://github.com/jlldavies/go4-llm-design-patterns/raw/main/GO4.pdf)** — the fully typeset book
-2. **[Read Chapter 0](CHAPTER-0.md)** — twelve mechanical principles that explain why patterns work
+2. **[Read the Mechanical Foundation](build/content/CHAPTER-0.md)** — twelve mechanical principles that explain why patterns work
 3. **[Browse the conflict map](patterns/CONFLICTS.md)** — the patterns you cannot combine, and why
 4. **[Pick your category](patterns/)** — jump directly to the pattern you need
 
@@ -304,7 +300,7 @@ Two patterns in this catalog don't appear in prior literature — they were deri
 - 12-Factor Agents — Dex Horthy / HumanLayer
 - Gamma, Helm, Johnson, Vlissides (1994) — Design Patterns (the original GoF)
 
-Full bibliography: [`REFERENCES.md`](REFERENCES.md)
+Full bibliography: [`build/content/REFERENCES.md`](build/content/REFERENCES.md)
 
 ---
 

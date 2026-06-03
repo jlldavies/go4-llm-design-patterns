@@ -5,13 +5,14 @@ from pathlib import Path
 import re
 import subprocess
 import sys
-sys.path.insert(0, str(Path(__file__).parent.parent / "site"))
+sys.path.insert(0, str(Path(__file__).parent))
 from linkify import linkify_mechanisms, linkify_conflicts
 
-PDF_SRC = Path(__file__).parent          # pdf-source/ — book source markdown
-ROOT = PDF_SRC.parent                    # repo root — patterns/, GO4.pdf, book.md
+BUILD = Path(__file__).parent            # build/ — all book machinery
+ROOT = BUILD.parent                      # repo root — patterns/, GO4.pdf
+CONTENT = BUILD / "content"              # book-source markdown
 PATTERNS = ROOT / "patterns"
-OUT_MD = ROOT / "book.md"
+OUT_MD = BUILD / "book.md"
 OUT_PDF = ROOT / "GO4.pdf"
 
 # Category map: (chapter title, intro file, standalone order)
@@ -185,7 +186,7 @@ def assemble() -> str:
     )
 
     # Introduction — before the TOC
-    intro = read(PDF_SRC / "INTRO.md")
+    intro = read(CONTENT / "INTRO.md")
     parts.append("# Introduction\n")
     parts.append(strip_first_h1(intro))
     parts.append("\n")
@@ -194,7 +195,7 @@ def assemble() -> str:
     parts.append(TOC)
 
     # The Pattern Catalog (TAXONOMY-DRAFT) — strip planning sections
-    tax = read(PDF_SRC / "TAXONOMY-DRAFT.md")
+    tax = read(CONTENT / "TAXONOMY-DRAFT.md")
     parts.append("# The Pattern Catalog\n")
     parts.append(strip_planning(strip_first_h1(tax)))
     parts.append("\n")
@@ -233,7 +234,7 @@ def assemble() -> str:
 
     # Mechanisms — back-matter reference (formerly Chapter 0)
     parts.append(PAGE_BREAK)
-    chapter0 = read(PDF_SRC / "CHAPTER-0.md")
+    chapter0 = read(CONTENT / "CHAPTER-0.md")
     parts.append("# The Mechanical Foundation\n")
     parts.append(strip_first_h1(chapter0))
     parts.append("\n")
@@ -247,13 +248,13 @@ def assemble() -> str:
     # Appendix B — References
     parts.append(PAGE_BREAK)
     parts.append("# Appendix B — References\n")
-    parts.append(strip_first_h1(read(PDF_SRC / "REFERENCES.md")))
+    parts.append(strip_first_h1(read(CONTENT / "REFERENCES.md")))
     parts.append("\n")
 
     # Appendix C — Anti-Patterns and Composition Examples
     parts.append(PAGE_BREAK)
     parts.append("# Appendix C — Anti-Patterns and Composition Examples\n")
-    parts.append(strip_first_h1(read(PDF_SRC / "APPENDIX-C.md")))
+    parts.append(strip_first_h1(read(CONTENT / "APPENDIX-C.md")))
     parts.append("\n")
 
     return "\n".join(parts)
@@ -291,7 +292,7 @@ def main():
         "-V", "linkcolor=NavyBlue",
         "-V", "urlcolor=NavyBlue",
         "-V", "toccolor=black",
-        "-H", str(PDF_SRC / "header.tex"),
+        "-H", str(BUILD / "header.tex"),
     ]
     print("running:", " ".join(cmd))
     result = subprocess.run(cmd, capture_output=True, text=True)
