@@ -12,6 +12,22 @@ Mechanism citations in pattern files take the form **"(mechanism N)"**. That not
 
 ---
 
+## 0.0 — How a Language Model Computes
+
+The mechanisms in this chapter are precise. Before the formalism, here is the conceptual model they build on.
+
+**Tokens.** A language model does not read words. It reads *tokens* — byte-pair encoded substrings that tile any input text. One token is roughly three-quarters of a word in English, though the ratio varies by content type. "context" is one token; "contextualisation" may be three. Every count in this chapter — context window size, KV cache size, input cost — is a token count, not a word count. When a model's context window is 200,000 tokens, that is roughly 150,000 words.
+
+**The context window.** At inference time, the model sees a fixed sequence of tokens: your system prompt, any prior turns, your current message, any retrieved documents. This sequence is the *context*. Every token has a position, and position matters — the model has learned structural priors from training (instructions near the start, user query near the end). The model is stateless between calls: it has no memory of previous requests. The context window is the totality of what it knows for one call.
+
+**A forward pass.** When you send a prompt, the model runs a single forward pass over all input tokens simultaneously. For each layer and each attention head, it computes how much every token should attend to every other token. The final layer's output is a probability distribution over the vocabulary; one token is sampled and appended to the sequence. Then the process repeats: another forward pass, another token. Generation is a loop of single-token predictions, each conditioned on everything before it. This loop is what the patterns in this catalog are engineering around.
+
+**The KV cache.** Running a full forward pass over the growing sequence on every step would be prohibitively slow — by step 500, you would recompute attention over 500 tokens 500 times. Each layer avoids this by caching the *key* and *value* vectors it computed for prior tokens. On the next step, only the new token needs fresh computation; the cached K and V vectors for all prior tokens are reused. This is the KV cache. It grows monotonically — one entry per layer per token, never removed or reordered — which is why its structure appears in the cost reasoning for almost every pattern in this catalog.
+
+**The n² intuition.** During the initial *prefill* — processing all input tokens before generation begins — the model computes attention between every pair of tokens. A prompt twice as long has four times as many pairs: prefill cost scales with the square of sequence length. A 2,000-token prompt costs four times as much to prefill as a 1,000-token prompt. A 4,000-token prompt costs sixteen times as much. Engineers who model token costs as linear are systematically underestimating the cost of long contexts. This quadratic relationship is the mechanical basis for the entire Knowledge category and for the subagent isolation imperative in Orchestration patterns.
+
+---
+
 ## 0.1 — The Inference Primitives (Mechanisms 1–7)
 
 ### Mechanism 1 — Attention as a Learned Bilinear Form **[Grade A]**
