@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from ingest_lib import unit_id, category_of, title_of, also_known_as, intent_of
+from ingest_lib import unit_id, category_of, title_of, also_known_as, intent_of, mechanism_refs
 
 
 def eq(got, want):
@@ -17,6 +17,10 @@ eq(unit_id("R4-ReAct"), "R4")
 eq(unit_id("K13-Retrieval-Bundle"), "K13")
 eq(category_of("R4"), "Reasoning")
 eq(category_of("H10"), "Humanizers")
+
+eq(mechanism_refs("conditions on mechanism 4; see mechanisms 2 and 3, plus (mechanism 12)."), [2, 3, 4, 12])
+eq(mechanism_refs("no citations here"), [])
+eq(mechanism_refs("mechanism 99 is out of range"), [])
 
 R4_HEAD = "# R4 — ReAct\n"
 eq(title_of(R4_HEAD), "ReAct")

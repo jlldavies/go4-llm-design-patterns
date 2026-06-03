@@ -52,3 +52,14 @@ def intent_of(text: str) -> str:
     if not m:
         return ""
     return re.sub(r'\s+', " ", m.group(1)).strip()
+
+
+def mechanism_refs(text: str) -> list:
+    """Sorted unique mechanism numbers (1–12) cited anywhere in the text."""
+    nums = set()
+    for m in _MECH.finditer(text):
+        for n in _NUM.findall(m.group(2)):
+            v = int(n)
+            if 1 <= v <= 12:
+                nums.add(v)
+    return sorted(nums)
