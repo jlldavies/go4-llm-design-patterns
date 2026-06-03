@@ -162,3 +162,79 @@ def related_edges(text: str, self_id: str) -> dict:
                 if i not in edges[etype]:
                     edges[etype].append(i)
     return edges
+
+
+EDGE_ORDER = ["requires", "conflicts_with", "composes_with", "siblings", "related"]
+EDGE_PHRASE = {
+    "requires": "Requires", "conflicts_with": "In tension with",
+    "composes_with": "Composes with", "siblings": "Sibling of",
+}
+
+
+def _yaml_scalar(v) -> str:
+    s = str(v)
+    return f'"{s}"' if re.search(r'[:#\[\]{}",]', s) else s
+
+
+def emit_frontmatter(fields: dict) -> str:
+    """Emit flat YAML frontmatter. Lists -> [a, b]; skip empty values."""
+    lines = ["---"]
+    for k, v in fields.items():
+        if v in (None, "", [], {}):
+            continue
+        if isinstance(v, list):
+            lines.append(f"{k}: [{', '.join(str(x) for x in v)}]")
+        elif isinstance(v, bool):
+            lines.append(f"{k}: {'true' if v else 'false'}")
+        else:
+            lines.append(f"{k}: {_yaml_scalar(v)}")
+    lines.append("---")
+    return "\n".join(lines)
+
+
+def relationship_sentence(edges: dict) -> str:
+    """Deterministic prose summary of the edge graph for the Description."""
+    parts = []
+    for et in EDGE_ORDER:
+        ids = edges.get(et)
+        if ids and et in EDGE_PHRASE:
+            parts.append(f"{EDGE_PHRASE[et]} {', '.join(ids)}")
+    return (". ".join(parts) + ".") if parts else ""
+
+
+def wikilink_line(edges: dict, id_to_stem: dict) -> str:
+    seen, links = set(), []
+    for et in EDGE_ORDER:
+        for i in edges.get(et, []):
+            if i in id_to_stem and i not in seen:
+                seen.add(i)
+                links.append(f"[[{id_to_stem[i]}]]")
+    return "Related: " + " · ".join(links) if links else ""
+
+
+def assemble_pattern_unit(uid, title, fields, intent, edges, key_points, id_to_stem):
+    fm = emit_frontmatter(fields)
+    rel = relationship_sentence(edges)
+    canonical = fields["canonical"]
+    desc = f"{intent} {rel} This is a condensed digest; the canonical file " \
+           f"(`{canonical}`) carries the full decision criteria, failure modes, " \
+           f"and implementation.".replace("  ", " ").strip()
+    body = [fm, "", "## Description", desc]
+    if key_points:
+        body += ["", "## Key points"] + [f"- {p}" for p in key_points]
+    wl = wikilink_line(edges, id_to_stem)
+    if wl:
+        body += ["", wl]
+    return "\n".join(body) + "\n"
+
+
+def strip_first_h1(text: str) -> str:
+    out, stripped = [], False
+    for line in text.splitlines():
+        if not stripped and line.startswith("# ") and not line.startswith("## "):
+            stripped = True
+            continue
+        if stripped and not out and not line.strip():
+            continue
+        out.append(line)
+    return "\n".join(out)

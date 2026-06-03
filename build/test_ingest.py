@@ -5,7 +5,11 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from ingest_lib import unit_id, category_of, title_of, also_known_as, intent_of, mechanism_refs, related_edges, _edge_type, conflict_edges, when_to_use_map, parse_mechanisms
+from ingest_lib import (unit_id, category_of, title_of, also_known_as, intent_of,
+                        mechanism_refs, related_edges, _edge_type, conflict_edges,
+                        when_to_use_map, parse_mechanisms,
+                        emit_frontmatter, relationship_sentence, wikilink_line,
+                        assemble_pattern_unit, strip_first_h1)
 
 
 def eq(got, want):
@@ -75,5 +79,25 @@ eq(also_known_as("**Also Known As:** Reason+Act, Think-Act-Observe, the Agent Lo
    ["Reason+Act", "Think-Act-Observe", "the Agent Loop"])
 eq(intent_of("## Intent\n\nLet an agent make its next decision after seeing the result.\n\n## Motivation"),
    "Let an agent make its next decision after seeing the result.")
+
+eq(emit_frontmatter({"id": "R4", "cost": "medium-high", "requires": ["V9", "V14"], "derived": True}),
+   "---\nid: R4\ncost: medium-high\nrequires: [V9, V14]\nderived: true\n---")
+eq(relationship_sentence({"requires": ["V9", "V14"], "siblings": ["R5"]}),
+   "Requires V9, V14. Sibling of R5.")
+eq(wikilink_line({"requires": ["V9"], "siblings": ["R5"]}, {"V9": "V9-Bounded-Execution", "R5": "R5-ReWOO"}),
+   "Related: [[V9-Bounded-Execution]] · [[R5-ReWOO]]")
+
+unit = assemble_pattern_unit(
+    "R4", "ReAct",
+    {"id": "R4", "title": "ReAct", "canonical": "patterns/R4-ReAct.md", "derived": True},
+    "ReAct interleaves Thought, Action, Observation.",
+    {"requires": ["V9"], "siblings": ["R5"]},
+    ["Use when the next call depends on the last result"],
+    {"V9": "V9-Bounded-Execution", "R5": "R5-ReWOO"},
+)
+assert "## Description" in unit and "[[V9-Bounded-Execution]]" in unit, unit
+assert "patterns/R4-ReAct.md" in unit, unit
+
+eq(strip_first_h1("# Title\n\nBody line"), "Body line")
 
 print("ALL INGEST TESTS PASSED")
