@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from ingest_lib import unit_id, category_of, title_of, also_known_as, intent_of, mechanism_refs
+from ingest_lib import unit_id, category_of, title_of, also_known_as, intent_of, mechanism_refs, related_edges, _edge_type
 
 
 def eq(got, want):
@@ -21,6 +21,24 @@ eq(category_of("H10"), "Humanizers")
 eq(mechanism_refs("conditions on mechanism 4; see mechanisms 2 and 3, plus (mechanism 12)."), [2, 3, 4, 12])
 eq(mechanism_refs("no citations here"), [])
 eq(mechanism_refs("mechanism 99 is out of range"), [])
+
+eq(_edge_type("Sibling of"), "siblings")
+eq(_edge_type("Required by"), "requires")
+eq(_edge_type("Pairs with"), "composes_with")
+eq(_edge_type("Distinct from"), "related")
+eq(_edge_type("Totally novel label"), "related")
+
+rp = (
+    "## Related Patterns\n"
+    "- **Sibling of** **R5 ReWOO** — same problem, opposite trade-off.\n"
+    "- **Required by** **V9 Bounded Execution** — never run R4 unbounded.\n"
+    "- **Composes with** **K8 Working Memory** — the trajectory is the scratchpad.\n"
+    "## Sources\n"
+)
+e = related_edges(rp, "R4")
+eq(e["siblings"], ["R5"])
+eq(e["requires"], ["V9"])
+eq(e["composes_with"], ["K8"])
 
 R4_HEAD = "# R4 — ReAct\n"
 eq(title_of(R4_HEAD), "ReAct")

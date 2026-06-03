@@ -63,3 +63,46 @@ def mechanism_refs(text: str) -> list:
             if 1 <= v <= 12:
                 nums.add(v)
     return sorted(nums)
+
+
+EDGE_LABELS = [  # (lowercase prefix, edge type) — order matters, first match wins
+    ("sibling", "siblings"),
+    ("required by", "requires"), ("requires", "requires"), ("depends on", "requires"),
+    ("pairs with", "composes_with"), ("composes with", "composes_with"),
+    ("inner pattern of", "composes_with"), ("often paired with", "composes_with"),
+    ("managed by", "composes_with"), ("uses", "composes_with"),
+    ("composes cleanly", "composes_with"), ("tool layer", "composes_with"),
+    ("distinct from", "related"), ("not to be confused", "related"),
+    ("named after", "related"), ("aligned with", "related"), ("echoes", "related"),
+]
+_REL_ID = re.compile(r'\b([A-Z]+\d+)\b')
+
+
+def _edge_type(label: str) -> str:
+    low = label.lower().strip()
+    for prefix, etype in EDGE_LABELS:
+        if low.startswith(prefix):
+            return etype
+    return "related"
+
+
+def related_edges(text: str, self_id: str) -> dict:
+    """Parse '## Related Patterns' bullets into {edge_type: [ids]} (deduped, no self)."""
+    sec = re.search(r'^## Related Patterns\s*\n(.*?)(?:\n## |\Z)', text, re.S | re.M)
+    edges = {}
+    if not sec:
+        return edges
+    for line in sec.group(1).splitlines():
+        if not line.lstrip().startswith("-"):
+            continue
+        lbl = re.match(r'\s*-\s*\*\*(.+?)\*\*', line)
+        if not lbl:
+            continue
+        etype = _edge_type(lbl.group(1))
+        ids = [i for i in _REL_ID.findall(line) if i != self_id]
+        if ids:
+            edges.setdefault(etype, [])
+            for i in ids:
+                if i not in edges[etype]:
+                    edges[etype].append(i)
+    return edges
