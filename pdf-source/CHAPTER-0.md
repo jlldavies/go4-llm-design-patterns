@@ -38,7 +38,7 @@ The mechanisms in this chapter are precise. Before the formalism, here is the co
 
 ## 0.1 — The Inference Primitives (Mechanisms 1–7)
 
-### M1 — Attention as a Learned Bilinear Form
+### M1 — Attention as a Learned Bilinear Form  {#m1}
 
 #### Grade A
 *The bilinear form is algebraically derived from the QK^T computation; the result follows from the matrix operations and requires no empirical inference.*
@@ -65,7 +65,7 @@ Every head defines a different $g_{\mu\nu}$. Multi-head attention runs $H$ such 
 
 ---
 
-### M2 — n² Compute and KV Cache Memory Cost
+### M2 — n² Compute and KV Cache Memory Cost  {#m2}
 
 #### Grade A
 *Quadratic scaling of the attention matrix is an algebraic consequence of computing pairwise token interactions; the cost bound is exact.*
@@ -80,7 +80,7 @@ Token generation (the decode phase) is structurally different. At each step, onl
 
 ---
 
-### M3 — The KV Cache as a Growing 4D Tensor
+### M3 — The KV Cache as a Growing 4D Tensor  {#m3}
 
 #### Grade A
 *Cache structure and monotonic growth follow directly from causal masking applied to autoregressive decoding; the tensor shape is exact.*
@@ -101,7 +101,7 @@ At generation step $t$, the model computes a new Q for position $t$ and contrast
 
 ---
 
-### M4 — Lost-in-the-Middle as Q-K Space Geometry
+### M4 — Lost-in-the-Middle as Q-K Space Geometry  {#m4}
 
 #### Grade B — empirically strong, partially derived
 *The U-shaped attention weight distribution is robustly observed across models and tasks, but the geometric account is a partial derivation rather than a closed-form proof.*
@@ -118,7 +118,7 @@ Middle K vectors are geometrically accessible — the attention computation can 
 
 ---
 
-### M5 — Prefix Caching as Cache Engineering
+### M5 — Prefix Caching as Cache Engineering  {#m5}
 
 #### Grade A mechanism; Grade B operational specifics
 *That caching prefix KV states reduces recomputation follows directly from M2 and M3; the TTL durations and hit-rate figures cited are provider-specific and subject to change.*
@@ -142,7 +142,7 @@ For multi-agent systems (Mechanism 6), the shared context given to all workers s
 
 ---
 
-### M6 — Subagent Decomposition as Context Bounding
+### M6 — Subagent Decomposition as Context Bounding  {#m6}
 
 #### Grade A
 *The cost reduction from independent context windows is a direct arithmetic consequence of n² scaling; the calculation is exact given the quadratic bound from M2.*
@@ -162,7 +162,7 @@ The quality win of O6 Orchestrator-Workers over O1 Single Agent is structural, n
 
 ---
 
-### M7 — Stochastic Generation and Autoregressive Commitment
+### M7 — Stochastic Generation and Autoregressive Commitment  {#m7}
 
 #### Grade A
 *Sampling from the output distribution is the defined mechanism of autoregressive generation; the irreversibility of committed tokens is a structural property, not an empirical finding.*
@@ -181,7 +181,7 @@ Two consequences are mechanically unavoidable:
 
 ## 0.2 — The Memory and Storage Hierarchy (Mechanisms 8–10)
 
-### M8 — Model Size Matching to Task Complexity
+### M8 — Model Size Matching to Task Complexity  {#m8}
 
 #### Grade A cost; Grade B thresholds
 *That smaller models are cheaper per token follows from parameter counts; the capability thresholds at which model tiers are interchangeable are empirical and task-dependent.*
@@ -199,7 +199,7 @@ This is not a preference — it is a cost-structure fact. The practical threshol
 
 ---
 
-### M9 — Storage Tier Hierarchy
+### M9 — Storage Tier Hierarchy  {#m9}
 
 #### Grade A cost structure; Grade B use patterns
 *The cost and latency ordering of in-context, retrieval, and fine-tuning tiers follows from their computational structure; which tier is optimal for a given access pattern is empirically determined.*
@@ -222,7 +222,7 @@ The critical design axis is **write cost vs. read cost**. In-context storage pay
 
 ---
 
-### M10 — No Cross-Session Persistence: All Memory Is Retrieval
+### M10 — No Cross-Session Persistence: All Memory Is Retrieval  {#m10}
 
 #### Grade A
 *LLM weights are fixed at inference time; the absence of cross-session state change is a definitional property of the inference API contract, not an empirical observation.*
@@ -239,7 +239,7 @@ All apparent inter-session memory is a file-retrieval operation: a document (CLA
 
 ## 0.3 — The Positional Architecture (Mechanisms 11–12)
 
-### M11 — Context Compaction for Long-Running Systems
+### M11 — Context Compaction for Long-Running Systems  {#m11}
 
 #### Grade A mechanism; Grade B trigger thresholds
 *That accumulated context must eventually be managed follows from finite window size and quadratic cost; the optimal compaction trigger depends on workload characteristics that are not derivable from first principles.*
@@ -260,7 +260,7 @@ The **"early decision" problem** in automated systems is a specialised case. Whe
 
 ---
 
-### M12 — RoPE as an SO(d_head) Lie Group Action
+### M12 — RoPE as an SO(d_head) Lie Group Action  {#m12}
 
 #### Grade A
 *The rotary embedding is derived exactly from the requirement that relative position encode as a rotation; the Lie group structure follows from the composition law for rotation matrices.*
