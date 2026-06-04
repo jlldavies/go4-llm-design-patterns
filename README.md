@@ -14,6 +14,21 @@
 
 ---
 
+## 🧠 Ingest GO4 into your agent's memory
+
+Beyond reading it, you can load the **whole catalog** into an agent. The
+[`ingest/`](ingest/) folder is a generated, ingestible projection — one markdown
+unit per pattern, mechanism, and decision guide, plus a machine manifest
+(`ingest.json`) carrying the full relationship graph.
+
+**Workflow:** clone the repo → point your personal memory system or coding agent at
+the top-level `ingest/` folder → it absorbs all of it (patterns, the mechanical
+foundation, the conflict graph, references). The labels are suggestions you can
+relabel on ingest. See [`ingest/INGEST.md`](ingest/INGEST.md) for load recipes
+(Karpathy wiki / agentmemory, Cognee, Obsidian, Claude Code).
+
+---
+
 ## Why this exists
 
 **88% of AI agents never reach production** (Composio, 2025). The ones that fail aren't failing because the model isn't good enough — they're failing because the engineering around the model is wrong. Wrong retrieval pattern. Wrong context management. No bounds on the agent loop. Rediscovery eating 85% of compute. Token costs compounding quadratically on tasks engineers thought were linear.
@@ -261,6 +276,10 @@ Two patterns in this catalog don't appear in prior literature — they were deri
 │   └── [94 pattern files]
 ├── research/
 │   └── MECHANISMS.md         ← folk-claim → mechanism → evidence mapping
+├── ingest/                   ← generated, ingestible projection of the catalog
+│   ├── ingest.json           ← manifest: unit index + relationship graph + glossary
+│   ├── INGEST.md             ← how to load it into agent memory
+│   └── [pattern/mechanism/decision units]
 └── build/                    ← everything that builds the PDF and the website
     ├── build_book.py         ← assembles content + pandoc → GO4.pdf
     ├── book.toml             ← mdBook config (the online edition)
@@ -279,6 +298,7 @@ Two patterns in this catalog don't appear in prior literature — they were deri
 2. **[Read the Mechanical Foundation](build/content/CHAPTER-0.md)** — twelve mechanical principles that explain why patterns work
 3. **[Browse the conflict map](patterns/CONFLICTS.md)** — the patterns you cannot combine, and why
 4. **[Pick your category](patterns/)** — jump directly to the pattern you need
+5. **[Ingest the whole catalog into your agent](ingest/INGEST.md)** — load every pattern, mechanism, and the conflict graph into your memory system
 
 ---
 
