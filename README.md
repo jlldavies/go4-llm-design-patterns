@@ -59,9 +59,9 @@ This is the [Gang of Four](https://en.wikipedia.org/wiki/Design_Patterns) applie
 
 | Category | Patterns | What it governs |
 |---|---|---|
-| **I. Signal** | S1–S9 | Prompt shaping — zero-shot, few-shot, personas, constitutional framing |
+| **I. Signal** | S1–S6, S8–S9 | Prompt shaping — zero-shot, few-shot, personas, constitutional framing |
 | **II. Knowledge** | K1–K13 | Context engineering — RAG, retrieval, memory, compression |
-| **III. Reasoning** | R1–R20 | Thinking structure — CoT, ReAct, Tree of Thoughts, self-consistency |
+| **III. Reasoning** | R1–R14, R16–R20 | Thinking structure — CoT, ReAct, Tree of Thoughts, self-consistency |
 | **IV. Orchestration** | O1–O18 | Multi-agent coordination — pipelines, hierarchies, parallelisation |
 | **V. Reliability** | V1–V20 | Production safety — bounds, logging, human oversight, evaluation |
 | **VI. Integration** | I1–I6 | Tool use — function calling, MCP, A2A delegation |
@@ -72,7 +72,7 @@ This is the [Gang of Four](https://en.wikipedia.org/wiki/Design_Patterns) applie
 ## Pattern Index
 
 <details>
-<summary><strong>Signal — shaping what you say to the model (S1–S9)</strong></summary>
+<summary><strong>Signal — shaping what you say to the model (S1–S6, S8–S9)</strong></summary>
 
 | Pattern | Also known as | When to use |
 |---|---|---|
@@ -109,7 +109,7 @@ This is the [Gang of Four](https://en.wikipedia.org/wiki/Design_Patterns) applie
 </details>
 
 <details>
-<summary><strong>Reasoning — chain-of-thought, agents, tool use (R1–R20)</strong></summary>
+<summary><strong>Reasoning — chain-of-thought, agents, tool use (R1–R14, R16–R20)</strong></summary>
 
 | Pattern | Also known as | When to use |
 |---|---|---|
