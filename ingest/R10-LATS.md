@@ -5,6 +5,7 @@ type: pattern
 category: Reasoning
 summary: "Search the solution space of an agentic task with full Monte Carlo Tree Search — selection by UCB, expansion, simulation, and value backpropagation — using the LLM as action generator, value estimator, and verbal critic, so the agent can revisit any node, redirect from any dead end, and converge on high-quality trajectories on problems that defeat single-path patterns."
 when_to_use: MCTS + ReAct + Reflexion unified
+cost: highest
 also_known_as: [LATS, MCTS for LLM Agents, Monte Carlo Agent Search]
 siblings: [R9]
 related: [R4, R7, R9, V9, R3]

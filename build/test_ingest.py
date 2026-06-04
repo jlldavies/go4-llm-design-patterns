@@ -9,7 +9,7 @@ from ingest_lib import (unit_id, category_of, title_of, also_known_as, intent_of
                         mechanism_refs, related_edges, _edge_type, conflict_edges,
                         when_to_use_map, parse_mechanisms,
                         emit_frontmatter, relationship_sentence, wikilink_line,
-                        assemble_pattern_unit, strip_first_h1)
+                        assemble_pattern_unit, strip_first_h1, cost_map)
 
 
 def eq(got, want):
@@ -164,5 +164,57 @@ ec = related_edges(rp_c, "K7")
 eq(ec.get("related"), ["K6"])           # 'Lossless counterpart of' -> default 'related'; plain-text target captured
 eq(ec.get("composes_with"), ["K8"])
 # third bullet has no bold label -> skipped entirely
+
+# --- cost_map ---
+# Spec sample: REASONING-DECISION rows (including the LaTeX 5× cell that must be skipped)
+dt = ("| Pattern | LLM Calls | Relative Cost | Notes |\n"
+      "|---|---|---|---|\n"
+      "| R1 Zero-Shot CoT | 1 | Baseline | x |\n"
+      "| R4 ReAct | N per step | Medium–High | x |\n"
+      "| R5 ReWOO | 2 total | **5$\\times$ cheaper than R4** | x |\n"
+      "| R9 ToT | N | Very High | x |\n")
+cm = cost_map([dt])
+eq(cm.get("R1"), "baseline")
+eq(cm.get("R4"), "medium-high")
+eq(cm.get("R9"), "very-high")
+eq(cm.get("R5"), None)   # '5× cheaper' has no clean leading enum -> skipped
+
+# Remaining enum values
+dt2 = ("| Pattern | LLM Calls | Relative Cost | Notes |\n"
+       "|---|---|---|---|\n"
+       "| R2 Few-Shot CoT | 1 | Low + example tokens | y |\n"
+       "| R3 Plan-and-Solve | 2 | Low | y |\n"
+       "| R7 Reflexion | N | High | y |\n"
+       "| R10 LATS | N | Highest | y |\n"
+       "| R8 Self-Refine | N | Medium | y |\n")
+cm2 = cost_map([dt2])
+eq(cm2.get("R2"), "low")    # leading word "Low" despite trailing text
+eq(cm2.get("R3"), "low")
+eq(cm2.get("R7"), "high")
+eq(cm2.get("R10"), "highest")
+eq(cm2.get("R8"), "medium")
+
+# First-wins: second guide does not override
+dt_first = "| Pattern | Relative Cost |\n|---|---|\n| O1 Single Agent | Baseline |\n"
+dt_second = "| Pattern | Relative Cost |\n|---|---|\n| O1 Single Agent | High |\n"
+eq(cost_map([dt_first, dt_second]).get("O1"), "baseline")
+eq(cost_map([dt_second, dt_first]).get("O1"), "high")
+
+# Table with no cost column is skipped entirely
+dt_no_cost = "| Pattern | Cacheable? | Notes |\n|---|---|---|\n| S1 Zero-Shot | Yes | x |\n"
+eq(cost_map([dt_no_cost]).get("S1"), None)
+
+# Orchestration rows (medium-high via en-dash variant)
+dt_orch = ("| Pattern | Relative cost | When justified |\n"
+           "|---|---|---|\n"
+           "| O1 Single Agent | Baseline | Default |\n"
+           "| O2 Prompt Chaining | Low | Fixed decomp |\n"
+           "| O6 Orchestrator-Workers | High | Dynamic decomp |\n"
+           "| O7 Supervisor Hierarchy | Very high | Recursive |\n")
+cmo = cost_map([dt_orch])
+eq(cmo.get("O1"), "baseline")
+eq(cmo.get("O2"), "low")
+eq(cmo.get("O6"), "high")
+eq(cmo.get("O7"), "very-high")
 
 print("ALL INGEST TESTS PASSED")

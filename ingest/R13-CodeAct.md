@@ -5,6 +5,7 @@ type: pattern
 category: Reasoning
 summary: "Make the agent's Action a *program*, not a tool call — so one step can call several tools, branch on what they return, loop, and keep intermediate results in variables — and execute that program in a sandbox whose stdout, return value, and stack traces become the next Observation."
 when_to_use: Python as action language; ~20pp accuracy gain over JSON tool calls
+cost: medium
 also_known_as: [Executable Code Actions, Code-as-Action, Programmatic Tool Calling, Code Agent]
 siblings: [R4, R5]
 related: [V8, V9, R14, I2, I3]

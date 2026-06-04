@@ -5,6 +5,7 @@ type: pattern
 category: Reasoning
 summary: "Solve problems where the right reasoning path is not obvious upfront by having the LLM expand a tree of candidate partial solutions, score the promise of each, expand the best, and backtrack from dead ends — substituting *search over a structured space* for a single linear chain of thought."
 when_to_use: BFS/DFS over reasoning states; complex planning
+cost: very-high
 also_known_as: [ToT, Deliberate Problem Solving, Branching Reasoning]
 siblings: [R10]
 related: [R17, R4, R3, R1, R2, R18, R11, R12]

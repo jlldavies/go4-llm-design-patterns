@@ -5,6 +5,7 @@ type: pattern
 category: Reasoning
 summary: "Separate the act of *deciding what to do* from the act of *doing it* by putting them in different LLM calls, so the Planner sees the whole task before committing to an order, the Executor runs efficiently against a stable plan, and the plan itself is an inspectable artifact a human or a downstream component can read, edit, or gate on before any step runs."
 when_to_use: "Two-phase: explicit plan, then execute"
+cost: low
 also_known_as: [Plan-and-Execute, Explicit Planning, Plan-then-Execute, Upfront Planning]
 related: [R1, R2, R4, R5, R9, R10, O6]
 siblings: [S4]

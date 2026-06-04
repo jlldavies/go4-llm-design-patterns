@@ -7,7 +7,8 @@
     "conflicts_with": "Mutually exclusive or in tension for the same task.",
     "composes_with": "Pairs or nests cleanly with the target.",
     "siblings": "Same-problem alternative with a different trade-off.",
-    "mechanism_refs": "Chapter-0 mechanism numbers (1–12) that ground this pattern."
+    "mechanism_refs": "Chapter-0 mechanism numbers (1–12) that ground this pattern.",
+    "cost": "Relative inference cost: baseline|low|medium|medium-high|high|very-high|highest (where the source decision guides tabulate it)."
   },
   "units": [
     {

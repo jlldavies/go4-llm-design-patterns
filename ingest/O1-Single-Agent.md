@@ -5,6 +5,7 @@ type: pattern
 category: Orchestration
 summary: "Run the whole task inside one agent: a single configured LLM with a system prompt, a small tool set, and a ReAct-style inner loop."
 when_to_use: "Baseline; one model, one loop"
+cost: baseline
 also_known_as: [Autonomous Agent, Solo Agent, Monolithic Agent, Single-Loop Agent, Tool-Using Assistant]
 related: [O2, O3, O4, O5, O6, O7, O17, V9, V14]
 composes_with: [R4, I2, I3, K8, K11, S3, S5, S6]

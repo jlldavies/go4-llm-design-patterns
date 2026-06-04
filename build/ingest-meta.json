@@ -497,7 +497,7 @@
   "K3": {
     "summary": "Answer queries that require connecting information across many documents — multi-hop relationship questions and whole-corpus synthesis — by indexing the corpus as a graph of entities and relationships instead of a flat set of chunks.",
     "when_to_use": "Multi-hop reasoning; entity relationships; global synthesis",
-    "cost": "",
+    "cost": "high",
     "edges": {
       "related": [
         "K1",
@@ -515,7 +515,7 @@
   "K4": {
     "summary": "Answer queries that vary in scope — from a precise fact to a broad theme — by indexing the corpus as a multi-level summary tree and retrieving from the level of abstraction the query requires.",
     "when_to_use": "Variable abstraction levels; document trees",
-    "cost": "",
+    "cost": "medium",
     "edges": {
       "related": [
         "K1",
@@ -616,7 +616,7 @@
   "O1": {
     "summary": "Run the whole task inside one agent: a single configured LLM with a system prompt, a small tool set, and a ReAct-style inner loop.",
     "when_to_use": "Baseline; one model, one loop",
-    "cost": "",
+    "cost": "baseline",
     "edges": {
       "related": [
         "O2",
@@ -825,7 +825,7 @@
   "O2": {
     "summary": "Decompose a task into a known, ordered sequence of LLM calls with deterministic transitions between them, so each step has its own focused setup and can be independently tested, logged, and gated — and so the whole pipeline is predictable in cost and behaviour.",
     "when_to_use": "Fixed-sequence pipeline; output of step N feeds step N+1",
-    "cost": "",
+    "cost": "low",
     "edges": {
       "related": [
         "S4",
@@ -848,7 +848,7 @@
   "O3": {
     "summary": "Make the choice of handler an explicit, inspectable, swappable step, so each input type meets a handler tuned for it and the routing decision itself becomes a first-class object the system can log, test, and improve.",
     "when_to_use": "Classify input; dispatch to specialist prompt or agent",
-    "cost": "",
+    "cost": "low",
     "edges": {
       "composes_with": [
         "O1",
@@ -908,7 +908,7 @@
   "O6": {
     "summary": "Have a central LLM decide *at runtime* how to break a goal into sub-tasks and which worker each sub-task goes to, then collect and synthesise the workers' returns — so the decomposition adapts to the specific input instead of being baked into a pipeline.",
     "when_to_use": "Dynamic task decomposition; workers run in isolation",
-    "cost": "",
+    "cost": "high",
     "edges": {
       "related": [
         "O2",
@@ -932,7 +932,7 @@
   "O7": {
     "summary": "Scale orchestration past the point where a single coordinator can hold all worker context, by stacking O6 Orchestrator-Workers nodes into a tree where every supervisor manages only its direct children.",
     "when_to_use": "O6 applied recursively; supervisor of supervisors",
-    "cost": "",
+    "cost": "very-high",
     "edges": {
       "related": [
         "O6",
@@ -1001,7 +1001,7 @@
   "R1": {
     "summary": "Elicit explicit intermediate reasoning from a capable instruction-tuned model by adding a single short trigger phrase to an otherwise zero-shot prompt, so the model writes its working out before committing to an answer instead of jumping straight to a guess.",
     "when_to_use": "Elicit reasoning without examples",
-    "cost": "",
+    "cost": "baseline",
     "edges": {
       "related": [
         "S1",
@@ -1022,7 +1022,7 @@
   "R10": {
     "summary": "Search the solution space of an agentic task with full Monte Carlo Tree Search — selection by UCB, expansion, simulation, and value backpropagation — using the LLM as action generator, value estimator, and verbal critic, so the agent can revisit any node, redirect from any dead end, and converge on high-quality trajectories on problems that defeat single-path patterns.",
     "when_to_use": "MCTS + ReAct + Reflexion unified",
-    "cost": "",
+    "cost": "highest",
     "edges": {
       "siblings": [
         "R9"
@@ -1045,7 +1045,7 @@
   "R11": {
     "summary": "Replace re-deriving a reasoning structure on every hard problem with retrieving and instantiating a previously distilled *thought-template*, so the cost of search is paid once across a problem family rather than every problem in it.",
     "when_to_use": "Reusable reasoning patterns distilled from prior runs",
-    "cost": "",
+    "cost": "low",
     "edges": {
       "siblings": [
         "R9",
@@ -1070,7 +1070,7 @@
   "R12": {
     "summary": "Cut end-to-end latency on long-form, structurally separable answers by writing the outline once and expanding every point in parallel, instead of decoding the whole answer token-by-token in a single sequential stream.",
     "when_to_use": "Outline first; generate sections in parallel",
-    "cost": "",
+    "cost": "medium",
     "edges": {
       "siblings": [
         "O4"
@@ -1090,7 +1090,7 @@
   "R13": {
     "summary": "Make the agent's Action a *program*, not a tool call — so one step can call several tools, branch on what they return, loop, and keep intermediate results in variables — and execute that program in a sandbox whose stdout, return value, and stack traces become the next Observation.",
     "when_to_use": "Python as action language; ~20pp accuracy gain over JSON tool calls",
-    "cost": "",
+    "cost": "medium",
     "edges": {
       "siblings": [
         "R4",
@@ -1118,7 +1118,7 @@
   "R14": {
     "summary": "For tasks whose hard part is computation — arithmetic, algebra, financial sums, statistical operations, symbolic manipulation — let the model write a short program and let a Python (or equivalent) interpreter compute the answer, instead of asking the model to compute in natural-language tokens.",
     "when_to_use": "Delegate computation to a deterministic interpreter",
-    "cost": "",
+    "cost": "low",
     "edges": {
       "siblings": [
         "R13"
@@ -1232,7 +1232,7 @@
   "R2": {
     "summary": "Elicit step-by-step intermediate reasoning by *demonstrating* it in a small set of in-prompt examples — `(question, reasoning trace, answer)` triples — so the model both adopts the reasoning style and produces the answer in the demonstrated form.",
     "when_to_use": "Show worked reasoning before the target question",
-    "cost": "",
+    "cost": "low",
     "edges": {
       "related": [
         "R1",
@@ -1267,7 +1267,7 @@
   "R3": {
     "summary": "Separate the act of *deciding what to do* from the act of *doing it* by putting them in different LLM calls, so the Planner sees the whole task before committing to an order, the Executor runs efficiently against a stable plan, and the plan itself is an inspectable artifact a human or a downstream component can read, edit, or gate on before any step runs.",
     "when_to_use": "Two-phase: explicit plan, then execute",
-    "cost": "",
+    "cost": "low",
     "edges": {
       "related": [
         "R1",
@@ -1294,7 +1294,7 @@
   "R4": {
     "summary": "Let an agent make its next decision *after* seeing the result of its last action, by interleaving short reasoning traces with tool calls and feeding each tool's return back into the model — so the trajectory adapts to what the environment actually says, instead of executing a plan written before any of it was known.",
     "when_to_use": "Adaptive tool use; each action informs the next",
-    "cost": "",
+    "cost": "medium-high",
     "edges": {
       "siblings": [
         "R5",
@@ -1351,7 +1351,7 @@
   "R6": {
     "summary": "Close the *compositionality gap* — the failure mode in which a model can answer each sub-fact of a multi-hop question individually but cannot combine them — by forcing the model to ask and answer its own follow-up questions before composing the final answer.",
     "when_to_use": "Multi-hop factual questions; sub-question chains",
-    "cost": "",
+    "cost": "medium",
     "edges": {
       "related": [
         "R3",
@@ -1367,7 +1367,7 @@
   "R7": {
     "summary": "Improve the reliability of an agent on a task with an automated pass/fail signal by having it retry, with a verbal critique of why the last attempt failed appended to its context — so each retry learns from a linguistic gradient instead of from weights.",
     "when_to_use": "Verbal self-critique across retries",
-    "cost": "",
+    "cost": "high",
     "edges": {
       "siblings": [
         "R17",
@@ -1387,7 +1387,7 @@
   "R8": {
     "summary": "Improve the quality of an output by having the same model that produced it write a critique of it and revise from that critique, iterating until a stopping condition — without any external evaluator, ground-truth signal, or second model.",
     "when_to_use": "Iterative in-session quality improvement",
-    "cost": "",
+    "cost": "medium",
     "edges": {
       "siblings": [
         "R7",
@@ -1405,7 +1405,7 @@
   "R9": {
     "summary": "Solve problems where the right reasoning path is not obvious upfront by having the LLM expand a tree of candidate partial solutions, score the promise of each, expand the best, and backtrack from dead ends — substituting *search over a structured space* for a single linear chain of thought.",
     "when_to_use": "BFS/DFS over reasoning states; complex planning",
-    "cost": "",
+    "cost": "very-high",
     "edges": {
       "siblings": [
         "R10"

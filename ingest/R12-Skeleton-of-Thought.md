@@ -5,6 +5,7 @@ type: pattern
 category: Reasoning
 summary: "Cut end-to-end latency on long-form, structurally separable answers by writing the outline once and expanding every point in parallel, instead of decoding the whole answer token-by-token in a single sequential stream."
 when_to_use: Outline first; generate sections in parallel
+cost: medium
 also_known_as: [SoT, Outline-First Generation, Parallel Decoding via Skeleton]
 siblings: [O4]
 related: [R3, R9, S4]

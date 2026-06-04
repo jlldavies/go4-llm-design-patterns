@@ -5,6 +5,7 @@ type: pattern
 category: Reasoning
 summary: "Improve the reliability of an agent on a task with an automated pass/fail signal by having it retry, with a verbal critique of why the last attempt failed appended to its context — so each retry learns from a linguistic gradient instead of from weights."
 when_to_use: Verbal self-critique across retries
+cost: high
 also_known_as: [Verbal Reinforcement Learning, Self-Reflection Loop, Episodic Refinement, Reflexion Agent]
 siblings: [R17, R8]
 related: [H2, O5]

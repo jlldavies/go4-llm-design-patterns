@@ -262,6 +262,88 @@ def assemble_pattern_unit(fields, intent, edges, key_points, id_to_stem):
     return "\n".join(body) + "\n"
 
 
+_COST_ENUM = [
+    # longest/most-specific patterns first so "very high" beats "high", "medium-high" beats "medium"
+    ("very high", "very-high"),
+    ("medium-high", "medium-high"),
+    ("medium–high", "medium-high"),   # en-dash variant
+    ("medium high", "medium-high"),   # space variant (defensive)
+    ("medium", "medium"),
+    ("baseline", "baseline"),
+    ("highest", "highest"),
+    ("high", "high"),
+    ("low", "low"),
+]
+
+
+def _normalize_cost(cell: str):
+    """Normalize a cost cell to the enum value, or None if not parseable."""
+    # Strip markdown bold (**...**) and leading/trailing whitespace
+    s = re.sub(r'\*\*([^*]*)\*\*', r'\1', cell).strip().lower()
+    # Normalise en-dash to hyphen for comparison
+    s = s.replace("–", "-")
+    for prefix, value in _COST_ENUM:
+        if s.startswith(prefix.replace("–", "-")):
+            return value
+    return None
+
+
+def cost_map(decision_texts: list) -> dict:
+    """Build {pattern_id: cost} from a list of decision-guide markdown strings.
+
+    For each text, find a table whose header row contains a column with 'Cost'
+    (case-insensitive). For each data row, extract the pattern id from the first cell
+    (regex ``^([A-Z]+\\d+)``) and the cost value from the Cost column, normalising it
+    to one of: baseline/low/medium/medium-high/high/very-high/highest.
+    Cells that don't begin with a recognisable enum word are skipped.
+    First-wins: a later guide does not override an id already mapped.
+    """
+    result: dict = {}
+    for text in decision_texts:
+        lines = text.splitlines()
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            # Detect a table header row (contains at least two '|')
+            if line.count("|") < 2:
+                i += 1
+                continue
+            cells = [c.strip() for c in line.strip("|").split("|")]
+            # Find a column index whose header contains "cost" (case-insensitive)
+            cost_col = next(
+                (j for j, c in enumerate(cells) if "cost" in c.lower()), None)
+            if cost_col is None:
+                i += 1
+                continue
+            # Skip the separator row (---|---|...)
+            i += 1
+            if i < len(lines) and re.match(r'^\s*\|?\s*[-:]+', lines[i]):
+                i += 1
+            # Parse data rows
+            while i < len(lines):
+                row = lines[i]
+                if row.count("|") < 2:
+                    break
+                row_cells = [c.strip() for c in row.strip("|").split("|")]
+                if len(row_cells) <= cost_col:
+                    i += 1
+                    continue
+                # Pattern id: leading [A-Z]+\d+ in first cell (strip markdown links/bold)
+                first = re.sub(r'\*\*([^*]*)\*\*', r'\1', row_cells[0])
+                first = re.sub(r'\[([^\]]+)\]', r'\1', first)
+                id_match = re.match(r'([A-Z]+\d+)', first.strip())
+                if not id_match:
+                    i += 1
+                    continue
+                uid = id_match.group(1)
+                cost_val = _normalize_cost(row_cells[cost_col])
+                # First-wins: don't overwrite an already-resolved id
+                if uid not in result and cost_val is not None:
+                    result[uid] = cost_val
+                i += 1
+    return result
+
+
 def strip_first_h1(text: str) -> str:
     out, stripped = [], False
     for line in text.splitlines():

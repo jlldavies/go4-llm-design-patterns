@@ -5,6 +5,7 @@ type: pattern
 category: Knowledge
 summary: Answer queries that require connecting information across many documents — multi-hop relationship questions and whole-corpus synthesis — by indexing the corpus as a graph of entities and relationships instead of a flat set of chunks.
 when_to_use: Multi-hop reasoning; entity relationships; global synthesis
+cost: high
 also_known_as: [Graph Retrieval, Entity Graph RAG, Knowledge-Graph RAG, Microsoft GraphRAG]
 related: [K1, K9]
 siblings: [K4]

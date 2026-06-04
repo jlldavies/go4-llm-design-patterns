@@ -5,6 +5,7 @@ type: pattern
 category: Orchestration
 summary: "Scale orchestration past the point where a single coordinator can hold all worker context, by stacking O6 Orchestrator-Workers nodes into a tree where every supervisor manages only its direct children."
 when_to_use: O6 applied recursively; supervisor of supervisors
+cost: very-high
 also_known_as: [Hierarchical Agents, Multi-Level Delegation, Tree of Agents, Nested Supervisors, Hierarchical Multi-Agent System]
 related: [O6, V9, V14, O10, O11, O16]
 composes_with: [O4, O17, S6, R4]

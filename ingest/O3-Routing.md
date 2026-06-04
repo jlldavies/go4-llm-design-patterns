@@ -5,6 +5,7 @@ type: pattern
 category: Orchestration
 summary: "Make the choice of handler an explicit, inspectable, swappable step, so each input type meets a handler tuned for it and the routing decision itself becomes a first-class object the system can log, test, and improve."
 when_to_use: Classify input; dispatch to specialist prompt or agent
+cost: low
 also_known_as: [Classifier-Dispatcher, Intent Router, Query Router, Triage]
 composes_with: [O1, O2, V14, V9, V15]
 related: [O2, O4, O6, K5]

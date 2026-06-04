@@ -5,6 +5,7 @@ type: pattern
 category: Knowledge
 summary: Answer queries that vary in scope — from a precise fact to a broad theme — by indexing the corpus as a multi-level summary tree and retrieving from the level of abstraction the query requires.
 when_to_use: Variable abstraction levels; document trees
+cost: medium
 also_known_as: [Recursive Abstractive Processing for Tree-Organized Retrieval, Hierarchical RAG, Summary-Tree RAG]
 related: [K1, K9, K6]
 siblings: [K3]

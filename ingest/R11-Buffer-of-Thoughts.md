@@ -5,6 +5,7 @@ type: pattern
 category: Reasoning
 summary: "Replace re-deriving a reasoning structure on every hard problem with retrieving and instantiating a previously distilled *thought-template*, so the cost of search is paid once across a problem family rather than every problem in it."
 when_to_use: Reusable reasoning patterns distilled from prior runs
+cost: low
 also_known_as: [BoT, Meta-Buffer Reasoning, Template-Augmented Reasoning, Thought-Augmented Reasoning]
 siblings: [R9, R10]
 related: [R9, R10, K10, K12, R2]
