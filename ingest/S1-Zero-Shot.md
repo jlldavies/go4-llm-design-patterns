@@ -6,7 +6,7 @@ category: Signal
 summary: State the task and submit it.
 when_to_use: "Simple, well-defined tasks within model priors"
 also_known_as: [Direct Instruction, Vanilla Prompting, Instruction-Only Prompting, Naked Prompt]
-related: [S2, S3, S4, S5, S6, S8, S9, S7, S10, R17, K6, R7, O6]
+related: [S2, S3, S4, S5, S6, S8, S9, R17, K6, R7, O6]
 mechanism_refs: [1, 2, 3, 7]
 canonical: patterns/S1-Zero-Shot.md
 derived: true

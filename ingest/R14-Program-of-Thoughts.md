@@ -5,7 +5,7 @@ type: pattern
 category: Reasoning
 summary: "For tasks whose hard part is computation — arithmetic, algebra, financial sums, statistical operations, symbolic manipulation — let the model write a short program and let a Python (or equivalent) interpreter compute the answer, instead of asking the model to compute in natural-language tokens."
 when_to_use: Delegate computation to a deterministic interpreter
-also_known_as: [PoT, Program-Aided Language Models]
+also_known_as: [PoT, Program-Aided Language Models, Code-Augmented Reasoning, Computational Reasoning, Disentangled Computation]
 siblings: [R13]
 related: [R1, R2, V8, R7, R5]
 composes_with: [R17, V9, V14, O4]

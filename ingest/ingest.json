@@ -2072,8 +2072,6 @@
           "S6",
           "S8",
           "S9",
-          "S7",
-          "S10",
           "R17",
           "K6",
           "R7",
@@ -2912,6 +2910,173 @@
           4
         ]
       }
+    },
+    {
+      "id": "M1",
+      "type": "mechanism",
+      "title": "Attention as a Learned Bilinear Form",
+      "summary": "Attention as a Learned Bilinear Form",
+      "file": "ingest/M1-attention-as-a-learned-bilinear-form.md",
+      "canonical": "build/content/CHAPTER-0.md#m1"
+    },
+    {
+      "id": "M2",
+      "type": "mechanism",
+      "title": "n² Compute and KV Cache Memory Cost",
+      "summary": "n² Compute and KV Cache Memory Cost",
+      "file": "ingest/M2-n-compute-and-kv-cache-memory-cost.md",
+      "canonical": "build/content/CHAPTER-0.md#m2"
+    },
+    {
+      "id": "M3",
+      "type": "mechanism",
+      "title": "The KV Cache as a Growing 4D Tensor",
+      "summary": "The KV Cache as a Growing 4D Tensor",
+      "file": "ingest/M3-the-kv-cache-as-a-growing-4d-tensor.md",
+      "canonical": "build/content/CHAPTER-0.md#m3"
+    },
+    {
+      "id": "M4",
+      "type": "mechanism",
+      "title": "Lost-in-the-Middle as Q-K Space Geometry",
+      "summary": "Lost-in-the-Middle as Q-K Space Geometry",
+      "file": "ingest/M4-lost-in-the-middle-as-q-k-space-geometry.md",
+      "canonical": "build/content/CHAPTER-0.md#m4"
+    },
+    {
+      "id": "M5",
+      "type": "mechanism",
+      "title": "Prefix Caching as Cache Engineering",
+      "summary": "Prefix Caching as Cache Engineering",
+      "file": "ingest/M5-prefix-caching-as-cache-engineering.md",
+      "canonical": "build/content/CHAPTER-0.md#m5"
+    },
+    {
+      "id": "M6",
+      "type": "mechanism",
+      "title": "Subagent Decomposition as Context Bounding",
+      "summary": "Subagent Decomposition as Context Bounding",
+      "file": "ingest/M6-subagent-decomposition-as-context-bounding.md",
+      "canonical": "build/content/CHAPTER-0.md#m6"
+    },
+    {
+      "id": "M7",
+      "type": "mechanism",
+      "title": "Stochastic Generation and Autoregressive Commitment",
+      "summary": "Stochastic Generation and Autoregressive Commitment",
+      "file": "ingest/M7-stochastic-generation-and-autoregressive-commitment.md",
+      "canonical": "build/content/CHAPTER-0.md#m7"
+    },
+    {
+      "id": "M8",
+      "type": "mechanism",
+      "title": "Model Size Matching to Task Complexity",
+      "summary": "Model Size Matching to Task Complexity",
+      "file": "ingest/M8-model-size-matching-to-task-complexity.md",
+      "canonical": "build/content/CHAPTER-0.md#m8"
+    },
+    {
+      "id": "M9",
+      "type": "mechanism",
+      "title": "Storage Tier Hierarchy",
+      "summary": "Storage Tier Hierarchy",
+      "file": "ingest/M9-storage-tier-hierarchy.md",
+      "canonical": "build/content/CHAPTER-0.md#m9"
+    },
+    {
+      "id": "M10",
+      "type": "mechanism",
+      "title": "No Cross-Session Persistence: All Memory Is Retrieval",
+      "summary": "No Cross-Session Persistence: All Memory Is Retrieval",
+      "file": "ingest/M10-no-cross-session-persistence-all-memory-is-retrieval.md",
+      "canonical": "build/content/CHAPTER-0.md#m10"
+    },
+    {
+      "id": "M11",
+      "type": "mechanism",
+      "title": "Context Compaction for Long-Running Systems",
+      "summary": "Context Compaction for Long-Running Systems",
+      "file": "ingest/M11-context-compaction-for-long-running-systems.md",
+      "canonical": "build/content/CHAPTER-0.md#m11"
+    },
+    {
+      "id": "M12",
+      "type": "mechanism",
+      "title": "RoPE as an SO(d_head) Lie Group Action",
+      "summary": "RoPE as an SO(d_head) Lie Group Action",
+      "file": "ingest/M12-rope-as-an-so-d-head-lie-group-action.md",
+      "canonical": "build/content/CHAPTER-0.md#m12"
+    },
+    {
+      "id": "DECISION-humanizers",
+      "type": "decision-guide",
+      "category": "Humanizers",
+      "title": "Humanizers — Decision Guide",
+      "summary": "How to choose among Humanizers patterns.",
+      "file": "ingest/DECISION-humanizers.md",
+      "canonical": "patterns/HUMANIZERS-DECISION.md"
+    },
+    {
+      "id": "DECISION-integration",
+      "type": "decision-guide",
+      "category": "Integration",
+      "title": "Integration — Decision Guide",
+      "summary": "How to choose among Integration patterns.",
+      "file": "ingest/DECISION-integration.md",
+      "canonical": "patterns/INTEGRATION-DECISION.md"
+    },
+    {
+      "id": "DECISION-knowledge",
+      "type": "decision-guide",
+      "category": "Knowledge",
+      "title": "Knowledge — Decision Guide",
+      "summary": "How to choose among Knowledge patterns.",
+      "file": "ingest/DECISION-knowledge.md",
+      "canonical": "patterns/KNOWLEDGE-DECISION.md"
+    },
+    {
+      "id": "DECISION-orchestration",
+      "type": "decision-guide",
+      "category": "Orchestration",
+      "title": "Orchestration — Decision Guide",
+      "summary": "How to choose among Orchestration patterns.",
+      "file": "ingest/DECISION-orchestration.md",
+      "canonical": "patterns/ORCHESTRATION-DECISION.md"
+    },
+    {
+      "id": "DECISION-reasoning",
+      "type": "decision-guide",
+      "category": "Reasoning",
+      "title": "Reasoning — Decision Guide",
+      "summary": "How to choose among Reasoning patterns.",
+      "file": "ingest/DECISION-reasoning.md",
+      "canonical": "patterns/REASONING-DECISION.md"
+    },
+    {
+      "id": "DECISION-reliability",
+      "type": "decision-guide",
+      "category": "Reliability",
+      "title": "Reliability — Decision Guide",
+      "summary": "How to choose among Reliability patterns.",
+      "file": "ingest/DECISION-reliability.md",
+      "canonical": "patterns/RELIABILITY-DECISION.md"
+    },
+    {
+      "id": "DECISION-signal",
+      "type": "decision-guide",
+      "category": "Signal",
+      "title": "Signal — Decision Guide",
+      "summary": "How to choose among Signal patterns.",
+      "file": "ingest/DECISION-signal.md",
+      "canonical": "patterns/SIGNAL-DECISION.md"
+    },
+    {
+      "id": "references",
+      "type": "reference-set",
+      "title": "References",
+      "summary": "Full bibliography for the catalog.",
+      "file": "ingest/references.md",
+      "canonical": "build/content/REFERENCES.md"
     }
   ],
   "edges": [
@@ -6127,16 +6292,6 @@
     },
     {
       "from": "S1",
-      "to": "S7",
-      "type": "related"
-    },
-    {
-      "from": "S1",
-      "to": "S10",
-      "type": "related"
-    },
-    {
-      "from": "S1",
       "to": "R17",
       "type": "related"
     },
@@ -7584,6 +7739,7 @@
   "stats": {
     "patterns": 94,
     "mechanisms": 12,
-    "decision_guides": 7
+    "decision_guides": 7,
+    "references": 1
   }
 }

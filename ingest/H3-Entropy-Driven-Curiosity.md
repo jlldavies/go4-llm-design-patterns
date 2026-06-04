@@ -5,7 +5,7 @@ type: pattern
 category: Humanizers
 summary: "Detect when an agent's own output distribution has collapsed — the agent is \"thinking the same thoughts in a loop\" — and act on the detection by raising sampling temperature or injecting a contrarian cue, so the loop escapes its local optimum and resumes productive search."
 when_to_use: Drive exploration by seeking to reduce uncertainty
-also_known_as: [Deadlock Break, Novelty Seeking, Intrinsic Motivation, Entropy-Based Intrinsic Drive]
+also_known_as: [Deadlock Break, Novelty Seeking, Intrinsic Motivation, Entropy-Based Intrinsic Drive, Stagnation Breaker]
 related: [H1, R4, R3, R7, R9, R10, R17, H7]
 composes_with: [V9, V15, R20, K11, H2, V20]
 conflicts_with: [R17]

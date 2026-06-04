@@ -5,7 +5,7 @@ type: pattern
 category: Orchestration
 summary: "Move a live interaction from one agent to another inside the same system without losing context, so the user does not repeat themselves and the receiving agent starts from the conversation's true state — not from zero, and not from a noisy transcript."
 when_to_use: Structured state transfer between agents mid-task
-also_known_as: [Context Transfer, Agent-to-Agent Transfer]
+also_known_as: [Context Transfer, Agent-to-Agent Transfer, Conversation Handoff, Transfer Tool, Swarm Handoff]
 related: [I6, O3, O17]
 composes_with: [O6, V14, V9, V1, S6, V6]
 mechanism_refs: [2, 4, 5]

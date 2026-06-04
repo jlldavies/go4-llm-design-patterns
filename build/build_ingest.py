@@ -57,6 +57,10 @@ def bootstrap():
     print(f"wrote {META} ({len(meta)} patterns) — REVIEW edges before building")
 
 
+def _filter_edges(edges, valid_ids):
+    return {et: [i for i in ids if i in valid_ids] for et, ids in edges.items()}
+
+
 def id_to_stem_map():
     return {L.unit_id(f.stem): f.stem for f in pattern_files()}
 
@@ -77,17 +81,18 @@ def build_patterns(meta, id_to_stem):
         uid = L.unit_id(f.stem)
         text = f.read_text(encoding="utf-8")
         m = meta[uid]
+        edges = _filter_edges(m["edges"], id_to_stem)
         fields = {
             "id": uid, "title": L.title_of(text), "type": "pattern",
             "category": L.category_of(uid), "summary": m["summary"],
             "when_to_use": m.get("when_to_use", ""), "cost": m.get("cost", ""),
             "also_known_as": L.also_known_as(text),
-            **m["edges"],
+            **edges,
             "mechanism_refs": L.mechanism_refs(text),
             "canonical": f"patterns/{f.name}", "derived": True,
         }
         unit_md = L.assemble_pattern_unit(
-            uid, fields["title"], fields, L.intent_of(text), m["edges"],
+            fields, L.intent_of(text), edges,
             applicability_points(text), id_to_stem)
         (OUT / f.name).write_text(unit_md, encoding="utf-8")
         units.append((uid, fields, f.name))
@@ -96,9 +101,12 @@ def build_patterns(meta, id_to_stem):
 
 def build_mechanisms(chapter0, id_to_stem):
     mechs = L.parse_mechanisms(chapter0)
+    units = []
     for me in mechs:
+        mid = f"M{me['num']}"
+        slug = me["slug"]
         fields = {
-            "id": f"M{me['num']}", "title": me["title"], "type": "mechanism",
+            "id": mid, "title": me["title"], "type": "mechanism",
             "summary": me["title"], "grade": me["grade"],
             "canonical": f"build/content/CHAPTER-0.md#m{me['num']}", "derived": True,
         }
@@ -106,36 +114,40 @@ def build_mechanisms(chapter0, id_to_stem):
                 f"Mechanism {me['num']} (Grade {me['grade']}): {me['title']}. "
                 f"Derived in the Mechanical Foundation; see the canonical file "
                 f"(`build/content/CHAPTER-0.md#m{me['num']}`) for the full derivation."]
-        (OUT / f"{me['slug']}.md").write_text("\n".join(body) + "\n", encoding="utf-8")
-        id_to_stem[f"M{me['num']}"] = me["slug"]
-    return mechs
+        (OUT / f"{slug}.md").write_text("\n".join(body) + "\n", encoding="utf-8")
+        id_to_stem[mid] = slug
+        units.append((mid, fields, f"{slug}.md"))
+    return units
 
 
 def build_decisions():
-    out = []
+    units = []
     for cat in sorted(CATEGORY_FILES):
         df = PATTERNS / f"{cat}-DECISION.md"
         if not df.exists():
             continue
         text = df.read_text(encoding="utf-8")
         uid = f"DECISION-{cat.lower()}"
+        fname = f"{uid}.md"
         fields = {"id": uid, "title": f"{cat.title()} — Decision Guide",
                   "type": "decision-guide", "summary": f"How to choose among {cat.title()} patterns.",
                   "canonical": f"patterns/{cat}-DECISION.md", "derived": True}
         # keep the decision body verbatim (it is already dense, agent-friendly)
         body = L.emit_frontmatter(fields) + "\n\n" + L.strip_first_h1(text)
-        (OUT / f"{uid}.md").write_text(body, encoding="utf-8")
-        out.append((uid, fields))
-    return out
+        (OUT / fname).write_text(body, encoding="utf-8")
+        units.append((uid, fields, fname))
+    return units
 
 
 def build_references():
     refs = (CONTENT / "REFERENCES.md").read_text(encoding="utf-8")
+    fname = "references.md"
     fields = {"id": "references", "title": "References", "type": "reference-set",
               "summary": "Full bibliography for the catalog.",
               "canonical": "build/content/REFERENCES.md", "derived": True}
-    (OUT / "references.md").write_text(
+    (OUT / fname).write_text(
         L.emit_frontmatter(fields) + "\n\n" + L.strip_first_h1(refs), encoding="utf-8")
+    return [("references", fields, fname)]
 
 
 FIELD_GLOSSARY = {
@@ -147,9 +159,9 @@ FIELD_GLOSSARY = {
 }
 
 
-def write_manifest(units, mechs):
+def write_manifest(pattern_units, mech_units, decision_units, ref_units):
     unit_list, edge_list = [], []
-    for uid, fields, fname in units:
+    for uid, fields, fname in pattern_units:
         unit_list.append({
             "id": uid, "type": "pattern", "category": fields["category"],
             "title": fields["title"], "summary": fields["summary"],
@@ -159,6 +171,24 @@ def write_manifest(units, mechs):
         for et in L.EDGE_ORDER:
             for tgt in fields.get(et, []):
                 edge_list.append({"from": uid, "to": tgt, "type": et})
+    for uid, fields, fname in mech_units:
+        unit_list.append({
+            "id": uid, "type": "mechanism",
+            "title": fields["title"], "summary": fields["summary"],
+            "file": f"ingest/{fname}", "canonical": fields["canonical"],
+        })
+    for uid, fields, fname in decision_units:
+        unit_list.append({
+            "id": uid, "type": "decision-guide", "category": fields["title"].split(" — ")[0],
+            "title": fields["title"], "summary": fields["summary"],
+            "file": f"ingest/{fname}", "canonical": fields["canonical"],
+        })
+    for uid, fields, fname in ref_units:
+        unit_list.append({
+            "id": uid, "type": "reference-set",
+            "title": fields["title"], "summary": fields["summary"],
+            "file": f"ingest/{fname}", "canonical": fields["canonical"],
+        })
     manifest = {
         "schema": "go4-ingest/v1",
         "generated_from": "patterns/*.md + build/content/CHAPTER-0.md",
@@ -166,8 +196,12 @@ def write_manifest(units, mechs):
         "field_glossary": FIELD_GLOSSARY,
         "units": unit_list,
         "edges": edge_list,
-        "stats": {"patterns": len(units), "mechanisms": len(mechs),
-                  "decision_guides": len(list(CATEGORY_FILES))},
+        "stats": {
+            "patterns": len(pattern_units),
+            "mechanisms": len(mech_units),
+            "decision_guides": len(decision_units),
+            "references": len(ref_units),
+        },
     }
     (OUT / "ingest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",
                                      encoding="utf-8")
@@ -235,12 +269,13 @@ if __name__ == "__main__":
         id_to_stem = id_to_stem_map()
         OUT.mkdir(exist_ok=True)
         chapter0 = (CONTENT / "CHAPTER-0.md").read_text(encoding="utf-8")
-        mechs = build_mechanisms(chapter0, id_to_stem)
-        units = build_patterns(meta, id_to_stem)
-        build_decisions()
-        build_references()
-        write_manifest(units, mechs)
-        write_index(units)
+        mech_units = build_mechanisms(chapter0, id_to_stem)
+        pattern_units = build_patterns(meta, id_to_stem)
+        decision_units = build_decisions()
+        ref_units = build_references()
+        write_manifest(pattern_units, mech_units, decision_units, ref_units)
+        write_index(pattern_units)
         write_readme()
-        print(f"ingest/: {len(units)} patterns, {len(mechs)} mechanisms, "
-              f"+ decisions, references, manifest, index, INGEST.md")
+        print(f"ingest/: {len(pattern_units)} patterns, {len(mech_units)} mechanisms, "
+              f"{len(decision_units)} decisions, {len(ref_units)} references, "
+              f"manifest, index, INGEST.md")

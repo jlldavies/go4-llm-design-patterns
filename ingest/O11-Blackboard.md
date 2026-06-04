@@ -5,7 +5,7 @@ type: pattern
 category: Orchestration
 summary: "Replace a fixed plan or a central orchestrator's task assignments with a shared memory whose evolving state, read by a thin control unit, decides which specialist runs next — so the set and order of contributors adapts to what has accumulated, not to what was decreed up front."
 when_to_use: Asynchronous shared state; agents post and consume
-also_known_as: [Shared Memory Board, Global Workspace, bMAS]
+also_known_as: [Shared Memory Board, Global Workspace, bMAS, Central Knowledge Accumulator]
 related: [O6, K10, O2, V9]
 composes_with: [K10, V14, O17, O4]
 mechanism_refs: [2, 4, 6]

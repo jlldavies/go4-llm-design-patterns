@@ -5,7 +5,7 @@ type: pattern
 category: Reliability
 summary: "Externalise the agent's working state to a durable store at each step boundary, so failures, terminations, and human pauses become resumable events instead of restart-from-zero events."
 when_to_use: Replayable agent state; recovery without restart
-also_known_as: [State Snapshot, Agent State Persistence, Savepoint, Durable Execution]
+also_known_as: [State Snapshot, Agent State Persistence, Savepoint, Durable Execution, Pause-and-Resume State]
 composes_with: [V12, V14]
 related: [V1, V9, O15, K8, V14, K10, K11, K12]
 mechanism_refs: [3, 5]

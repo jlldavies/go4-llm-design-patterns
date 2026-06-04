@@ -5,7 +5,7 @@ type: pattern
 category: Reasoning
 summary: "Solve problems whose natural decomposition is not a tree by reasoning over a directed acyclic graph of thoughts in which sub-results can be *aggregated* — merged, sorted, deduplicated, combined — and not only expanded and pruned."
 when_to_use: DAG of reasoning operations; non-linear thought
-also_known_as: [GoT, Graph-of-Thought Reasoning, Graph of Operations]
+also_known_as: [GoT, Graph-of-Thought Reasoning, Graph of Operations, Thought-Graph Search]
 siblings: [R9, R10, R11, R12]
 related: [R17]
 composes_with: [V9, V15, V14, R1, R2]

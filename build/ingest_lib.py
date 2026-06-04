@@ -37,12 +37,13 @@ def title_of(text: str) -> str:
 
 
 def also_known_as(text: str) -> list:
-    """Parse the '**Also Known As:** a, b, c' line into a list (stops at first sentence/paren)."""
+    """Parse the '**Also Known As:** a, b, c' line into a list (stops at first sentence)."""
     m = re.search(r'\*\*Also Known As:\*\*\s*(.+)', text)
     if not m:
         return []
     raw = m.group(1)
-    raw = re.split(r'\.\s|\s*\(', raw, maxsplit=1)[0]  # drop trailing prose/parenthetical
+    raw = re.sub(r'\s*\([^)]*\)', '', raw)   # strip inline parentheticals first
+    raw = re.split(r'\.\s', raw, 1)[0]       # then cut at sentence end
     return [p.strip().rstrip(".") for p in raw.split(",") if p.strip()]
 
 
@@ -245,7 +246,7 @@ def wikilink_line(edges: dict, id_to_stem: dict) -> str:
     return "Related: " + " · ".join(links) if links else ""
 
 
-def assemble_pattern_unit(uid, title, fields, intent, edges, key_points, id_to_stem):
+def assemble_pattern_unit(fields, intent, edges, key_points, id_to_stem):
     fm = emit_frontmatter(fields)
     rel = relationship_sentence(edges)
     canonical = fields["canonical"]

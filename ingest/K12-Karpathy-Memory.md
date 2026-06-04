@@ -5,7 +5,7 @@ type: pattern
 category: Knowledge
 summary: "Give an agent a memory the LLM itself maintains as structured, dense, token-efficient notes — paying more at *write* time so every *read* is cheap, navigable, and useful."
 when_to_use: LLM curates dense structured notes; cheap reads
-also_known_as: [Curated Memory, Self-Edited Memory]
+also_known_as: [Curated Memory, Self-Edited Memory, Agent-Authored Wiki, Structured Notes Memory]
 related: [K10, K11, K6]
 composes_with: [S6, V14]
 mechanism_refs: [2, 3, 5, 9, 10]

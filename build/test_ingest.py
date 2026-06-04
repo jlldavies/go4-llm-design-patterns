@@ -91,6 +91,8 @@ R4_HEAD = "# R4 — ReAct\n"
 eq(title_of(R4_HEAD), "ReAct")
 eq(also_known_as("**Also Known As:** Reason+Act, Think-Act-Observe, the Agent Loop. (Function-calling agents...)"),
    ["Reason+Act", "Think-Act-Observe", "the Agent Loop"])
+eq(also_known_as("**Also Known As:** Curated Memory, Self-Edited Memory (Letta's term), Agent-Authored Wiki, Structured Notes Memory"),
+   ["Curated Memory", "Self-Edited Memory", "Agent-Authored Wiki", "Structured Notes Memory"])
 eq(intent_of("## Intent\n\nLet an agent make its next decision after seeing the result.\n\n## Motivation"),
    "Let an agent make its next decision after seeing the result.")
 
@@ -106,7 +108,6 @@ eq(wikilink_line({"requires": ["V9"], "siblings": ["R5"]}, {"V9": "V9-Bounded-Ex
    "Related: [[V9-Bounded-Execution]] · [[R5-ReWOO]]")
 
 unit = assemble_pattern_unit(
-    "R4", "ReAct",
     {"id": "R4", "title": "ReAct", "canonical": "patterns/R4-ReAct.md", "derived": True},
     "ReAct interleaves Thought, Action, Observation.",
     {"requires": ["V9"], "siblings": ["R5"]},

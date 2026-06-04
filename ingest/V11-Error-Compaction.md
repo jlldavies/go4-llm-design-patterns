@@ -5,7 +5,7 @@ type: pattern
 category: Reliability
 summary: "Keep the cumulative weight of errors, exceptions, and tool failures inside the agent's context window small enough that the agent retains the diagnostic signal but does not lose attention or budget to repeated raw tracebacks."
 when_to_use: Compress errors into compact structured signals
-also_known_as: [Compact Errors]
+also_known_as: [Compact Errors, Error Context Management, Failure Summarisation, Error Digest, Stack-Trace Compaction]
 related: [K6, K7, R13, R14]
 composes_with: [V14, V9, V1, O8, R4, R7]
 mechanism_refs: [2, 3, 4]

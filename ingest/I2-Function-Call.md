@@ -5,7 +5,7 @@ type: pattern
 category: Integration
 summary: "Make external actions LLM-routable without giving up typed execution: the LLM reads tool descriptions and picks one with structured arguments; code validates and executes it; the result flows back into the model's context so reasoning continues."
 when_to_use: Model selects and invokes a typed function
-also_known_as: [Tool Use]
+also_known_as: [Tool Use, Function Calling, Schema-Wrapped Tool Call, Structured Action Output]
 related: [I1, R4, R13, V3]
 siblings: [I3, I4]
 composes_with: [V13, V20, V9, V1, V14, V6]

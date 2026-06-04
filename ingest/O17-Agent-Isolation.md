@@ -5,7 +5,7 @@ type: pattern
 category: Orchestration
 summary: "When a sub-task does not need the parent's accumulated context, spawn the sub-agent with a fresh window holding only that sub-task's brief and inputs — so the sub-agent reasons over a tight, on-topic context instead of inheriting whatever the parent happens to be carrying."
 when_to_use: Fresh isolated context per sub-task — mandatory companion to O6
-also_known_as: [Clean Context, Context Quarantine, Fresh Context Delegation, Sub-Agent Spawn, Isolate]
+also_known_as: [Clean Context, Context Quarantine, Fresh Context Delegation, Sub-Agent Spawn, Isolate, Small Focused Agents]
 composes_with: [O6, O4, V14]
 related: [V9, K6, O15, K10, K12]
 siblings: [O7]

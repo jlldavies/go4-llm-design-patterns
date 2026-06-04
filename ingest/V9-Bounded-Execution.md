@@ -5,7 +5,7 @@ type: pattern
 category: Reliability
 summary: "Apply hard, externally-enforced limits on every dimension along which an agent loop can run away — iterations, tool calls, tokens, wall-clock, and dollars — so that a miscalibrated agent fails fast at a known bound instead of consuming unbounded resources before someone notices."
 when_to_use: "Hard caps on steps, cost, wall-time, depth — required for every loop"
-also_known_as: [Circuit Breaker]
+also_known_as: [Circuit Breaker, Iteration Cap, Recursion Limit, Execution Budget, Step Budget, Cost Budget]
 composes_with: [V10, V14, V1]
 related: [R4, R7, R8, R9, R10, R13, R17, R20, K5, O5, O8, O16, H5]
 mechanism_refs: [2, 3, 4]
