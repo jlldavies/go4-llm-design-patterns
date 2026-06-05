@@ -1,0 +1,22 @@
+# GO4 — AI Engineering Design Patterns
+
+> 94 design patterns for building LLM systems in production, each grounded in transformer
+> mechanics. Seven categories, per-category decision guides, and a cross-pattern conflict map.
+
+## Catalog
+- [Pattern catalog (browse)](https://jlldavies.github.io/go4-llm-design-patterns)
+- [The Mechanical Foundation](https://github.com/jlldavies/go4-llm-design-patterns/blob/main/build/content/CHAPTER-0.md): the 12 mechanisms patterns derive from
+- [Conflict map](https://github.com/jlldavies/go4-llm-design-patterns/blob/main/patterns/CONFLICTS.md): which patterns can't combine
+
+## Decision guides (pick a pattern)
+- [Signal / prompting](https://github.com/jlldavies/go4-llm-design-patterns/blob/main/patterns/SIGNAL-DECISION.md)
+- [Knowledge / RAG](https://github.com/jlldavies/go4-llm-design-patterns/blob/main/patterns/KNOWLEDGE-DECISION.md)
+- [Reasoning](https://github.com/jlldavies/go4-llm-design-patterns/blob/main/patterns/REASONING-DECISION.md)
+- [Orchestration](https://github.com/jlldavies/go4-llm-design-patterns/blob/main/patterns/ORCHESTRATION-DECISION.md)
+- [Reliability](https://github.com/jlldavies/go4-llm-design-patterns/blob/main/patterns/RELIABILITY-DECISION.md)
+- [Integration](https://github.com/jlldavies/go4-llm-design-patterns/blob/main/patterns/INTEGRATION-DECISION.md)
+- [Humanizers / memory](https://github.com/jlldavies/go4-llm-design-patterns/blob/main/patterns/HUMANIZERS-DECISION.md)
+
+## For agents
+- [ingest/INGEST.md](https://github.com/jlldavies/go4-llm-design-patterns/blob/main/ingest/INGEST.md): load the whole catalog into your memory
+- [mcp/](https://github.com/jlldavies/go4-llm-design-patterns/blob/main/mcp/README.md): query the catalog live via MCP

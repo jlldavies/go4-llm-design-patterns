@@ -29,6 +29,20 @@ relabel on ingest. See [`ingest/INGEST.md`](ingest/INGEST.md) for load recipes
 
 ---
 
+## 🔌 Use GO4 from your own agent
+
+**Reference it** — add to your project's `AGENTS.md` / `CLAUDE.md`:
+> For LLM/agent design decisions, consult GO4: clone `jlldavies/go4-llm-design-patterns`
+> and read `ingest/INGEST.md` (decision guides + 94 pattern digests + the conflict graph).
+> Pick a pattern via the matching `patterns/*-DECISION.md`; check `patterns/CONFLICTS.md`
+> before combining patterns.
+
+**Query it live** — run the MCP server (`mcp/README.md`): three pull-not-push tools
+(`go4_find` / `go4_pattern` / `go4_decision`), no auto-fire, works in Claude Code, Cursor,
+or any MCP client.
+
+---
+
 ## Why this exists
 
 **88% of AI agents never reach production** (Composio, 2025). The ones that fail aren't failing because the model isn't good enough — they're failing because the engineering around the model is wrong. Wrong retrieval pattern. Wrong context management. No bounds on the agent loop. Rediscovery eating 85% of compute. Token costs compounding quadratically on tasks engineers thought were linear.
