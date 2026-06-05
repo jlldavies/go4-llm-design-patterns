@@ -239,11 +239,15 @@ def assemble() -> str:
     parts.append(strip_first_h1(chapter0))
     parts.append("\n")
 
-    # Appendix A — Conflicts
+    # Appendix A — Conflicts (summary + per-category subfiles)
     parts.append(PAGE_BREAK)
     parts.append("# Appendix A — Conflicts {#appendix-conflicts}\n")
     parts.append(strip_first_h1(read(PATTERNS / "CONFLICTS.md")))
     parts.append("\n")
+    for cat in ["SIGNAL", "KNOWLEDGE", "REASONING", "ORCHESTRATION", "RELIABILITY", "INTEGRATION", "HUMANIZERS"]:
+        parts.append(PAGE_BREAK)
+        parts.append(shift_headings(read(PATTERNS / "conflicts" / f"{cat}.md"), by=0))
+        parts.append("\n")
 
     # Appendix B — References
     parts.append(PAGE_BREAK)
