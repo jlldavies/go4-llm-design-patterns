@@ -50,3 +50,35 @@ def load_index(ingest_dir=INGEST):
             fm["stem"] = f.stem
             index[uid] = fm
     return index
+
+
+_WORD = re.compile(r'[a-z0-9]+')
+
+
+def _terms(s):
+    return set(_WORD.findall(s.lower()))
+
+
+def find(query, limit=5, index=None):
+    """Rank patterns by term overlap of the query against
+    id/title/summary/when_to_use/also_known_as/category. Returns lean candidates."""
+    idx = index if index is not None else load_index()
+    q = _terms(query)
+    scored = []
+    for uid, u in idx.items():
+        hay = " ".join([uid, u.get("title", ""), u.get("summary", ""),
+                        u.get("when_to_use", ""), " ".join(u.get("also_known_as", [])),
+                        u.get("category", "")])
+        overlap = len(q & _terms(hay))
+        # light field weighting: title/aka hits count double
+        boost = len(q & _terms(u.get("title", "") + " " + " ".join(u.get("also_known_as", []))))
+        score = overlap + boost
+        if score:
+            scored.append((score, uid, u))
+    scored.sort(key=lambda t: (-t[0], t[1]))
+    out = []
+    for _, uid, u in scored[:limit]:
+        out.append({"id": uid, "title": u.get("title", ""), "category": u.get("category", ""),
+                    "when_to_use": u.get("when_to_use", u.get("summary", ""))})
+    return out
+# (the agent calls go4_decision(category) for the matching flowchart)

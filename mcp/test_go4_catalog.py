@@ -19,4 +19,14 @@ eq(idx["R4"]["title"], "ReAct")
 eq(idx["R4"]["category"], "Reasoning")
 assert "R5" in idx["R4"].get("conflicts_with", []), idx["R4"]
 
+# ── Task 2: find ──────────────────────────────────────────────────────────────
+from go4_catalog import find
+r = find("multi-agent orchestrator workers", limit=5, index=idx)
+ids = [c["id"] for c in r]
+assert "O6" in ids, ids          # Orchestrator-Workers should surface
+assert all(set(c) == {"id","title","category","when_to_use"} for c in r)
+r2 = find("retrieval augmented generation vector", limit=3, index=idx)
+assert any(c["id"].startswith("K") for c in r2), r2   # a Knowledge pattern
+assert len(find("zzzznotarealterm", index=idx)) == 0
+
 print("ALL CATALOG TESTS PASSED")
