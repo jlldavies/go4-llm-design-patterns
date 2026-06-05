@@ -114,3 +114,37 @@ def get_pattern(uid, index=None):
         "description": desc, "key_points": kps,
         "canonical": u.get("canonical", ""),  # authoritative full source
     }
+
+
+def get_decision(category):
+    """Return a category's decision-guide markdown (strip the leading H1)."""
+    fname = CATEGORY_FILE.get(category.title())
+    if not fname:
+        return {"error": f"unknown category {category!r} (use one of {sorted(CATEGORY_FILE)})"}
+    text = (PATTERNS / fname).read_text(encoding="utf-8")
+    return {"category": category.title(), "decision_guide": re.sub(r'^# .*\n', "", text, count=1)}
+
+
+_ID = re.compile(r'\b([SKROVIH]\d+)\b')
+
+
+def conflict_notes(uid, conflicts_dir=CONFLICTS):
+    """Scan the conflict subfiles for entries mentioning uid; return [{with, note}].
+    Covers both '## Critical/Connection — A sym B' headings and registry table rows."""
+    notes = []
+    for f in sorted(conflicts_dir.glob("*.md")):
+        for line in f.read_text(encoding="utf-8").splitlines():
+            if line.startswith("## ") or line.startswith("| "):
+                ids = _ID.findall(line)
+                if uid in ids:
+                    other = [i for i in ids if i != uid]
+                    if other:
+                        # registry row: resolution is the last '|' cell; heading: the title
+                        note = line.split("|")[-2].strip() if line.startswith("| ") else line.lstrip("# ").strip()
+                        notes.append({"with": other[0], "note": note})
+    # dedupe by 'with'
+    seen, out = set(), []
+    for n in notes:
+        if n["with"] not in seen:
+            seen.add(n["with"]); out.append(n)
+    return out

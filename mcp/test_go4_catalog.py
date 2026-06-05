@@ -39,4 +39,14 @@ assert p["description"], p          # non-empty digest description
 assert p["key_points"], p           # at least one key point
 eq(get_pattern("ZZ9", index=idx), {"error": "unknown pattern 'ZZ9'"})
 
+# ── Task 4: get_decision + conflict_notes ─────────────────────────────────────
+from go4_catalog import get_decision, conflict_notes
+d = get_decision("reasoning")
+eq(d["category"], "Reasoning")
+assert "ReAct" in d["decision_guide"] or "R4" in d["decision_guide"], d
+assert "error" in get_decision("nope")
+cn = conflict_notes("R4")
+withs = [c["with"] for c in cn]
+assert "R5" in withs, cn          # R4 conflicts with R5 (Critical 1 + registry)
+
 print("ALL CATALOG TESTS PASSED")
