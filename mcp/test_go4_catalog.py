@@ -29,4 +29,14 @@ r2 = find("retrieval augmented generation vector", limit=3, index=idx)
 assert any(c["id"].startswith("K") for c in r2), r2   # a Knowledge pattern
 assert len(find("zzzznotarealterm", index=idx)) == 0
 
+# ── Task 3: get_pattern ───────────────────────────────────────────────────────
+from go4_catalog import get_pattern
+p = get_pattern("R4", index=idx)
+eq(p["id"], "R4"); eq(p["title"], "ReAct")
+assert "R5" in p["edges"]["conflicts_with"], p["edges"]
+assert p["canonical"] == "patterns/R4-ReAct.md", p["canonical"]
+assert p["description"], p          # non-empty digest description
+assert p["key_points"], p           # at least one key point
+eq(get_pattern("ZZ9", index=idx), {"error": "unknown pattern 'ZZ9'"})
+
 print("ALL CATALOG TESTS PASSED")

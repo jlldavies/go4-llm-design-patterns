@@ -82,3 +82,35 @@ def find(query, limit=5, index=None):
                     "when_to_use": u.get("when_to_use", u.get("summary", ""))})
     return out
 # (the agent calls go4_decision(category) for the matching flowchart)
+
+
+def _body_sections(text):
+    """Return (description, [key_points]) from a digest body."""
+    desc = ""
+    m = re.search(r'## Description\s*\n+(.+?)(?:\n## |\Z)', text, re.S)
+    if m:
+        desc = re.sub(r'\s+', " ", m.group(1)).strip()
+    kps = []
+    m = re.search(r'## Key points\s*\n+(.*?)(?:\n## |\nRelated:|\Z)', text, re.S)
+    if m:
+        kps = [l.strip("- ").strip() for l in m.group(1).splitlines() if l.strip().startswith("-")]
+    return desc, kps
+
+
+def get_pattern(uid, index=None):
+    """Full bundle for one pattern: digest fields + typed edges + canonical (authority)."""
+    idx = index if index is not None else load_index()
+    u = idx.get(uid)
+    if not u:
+        return {"error": f"unknown pattern {uid!r}"}
+    text = (INGEST / f"{u['stem']}.md").read_text(encoding="utf-8")
+    desc, kps = _body_sections(text)
+    return {
+        "id": uid, "title": u.get("title", ""), "category": u.get("category", ""),
+        "summary": u.get("summary", ""), "when_to_use": u.get("when_to_use", ""),
+        "cost": u.get("cost", ""), "also_known_as": u.get("also_known_as", []),
+        "edges": {k: u.get(k, []) for k in ("requires", "conflicts_with", "composes_with", "siblings", "related")},
+        "mechanism_refs": u.get("mechanism_refs", []),
+        "description": desc, "key_points": kps,
+        "canonical": u.get("canonical", ""),  # authoritative full source
+    }
