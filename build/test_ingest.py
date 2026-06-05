@@ -55,6 +55,16 @@ eq(conflict_edges(cm), [("R4", "R5", "conflicts_with"),
                         ("V1", "V2", "conflicts_with"),
                         ("S9", "V7", "composes_with")])
 
+# ## form (subfile headings from migration)
+cm_h2 = (
+    "## Critical 1 — R4 $\\oplus$ R5  {#critical-1}\n"
+    "## Critical 2 — V1 $\\leftrightarrow$ V2  {#critical-2}\n"
+    "## Critical 3 — S9 H/S V7  {#critical-3}\n"
+)
+eq(conflict_edges(cm_h2), [("R4", "R5", "conflicts_with"),
+                            ("V1", "V2", "conflicts_with"),
+                            ("S9", "V7", "composes_with")])
+
 eq(_edge_type("Sibling of"), "siblings")
 eq(_edge_type("Required by"), "related")   # Fix 2: demoted from "requires" to "related"
 eq(_edge_type("Requires"), "requires")      # Fix 2: "requires" stays as-is

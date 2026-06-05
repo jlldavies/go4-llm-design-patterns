@@ -32,7 +32,9 @@ def pattern_files():
 def bootstrap():
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     wmap = L.when_to_use_map(readme)
-    conflicts = (PATTERNS / "CONFLICTS.md").read_text(encoding="utf-8")
+    conflicts = "\n".join((PATTERNS / "conflicts" / f"{c}.md").read_text(encoding="utf-8")
+                          for c in ["SIGNAL", "KNOWLEDGE", "REASONING", "ORCHESTRATION",
+                                    "RELIABILITY", "INTEGRATION", "HUMANIZERS"])
     cedges = L.conflict_edges(conflicts)
     decision_texts = [
         (PATTERNS / f"{cat}-DECISION.md").read_text(encoding="utf-8")

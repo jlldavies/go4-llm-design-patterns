@@ -133,7 +133,7 @@ CONFLICT_SYMBOLS = [
     (r'\\to\b', "requires"), (r'\\sim', "composes_with"),
     (r'\\uparrow', "composes_with"), (r'\bH/S\b', "composes_with"),
 ]
-_CONF_HEAD = re.compile(r'^###\s+Critical\s+\d+\s+—\s+(.+?)\s*\{#', re.M)
+_CONF_HEAD = re.compile(r'^#{2,3}\s+Critical\s+\d+\s+—\s+(.+?)\s*\{#', re.M)
 
 
 def conflict_edges(conflicts_md: str) -> list:
