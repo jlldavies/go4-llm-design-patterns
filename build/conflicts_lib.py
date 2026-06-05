@@ -30,3 +30,18 @@ def primary_category_of_title(title):
     """Registry section title -> category. 'Reliability vs Orchestration' -> 'Reliability'."""
     first = title.split(" vs ")[0].strip()
     return TITLE_CATEGORY[first]
+
+
+def parse_sections(md):
+    """Split a markdown doc into {h2_title: body} on '## ' headings.
+    Preamble (before the first ## ) is keyed ''. Bodies exclude the ## line."""
+    out, key, buf = {}, "", []
+    for line in md.splitlines():
+        m = re.match(r'^## (.+)', line)
+        if m:
+            out[key] = "\n".join(buf).strip("\n")
+            key, buf = m.group(1).strip(), []
+        else:
+            buf.append(line)
+    out[key] = "\n".join(buf).strip("\n")
+    return out
