@@ -45,3 +45,26 @@ def parse_sections(md):
             buf.append(line)
     out[key] = "\n".join(buf).strip("\n")
     return out
+
+
+def split_entries(section_body):
+    """Split a section body on '### ' headings into [(heading, body), ...].
+    heading excludes the leading '### '. body excludes the heading line."""
+    out, head, buf = [], None, []
+    for line in section_body.splitlines():
+        m = re.match(r'^### (.+)', line)
+        if m:
+            if head is not None:
+                out.append((head, "\n".join(buf).strip("\n")))
+            head, buf = m.group(1).strip(), []
+        elif head is not None:
+            buf.append(line)
+    if head is not None:
+        out.append((head, "\n".join(buf).strip("\n")))
+    return out
+
+
+def anchor_of(heading):
+    """Extract the {#anchor} from a heading, or None. '… {#critical-1}' -> 'critical-1'."""
+    m = re.search(r'\{#([\w-]+)\}', heading)
+    return m.group(1) if m else None
