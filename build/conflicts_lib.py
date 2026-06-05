@@ -68,3 +68,15 @@ def anchor_of(heading):
     """Extract the {#anchor} from a heading, or None. '… {#critical-1}' -> 'critical-1'."""
     m = re.search(r'\{#([\w-]+)\}', heading)
     return m.group(1) if m else None
+
+
+def gloss_of(body):
+    """First sentence of a conflict body, skipping a leading '**Type:** …' line.
+    Used for the summary index entry."""
+    lines = [l for l in body.splitlines() if l.strip() and not l.startswith("**Type:**")]
+    if not lines:
+        return ""
+    first = lines[0].strip()
+    # first sentence: up to the first '. ' (keep it short)
+    sentence = re.split(r'(?<=\.)\s', first, maxsplit=1)[0]
+    return sentence.strip()
