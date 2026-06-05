@@ -19,18 +19,12 @@ SUBDIR = PATTERNS / "conflicts"
 CATS = ["Signal", "Knowledge", "Reasoning", "Orchestration", "Reliability", "Integration", "Humanizers"]
 CAT_FILE = {c: c.upper() + ".md" for c in CATS}  # Signal -> SIGNAL.md
 
-# Section titles that stay verbatim in the summary (authored), in order.
-SUMMARY_KEEP = ["Conflict Taxonomy", "Cross-Category Dependency Graph",
-                "The Seven Hardest Design Decisions", "Conflict Escalation Path"]
-
-
 def _section_preamble(body):
     """Text before the first '### ' heading in a section body, stripped of trailing ---."""
-    import re as _re
     lines = body.splitlines()
     result = []
     for line in lines:
-        if _re.match(r'^### ', line):
+        if re.match(r'^### ', line):
             break
         result.append(line)
     return "\n".join(result).strip().rstrip("-").strip()
@@ -83,7 +77,7 @@ def migrate():
                index_block]
     for keep in ["Cross-Category Dependency Graph", "The Seven Hardest Design Decisions", "Conflict Escalation Path"]:
         summary.append(f"## {keep}\n\n{sections[keep]}")
-    CONFLICTS.write_text("\n\n---\n\n".join(summary).rstrip() + "\n", encoding="utf-8")
+    CONFLICTS.write_text("\n\n---\n\n".join(s.rstrip().rstrip("-").rstrip() for s in summary).rstrip() + "\n", encoding="utf-8")
     print(f"migrated: {sum(len(b) for b in buckets.values())} entries -> {len(CATS)} subfiles + summary")
 
 

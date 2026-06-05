@@ -7,8 +7,6 @@
 
 ---
 
----
-
 ## Conflict Taxonomy
 
 Six types of conflict appear across this pattern language:
@@ -21,8 +19,6 @@ Six types of conflict appear across this pattern language:
 | **Composability Tension** | $\sim$ | Both can be used together, but their interaction produces unexpected behavior that must be explicitly managed |
 | **Scale Progression** | $\uparrow$ | A is correct at small scale; B is correct at large scale; the upgrade path is one-way |
 | **Hard vs Soft** | H/S | A and B achieve the same goal with different enforcement strength; they are complementary, not alternatives |
-
----
 
 ---
 
@@ -133,8 +129,6 @@ H4 (Skill Accum.)    REQUIRES K10 (Long-Term Memory, procedural variant) as skil
 
 ---
 
----
-
 ## The Seven Hardest Design Decisions
 
 These are the decisions where practitioners most often get stuck because the right answer depends on context:
@@ -159,8 +153,6 @@ These are not alternatives — they operate at different layers. Context window:
 
 ### 7. Stateless vs Checkpointed (V12 vs V10)
 V12 defines the agent function's purity. V10 defines the framework's state management. They compose. The conflict only appears when you conflate "stateless agent" with "no state anywhere."
-
----
 
 ---
 

@@ -246,7 +246,7 @@ def assemble() -> str:
     parts.append("\n")
     for cat in ["SIGNAL", "KNOWLEDGE", "REASONING", "ORCHESTRATION", "RELIABILITY", "INTEGRATION", "HUMANIZERS"]:
         parts.append(PAGE_BREAK)
-        parts.append(shift_headings(read(PATTERNS / "conflicts" / f"{cat}.md"), by=0))
+        parts.append(shift_headings(read(PATTERNS / "conflicts" / f"{cat}.md"), by=1))
         parts.append("\n")
 
     # Appendix B — References
