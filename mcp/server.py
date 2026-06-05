@@ -14,18 +14,18 @@ _INDEX = C.load_index()  # built once at startup (deterministic)
 
 @mcp.tool()
 def go4_find(query: str, limit: int = 5) -> list:
-    """Find GO4 design patterns matching a task or concern. Returns ranked candidate
-    pattern ids with one-line when-to-use + the category's decision guide. Use to pick
-    which pattern(s) fit, then call go4_pattern for details."""
+    """Find GO4 design patterns matching a task or concern. Returns ranked candidates:
+    [{id, title, category, when_to_use}]. Call go4_pattern(id) for a pattern's full
+    bundle and go4_decision(category) for the category flowchart."""
     return C.find(query, limit, index=_INDEX)
 
 
 @mcp.tool()
 def go4_pattern(id: str) -> dict:
     """Get one GO4 pattern's bundle: summary, when-to-use, cost, typed edges
-    (requires/conflicts_with/composes_with/siblings), mechanism refs, a dense
-    description + key points, and the canonical source path. Conflicts are in edges;
-    call go4_decision for the category flowchart."""
+    (requires/conflicts_with/composes_with/siblings), mechanism refs, description,
+    key points, canonical source path, and conflicts (resolution notes per
+    conflicting pattern). Call go4_decision for the category flowchart."""
     p = C.get_pattern(id, index=_INDEX)
     if "error" not in p:
         p["conflicts"] = C.conflict_notes(id)

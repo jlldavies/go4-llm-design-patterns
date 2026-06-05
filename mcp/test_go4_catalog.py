@@ -49,4 +49,14 @@ cn = conflict_notes("R4")
 withs = [c["with"] for c in cn]
 assert "R5" in withs, cn          # R4 conflicts with R5 (Critical 1 + registry)
 
+# ── Fix I2: conflict_notes quality ───────────────────────────────────────────
+cn = conflict_notes("R4")
+notes = {c["with"]: c["note"] for c in cn}
+assert "R5" in notes, cn
+assert "{#" not in notes["R5"] and "$" not in notes["R5"], notes["R5"]   # cleaned/resolution, not raw heading
+# every note across a few patterns is clean (no anchor/LaTeX noise)
+for uid in ["R4", "R13", "O6", "V13"]:
+    for c in conflict_notes(uid):
+        assert "{#" not in c["note"] and "$\\" not in c["note"], (uid, c)
+
 print("ALL CATALOG TESTS PASSED")

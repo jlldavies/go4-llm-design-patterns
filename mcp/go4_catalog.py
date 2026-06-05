@@ -128,10 +128,20 @@ def get_decision(category):
 _ID = re.compile(r'\b([SKROVIH]\d+)\b')
 
 
+def _clean_heading_note(note):
+    """Strip {#anchor} and LaTeX $…$ spans from a heading-derived note."""
+    note = re.sub(r'\s*\{#[\w-]+\}\s*$', '', note)
+    note = re.sub(r'\s*\$[^$]*\$\s*', ' ', note)
+    return re.sub(r'\s+', ' ', note).strip()
+
+
 def conflict_notes(uid, conflicts_dir=CONFLICTS):
     """Scan the conflict subfiles for entries mentioning uid; return [{with, note}].
-    Covers both '## Critical/Connection — A sym B' headings and registry table rows."""
-    notes = []
+    Covers both '## Critical/Connection — A sym B' headings and registry table rows.
+    Dedup is last-wins so registry resolution rows (which follow headings) take
+    precedence over the raw heading text."""
+    # Use a dict for last-wins dedup: later entries overwrite earlier ones.
+    seen = {}
     for f in sorted(conflicts_dir.glob("*.md")):
         for line in f.read_text(encoding="utf-8").splitlines():
             if line.startswith("## ") or line.startswith("| "):
@@ -139,12 +149,11 @@ def conflict_notes(uid, conflicts_dir=CONFLICTS):
                 if uid in ids:
                     other = [i for i in ids if i != uid]
                     if other:
-                        # registry row: resolution is the last '|' cell; heading: the title
-                        note = line.split("|")[-2].strip() if line.startswith("| ") else line.lstrip("# ").strip()
-                        notes.append({"with": other[0], "note": note})
-    # dedupe by 'with'
-    seen, out = set(), []
-    for n in notes:
-        if n["with"] not in seen:
-            seen.add(n["with"]); out.append(n)
-    return out
+                        if line.startswith("| "):
+                            # registry row: resolution is the last non-empty '|' cell
+                            note = line.split("|")[-2].strip()
+                        else:
+                            # heading: clean out anchors and LaTeX noise
+                            note = _clean_heading_note(line.lstrip("# ").strip())
+                        seen[other[0]] = note
+    return [{"with": w, "note": n} for w, n in seen.items()]
