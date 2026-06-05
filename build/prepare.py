@@ -45,6 +45,12 @@ src_patterns.mkdir(parents=True, exist_ok=True)
 for f in sorted((ROOT / "patterns").glob("*.md")):
     copy_transformed(f, src_patterns / f.name, "patterns")
 
+# Conflict subfiles -> build/src/patterns/conflicts/
+src_conf = src_patterns / "conflicts"
+src_conf.mkdir(parents=True, exist_ok=True)
+for f in sorted((ROOT / "patterns" / "conflicts").glob("*.md")):
+    copy_transformed(f, src_conf / f.name, "patterns")
+
 # Selected book-source files -> build/src/pdf-source/ (in-book name kept stable)
 src_pdf = SRC / "pdf-source"
 src_pdf.mkdir(parents=True, exist_ok=True)

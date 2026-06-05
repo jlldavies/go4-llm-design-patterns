@@ -145,5 +145,12 @@
 # Appendices
 
 - [Appendix A — Conflicts](patterns/CONFLICTS.md)
+  - [Signal](patterns/conflicts/SIGNAL.md)
+  - [Knowledge](patterns/conflicts/KNOWLEDGE.md)
+  - [Reasoning](patterns/conflicts/REASONING.md)
+  - [Orchestration](patterns/conflicts/ORCHESTRATION.md)
+  - [Reliability](patterns/conflicts/RELIABILITY.md)
+  - [Integration](patterns/conflicts/INTEGRATION.md)
+  - [Humanizers](patterns/conflicts/HUMANIZERS.md)
 - [Appendix B — References](pdf-source/REFERENCES.md)
 - [Appendix C — Anti-Patterns & Composition Examples](pdf-source/APPENDIX-C.md)
