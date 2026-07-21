@@ -8,6 +8,7 @@ build/src/pdf-source/
 docs/
 
 # Internal working files — not for public repo
+CLAUDE.md
 LOG.md
 SECTION-REVIEW.md
 SIDEBAR-co-scientist.md
