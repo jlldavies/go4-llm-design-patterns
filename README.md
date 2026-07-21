@@ -31,6 +31,16 @@ relabel on ingest. See [`ingest/INGEST.md`](ingest/INGEST.md) for load recipes
 
 ## 🔌 Use GO4 from your own agent
 
+**Install the skill (recommended)** — GO4 ships an Agent Skill that fires automatically
+whenever Claude is designing or debugging an LLM system, and routes into the catalog
+(category decision guide → pattern digests → conflict check) without loading all 94 patterns:
+
+    git clone https://github.com/jlldavies/go4-llm-design-patterns.git ~/GO4
+    mkdir -p ~/.claude/skills && ln -s ~/GO4/skills/go4 ~/.claude/skills/go4
+
+The symlink means the skill tracks the catalog — `git pull` updates both. Works in any
+project. See [`skills/go4/SKILL.md`](skills/go4/SKILL.md).
+
 **Reference it** — add to your project's `AGENTS.md` / `CLAUDE.md`:
 > For LLM/agent design decisions, consult GO4: clone `jlldavies/go4-llm-design-patterns`
 > and read `ingest/INGEST.md` (decision guides + 94 pattern digests + the conflict graph).
