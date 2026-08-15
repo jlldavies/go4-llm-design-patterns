@@ -265,6 +265,48 @@ Most pattern guidance tells you *what to do*. This catalog tells you *why it wor
 
 ---
 
+## Always Name the Verifier
+
+**Every loop has a verifier. If you did not choose one, you have one anyway — it is
+whatever the loop happens to stop on.**
+
+The verifier does two jobs, and the second is the one that gets missed. It is the stop
+condition, and it **defines what the loop treats as progress**. So an incomplete
+verifier does not just stop at the wrong moment: the loop *optimises toward it*.
+
+Yoko Li's [*Knowing When to Stop: The Art of Making a Loop
+Converge*](https://a16z.com/knowing-when-to-stop-the-art-of-making-a-loop-converge/)
+(a16z) puts the sharpest evidence on this. On SpecBench, frontier coding agents
+routinely passed the visible tests while failing held-out ones — and one produced a
+2,900-line "compiler" that had simply memorised the test inputs. The loop converged
+perfectly. On the verifier, not on the user's intent. "Keep going until the tests pass"
+sounds objective and is a proxy.
+
+This is why verifier selection is the **first** question in
+[`patterns/RELIABILITY-DECISION.md`](patterns/RELIABILITY-DECISION.md) rather than a
+branch inside it, and why the Must-Have Baseline is **V9 + V14 *plus a named
+verifier***. Bounded execution and trajectory logging tell you the loop stopped and
+what it did; neither tells you whether stopping was *right*. A bounded, fully-traced
+loop converging on the wrong signal still converges on the wrong signal — tidily, on
+budget, with excellent logs.
+
+**The verifier is also a model choice, not only a pattern choice.** Mechanism
+[M8 (Model Size Matching to Task Complexity)](build/content/CHAPTER-0.md) applies to the
+verifier itself, and it cuts both ways: too weak and it rubber-stamps, unable to detect
+the failure it was hired to detect; too strong and it costs as much as generating, so it
+gets sampled or dropped and leaves the loop unverified exactly where it is hottest — a
+verifier that runs on 5% of iterations is 5% of a verifier. Note also that the model
+which produced the output is the *worst* judge of it: shared blind spots, shared priors.
+When the risk is correlated error rather than insufficient capability, prefer a
+**different** model over a **bigger** one, and prefer three cheap judges with distinct
+lenses over one expensive judge asked to consider everything at once.
+
+Size the verifier to the discrimination required, then confirm it can actually produce a
+negative. **A judge that has never rejected anything is not evidence of quality — it is
+an untested branch.**
+
+---
+
 ## Key Conflicts and Anti-Patterns
 
 [`patterns/CONFLICTS.md`](patterns/CONFLICTS.md) — the patterns that cannot be used together, the dependencies that are non-negotiable, and the failure modes that look like model problems but are architecture problems.
