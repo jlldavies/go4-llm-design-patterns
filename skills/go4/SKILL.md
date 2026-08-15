@@ -72,11 +72,42 @@ Canonical `$GO4/patterns/<ID>.md` (8k+ tokens) only when implementing.
 
 Mutually-exclusive pairs and missing prerequisites are the expensive mistakes — never skip this.
 
-## Step 6 — Recommend with the economics (required shape)
+## Step 6 — Name the verifier (mandatory whenever anything repeats)
+
+**If the design contains a loop, a retry, a fan-out or a scheduled routine, it has a verifier
+whether or not you chose one — it is whatever the loop happens to stop on.** The verifier is both
+the stop condition *and* the definition of progress, so an incomplete one does not merely stop at
+the wrong moment: the loop optimises toward it. Evidence: on SpecBench, agents passed visible tests
+while failing held-out ones, and one memorised the test inputs in a 2,900-line "compiler" — perfect
+convergence on the verifier, none on the intent ([a16z, *Knowing When to
+Stop*](https://a16z.com/knowing-when-to-stop-the-art-of-making-a-loop-converge/)).
+
+Read `$GO4/patterns/RELIABILITY-DECISION.md` §"Ask This First". Classify and state it:
+
+- **deterministic** (schema, exit code, diff, invariant) → V20 / V9 — cheapest and most trustworthy;
+  prefer wherever the property is decidable
+- **judgement** (quality, "is this finding real") → V15, prompted to **refute** rather than approve
+- **aggregate only** (regression, drift, win-rate) → V16 offline / V17 online
+- **none exists** → say so and put a human at the boundary (V1 blocking / V2 monitoring). *"No
+  verifier"* is a valid finding; an unexamined proxy is not.
+
+**Then pick the verifier's MODEL deliberately — M8 applied to the verifier itself.** Not reflexively
+the strongest, never reflexively the cheapest. Too weak rubber-stamps and cannot detect the failure
+it was hired for; too strong costs as much as generating, so it gets sampled or dropped and leaves
+the loop unverified where it is hottest — *a verifier that runs on 5% of iterations is 5% of a
+verifier.* The model that produced the output is the worst judge of it, so when the risk is
+correlated error rather than insufficient capability, prefer a **different** model over a **bigger**
+one; and prefer three cheap judges with distinct lenses over one expensive judge asked to weigh
+everything at once. Size it as weak as it can be while still able to fail the check — **a judge that
+has never rejected anything is an untested branch, not evidence of quality.**
+
+## Step 7 — Recommend with the economics (required shape)
 
 In order: pattern IDs + the **regime** chosen for; the **cost model** — per-call driver (context
 length / cache) × lifetime multiplier (frequency / fan-out), not a tier; the cheaper alternative
-rejected and the threshold that ruled it out; cost companions carried; conflicts checked and resolved.
+rejected and the threshold that ruled it out; cost companions carried; conflicts checked and
+resolved; **and the verifier — which pattern, which model, and why that model.** A recommendation
+that does not name its verifier is incomplete, not merely terse.
 
 ## When to spend, not save — the ultracode case
 
@@ -91,4 +122,6 @@ summon a swarm.*
 
 - Invent pattern IDs — if nothing fits, say so.
 - Drop a prerequisite companion (the guides mark them REQUIRED).
+- **Ship a design with a loop in it and no named verifier**, or name one without saying which model
+  runs it. Both leave the most consequential decision in the design unexamined.
 - Optimise this reading over the design: the consultation is ~3k tokens once; the design runs for the system's whole life.
